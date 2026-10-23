@@ -23,9 +23,10 @@
    │  - Contract Tests 与跨越 Electron main → preload → renderer 的 Real E2E
    ▼
 [2026-11 ~ 12] 阶段 3: 任务执行与受控工作区操作 (M3) [IN PROGRESS]
-   │  - 已完成首条纵向切片：输入 → Intent Review → READY，并落入真实 Electron 主线
-   │  - 顶层场景冻结为：输入 / 审阅 / 输出 / 自定；Intent Review 属于「输入」而非顶层「审阅」
-   │  - 下一切片：READY → Runtime Session bootstrap；仍不开放任意文件写入或工作区重组
+   │  - 已完成：输入 → Intent Review → READY → Runtime Session INITIALIZED
+   │  - 已完成第三条纵向切片：INITIALIZED → START REQUESTED + 本地 append-only lifecycle event stream
+   │  - 顶层场景冻结为：输入 / 审阅 / 输出 / 自定；Intent Review 与 Runtime 请求仍属于「输入」
+   │  - 下一步：START REQUESTED → 受控 Runtime adapter handshake；模型接入、工具执行、文件写入仍保持关闭
    │  - 文件变更、可逆快照、Agent Files / Diff 与 Artifacts 继续按独立授权边界渐进实现
    ▼
 [2026-12 ~ 2027-01] 阶段 4: Pi-Agent 微内核底座桥接与插件库 (M4: 调度与扩展闭环)
@@ -48,7 +49,7 @@
 | M1 | **COMPLETE** | M1 设计原型与开题材料已完成设计基线收敛；后续产品工作区语义已在 Figma / M3 工程契约中冻结为「输入 / 审阅 / 输出 / 自定」，原型测试保持 100% PASS。 |
 | M1.5 | **COMPLETE** | 仓库规范化、三层测试真相与 `pnpm check:m15` 门禁已完成。 |
 | M2 | **COMPLETE** | Electron + React + TypeScript 只读桌面基础切片已完成；Contract Tests、Real Electron E2E、Windows Native Picker 人工验收、Package Smoke 与最终 Windows Quality Gate 均已通过。M2 不包含文件写入、工作区重组或快照；其只读安全边界继续作为 M3 基线。 |
-| M3 | **IN PROGRESS** | 设计契约同步与首条 `Input → Intent Review → READY` 纵向切片已合并 `main`，支持任务编写、意图审阅、修改重提、revision 递增、取消与 READY；项目 Tab 的草稿状态相互隔离并在切换时保持。当前仍无 Agent Runtime、工具执行、项目文件写入或通用文件系统 IPC。下一步是 `READY → Runtime Session bootstrap`。 |
+| M3 | **IN PROGRESS** | 已完成 `Input → Intent Review → READY → Runtime Session INITIALIZED → START REQUESTED` 三条纵向切片，并建立确定性 append-only 本地生命周期事件流。事件只记录授权边界，不代表真实 Agent 执行；模型接入、工具执行、文件写入、通用文件系统 IPC 与 Runtime 进程仍保持关闭。下一步是受控 Runtime adapter handshake。 |
 
 ---
 

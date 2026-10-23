@@ -4,13 +4,14 @@ import type { ProjectSummary } from '../../shared/contracts/catalog';
 import {
   initialIntentWorkspaceState,
   intentWorkspaceReducer,
+  type IntentWorkspaceError,
 } from '../state/intent-workspace';
 
 export interface ProjectWorkspaceProps {
   project: ProjectSummary;
 }
 
-const errorCopy: Record<string, string> = {
+const errorCopy: Record<IntentWorkspaceError, string> = {
   EMPTY_INSTRUCTION: '请输入任务说明后再生成意图计划。',
   INVALID_ACTION: '当前操作无效，请重新开始。',
   INVALID_INTENT: '当前任务状态无效，请重新开始。',
@@ -18,6 +19,9 @@ const errorCopy: Record<string, string> = {
   REVISION_OVERFLOW: '任务版本已达到上限，请重新开始。',
   STALE_REVISION: '任务版本已变化，请重新审阅。',
   INTENT_NOT_READY: '只有已批准的 READY 意图才能初始化运行会话。',
+  INVALID_SESSION: '运行会话无效，无法建立生命周期。',
+  INVALID_LIFECYCLE: '运行生命周期无效，请新建任务重新开始。',
+  INVALID_LIFECYCLE_TRANSITION: '当前生命周期状态不能再次请求启动。',
 };
 
 function ProjectContext({
@@ -49,8 +53,8 @@ function ProjectContext({
       </dl>
       <div className="workspace-boundary">
         <strong>本轮边界</strong>
-        <span>生成、审阅 TaskIntent，并可初始化受控 Runtime Session</span>
-        <span>不连接模型 · 不执行工具 · 不写文件</span>
+        <span>生成、审阅 TaskIntent，并记录受控 Runtime 生命周期事件</span>
+        <span>不连接模型 · 不执行工具 · 不写文件 · 不启动进程</span>
       </div>
     </aside>
   );
@@ -90,7 +94,7 @@ function SceneBar(): React.JSX.Element {
       >
         自定
       </button>
-      <span className="scene-bar__hint">M3 · Runtime bootstrap</span>
+      <span className="scene-bar__hint">M3 · Lifecycle events</span>
     </nav>
   );
 }
@@ -104,10 +108,7 @@ export function ProjectWorkspace({
     initialIntentWorkspaceState,
   );
 
-  const error =
-    state.error === null
-      ? null
-      : (errorCopy[state.error] ?? '任务状态发生错误，请重新开始。');
+  const error = state.error === null ? null : errorCopy[state.error];
 
   const submitInstruction = (): void => {
     dispatch({ type: 'SUBMIT', projectId: project.id });
@@ -127,7 +128,7 @@ export function ProjectWorkspace({
           </div>
         </div>
         <div className="project-workspace__header-actions">
-          <span className="status-pill">M3 · RUNTIME BOOTSTRAP</span>
+          <span className="status-pill">M3 · LIFECYCLE EVENTS</span>
           <button
             className="button"
             onClick={() => {
@@ -359,30 +360,47 @@ export function ProjectWorkspace({
         </section>
       ) : null}
 
-      {state.phase === 'session' && state.session !== null ? (
+      {state.phase === 'session' && state.runtime !== null ? (
         <section
           className="intent-terminal-state"
-          aria-label="Runtime session initialized"
+          aria-label="Runtime lifecycle"
         >
-          <span className="ready-badge">SESSION INITIALIZED</span>
-          <p className="eyebrow">INPUT · RUNTIME SESSION BOOTSTRAP</p>
-          <h2>运行会话已初始化</h2>
+          <span className="ready-badge">
+            {state.runtime.status === 'initialized'
+              ? 'SESSION INITIALIZED'
+              : 'START REQUESTED'}
+          </span>
+          <p className="eyebrow">INPUT · RUNTIME LIFECYCLE</p>
+          <h2>
+            {state.runtime.status === 'initialized'
+              ? '运行会话已初始化'
+              : '启动请求已记录'}
+          </h2>
           <p>
             Runtime Session 已锁定批准后的 TaskIntent revision{' '}
-            {state.session.approvedIntent.revision}。执行仍未开始。
+            {state.runtime.session.approvedIntent.revision}。
+            {state.runtime.status === 'initialized'
+              ? ' 你可以记录一次启动请求；执行仍未开始。'
+              : ' 启动请求仅进入本地事件流；执行仍未开始。'}
           </p>
           <div className="runtime-session-grid">
             <div>
               <span>Session ID</span>
-              <strong className="path-text">{state.session.id}</strong>
+              <strong className="path-text">{state.runtime.session.id}</strong>
             </div>
             <div>
               <span>批准意图</span>
-              <strong>REV {state.session.approvedIntent.revision}</strong>
+              <strong>
+                REV {state.runtime.session.approvedIntent.revision}
+              </strong>
             </div>
             <div>
-              <span>运行状态</span>
-              <strong>INITIALIZED</strong>
+              <span>生命周期</span>
+              <strong>
+                {state.runtime.status === 'initialized'
+                  ? 'INITIALIZED'
+                  : 'START REQUESTED'}
+              </strong>
             </div>
           </div>
           <div
@@ -393,19 +411,69 @@ export function ProjectWorkspace({
             <strong>工具执行：关闭</strong>
             <strong>文件写入：关闭</strong>
           </div>
-          <div className="intent-terminal-state__summary">
-            <strong>{state.session.approvedIntent.instruction}</strong>
-            <span>会话只持有已批准意图的独立快照，不会重新解释原始输入。</span>
-          </div>
-          <button
-            className="button"
-            onClick={() => {
-              dispatch({ type: 'RESET' });
-            }}
-            type="button"
+          <section
+            className="runtime-event-stream"
+            aria-label="Runtime event stream"
           >
-            新建任务
-          </button>
+            <div className="runtime-event-stream__header">
+              <p className="eyebrow">LOCAL EVENT STREAM</p>
+              <span>{state.runtime.events.length} EVENT(S)</span>
+            </div>
+            <ol>
+              {state.runtime.events.map((event) => (
+                <li key={event.id}>
+                  <span className="runtime-event__sequence">
+                    {String(event.sequence).padStart(2, '0')}
+                  </span>
+                  <div>
+                    <strong>{event.type}</strong>
+                    <span>
+                      {event.type === 'session.initialized'
+                        ? `Approved intent REV ${String(
+                            event.approvedIntentRevision,
+                          )} locked`
+                        : 'Local start request recorded · no execution'}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+          <div className="intent-terminal-state__summary">
+            <strong>{state.runtime.session.approvedIntent.instruction}</strong>
+            <span>
+              本地生命周期事件只表达状态边界，不代表模型、工具或 Agent Runtime
+              已经运行。
+            </span>
+          </div>
+          {error === null ? null : (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="intent-terminal-state__actions">
+            <button
+              className="button button--primary"
+              disabled={state.runtime.status !== 'initialized'}
+              onClick={() => {
+                dispatch({ type: 'REQUEST_RUNTIME_START' });
+              }}
+              type="button"
+            >
+              {state.runtime.status === 'initialized'
+                ? '请求启动 Runtime'
+                : '启动请求已记录'}
+            </button>
+            <button
+              className="button"
+              onClick={() => {
+                dispatch({ type: 'RESET' });
+              }}
+              type="button"
+            >
+              新建任务
+            </button>
+          </div>
         </section>
       ) : null}
 

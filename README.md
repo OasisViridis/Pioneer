@@ -49,7 +49,7 @@ Harness 应提供清楚的目标、可靠的工具和恰当的上下文，而不
 
 ## 开发进度与后续规划 (Status & Roadmap)
 
-本项目是数字媒体技术专业本科毕业设计《模块化 AI Agent 交互系统的设计与实现》的工程实践，现阶段重心在桌面交互框架与本地工程协同体验。各模块的落地现状与规划如下：
+本项目是数字媒体技术专业本科毕业设计《模块化 AI Agent 交互系统的设计与实现》的工程实践，现阶段重心在桌面交互框架与本地工程协同体验。M3 已完成「输入 → Intent Review → READY → Runtime Session INITIALIZED → START REQUESTED」纵向切片，运行能力（模型接入、工具执行、文件写入）仍保持关闭。各模块的落地现状与规划如下：
 
 | 模块 / 维度 | 当前已实现 (Implemented) | 规划与进行中 (Roadmap) |
 | :--- | :--- | :--- |
@@ -108,6 +108,7 @@ pnpm check
 ## 深入阅读与参考文档
 
 - [课题背景与选题收敛说明](选题收敛说明.md) —— 毕业设计立项背景、研究哲学与双主线演进
+- [桌面工程实现 (apps/desktop)](apps/desktop/) —— Electron + React 渲染层与受限 preload 安全桥
 - [产品定义与美学纲领](产品定义与美学纲领.md) —— 视觉规范、设计哲学与交互细节
 - [测试架构与质量门禁说明 (TEST_INFRA.md)](TEST_INFRA.md) —— 测试分层设计与验证标准
 - [工程路线图 (ROADMAP.md)](themasterplan/ROADMAP.md) —— 阶段目标与里程碑演进记录

@@ -110,6 +110,19 @@ The next M3 slice consumes an already approved `TaskIntent.status = ready` and c
 
 See [`docs/design/M3-RUNTIME-SESSION-CONTRACT.md`](docs/design/M3-RUNTIME-SESSION-CONTRACT.md).
 
+## Approved M3 runtime lifecycle / event skeleton
+
+The third M3 slice creates a local `RuntimeLifecycle` around an initialized Runtime Session.
+
+- lifecycle state starts at `initialized` with one deterministic `session.initialized` event;
+- an explicit user action may move it to `start_requested` and append exactly one `runtime.start_requested` event;
+- event sequence numbers are contiguous and event ids are derived from session identity plus sequence;
+- duplicate start requests are rejected;
+- the event skeleton contains no fabricated timestamps, token usage, tool output, or execution result;
+- recording `start_requested` does not enable model access, tools, file writes, IPC, or a Runtime process.
+
+See [`docs/design/M3-RUNTIME-LIFECYCLE-CONTRACT.md`](docs/design/M3-RUNTIME-LIFECYCLE-CONTRACT.md).
+
 ## M3 and later exclusions
 
-Workspace mutation or reorganization, reversible snapshots, actual Agent runtime execution, model/provider integration, tool execution, event streaming, session trees, plugin runtime integration, and freeform/dockable workspaces remain later M3/M4 work and require separate design, authorization, and verification.
+Workspace mutation or reorganization, reversible snapshots, actual Agent runtime execution, model/provider integration, tool execution, external/runtime event transport (WebSocket/SSE), session trees, plugin runtime integration, and freeform/dockable workspaces remain later M3/M4 work and require separate design, authorization, and verification.

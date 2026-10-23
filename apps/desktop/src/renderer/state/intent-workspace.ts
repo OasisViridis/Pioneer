@@ -1,12 +1,17 @@
 import type {
-  RuntimeSession,
-  RuntimeSessionErrorCode,
-} from '../../shared/contracts/runtime-session';
+  RuntimeLifecycle,
+  RuntimeLifecycleErrorCode,
+} from '../../shared/contracts/runtime-lifecycle';
+import type { RuntimeSessionErrorCode } from '../../shared/contracts/runtime-session';
 import type {
   IntentErrorCode,
   TaskIntent,
   TaskIntentStep,
 } from '../../shared/contracts/task-intent';
+import {
+  createRuntimeLifecycle,
+  requestRuntimeStart,
+} from '../../shared/runtime-lifecycle';
 import { bootstrapRuntimeSession } from '../../shared/runtime-session';
 import { transitionIntent } from '../../shared/task-intent';
 
@@ -14,13 +19,16 @@ export type IntentWorkspacePhase =
   'compose' | 'review' | 'ready' | 'session' | 'cancelled';
 
 export type IntentWorkspaceError =
-  'EMPTY_INSTRUCTION' | IntentErrorCode | RuntimeSessionErrorCode;
+  | 'EMPTY_INSTRUCTION'
+  | IntentErrorCode
+  | RuntimeSessionErrorCode
+  | RuntimeLifecycleErrorCode;
 
 export interface IntentWorkspaceState {
   phase: IntentWorkspacePhase;
   draftInstruction: string;
   intent: TaskIntent | null;
-  session: RuntimeSession | null;
+  runtime: RuntimeLifecycle | null;
   error: IntentWorkspaceError | null;
 }
 
@@ -30,6 +38,7 @@ export type IntentWorkspaceAction =
   | { type: 'EDIT' }
   | { type: 'CONFIRM' }
   | { type: 'BOOTSTRAP_SESSION' }
+  | { type: 'REQUEST_RUNTIME_START' }
   | { type: 'CANCEL' }
   | { type: 'RESET' };
 
@@ -37,7 +46,7 @@ export const initialIntentWorkspaceState = (): IntentWorkspaceState => ({
   phase: 'compose',
   draftInstruction: '',
   intent: null,
-  session: null,
+  runtime: null,
   error: null,
 });
 
@@ -117,7 +126,7 @@ export function intentWorkspaceReducer(
         phase: 'review',
         draftInstruction: instruction,
         intent: submitted.value,
-        session: null,
+        runtime: null,
         error: null,
       };
     }
@@ -126,7 +135,7 @@ export function intentWorkspaceReducer(
       if (state.intent?.status !== 'reviewing') {
         return failure(state, 'INVALID_TRANSITION');
       }
-      return { ...state, phase: 'compose', session: null, error: null };
+      return { ...state, phase: 'compose', runtime: null, error: null };
 
     case 'CONFIRM': {
       if (state.intent === null) return failure(state, 'INVALID_INTENT');
@@ -139,19 +148,37 @@ export function intentWorkspaceReducer(
         ...state,
         phase: 'ready',
         intent: confirmed.value,
-        session: null,
+        runtime: null,
         error: null,
       };
     }
 
     case 'BOOTSTRAP_SESSION': {
       if (state.intent === null) return failure(state, 'INVALID_INTENT');
+      if (state.runtime !== null) return failure(state, 'INVALID_TRANSITION');
       const bootstrapped = bootstrapRuntimeSession(state.intent);
       if (!bootstrapped.ok) return failure(state, bootstrapped.error);
+      const lifecycle = createRuntimeLifecycle(bootstrapped.value);
+      if (!lifecycle.ok) return failure(state, lifecycle.error);
+
       return {
         ...state,
         phase: 'session',
-        session: bootstrapped.value,
+        runtime: lifecycle.value,
+        error: null,
+      };
+    }
+
+    case 'REQUEST_RUNTIME_START': {
+      if (state.runtime === null || state.phase !== 'session') {
+        return failure(state, 'INVALID_LIFECYCLE');
+      }
+      const requested = requestRuntimeStart(state.runtime);
+      if (!requested.ok) return failure(state, requested.error);
+
+      return {
+        ...state,
+        runtime: requested.value,
         error: null,
       };
     }
@@ -167,7 +194,7 @@ export function intentWorkspaceReducer(
         ...state,
         phase: 'cancelled',
         intent: cancelled.value,
-        session: null,
+        runtime: null,
         error: null,
       };
     }

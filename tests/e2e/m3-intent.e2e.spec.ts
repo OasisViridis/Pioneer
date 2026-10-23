@@ -33,7 +33,7 @@ const launchApplication = async (userDataDir: string) =>
     },
   });
 
-test('moves an approved READY intent into an initialized runtime session without mutating fixtures', async ({}, testInfo) => {
+test('moves an approved READY intent into a local runtime start-request event stream without mutating fixtures', async ({}, testInfo) => {
   const beforeHash = await captureFixtureHash(fixtureRoot);
   const userDataDir = testInfo.outputPath('user-data');
   await mkdir(userDataDir, { recursive: true });
@@ -92,6 +92,32 @@ test('moves an approved READY intent into an initialized runtime session without
       page.getByText('文件写入：关闭', { exact: true }),
     ).toBeVisible();
     await expect(page.getByText(/执行仍未开始/)).toBeVisible();
+    await expect(
+      page.getByText('session.initialized', { exact: true }),
+    ).toBeVisible();
+
+    const eventStream = page.locator(
+      'section[aria-label="Runtime event stream"] li',
+    );
+    await expect(eventStream).toHaveCount(1);
+
+    await page.getByRole('button', { name: '请求启动 Runtime' }).click();
+    await expect(
+      page.getByRole('heading', { name: '启动请求已记录' }),
+    ).toBeVisible();
+    await expect(
+      page.getByText('runtime.start_requested', { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: '启动请求已记录' }),
+    ).toBeDisabled();
+    await expect(page.getByText(/执行仍未开始/)).toBeVisible();
+    await expect(eventStream).toHaveCount(2);
+    await expect(eventStream.nth(0)).toContainText('session.initialized');
+    await expect(eventStream.nth(1)).toContainText('runtime.start_requested');
+    await expect(
+      page.getByText('模型接入：关闭', { exact: true }),
+    ).toBeVisible();
   } finally {
     try {
       await application.close();

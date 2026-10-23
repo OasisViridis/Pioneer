@@ -71,7 +71,7 @@ describe('M3 intent workspace reducer', () => {
 
     expect(state.phase).toBe('ready');
     expect(state.intent?.status).toBe('ready');
-    expect(state.session).toBeNull();
+    expect(state.runtime).toBeNull();
   });
 
   it('bootstraps a disabled runtime session only after approval', () => {
@@ -80,13 +80,75 @@ describe('M3 intent workspace reducer', () => {
     });
 
     expect(state.phase).toBe('session');
-    expect(state.session?.status).toBe('initialized');
-    expect(state.session?.approvedIntent.status).toBe('ready');
-    expect(state.session?.capabilities).toEqual({
+    expect(state.runtime?.status).toBe('initialized');
+    expect(state.runtime?.session.approvedIntent.status).toBe('ready');
+    expect(state.runtime?.session.capabilities).toEqual({
       modelAccess: false,
       toolExecution: false,
       fileMutation: false,
     });
+  });
+
+  it('records a local runtime start request without enabling execution', () => {
+    let state = intentWorkspaceReducer(readyState(), {
+      type: 'BOOTSTRAP_SESSION',
+    });
+    state = intentWorkspaceReducer(state, {
+      type: 'REQUEST_RUNTIME_START',
+    });
+
+    expect(state.phase).toBe('session');
+    expect(state.runtime?.status).toBe('start_requested');
+    expect(state.runtime?.events).toHaveLength(2);
+    expect(state.runtime?.events[1]?.type).toBe('runtime.start_requested');
+    expect(state.runtime?.session.capabilities).toEqual({
+      modelAccess: false,
+      toolExecution: false,
+      fileMutation: false,
+    });
+  });
+
+  it('rejects a duplicate runtime start request', () => {
+    let state = intentWorkspaceReducer(readyState(), {
+      type: 'BOOTSTRAP_SESSION',
+    });
+    state = intentWorkspaceReducer(state, {
+      type: 'REQUEST_RUNTIME_START',
+    });
+    state = intentWorkspaceReducer(state, {
+      type: 'REQUEST_RUNTIME_START',
+    });
+
+    expect(state.runtime?.status).toBe('start_requested');
+    expect(state.runtime?.events).toHaveLength(2);
+    expect(state.error).toBe('INVALID_LIFECYCLE_TRANSITION');
+  });
+
+  it('keeps a recorded start request when bootstrap is dispatched again', () => {
+    let state = intentWorkspaceReducer(readyState(), {
+      type: 'BOOTSTRAP_SESSION',
+    });
+    state = intentWorkspaceReducer(state, {
+      type: 'REQUEST_RUNTIME_START',
+    });
+    state = intentWorkspaceReducer(state, { type: 'BOOTSTRAP_SESSION' });
+
+    expect(state.runtime?.status).toBe('start_requested');
+    expect(state.runtime?.events).toHaveLength(2);
+    expect(state.error).toBe('INVALID_TRANSITION');
+  });
+
+  it('rejects a runtime start request outside the session phase', () => {
+    const bootstrapped = intentWorkspaceReducer(readyState(), {
+      type: 'BOOTSTRAP_SESSION',
+    });
+    const outsideSessionPhase = { ...bootstrapped, phase: 'review' as const };
+    const next = intentWorkspaceReducer(outsideSessionPhase, {
+      type: 'REQUEST_RUNTIME_START',
+    });
+
+    expect(next.runtime?.status).toBe('initialized');
+    expect(next.error).toBe('INVALID_LIFECYCLE');
   });
 
   it('rejects runtime bootstrap before the intent is ready', () => {
@@ -98,7 +160,7 @@ describe('M3 intent workspace reducer', () => {
     state = intentWorkspaceReducer(state, { type: 'BOOTSTRAP_SESSION' });
 
     expect(state.phase).toBe('review');
-    expect(state.session).toBeNull();
+    expect(state.runtime).toBeNull();
     expect(state.error).toBe('INTENT_NOT_READY');
   });
 
@@ -112,6 +174,6 @@ describe('M3 intent workspace reducer', () => {
 
     expect(state.phase).toBe('cancelled');
     expect(state.intent?.status).toBe('cancelled');
-    expect(state.session).toBeNull();
+    expect(state.runtime).toBeNull();
   });
 });
