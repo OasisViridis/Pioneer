@@ -4,13 +4,14 @@ import type { ProjectSummary } from '../../shared/contracts/catalog';
 import {
   initialIntentWorkspaceState,
   intentWorkspaceReducer,
+  type IntentWorkspaceError,
 } from '../state/intent-workspace';
 
 export interface ProjectWorkspaceProps {
   project: ProjectSummary;
 }
 
-const errorCopy: Record<string, string> = {
+const errorCopy: Record<IntentWorkspaceError, string> = {
   EMPTY_INSTRUCTION: '请输入任务说明后再生成意图计划。',
   INVALID_ACTION: '当前操作无效，请重新开始。',
   INVALID_INTENT: '当前任务状态无效，请重新开始。',
@@ -19,7 +20,7 @@ const errorCopy: Record<string, string> = {
   STALE_REVISION: '任务版本已变化，请重新审阅。',
   INTENT_NOT_READY: '只有已批准的 READY 意图才能初始化运行会话。',
   INVALID_SESSION: '运行会话无效，无法建立生命周期。',
-  INVALID_LIFECYCLE: '运行生命周期无效，请重新初始化会话。',
+  INVALID_LIFECYCLE: '运行生命周期无效，请新建任务重新开始。',
   INVALID_LIFECYCLE_TRANSITION: '当前生命周期状态不能再次请求启动。',
 };
 
@@ -107,10 +108,7 @@ export function ProjectWorkspace({
     initialIntentWorkspaceState,
   );
 
-  const error =
-    state.error === null
-      ? null
-      : (errorCopy[state.error] ?? '任务状态发生错误，请重新开始。');
+  const error = state.error === null ? null : errorCopy[state.error];
 
   const submitInstruction = (): void => {
     dispatch({ type: 'SUBMIT', projectId: project.id });

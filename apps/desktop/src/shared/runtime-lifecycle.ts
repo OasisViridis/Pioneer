@@ -5,6 +5,23 @@ import {
 } from './contracts/runtime-lifecycle';
 import { RuntimeSessionSchema } from './contracts/runtime-session';
 
+function eventIdentity(
+  sessionId: string,
+  sequence: number,
+): { id: string; sessionId: string; sequence: number } {
+  return { id: runtimeEventId(sessionId, sequence), sessionId, sequence };
+}
+
+function deepFreeze(value: unknown): void {
+  if (value === null || typeof value !== 'object') return;
+
+  for (const nested of Object.values(value)) {
+    deepFreeze(nested);
+  }
+
+  Object.freeze(value);
+}
+
 export function createRuntimeLifecycle(
   session: unknown,
 ): RuntimeLifecycleResult {
@@ -13,21 +30,24 @@ export function createRuntimeLifecycle(
     return { ok: false, error: 'INVALID_SESSION' };
   }
 
-  const lifecycle = RuntimeLifecycleSchema.parse({
+  const lifecycle = RuntimeLifecycleSchema.safeParse({
     session: parsedSession.data,
     status: 'initialized',
     events: [
       {
-        id: runtimeEventId(parsedSession.data.id, 1),
-        sessionId: parsedSession.data.id,
-        sequence: 1,
+        ...eventIdentity(parsedSession.data.id, 1),
         type: 'session.initialized',
         approvedIntentRevision: parsedSession.data.approvedIntent.revision,
       },
     ],
   });
+  if (!lifecycle.success) {
+    return { ok: false, error: 'INVALID_LIFECYCLE' };
+  }
 
-  return { ok: true, value: lifecycle };
+  deepFreeze(lifecycle.data);
+
+  return { ok: true, value: lifecycle.data };
 }
 
 export function requestRuntimeStart(
@@ -38,24 +58,27 @@ export function requestRuntimeStart(
     return { ok: false, error: 'INVALID_LIFECYCLE' };
   }
 
-  if (parsedLifecycle.data.status !== 'initialized') {
+  const initialized = parsedLifecycle.data;
+  if (initialized.status !== 'initialized') {
     return { ok: false, error: 'INVALID_LIFECYCLE_TRANSITION' };
   }
 
-  const sequence = parsedLifecycle.data.events.length + 1;
-  const next = RuntimeLifecycleSchema.parse({
-    ...parsedLifecycle.data,
+  const next = RuntimeLifecycleSchema.safeParse({
+    ...initialized,
     status: 'start_requested',
     events: [
-      ...parsedLifecycle.data.events,
+      ...initialized.events,
       {
-        id: runtimeEventId(parsedLifecycle.data.session.id, sequence),
-        sessionId: parsedLifecycle.data.session.id,
-        sequence,
+        ...eventIdentity(initialized.session.id, initialized.events.length + 1),
         type: 'runtime.start_requested',
       },
     ],
   });
+  if (!next.success) {
+    return { ok: false, error: 'INVALID_LIFECYCLE' };
+  }
 
-  return { ok: true, value: next };
+  deepFreeze(next.data);
+
+  return { ok: true, value: next.data };
 }

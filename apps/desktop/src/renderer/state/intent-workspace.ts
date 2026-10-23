@@ -155,6 +155,7 @@ export function intentWorkspaceReducer(
 
     case 'BOOTSTRAP_SESSION': {
       if (state.intent === null) return failure(state, 'INVALID_INTENT');
+      if (state.runtime !== null) return failure(state, 'INVALID_TRANSITION');
       const bootstrapped = bootstrapRuntimeSession(state.intent);
       if (!bootstrapped.ok) return failure(state, bootstrapped.error);
       const lifecycle = createRuntimeLifecycle(bootstrapped.value);
@@ -169,7 +170,9 @@ export function intentWorkspaceReducer(
     }
 
     case 'REQUEST_RUNTIME_START': {
-      if (state.runtime === null) return failure(state, 'INVALID_LIFECYCLE');
+      if (state.runtime === null || state.phase !== 'session') {
+        return failure(state, 'INVALID_LIFECYCLE');
+      }
       const requested = requestRuntimeStart(state.runtime);
       if (!requested.ok) return failure(state, requested.error);
 

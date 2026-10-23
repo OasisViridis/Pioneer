@@ -21,7 +21,7 @@ RuntimeSession.status = initialized
 
 ## 2. Event-stream invariants
 
-The local event stream is serializable and append-only for this slice.
+The local event stream is serializable and append-only for this slice. Lifecycles are only changed through the public transition functions; the returned object graph is frozen so recorded events cannot be edited or dropped in place.
 
 - sequence numbers start at 1 and are contiguous;
 - event ids are deterministic from `sessionId + sequence`;
@@ -29,7 +29,8 @@ The local event stream is serializable and append-only for this slice.
 - the first event is always `session.initialized`;
 - its approved intent revision must match the locked Runtime Session snapshot;
 - a `start_requested` lifecycle has exactly one subsequent `runtime.start_requested` event;
-- duplicate start requests are rejected rather than silently adding more events.
+- duplicate start requests are rejected rather than silently adding more events;
+- a workspace that already holds a lifecycle rejects a second bootstrap instead of rebuilding and discarding recorded events.
 
 No timestamps are fabricated in this slice. A future real runtime transport may add clocked transport envelopes at a separate boundary.
 

@@ -124,6 +124,33 @@ describe('M3 intent workspace reducer', () => {
     expect(state.error).toBe('INVALID_LIFECYCLE_TRANSITION');
   });
 
+  it('keeps a recorded start request when bootstrap is dispatched again', () => {
+    let state = intentWorkspaceReducer(readyState(), {
+      type: 'BOOTSTRAP_SESSION',
+    });
+    state = intentWorkspaceReducer(state, {
+      type: 'REQUEST_RUNTIME_START',
+    });
+    state = intentWorkspaceReducer(state, { type: 'BOOTSTRAP_SESSION' });
+
+    expect(state.runtime?.status).toBe('start_requested');
+    expect(state.runtime?.events).toHaveLength(2);
+    expect(state.error).toBe('INVALID_TRANSITION');
+  });
+
+  it('rejects a runtime start request outside the session phase', () => {
+    const bootstrapped = intentWorkspaceReducer(readyState(), {
+      type: 'BOOTSTRAP_SESSION',
+    });
+    const outsideSessionPhase = { ...bootstrapped, phase: 'review' as const };
+    const next = intentWorkspaceReducer(outsideSessionPhase, {
+      type: 'REQUEST_RUNTIME_START',
+    });
+
+    expect(next.runtime?.status).toBe('initialized');
+    expect(next.error).toBe('INVALID_LIFECYCLE');
+  });
+
   it('rejects runtime bootstrap before the intent is ready', () => {
     let state = intentWorkspaceReducer(initialIntentWorkspaceState(), {
       type: 'SET_INSTRUCTION',
