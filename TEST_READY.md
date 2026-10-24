@@ -79,4 +79,4 @@ Run the frozen M1 suite through the current command:
 pnpm test:prototype
 ```
 
-The taxonomy in [`TEST_INFRA.md`](TEST_INFRA.md) defines the separate Contract Tests and Real E2E boundaries. Their commands remain reserved until M2 supplies real implementations.
+The taxonomy in [`TEST_INFRA.md`](TEST_INFRA.md) defines the separate Contract Tests and Real E2E boundaries. Their commands are fully implemented (`pnpm test:contract` and `pnpm test:e2e`) and verified as part of the primary `pnpm check` gate.

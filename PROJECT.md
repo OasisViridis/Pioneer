@@ -2,7 +2,7 @@
 
 ## Authority and current boundary
 
-[`themasterplan/ROADMAP.md`](themasterplan/ROADMAP.md) is the sole authority for milestone status. M1.5 and M2 are complete. M3 starts from the approved Figma workspace contract and the first `Input → Intent Review → READY` vertical slice.
+[`themasterplan/ROADMAP.md`](themasterplan/ROADMAP.md) is the sole authority for milestone status. M1.5 and M2 are complete. M3 includes the implemented legacy `Input → Intent Review → READY` slice and local RuntimeSession bootstrap. The user accepted the v8 presentation and resumed application development on 2026-10-03. P0 and P1 are complete. The current full gate passed (200 Contract, 21 Real Electron E2E, final package; the frozen Prototype gate also passed). P1 wires independent sessions, persisted drafts/intent/single docking layout and restart recovery; P2 is the first real read-only Harness task; the active execution queue is the [Wayfinder development plan](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md) (succeeding the [2026-10-01 plan](docs/plans/2026-10-01-pioneer-frozen-prototype-development-plan.md)).
 
 The current product implementation is the [`apps/desktop`](apps/desktop/) Electron + React + TypeScript application. M2 provides the completed read-only desktop foundation. M3 extends the renderer and shared task-intent domain without weakening the M2 filesystem or IPC boundaries.
 
@@ -21,29 +21,29 @@ The scanner must not recurse, execute workspace code, modify the selected root, 
 
 ## Implemented application boundaries
 
-- `apps/desktop/src/main` owns Electron lifecycle, a guarded E2E-only runtime seam, sender-validated IPC registration, isolated settings under Electron `userData`, and immediate-child read-only scanning.
-- `apps/desktop/src/preload` exposes only the typed `window.pioneer` catalog facade through `contextBridge`.
-- `apps/desktop/src/renderer` owns React state and UI: Library, project overview, fixed Settings, keyboard-operable Tabs, and unique project-tab identity.
+- `apps/desktop/src/main` owns Electron lifecycle, sender-validated fixed IPC, isolated settings and atomic session storage under Electron `userData`, accepted-write close barriers, and immediate-child read-only scanning. E2E runtime seams require an isolated fixture/profile.
+- `apps/desktop/src/preload` exposes the typed `window.pioneer` catalog and fixed session facade through `contextBridge`, never generic IPC or filesystem access.
+- `apps/desktop/src/renderer` owns Library, fixed Settings, keyboard-operable session Tabs, Conversation and DockSurface; independent session identity is distinct from project identity.
 - `apps/desktop/src/shared` contains serializable contracts, fixed IPC channel names, schemas, and stable warning codes shared across process boundaries.
 - `tests/contract` exercises deterministic domain and process-boundary behavior. `tests/e2e` launches the actual Electron chain against `tests/fixtures/workspaces/library` and verifies that fixture tree is unchanged.
 
-The authoritative current workspace handoff is the Figma `Pioneer · DEMO Lab` page (`132:2`). For the first M3 slice, D03 `输入 / 新任务 Compose` (`135:258`) and D04 `输入 / 执行与批准` (`136:105`) define the interaction contract. Frozen HTML demos remain historical references only and are not imported into the desktop runtime.
+The current design reference is the editable [F9 Figma handoff](docs/design/figma-make-f9-writeback-2026-10-02.md), page `925:3`, plus frozen Make F9. The former DEMO Lab (`132:2`) and D03/D04 contract describe the earlier M3 implementation, not the next UI target. The active renderer uses `SessionWorkbench` with independent session Tabs, docking and persisted optional intent. `ProjectWorkspace` remains unmounted legacy reference; `WindowChrome` is still a later-stage candidate. Frozen HTML demos and the cinematic movie remain separate from the desktop runtime.
 
 ## Formal desktop contracts
 
-The target catalog is serializable across the Electron boundary. A `ProjectSummary` has a normalized-path-derived `id`, display metadata, Git presence, modification time, and deterministic cover seed. A `CatalogResult` contains the selected root, project list, structured warnings, and scan time. The main process may persist only its own settings under Electron `userData`.
+The target catalog is serializable across the Electron boundary. A `ProjectSummary` has a normalized-path-derived `id`, display metadata, Git presence, modification time, and deterministic cover seed. A `CatalogResult` contains the selected root, project list, structured warnings, and scan time. The main process persists its own settings and validated session records under Electron `userData`, not workspace files.
 
-The preload facade is intentionally narrow:
+The preload facade is intentionally narrow. `SessionDesktopApi` adds only `loadSessionState`, `saveSessionState`, `getSessionActivity`, `finishClose`, and `onCloseRequested`:
 
 ```ts
-interface PioneerDesktopApi {
+interface PioneerDesktopApi extends SessionDesktopApi {
   selectRoot(): Promise<CatalogResult | null>;
   getCatalog(): Promise<CatalogResult>;
   rescan(): Promise<CatalogResult>;
 }
 ```
 
-It must not expose `ipcRenderer`, Node globals, arbitrary channels, or generic filesystem methods. The renderer never reads local files directly. Closing an active dynamic project tab returns to the most recently active valid tab, or Project Library if none remains.
+It must not expose `ipcRenderer`, Node globals, arbitrary channels, or generic filesystem methods. The renderer never reads local files directly. Closing an active session tab returns to the most recently active valid tab, or Library if none remains; the saved session record remains available to reopen.
 
 ## Verification taxonomy and completion boundaries
 
@@ -86,22 +86,22 @@ Pioneer/
 └── tests/repository/      # repository-policy gate
 ```
 
-## Approved M3 first vertical slice
+## Implemented legacy M3 first vertical slice
 
-The canonical scene vocabulary is `输入 / 审阅 / 输出 / 自定`.
+The following `输入 / 审阅 / 输出 / 自定` vocabulary describes the historical slice. The next UI uses conversation-local panels, not mode tabs. Intent summaries are optional goal clarification; permissions are separate from READY.
 
 - **输入** owns both task composition and pre-execution Intent Review. Intent Review is not the top-level **审阅** scene.
 - **审阅** is reserved for reviewing Agent-modified files and Diff after a future execution runtime exists.
 - **输出** is reserved for generated artifacts and the standard actions `打开 → 文件夹内打开 → 复制 → 复制路径`.
 - **自定** is reserved for user-composed workspace modules.
-- The first M3 vertical slice ends at TaskIntent status `ready`. It must not execute project code, mutate workspace files, start an Agent runtime, add generic filesystem IPC, or claim that approval caused execution.
+- The first historical M3 vertical slice ended at TaskIntent status `ready`. It must not execute project code, mutate workspace files, start an Agent runtime, add generic filesystem IPC, or claim that approval caused execution.
 - TaskIntent transitions reuse the shared `draft → reviewing → ready` domain contract. Revision, cancellation, and stale-revision protections remain domain-owned rather than UI-owned.
 
 See [`docs/design/M3-INTERACTION-CONTRACT.md`](docs/design/M3-INTERACTION-CONTRACT.md).
 
 ## Approved M3 runtime-session bootstrap slice
 
-The next M3 slice consumes an already approved `TaskIntent.status = ready` and creates a local, serializable `RuntimeSession` bootstrap record.
+The implemented bootstrap slice consumes an already approved `TaskIntent.status = ready` and creates a local, serializable `RuntimeSession` bootstrap record.
 
 - Runtime bootstrap consumes the approved TaskIntent snapshot; it must not reinterpret the raw user instruction or silently regenerate the approved plan.
 - A bootstrapped session is only `initialized`. It does not imply model access, tool execution, project-file mutation, event streaming, or a running Agent process.

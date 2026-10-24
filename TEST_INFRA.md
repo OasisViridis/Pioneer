@@ -12,13 +12,12 @@
 
 ## Aggregate gate
 
-The primary gate is `pnpm check`. It runs, in order: format check; strict lint; desktop typecheck; Contract Tests; frozen Prototype Tests; Real E2E (including its package build); and a final package smoke. The duplicate final build is intentional. M2 remains **IN PROGRESS** until this gate and independent review pass.
+The primary gate is `pnpm check`. It runs, in order: format check; strict lint; desktop typecheck; Contract Tests; frozen Prototype Tests; Real E2E (including its package build); and a final package smoke. The duplicate final build is intentional. M2 is **COMPLETE**; `pnpm check` continues as the primary quality gate for M3.
 
 ## Evidence boundaries
 
 - The frozen M1 **Prototype Tests** result is **210/210 passed** and covers the historical 18-function simulator plus static/adversarial probes. It is not Electron proof.
-- The native directory picker is outside the deterministic E2E fixture seam.
-- Native-picker manual evidence is **Pending** and is not implied by the fixture-injected Real E2E result.
+- The native directory picker is outside the deterministic E2E fixture seam; M2 manual acceptance evidence was completed in [`docs/testing/m2-native-picker-smoke.md`](docs/testing/m2-native-picker-smoke.md), and subsequent fixture seams must not pretend to substitute for manual verification.
 - No renderer mock can support a Real E2E claim: that claim requires the Electron main → preload → renderer flow against filesystem fixtures.
 - See [`TEST_READY.md`](TEST_READY.md) for the historical M1 readiness record, not a current product-runtime certification.
 
