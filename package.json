@@ -10,11 +10,13 @@
   "scripts": {
     "build:desktop": "pnpm --filter @pioneer/desktop build",
     "dev": "pnpm --filter @pioneer/desktop start",
+    "format": "prettier --write apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts",
     "format:check": "prettier --check apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts",
     "lint": "eslint apps/desktop/src tests/contract tests/e2e *.config.*",
     "typecheck": "pnpm --filter @pioneer/desktop typecheck",
     "package:smoke": "pnpm --filter @pioneer/desktop build",
     "verify:repository": "node --test tests/repository/normalization.test.mjs",
+    "prepare": "node -e \"try { require('child_process').execSync('git config core.hooksPath .githooks'); } catch {}\"",
     "test:prototype": "node tests/prototype/verify-prototype.js && node tests/prototype/adversarial-probes.js && node tests/prototype/adversarial-stress-probe.js && node tests/prototype/link-details-probe.js",
     "check:m15": "pnpm verify:repository && pnpm test:prototype",
     "test:contract:types": "tsc --noEmit -p tsconfig.tests.json",

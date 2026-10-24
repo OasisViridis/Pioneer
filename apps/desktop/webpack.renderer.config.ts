@@ -1,3 +1,5 @@
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import path from 'node:path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import type { Compiler, Configuration } from 'webpack';
 
@@ -37,12 +39,26 @@ const config: Configuration = {
         use: 'ts-loader',
       },
       {
+        test: /\.(png|svg|woff2)$/i,
+        type: 'asset/resource',
+      },
+      {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
     ],
   },
-  plugins: [new PackagedCspMetaPlugin()],
+  plugins: [
+    new PackagedCspMetaPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.join(__dirname, 'src/renderer/assets/fonts/licenses'),
+          to: 'assets/font-licenses',
+        },
+      ],
+    }),
+  ],
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
   },
