@@ -1,0 +1,24 @@
+{
+  "finishedAt": "2026-10-01T02:22:38.4404249Z",
+  "fullPnpmCheckPassed": false,
+  "gates": [
+    {
+      "exitCode": 0,
+      "finishedAt": "2026-10-01T02:22:28.1925962Z",
+      "command": "pnpm format:check",
+      "startedAt": "2026-10-01T02:22:25.9829917Z"
+    },
+    {
+      "exitCode": 1,
+      "finishedAt": "2026-10-01T02:22:38.4366935Z",
+      "command": "pnpm lint",
+      "startedAt": "2026-10-01T02:22:28.1999908Z"
+    }
+  ],
+  "startedAt": "2026-10-01T02:22:25.9703994Z",
+  "log": "tests/wc1-staged-offline-gates-2026-10-01.log",
+  "nativeProbe": "not-executed-approval-review-service-limit",
+  "kind": "WC1-pre-wiring-offline-gates",
+  "allListedGatesPassed": false,
+  "electronE2E": "not-executed"
+}

@@ -1,0 +1,524 @@
+{
+  "kind": "decoration-v32-engineering-candidate",
+  "capturedAt": "2026-09-30T20:21:38.148641+00:00",
+  "scope": "F1a full engineering inputs plus eight added runtime assets and independent E2E decoration policy; no build output, logs or personal profile",
+  "head": "cc82d8a38b013e9e6bcbc11cbc99bd07e706bc33",
+  "branch": "codex/hazel-session-workbench",
+  "identityMethod": "SHA-256 of sorted UTF-8 path:sha256 lines joined by LF without terminal LF",
+  "identitySha256": "ee45eea2a514cc035c0e5fda0dfa1304c7d2f25c704e502e90f191b8cdd4cd6f",
+  "files": [
+    {
+      "path": ".prettierrc.json",
+      "sha256": "e51419e8206a0a5493e85ef1f4dea080982dc9187992bb253220a93d0784f6b2"
+    },
+    {
+      "path": "apps/desktop/forge.config.ts",
+      "sha256": "7c23733c107dcabee44af520653702598f58e16e4675676b0a15cbc44df5e5f7"
+    },
+    {
+      "path": "apps/desktop/package.json",
+      "sha256": "891d7ae417192048899cdcfc612793f4f11e04704359e39af582b43895b9e404"
+    },
+    {
+      "path": "apps/desktop/scripts/prepare-source-launch.cjs",
+      "sha256": "8b7c9b6b5d4771bcbb46d6673619737dfff4a8ca6688432a8e61e849e1c5b9ab"
+    },
+    {
+      "path": "apps/desktop/src/main/catalog/catalog-service.ts",
+      "sha256": "91415c0e5367cf16d00de1c3273a6a4da83ab35dc227f75e7495b923564a21b8"
+    },
+    {
+      "path": "apps/desktop/src/main/catalog/fs-adapter.ts",
+      "sha256": "849783aaca8660aa79ce267bb90ab031f195e0743788b9d7d11ef9e0da27f7e7"
+    },
+    {
+      "path": "apps/desktop/src/main/catalog/metadata.ts",
+      "sha256": "08570e01b7b7b99c7840e7ea075c42090353bf781dbc889c6f820eb70062f1ec"
+    },
+    {
+      "path": "apps/desktop/src/main/catalog/path-policy.ts",
+      "sha256": "35818d93e1cd68c78fbb32ec55978dc8f98d9135ce326a5ac53b5f69abce48e9"
+    },
+    {
+      "path": "apps/desktop/src/main/catalog/scanner.ts",
+      "sha256": "22363eeb08eef28c422fe94a07fc3b20d306f6971314e3371e0c59d0f4e5b81f"
+    },
+    {
+      "path": "apps/desktop/src/main/index.ts",
+      "sha256": "39a14dab9eb16dc0cf8edbe74296661cebe3956722a5bb41cea859bc6e8ef265"
+    },
+    {
+      "path": "apps/desktop/src/main/ipc.ts",
+      "sha256": "1bf26c09c59a0804b2e14ccdbaedf908c8a551011d3eb88398018cd434c5c571"
+    },
+    {
+      "path": "apps/desktop/src/main/runtime-config.ts",
+      "sha256": "fb4e3f3b8c9766f00db497f90ce0e94d367c9a7f03f47f57509e59532671890e"
+    },
+    {
+      "path": "apps/desktop/src/main/security.ts",
+      "sha256": "f07ebe71f2a2824c6956cc3fa8cba712ad42d3074fc80d56c5073215533fb147"
+    },
+    {
+      "path": "apps/desktop/src/main/session-state-ipc.ts",
+      "sha256": "51cb7795303e44c5f1deb11663d2cbe9deb60987281106929586a89560c5147b"
+    },
+    {
+      "path": "apps/desktop/src/main/session-state-store.ts",
+      "sha256": "6b56b85d3320961f15a52f0d0a04a5f022e366cba0df593ee4aaad4cdb228caa"
+    },
+    {
+      "path": "apps/desktop/src/main/settings-store.ts",
+      "sha256": "be4e4145da3badab15305c0b0f59248243bc4ef19c05bfc11ac114109bfe6c88"
+    },
+    {
+      "path": "apps/desktop/src/main/window-lifecycle.ts",
+      "sha256": "7fc82792bb30016027eed37a4c622bb7f234ceb622e85a13f666beb3287604e8"
+    },
+    {
+      "path": "apps/desktop/src/main/window.ts",
+      "sha256": "cb98aff9e60f200da17cd20f497d6d31754c87f7925948379ebb7595e8809ea2"
+    },
+    {
+      "path": "apps/desktop/src/preload/index.ts",
+      "sha256": "da17f40dfe897a1e12eea3097b8876bb3997d15a169dd9e87a95419997ab2fe2"
+    },
+    {
+      "path": "apps/desktop/src/renderer/App.tsx",
+      "sha256": "eb7a1b1ea12666a0d16e3a0d8aa271232259aa68f335df4d10bb2d348b888aae"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/cherry-bookmark.png",
+      "sha256": "4304c77ed8ab9f52e10efca1737fcd41cdce4b20e28843e226bace231a1e858b"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/cherry-pair.svg",
+      "sha256": "3a465d752198008391ab7eda84893806a6a6541705fea6ad30b20374d9a8d86b"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/greendou-listening.png",
+      "sha256": "0504fbf0fead98d3a2af3e8e17bc7c1360ef09aecd4fa439a40736ecbe010505"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/greendou-organizing.png",
+      "sha256": "0d54c45287fcf4f0390dc1feb57af1ba509e5482aacf3bb48c10666e131a8bdf"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/greendou-reading.png",
+      "sha256": "103817d6de0e73a5f803ae359b2e3253482b79bd7778d8bc9aaf28b02c1f03e2"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/jelly-companion.png",
+      "sha256": "585be08d03ce7668c74790114cacd1a1ecd948e41fabf76e494392d17c68a6f7"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/jelly-outline.svg",
+      "sha256": "49a6d0165613ec0913834f95e03264cac6892b6664caaeed89a6a384bf82604c"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/jelly-ribbon-charm.png",
+      "sha256": "4b5b7abe12d9d259d0f74ebcf651b824ad86164020af541aafd05e91b7c9029e"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/paper-butterfly.png",
+      "sha256": "d273b13d41293c5479ca66e44286389254f3fae14a3369f7178651a298c7cf8b"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/ribbon-outline.svg",
+      "sha256": "99c3dc492867a4de712a0335547f7a664f7a4d2c7c3557355af6360b39162b4a"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/silver-paper-fold.svg",
+      "sha256": "4c4316d859ca45094b921274f07586fc11d8270420533c56c3c23a651f8ef1f5"
+    },
+    {
+      "path": "apps/desktop/src/renderer/assets/hazel/uniform-ribbon.png",
+      "sha256": "bfbe5ac5e8c79a9c7b17b4765bec87eb47a4bf74ee5e540b626afe8735b9374f"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/CatalogNotice.tsx",
+      "sha256": "f71a3cb9fff12f2f7e4289b983f6e70b987685bc11b4ac6570ca69dd50b50ef1"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/Conversation.tsx",
+      "sha256": "66a19a3e1372285e59065d1a464c493d61d2894abb77756be0860c53d02e4274"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/DockSurface.tsx",
+      "sha256": "30badc6a468ea7f79109e8fbe999f3cb93f584eb45c88638ace1768e14261190"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/HazelCompanion.tsx",
+      "sha256": "672b1112b0d2360fc4ca2fcff08efe3dab95b5a61b148c5ac7cedc29d7816abe"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/HazelMark.tsx",
+      "sha256": "b77b6e0d621e4bc4d1cc999559bf275c684e5fe844102a5f510cc9509cc4d677"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/LocalTabs.tsx",
+      "sha256": "1a31c2e8785e1eebd68f9e44ee10da4d6ae651c37c1b28c5ddf2445dc2c0365a"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/Modal.tsx",
+      "sha256": "11caf3f49afe8373b5257a039edc9ceefd013cce66a5ba890365a29683673a3f"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/PanelMenu.tsx",
+      "sha256": "dcb17bd2ed191edaeec3175eed89a06bab7a0dd3a3b8de02ed87c0ec042ffd71"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ProjectLibrary.tsx",
+      "sha256": "bdf426d33c08af432f384fc0fe787e681b2ddc5dc28cd6f84513ab663a1f460b"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ProjectOverview.tsx",
+      "sha256": "1d6a6dcba97ca5c7450330dff0484b9770312d68fed5959296a7286fec3f369c"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ProjectPoster.tsx",
+      "sha256": "7d0c68279ad0c2335b4a690c6c513a4ffa7f93af8aed560afafc1d36837d3d0c"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ResizeHandle.tsx",
+      "sha256": "2d9c7da87f2471f9f427e5ab3417d4d18881673d599fd4fc5bcd4821241d40d7"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/SessionList.tsx",
+      "sha256": "a47b631a7b6012d5bcd9fdb05b1599decf088faffe9a20c683d78e4729ee6e24"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/SessionTitle.tsx",
+      "sha256": "ace7cfa2880131a39f8a09c1aceec81a2d2064f9c9158dd3f859e03873812b15"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/SessionWorkbench.tsx",
+      "sha256": "5d173da07c5ddc799abd1915e19f85b3756f208f63875ef8e3c7ed28c91a8454"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/SettingsView.tsx",
+      "sha256": "71f7272e68fb26c72d3e9eb01b8987831b53f46aabf762901788525c5a3c3039"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/TabStrip.tsx",
+      "sha256": "80083c2a229656e7c6faf09c9e268620297dc78da9043ed01de5dbbf4dea4696"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/WorkbenchPanels.tsx",
+      "sha256": "3efaa79eb1bbefcf94cc8b88d2278aa822dcc9643acd8bbefdfaff3830de39ab"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/workspace-identity.ts",
+      "sha256": "fd11fcb212e0a830c18105b554f8ae3c18d9b5f34a93c243909c21d6107feb7e"
+    },
+    {
+      "path": "apps/desktop/src/renderer/global.d.ts",
+      "sha256": "d5ef17c830c8f86ea92f9471ba6222cd590847dd892bd0ce07695a6447c81822"
+    },
+    {
+      "path": "apps/desktop/src/renderer/hooks/use-catalog.ts",
+      "sha256": "aa74e8f11fe19486e58ae236be609fcfd376d4d3bae9d5068a941844696afaab"
+    },
+    {
+      "path": "apps/desktop/src/renderer/hooks/use-session-state.ts",
+      "sha256": "628a4f05852cfceab6699c58d1ab0cd94248dbab9ea2bbdf9c466dcfa0085a0a"
+    },
+    {
+      "path": "apps/desktop/src/renderer/index.html",
+      "sha256": "f364afd8162138eb5245ee30ae5c05bed8a4575a6a1cc2e1cad58e0146eabb3b"
+    },
+    {
+      "path": "apps/desktop/src/renderer/index.tsx",
+      "sha256": "a4a43f979fe62dbe080694496fc85efb69f78dee9640ea15ae37278a86b248c7"
+    },
+    {
+      "path": "apps/desktop/src/renderer/state/close-deadline.ts",
+      "sha256": "b57b202a445a5b60b8810acf36f86a124f6026f0463480074a69f4011f73afd3"
+    },
+    {
+      "path": "apps/desktop/src/renderer/state/session-save-queue.ts",
+      "sha256": "782dbf9dc1a6002dc7a29e419e54001ca9e17bd32eb4296e2d68f8966c66050a"
+    },
+    {
+      "path": "apps/desktop/src/renderer/state/tabs-reducer.ts",
+      "sha256": "92cc196d3155f9e20ec6262b3c860a7862dcc92783faf73a612c0b99cdc35aae"
+    },
+    {
+      "path": "apps/desktop/src/renderer/styles/app.css",
+      "sha256": "ec618d313bbaa15602627c5cb1b706eb54a2646a90de9ddbaceef5a5d4dddcca"
+    },
+    {
+      "path": "apps/desktop/src/renderer/styles/tokens.css",
+      "sha256": "4bbb824c85e14ac3090b1e16f0dc4ed608354586be30c27064f8fe589f633fbc"
+    },
+    {
+      "path": "apps/desktop/src/shared/contracts/catalog.ts",
+      "sha256": "daf090c4752f1e0928e41ec16c0a177b0d9a531bc602b256c506adf3360d6b27"
+    },
+    {
+      "path": "apps/desktop/src/shared/contracts/errors.ts",
+      "sha256": "d1032dd63dd710cf6e7f676fa7a63ea6c257246a3ba2b0745c7b7897422d1feb"
+    },
+    {
+      "path": "apps/desktop/src/shared/contracts/ipc.ts",
+      "sha256": "c1740c9aea83ca4e58aba1afa4c7249f5ae5cc7a32d575e08a2604d54fcc1798"
+    },
+    {
+      "path": "apps/desktop/src/shared/contracts/tabs.ts",
+      "sha256": "9102818d6768567cc80c2b765f4edeb89004f3aec150c902c9e363ac9447c332"
+    },
+    {
+      "path": "apps/desktop/src/shared/contracts/task-intent.ts",
+      "sha256": "f8fe1eb05dbb70a4441acff11007f2d09d8f328c793aeafd14287222f051fe9e"
+    },
+    {
+      "path": "apps/desktop/src/shared/docking.ts",
+      "sha256": "4657dcae903ccb7d8599939981850ff03f34674fd1c3e85dd4dad01d004c7f3d"
+    },
+    {
+      "path": "apps/desktop/src/shared/session-activity.ts",
+      "sha256": "0b787728666d7d910d3cca19c7cec0feaf8fcdc6f4fa37dda3d590a484684937"
+    },
+    {
+      "path": "apps/desktop/src/shared/session-state.ts",
+      "sha256": "dd5a36f43c6d342d75ed8d212642dcc7fc22d16e25a5c75c6acfaa3f632b33e9"
+    },
+    {
+      "path": "apps/desktop/src/shared/task-intent.ts",
+      "sha256": "5b559c8f277fb1df024a222bdfe52990f30eba336e24dc5833d3da07ed3f6c44"
+    },
+    {
+      "path": "apps/desktop/src/shared/validation.ts",
+      "sha256": "5f47da8e008694959b07625d673ff1f3036678616b1a97fa8660e497467687f6"
+    },
+    {
+      "path": "apps/desktop/tsconfig.json",
+      "sha256": "7ec643dbc27b1daef0a2580fc6ef32094e78c120d8f20727a9758d04cb22fa86"
+    },
+    {
+      "path": "apps/desktop/webpack.main.config.ts",
+      "sha256": "5f44cc1ff3e1b454ee7e05f77bbe3154c1bc145b4dc733b968afdd41dd092fd4"
+    },
+    {
+      "path": "apps/desktop/webpack.renderer.config.ts",
+      "sha256": "9fced17ddd8110b8e5d2c172bb8ac13b79390d3f229461bb6d9fdf51281e7ce8"
+    },
+    {
+      "path": "docs/design/hazel-v3/decoration-policy.json",
+      "sha256": "2b4c1e73e6871f0a87425e9db986b1ed7c1f3efc47d9952fa0dded195868597e"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "e801bda1d273c3512a52ab30fbae511be950eb7e91769d9f4f8416773bfd4faa"
+    },
+    {
+      "path": "mcp_config.json",
+      "sha256": "224639ce4dc6ea239720e502527e5ec3f7a3af5faabb18c923d55ed115c6428c"
+    },
+    {
+      "path": "package.json",
+      "sha256": "90ca1a50cf7afd99b39d99a7bfdcef025a698bf5069f64acf54e33fdd889a961"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "2fd91173cedb4b6e4bb2393ca1321a0380c5cb778fa0d8ddf18b0b5321865f39"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "sha256": "7c531c5996bdbe760325b72e260ffc05ebc4dc28bd5c2a8445ee53e212dad042"
+    },
+    {
+      "path": "tests/contract/catalog-contract.test.ts",
+      "sha256": "1edfdabf193661611f4bb15a22abf3eb2e95222ba68fa145f8ebf0aa3c47b5e3"
+    },
+    {
+      "path": "tests/contract/catalog-hook.test.ts",
+      "sha256": "0325e5a5180a404182e596ce6e7f8cff84489a468112de059d143af2516acb94"
+    },
+    {
+      "path": "tests/contract/catalog-service.test.ts",
+      "sha256": "4326568f4e0cdf3293f1b322ee05298a4e70895e8a2818fb772e18a622f14532"
+    },
+    {
+      "path": "tests/contract/close-deadline.test.ts",
+      "sha256": "2bd4b637ae4cd5ccac9c2e634267e885826d4138dce1492317d0dcc17db0f6c2"
+    },
+    {
+      "path": "tests/contract/docking.test.ts",
+      "sha256": "52b59f3ec0d80994c20200ffc3c809b8d447f64da36008c71b0d0b920a1fd35e"
+    },
+    {
+      "path": "tests/contract/hash-tree.test.ts",
+      "sha256": "9dd72acea42c0c7ee411dc4bdf27bbf8d8ccf809d742cc0ad08207598fdb6a09"
+    },
+    {
+      "path": "tests/contract/ipc.test.ts",
+      "sha256": "9be84dba4d8e84a2306c303c533e73c706b5288562353d71c97742c8eda91a66"
+    },
+    {
+      "path": "tests/contract/metadata.test.ts",
+      "sha256": "168f0ebf4b4479054d70ad497b226b27a5c2f3c33464ee25c0bf3a295c53a8a4"
+    },
+    {
+      "path": "tests/contract/path-policy.test.ts",
+      "sha256": "1eaa896684525e9e79839dba76102591de1b30cc4b126a61dbb34cd58e291a26"
+    },
+    {
+      "path": "tests/contract/runtime-config.test.ts",
+      "sha256": "8a623393ff6a09ef46465a59948cff0b70007e0d19f192ee0e58276fbadf3d23"
+    },
+    {
+      "path": "tests/contract/scanner.test.ts",
+      "sha256": "153df30c9f315816e3e2d0b068026165ec1085f24f514e60e021973e77888151"
+    },
+    {
+      "path": "tests/contract/security.test.ts",
+      "sha256": "da3357b321690b02d6d35b59b5610b2b6146316a4aec1cec074bd39e0ddbba4d"
+    },
+    {
+      "path": "tests/contract/session-activity.test.ts",
+      "sha256": "39bcd63f08292cbb521933acc5f3e59597f790f176b172483622280adf691805"
+    },
+    {
+      "path": "tests/contract/session-save-queue.test.ts",
+      "sha256": "d38dba56f7e27fb2ccf99183af068a81ca63ce612b41d8bce73feab3719dad16"
+    },
+    {
+      "path": "tests/contract/session-state-ipc.test.ts",
+      "sha256": "4d2bfb3a27707de26c79deb74b0ee823df57b20d8eed47b78a77c13581f62252"
+    },
+    {
+      "path": "tests/contract/session-state-store.test.ts",
+      "sha256": "c2547d65b0a9d9fd32649f68f86f93a67caec9925955e5ba31cf2c8b7075c705"
+    },
+    {
+      "path": "tests/contract/settings-store.test.ts",
+      "sha256": "a88af66cfbf4c97f848dbb9e5cc87820d4d6761c5be749a2c84d1214fc3fd95d"
+    },
+    {
+      "path": "tests/contract/tabs-reducer.test.ts",
+      "sha256": "27c7b2f2a80877ba1618d3f323f03f46de190dbd27c1c41a31a5b7689f616017"
+    },
+    {
+      "path": "tests/contract/task-intent.test.ts",
+      "sha256": "0c54eb496721f9c09533e4902ded7c8b979570a387dbb4bf16a3408a8295a749"
+    },
+    {
+      "path": "tests/contract/window-lifecycle.test.ts",
+      "sha256": "130684bba948b698ef6254daf8e03fe502c88d465498c3d71c49d9388dc01574"
+    },
+    {
+      "path": "tests/e2e/catalog-state.e2e.spec.ts",
+      "sha256": "39ac7bd79fbda0ad76e0f024ae76519e02f59d69295a8a220ae63e109ecd6027"
+    },
+    {
+      "path": "tests/e2e/fixture-integrity.ts",
+      "sha256": "297845403f4a039e03306c2823c7b880d086bc666e866bc6f708113d00a3df8c"
+    },
+    {
+      "path": "tests/e2e/hazel-design.e2e.spec.ts",
+      "sha256": "5a3aecc3e9770a83ee557ebf0acc7a94f75abd4244cc906d5e0bcb06542017be"
+    },
+    {
+      "path": "tests/e2e/pioneer.e2e.spec.ts",
+      "sha256": "682b4c16cbb9ff748bff8f7b8cb4ec37969160fd43458829dd8c60cf3fa9fc19"
+    },
+    {
+      "path": "tests/e2e/playwright.config.ts",
+      "sha256": "1a172be129ef492959fa505893ef6f461e794f072b3529e7ca2557b5481a7ac4"
+    },
+    {
+      "path": "tests/e2e/session-lifecycle.e2e.spec.ts",
+      "sha256": "3bd6ecd12809f30100c52a0ae4e135be21ff0ce7fcf16bce4e2aa81b5003def2"
+    },
+    {
+      "path": "tests/e2e/session-persistence.e2e.spec.ts",
+      "sha256": "fa7c8ffff6c2569c894918e1712028d73abab4ea5829e4b735f7f2f718343391"
+    },
+    {
+      "path": "tests/e2e/tab-strip.e2e.spec.ts",
+      "sha256": "ecd6a14ad3cf3a9c105875c62e9c693539a9dcb448445deb3be4686d3c23c4b2"
+    },
+    {
+      "path": "tests/fixtures/workspaces/library/alpha-app/README.md",
+      "sha256": "28effecf88dddccf74d592e45555ceee71b8df4c7d4b60f69099f1b8e2fae010"
+    },
+    {
+      "path": "tests/fixtures/workspaces/library/alpha-app/nested/not-a-project.txt",
+      "sha256": "e55cfcc141c7bbd40361b5c0cccf7d8ff6d3ab64528388d816a78dccb1b463b8"
+    },
+    {
+      "path": "tests/fixtures/workspaces/library/alpha-app/package.json",
+      "sha256": "eaa7ae0e08d321b61c8114a925c97c7618a756a63e15a9e87fee990f1b29ad38"
+    },
+    {
+      "path": "tests/fixtures/workspaces/library/beta-notes/README.md",
+      "sha256": "2cdeb8c4904a9cb9f144e34124b4bd0fdc1f9d75b954d821bbce48fabb782a82"
+    },
+    {
+      "path": "tests/fixtures/workspaces/library/broken-metadata/package.json",
+      "sha256": "67dfba6d4e88953fcdcc86b3c08a4047a14d0dc2b60d7e8d4bc449199572a65b"
+    },
+    {
+      "path": "tests/helpers/hash-tree.ts",
+      "sha256": "7dfedb0a49c9f0e5740dcd6d7124988e74d56820372f95687a08aebf7335ad33"
+    },
+    {
+      "path": "tests/prototype/adversarial-probes.js",
+      "sha256": "36d6a12eba26195f8969cef739bac34a10cb89a4591690cfa972e134d43849e5"
+    },
+    {
+      "path": "tests/prototype/adversarial-stress-probe.js",
+      "sha256": "61696913f15a6fcdde75fbd9ce864d374b0c30df4de83603d13f9a62b7fd57b0"
+    },
+    {
+      "path": "tests/prototype/link-details-probe.js",
+      "sha256": "bc7d6d878db139db9602b7185b9a75a50e996131b1235475d477b6dee9a1d3df"
+    },
+    {
+      "path": "tests/prototype/prototype-runner.html",
+      "sha256": "e83b5f9d5ef0f3b08c587f4e87242ced2fe82db02c9bda3b8cf9238dc566dca2"
+    },
+    {
+      "path": "tests/prototype/test-cases.js",
+      "sha256": "42d6bbe9a28adc943710a55bf00b23ab5d0c6526dd44e5d33031887725f523b6"
+    },
+    {
+      "path": "tests/prototype/verify-prototype.js",
+      "sha256": "21f9859a0fecc4ec046ff34d49c2f57d88bf5c4e374800b6e023b668708485a6"
+    },
+    {
+      "path": "tsconfig.eslint.json",
+      "sha256": "b3e8237d38556491af1763b518668b586698c92248a5f8e503abcdbdab93e1bc"
+    },
+    {
+      "path": "tsconfig.tests.json",
+      "sha256": "1859aa124665e2739109f3d866a6e258be628dc2b8a94e25c2a1b5f0065d431e"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "6159806915879fb31b317df9db408b9e401d3dd0396822f811567f4b61c06976"
+    }
+  ],
+  "previousCandidate": "resumption-candidate-2026-10-01.json",
+  "delta": {
+    "modified": [
+      "apps/desktop/src/renderer/components/Conversation.tsx",
+      "apps/desktop/src/renderer/components/HazelCompanion.tsx",
+      "apps/desktop/src/renderer/global.d.ts",
+      "apps/desktop/src/renderer/styles/app.css",
+      "tests/e2e/hazel-design.e2e.spec.ts"
+    ],
+    "added": [
+      "apps/desktop/src/renderer/assets/hazel/cherry-bookmark.png",
+      "apps/desktop/src/renderer/assets/hazel/cherry-pair.svg",
+      "apps/desktop/src/renderer/assets/hazel/jelly-outline.svg",
+      "apps/desktop/src/renderer/assets/hazel/jelly-ribbon-charm.png",
+      "apps/desktop/src/renderer/assets/hazel/paper-butterfly.png",
+      "apps/desktop/src/renderer/assets/hazel/ribbon-outline.svg",
+      "apps/desktop/src/renderer/assets/hazel/silver-paper-fold.svg",
+      "apps/desktop/src/renderer/assets/hazel/uniform-ribbon.png",
+      "docs/design/hazel-v3/decoration-policy.json"
+    ]
+  }
+}

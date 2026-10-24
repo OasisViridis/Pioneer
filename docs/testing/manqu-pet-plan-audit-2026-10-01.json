@@ -1,0 +1,92 @@
+{
+  "capturedAt": "2026-09-30T20:41:33.786035+00:00",
+  "request": "计划添加适配我的桌宠插件dsh-manqu-pet",
+  "scope": "Read-only source audit and Pioneer planning documents only; no plugin/source/asset/runtime/config change",
+  "pluginRoot": "D:\\Project\\GitProject\\dsh-manqu-pet",
+  "pluginFiles": [
+    {
+      "path": "README.md",
+      "sha256": "024cfa13ba2f131836c9f995e20429bdfcea2feca2744aefe4432b38a04a39fe"
+    },
+    {
+      "path": "package.json",
+      "sha256": "78760ac8fb677d5b54e70c09da90e94784129d123fd4bd7188180c8eeb1e21fe"
+    },
+    {
+      "path": "ASSET-NOTICE.md",
+      "sha256": "e6c67f6ee6adf97cb13cbdf51f8f474e63dffc99ce4acc70f170bd3349eca9c0"
+    },
+    {
+      "path": ".dsh-plugin/index.mjs",
+      "sha256": "e3262203b310a28bed88e20ec4c829e4c1aae1455ec61dab78452b206a39012d"
+    },
+    {
+      "path": ".dsh-plugin/client/index.mjs",
+      "sha256": "88f62314070299e355df5b0e9876d5adbb3deafd3a6112076ea5fd933b8a6bc8"
+    },
+    {
+      "path": ".dsh-plugin/client/atlas.mjs",
+      "sha256": "a548a57871eedcdc880c363260412b5cb73ff2998e249b58eb1271b24c491049"
+    },
+    {
+      "path": ".dsh-plugin/src/routes.mjs",
+      "sha256": "f0cb4f40d9f6ee97a8d22bc1c9603c0e3f5c95fddf4f32c2b4f29e8655390e83"
+    },
+    {
+      "path": ".dsh-plugin/src/state.mjs",
+      "sha256": "5ef1965a6222072e7ef9b11f3a7a14047c1c9fd46c638da7662b51229552903d"
+    },
+    {
+      "path": ".dsh-plugin/src/session-events.mjs",
+      "sha256": "03c8cfcd07ec22f3180ef65c44cc86bb31ae54cac49d8e61dd71abcacef650b5"
+    },
+    {
+      "path": ".dsh-plugin/src/assets.mjs",
+      "sha256": "5f837a58914038f32ba9a7a90c1b79165271852a6ae8a610fbd528f28f39fccd"
+    },
+    {
+      "path": ".dsh-plugin/assets/pet.json",
+      "sha256": "d6e9b7d225c0e78cd91c0f45500e321e766212500edb3899f8509244284a7997"
+    },
+    {
+      "path": ".dsh-plugin/assets/spritesheet.webp",
+      "sha256": "910da71becc89a3dd879ddad09140c649eb918688ceb55e5f87c58561efa7ecf"
+    }
+  ],
+  "confirmed": [
+    "DSH Web bundle/client, not a Pioneer or Codex native-overlay integration",
+    "Local CodexPet v2 atlas/player and DOM interaction can be adapter inputs",
+    "DSH ctx jobs/agents/sessions/webServer and manqu HTTP/SSE are host-specific",
+    "Current Pioneer source has no existing pet host/contract",
+    "Asset notice distinguishes source MIT from third-party Manqu art; unrestricted redistribution is not proven"
+  ],
+  "proposedSlices": [
+    "PET1 host/resources/interaction",
+    "PET2 narrow authoritative task-event mapping"
+  ],
+  "notExecuted": [
+    "Plugin runtime/DSH services",
+    "Electron pet integration/tests",
+    "Figma changes",
+    "Asset copy/upload/redistribution",
+    "Native secondary-monitor repair"
+  ],
+  "backup": ".private\\pet-plan-baseline-2026-10-01",
+  "implementationStatus": "PLANNED",
+  "validation": {
+    "relativeLinksChecked": 72,
+    "missingLinks": [],
+    "engineeringCandidateInputsUnchanged": 123,
+    "pluginFingerprintInputsUnchanged": 12,
+    "engineeringTestsRun": false,
+    "pluginTestsRun": false,
+    "fullGateInheritedAsPetProof": false
+  },
+  "independentPlanningReview": {
+    "status": "PASS",
+    "reviewer": "Luna pet_adapter_audit",
+    "scope": "Read-only source/plan/ROADMAP scope and dependency review, not runtime verification",
+    "findings": [],
+    "openDecision": "PET1 host form probe before choosing independent native overlay"
+  }
+}
