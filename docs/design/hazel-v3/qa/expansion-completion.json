@@ -1,0 +1,167 @@
+{
+  "date": "2026-10-01",
+  "version": "3.1.0",
+  "pass": true,
+  "objective": "使用图像生成能力扩展绿冻形象与其他装饰元素，加入设计规范并落地到设计稿",
+  "requirements": [
+    {
+      "requirement": "Use built-in image generation and persist six accepted transparent assets",
+      "pass": true,
+      "evidence": [
+        "expansion/prompts.json",
+        "expansion/generation-record.json",
+        "qa/local-validation.json"
+      ]
+    },
+    {
+      "requirement": "Derive recognizable poses and accessories from existing Hazel material",
+      "pass": true,
+      "evidence": [
+        "provenance.json",
+        "qa/expansion-small-size.png",
+        "qa/expansion-figma-assets.png"
+      ]
+    },
+    {
+      "requirement": "Integrate all new assets into current human and machine-readable design specifications",
+      "pass": true,
+      "evidence": [
+        "../DESIGN-SYSTEM.md",
+        "README.md",
+        "tokens.json",
+        "expansion/assets.json",
+        "figma-state.json"
+      ]
+    },
+    {
+      "requirement": "Use all three poses in four existing editable application empty-state screens",
+      "pass": true,
+      "evidence": [
+        "qa/expansion-figma-main.json",
+        "qa/expansion-figma-audit.json",
+        "qa/expansion-figma-L00.png",
+        "qa/expansion-figma-W01.png",
+        "qa/expansion-figma-W02.png",
+        "qa/expansion-figma-R02.png"
+      ]
+    },
+    {
+      "requirement": "Provide reusable decorative variants and restrained accessory placement examples",
+      "pass": true,
+      "evidence": [
+        "qa/expansion-figma-assets.json",
+        "qa/expansion-figma-assets.png",
+        "qa/expansion-figma-audit.json"
+      ]
+    },
+    {
+      "requirement": "Ship verifiable local outputs, prompts and updated offline asset package without original reference art",
+      "pass": true,
+      "evidence": [
+        "Pioneer-Hazel-v3-assets.zip",
+        "qa/local-validation.json"
+      ]
+    },
+    {
+      "requirement": "Preserve application/runtime boundary and clean temporary upload material",
+      "pass": true,
+      "evidence": [
+        "qa/expansion-runtime-boundary.json",
+        "qa/expansion-uploads.json",
+        "README.md"
+      ]
+    }
+  ],
+  "newGeneratedAssets": 6,
+  "allAssets": 12,
+  "decorativeFamilies": 2,
+  "decorativeVariants": 9,
+  "updatedApplicationScreens": 4,
+  "renders": [
+    {
+      "file": "expansion-figma-assets.png",
+      "dimensions": [
+        1440,
+        974
+      ],
+      "sha256": "55dfd67d415cd2f2bb8174cd4b63668a2cbbb61097df91a80ac77743d3ce4c17"
+    },
+    {
+      "file": "expansion-figma-rules.png",
+      "dimensions": [
+        1440,
+        342
+      ],
+      "sha256": "f4e683c0aeec7148f0aaa4d660fb438fd8ba98a4f2c3f9ae2a1dcede1aad2da6"
+    },
+    {
+      "file": "expansion-figma-L00.png",
+      "dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "cdba7c3da3ddaeb3d1e8af2c76e2bba81ac391a65b6e75d9e5b753ef3d8b570d"
+    },
+    {
+      "file": "expansion-figma-W01.png",
+      "dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "4a37e363d5b4230bdddcd9b70513b3ba75d826ba2b3073af8292393a11c0429b"
+    },
+    {
+      "file": "expansion-figma-W02.png",
+      "dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "cfe15c4973f9aaaff1ae89ad00de9f831ce4a117e81e72c70f1447ac07206943"
+    },
+    {
+      "file": "expansion-figma-R02.png",
+      "dimensions": [
+        900,
+        800
+      ],
+      "sha256": "3de55f7dc8fcda3df29aaf239188150e829ddfafa803afea29f3a0ad69782469"
+    }
+  ],
+  "zip": {
+    "file": "Pioneer-Hazel-v3-assets.zip",
+    "sha256": "0684f759dacded9002eb84bfd07f219f6e77a61bfd7d9a85f7669076bf21bb35",
+    "files": [
+      "README.md",
+      "assets/cherry-bookmark.png",
+      "assets/cherry-pair.svg",
+      "assets/compass-seal.svg",
+      "assets/greendou-listening.png",
+      "assets/greendou-organizing.png",
+      "assets/greendou-reading.png",
+      "assets/jelly-companion.png",
+      "assets/jelly-mark.svg",
+      "assets/jelly-ribbon-charm.png",
+      "assets/paper-butterfly.png",
+      "assets/ribbon-outline.svg",
+      "assets/uniform-ribbon.png",
+      "expansion/assets.json",
+      "expansion/generation-record.json",
+      "expansion/prompts.json",
+      "prompts.md",
+      "provenance.json",
+      "tokens.css",
+      "tokens.json"
+    ],
+    "crcError": null,
+    "referenceImagesIncluded": false,
+    "absolutePathsIncluded": false
+  },
+  "pixelNote": "Original jelly and three poses retain native edge alpha at most 1/255; no visible subject is clipped. No raster background cleanup or cropping was performed.",
+  "engineeringBoundary": {
+    "runtimeExpansionIntegrated": false,
+    "pnpmCheckRerunThisExpansion": false,
+    "priorEngineeringGate": "2026-09-30",
+    "priorInputFingerprintsChecked": 13
+  },
+  "published": false
+}

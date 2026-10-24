@@ -11,18 +11,26 @@
 
 # 临时中间产物（非项目交付物，不污染仓库与产线）
 tmp/
+logs/
+.scratch/
 screenshots-private/
 
-# 依赖与编译构建产物
+# 依赖与编译构建产物及本地日志
 node_modules/
 dist/
 build/
 coverage/
 tests/e2e/test-output/
+test-results/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# 临时转录、渲染与抓取中间产物
+kdocs_*
+meeting_*
+pioneer-cinematic-*
 
 # 操作系统临时与缩略图缓存
 .DS_Store

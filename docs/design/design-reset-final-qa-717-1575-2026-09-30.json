@@ -1,0 +1,73 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static structure/solid-color text with recorded inside-stroke and CJK-code-fallback exceptions; not WCAG/runtime certification",
+  "result": {
+    "pageId": "717:1575",
+    "pageName": "components · controls",
+    "problems": [],
+    "qa": {
+      "structure": {
+        "pageId": "717:1575",
+        "name": "components · controls",
+        "nodes": 141,
+        "texts": 67,
+        "instances": 1,
+        "roots": [
+          {
+            "id": "720:1574",
+            "name": "01 · 操作按钮",
+            "x": 200,
+            "y": 200,
+            "width": 1200,
+            "height": 578
+          },
+          {
+            "id": "720:1662",
+            "name": "02 · 输入字段",
+            "x": 200,
+            "y": 938,
+            "width": 1200,
+            "height": 462
+          },
+          {
+            "id": "720:1691",
+            "name": "03 · 状态短句",
+            "x": 200,
+            "y": 1560,
+            "width": 1200,
+            "height": 346
+          },
+          {
+            "id": "721:1574",
+            "name": "04 · 属性与长文本检查",
+            "x": 200,
+            "y": 2000,
+            "width": 1200,
+            "height": 290
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": []
+        }
+      },
+      "contrast": {
+        "pageId": "717:1575",
+        "name": "components · controls",
+        "tested": 67,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    }
+  }
+}

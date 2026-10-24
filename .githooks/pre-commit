@@ -1,0 +1,28 @@
+#!/bin/sh
+# Pioneer pre-commit hook
+# Runs fast sanity checks before commit: repository normalization & formatting check.
+
+echo "[pre-commit] Checking repository normalization..."
+node --test tests/repository/normalization.test.mjs || {
+  echo "[pre-commit] Repository normalization check failed! Please fix doc links and 210 qualifications."
+  exit 1
+}
+
+echo "[pre-commit] Checking formatting on key files..."
+run_format_check() {
+  if [ -f "./node_modules/prettier/bin/prettier.cjs" ]; then
+    node ./node_modules/prettier/bin/prettier.cjs --check apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts
+  elif command -v pnpm >/dev/null 2>&1; then
+    pnpm format:check
+  else
+    npx --no-install prettier --check apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts
+  fi
+}
+
+run_format_check || {
+  echo "[pre-commit] Prettier format check failed! Run 'pnpm format' or 'pnpm prettier --write <files>' to fix."
+  exit 1
+}
+
+echo "[pre-commit] Pre-commit checks passed successfully."
+exit 0

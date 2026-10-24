@@ -1,0 +1,11 @@
+{
+  "command": "pnpm check",
+  "startedAt": "2026-09-30T09:31:18.1688104+00:00",
+  "endedAt": "2026-09-30T09:33:25.6394996+00:00",
+  "exitCode": 1,
+  "candidateManifest": "docs/testing/resumption-candidate-2026-09-30.json",
+  "node": "24.17.0",
+  "pnpm": "11.19.0",
+  "processPathAdjustment": "prepend existing repository .bin directories for this process only",
+  "log": "tests/resumption-baseline-2026-09-30.log"
+}

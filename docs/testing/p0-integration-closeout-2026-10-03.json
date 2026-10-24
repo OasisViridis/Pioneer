@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-03",
+  "goal": "P0 unified contracts and compilable verified integration base",
+  "status": "complete",
+  "mainHead": "10bd3b0c93836288237488c13af71103b87e21df",
+  "gate": {
+    "command": "pnpm check",
+    "exitCode": 0,
+    "execution": "approved outside sandbox, isolated Electron fixture and user-data",
+    "contract": {
+      "passed": 194,
+      "files": 28
+    },
+    "frozenPrototype": {
+      "passed": 210,
+      "notElectron": true
+    },
+    "realElectron": {
+      "passed": 9,
+      "files": 5,
+      "candidateSessionWindowE2eNotRun": true
+    },
+    "finalPackageSmoke": "passed",
+    "log": "tmp/development-resumption-20261003/p0-check-final.log",
+    "logSha256": "9611b241036052406faeacb32fe9abd3ba1ea46b93df6a3962d8283fb44ce433",
+    "inputs": "tmp/development-resumption-20261003/p0-gate-inputs.json",
+    "inputsSha256": "e1b0945a0639ff194af0843d2d66ce00f46a3351f93c508da2b70205009c5f75",
+    "inputCount": 147,
+    "inputsUnchangedAfterGate": true
+  },
+  "originalInputs": {
+    "count": 1467,
+    "snapshotSha256": "9d91393b3602a646b6f2e61c6a94c5b3449e897b654cbed379b553b8464cb14e",
+    "allZipMembersReverified": true,
+    "protectedActiveMainAndM3Unchanged": [
+      "apps/desktop/src/main/index.ts",
+      "apps/desktop/src/preload/index.ts",
+      "apps/desktop/src/renderer/App.tsx",
+      "apps/desktop/src/renderer/state/tabs-reducer.ts",
+      "apps/desktop/src/renderer/state/intent-workspace.ts",
+      "apps/desktop/src/shared/contracts/tabs.ts",
+      "apps/desktop/src/shared/contracts/ipc.ts",
+      "apps/desktop/src/shared/task-intent.ts",
+      "apps/desktop/src/shared/runtime-session.ts"
+    ]
+  },
+  "review": {
+    "blockingFindings": 0,
+    "snapshotCompetitionFixed": "sync replay, late snapshot, disposal and stale rejection covered",
+    "legacyModeUi": "retained unmounted; replace before P1 wiring"
+  },
+  "designMap": "docs/plans/2026-10-03-p0-integration-map.md",
+  "disposition": "docs/testing/p0-integration-disposition-2026-10-03.json",
+  "fontHashesVerified": true,
+  "next": "P1 recoverable session runtime, then P2 real read-only Pi task",
+  "notEnabled": [
+    "Pi",
+    "model",
+    "tools",
+    "file writes",
+    "native traffic light or tray integration",
+    "pet plugin"
+  ],
+  "vcs": "no commit, merge, reset, push, publish or branch change"
+}

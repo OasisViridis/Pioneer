@@ -1,0 +1,1713 @@
+{
+  "date": "2026-10-01",
+  "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+  "status": "VERIFIED",
+  "scope": "Reorder current pages; rename and reorder legacy pages; reorder v3 main layer listing only. No removal, cross-page moves, artwork, variables, styles, or prototype edits.",
+  "before": {
+    "pageOrder": [
+      {
+        "id": "717:1578",
+        "name": "main"
+      },
+      {
+        "id": "717:1574",
+        "name": "design-system"
+      },
+      {
+        "id": "717:1575",
+        "name": "components · controls"
+      },
+      {
+        "id": "717:1576",
+        "name": "components · navigation"
+      },
+      {
+        "id": "717:1577",
+        "name": "components · workbench"
+      },
+      {
+        "id": "743:1574",
+        "name": "states · v2"
+      },
+      {
+        "id": "757:1574",
+        "name": "responsive · v2"
+      },
+      {
+        "id": "132:2",
+        "name": "archive · main (pre-v2)"
+      },
+      {
+        "id": "299:725",
+        "name": "archive · workbench (pre-v2)"
+      },
+      {
+        "id": "257:725",
+        "name": "archive"
+      },
+      {
+        "id": "824:1276",
+        "name": "design-system · v3"
+      },
+      {
+        "id": "824:1277",
+        "name": "assets · Hazel v3"
+      },
+      {
+        "id": "824:1278",
+        "name": "components · v3"
+      },
+      {
+        "id": "824:1279",
+        "name": "main · v3"
+      }
+    ],
+    "mainStackingOrder": [
+      "836:1276",
+      "836:1277",
+      "836:1278",
+      "836:1279",
+      "836:1280",
+      "836:1281",
+      "836:1282"
+    ],
+    "collections": [
+      {
+        "id": "VariableCollectionId:32:2",
+        "name": "Pioneer / Color",
+        "count": 14
+      },
+      {
+        "id": "VariableCollectionId:32:3",
+        "name": "Pioneer / Layout",
+        "count": 8
+      },
+      {
+        "id": "VariableCollectionId:125:2",
+        "name": "Pioneer Demo UI",
+        "count": 3
+      },
+      {
+        "id": "VariableCollectionId:263:725",
+        "name": "Pioneer · HAZEL",
+        "count": 26
+      },
+      {
+        "id": "VariableCollectionId:300:725",
+        "name": "Pioneer · Workbench",
+        "count": 19
+      },
+      {
+        "id": "VariableCollectionId:420:1896",
+        "name": "Pioneer · Prototype State",
+        "count": 7
+      },
+      {
+        "id": "VariableCollectionId:460:1892",
+        "name": "Pioneer · Output View",
+        "count": 6
+      },
+      {
+        "id": "VariableCollectionId:466:1892",
+        "name": "Pioneer · Session Context",
+        "count": 6
+      },
+      {
+        "id": "VariableCollectionId:549:953",
+        "name": "Pioneer / P01 Navigation",
+        "count": 2
+      },
+      {
+        "id": "VariableCollectionId:562:1181",
+        "name": "Pioneer / P02 File Selection",
+        "count": 15
+      },
+      {
+        "id": "VariableCollectionId:571:1352",
+        "name": "Pioneer / P03 Artifact Browser",
+        "count": 40
+      },
+      {
+        "id": "VariableCollectionId:590:1656",
+        "name": "Pioneer / P04 Workspace Entry",
+        "count": 18
+      },
+      {
+        "id": "VariableCollectionId:603:1332",
+        "name": "Pioneer / P05 Task Compose",
+        "count": 11
+      },
+      {
+        "id": "VariableCollectionId:612:1332",
+        "name": "Pioneer / P06 Model Connection",
+        "count": 17
+      },
+      {
+        "id": "VariableCollectionId:625:1357",
+        "name": "Pioneer / P07 Runbook",
+        "count": 14
+      },
+      {
+        "id": "VariableCollectionId:641:2587",
+        "name": "Pioneer / P08 Controls",
+        "count": 7
+      },
+      {
+        "id": "VariableCollectionId:716:1574",
+        "name": "Pioneer v2 / Primitives",
+        "count": 36
+      },
+      {
+        "id": "VariableCollectionId:716:1575",
+        "name": "Pioneer v2 / Color",
+        "count": 24
+      },
+      {
+        "id": "VariableCollectionId:716:1576",
+        "name": "Pioneer v2 / Geometry",
+        "count": 24
+      },
+      {
+        "id": "VariableCollectionId:824:1280",
+        "name": "Pioneer v3 / Primitives",
+        "count": 37
+      },
+      {
+        "id": "VariableCollectionId:824:1281",
+        "name": "Pioneer v3 / Color",
+        "count": 25
+      },
+      {
+        "id": "VariableCollectionId:824:1282",
+        "name": "Pioneer v3 / Geometry",
+        "count": 24
+      }
+    ],
+    "textStyles": [
+      {
+        "id": "S:257c6c917d8fa2dde989032051b51b26f3c9a197,",
+        "name": "Pioneer v2 / Heading/Large"
+      },
+      {
+        "id": "S:5f654470ee0fa802090097da484862b9991ae33e,",
+        "name": "Pioneer v2 / Heading/Medium"
+      },
+      {
+        "id": "S:009108471da5abf19de0f60cac5d933e051e0b67,",
+        "name": "Pioneer v2 / Body/Reading"
+      },
+      {
+        "id": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,",
+        "name": "Pioneer v2 / Body/Default"
+      },
+      {
+        "id": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,",
+        "name": "Pioneer v2 / UI/Label"
+      },
+      {
+        "id": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,",
+        "name": "Pioneer v2 / UI/Small"
+      },
+      {
+        "id": "S:162f281c8522b6bd9b95f7172ec5385575cedc60,",
+        "name": "Pioneer v2 / UI/Small Strong"
+      },
+      {
+        "id": "S:c2b51bf8345deeaf843453037b01769be1b43769,",
+        "name": "Pioneer v2 / Code/Default"
+      },
+      {
+        "id": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,",
+        "name": "Pioneer v2 / Code/Small"
+      },
+      {
+        "id": "S:5ce375458898e9d925f03f5f797fada951cf49f8,",
+        "name": "Pioneer v3 / Heading/Large"
+      },
+      {
+        "id": "S:745380c35fef498e5978e532149f73b1516df9ac,",
+        "name": "Pioneer v3 / Heading/Medium"
+      },
+      {
+        "id": "S:8c2b30c059b83e8821616cee0873c7b408e97db6,",
+        "name": "Pioneer v3 / Body/Reading"
+      },
+      {
+        "id": "S:b29951ab5628efa4d06fc249138110390c09c732,",
+        "name": "Pioneer v3 / Body/Default"
+      },
+      {
+        "id": "S:d9ae42b98c941df8be748e26ce753b1f0572fa89,",
+        "name": "Pioneer v3 / UI/Label"
+      },
+      {
+        "id": "S:c0fd9a8014ec3f4afb2fe66a0d0d537c80d1b2b2,",
+        "name": "Pioneer v3 / UI/Small"
+      },
+      {
+        "id": "S:20d78c8a4d3860d5c12eb6049b5615d23d80f3e8,",
+        "name": "Pioneer v3 / UI/Small Strong"
+      },
+      {
+        "id": "S:6f98ead86832db917a35a9c8f9f4aa4d4387af87,",
+        "name": "Pioneer v3 / Code/Default"
+      },
+      {
+        "id": "S:092d7c5d7ea4d2da0e94ac9ed4ea68efb8d70352,",
+        "name": "Pioneer v3 / Code/Small"
+      },
+      {
+        "id": "S:a445943b463ff274e13637b8c2421f028b46ae0b,",
+        "name": "Pioneer v3 / Display/Welcome"
+      },
+      {
+        "id": "S:9db57ac50d12e40b23a3eb3bf167c1fbcbdcf727,",
+        "name": "Pioneer v3 / UI/Card Title"
+      }
+    ],
+    "pages": [
+      {
+        "id": "717:1574",
+        "name": "design-system",
+        "children": [
+          {
+            "id": "717:1579",
+            "name": "00 · 从对话出发，把工作留在眼前",
+            "type": "FRAME",
+            "x": 200,
+            "y": 200,
+            "w": 1440,
+            "h": 548
+          },
+          {
+            "id": "717:1603",
+            "name": "01 · 颜色承担角色，不承担装饰",
+            "type": "FRAME",
+            "x": 1800,
+            "y": 200,
+            "w": 1440,
+            "h": 712
+          },
+          {
+            "id": "717:1661",
+            "name": "02 · 清楚的字阶，安静的密度",
+            "type": "FRAME",
+            "x": 200,
+            "y": 1072,
+            "w": 1440,
+            "h": 746
+          },
+          {
+            "id": "717:1704",
+            "name": "03 · 一个窗口，一条会话主轴",
+            "type": "FRAME",
+            "x": 1800,
+            "y": 1072,
+            "w": 1440,
+            "h": 616
+          },
+          {
+            "id": "717:1733",
+            "name": "04 · 先说事实，再说影响和下一步",
+            "type": "FRAME",
+            "x": 200,
+            "y": 1978,
+            "w": 1440,
+            "h": 824
+          },
+          {
+            "id": "717:1755",
+            "name": "05 · 开发稿重置与交接",
+            "type": "FRAME",
+            "x": 1800,
+            "y": 1978,
+            "w": 1440,
+            "h": 510
+          }
+        ],
+        "nodeCount": 208,
+        "contentChecksumRolling31": "4f610cd5",
+        "flowStartingPoints": [],
+        "childIds": [
+          "717:1579",
+          "717:1603",
+          "717:1661",
+          "717:1704",
+          "717:1733",
+          "717:1755"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "717:1575",
+        "name": "components · controls",
+        "children": [
+          {
+            "id": "720:1574",
+            "name": "01 · 操作按钮",
+            "type": "FRAME",
+            "x": 200,
+            "y": 200,
+            "w": 1200,
+            "h": 578
+          },
+          {
+            "id": "720:1662",
+            "name": "02 · 输入字段",
+            "type": "FRAME",
+            "x": 200,
+            "y": 938,
+            "w": 1200,
+            "h": 462
+          },
+          {
+            "id": "720:1691",
+            "name": "03 · 状态短句",
+            "type": "FRAME",
+            "x": 200,
+            "y": 1560,
+            "w": 1200,
+            "h": 346
+          },
+          {
+            "id": "721:1574",
+            "name": "04 · 属性与长文本检查",
+            "type": "FRAME",
+            "x": 200,
+            "y": 2000,
+            "w": 1200,
+            "h": 290
+          }
+        ],
+        "nodeCount": 141,
+        "contentChecksumRolling31": "1a0971d7",
+        "flowStartingPoints": [],
+        "childIds": [
+          "720:1574",
+          "720:1662",
+          "720:1691",
+          "721:1574"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "717:1576",
+        "name": "components · navigation",
+        "children": [
+          {
+            "id": "722:1574",
+            "name": "00 · 关闭按钮",
+            "type": "FRAME",
+            "x": 200,
+            "y": 200,
+            "w": 1200,
+            "h": 250
+          },
+          {
+            "id": "722:1584",
+            "name": "01 · Session Tab",
+            "type": "FRAME",
+            "x": 200,
+            "y": 610,
+            "w": 1200,
+            "h": 266
+          },
+          {
+            "id": "722:1612",
+            "name": "02 · Local Tab",
+            "type": "FRAME",
+            "x": 200,
+            "y": 1036,
+            "w": 1200,
+            "h": 254
+          },
+          {
+            "id": "722:1624",
+            "name": "03 · Workspace Poster",
+            "type": "FRAME",
+            "x": 200,
+            "y": 1450,
+            "w": 1200,
+            "h": 618
+          },
+          {
+            "id": "722:1655",
+            "name": "04 · Panel Header",
+            "type": "FRAME",
+            "x": 200,
+            "y": 2228,
+            "w": 1200,
+            "h": 266
+          },
+          {
+            "id": "722:1669",
+            "name": "05 · Session Row",
+            "type": "FRAME",
+            "x": 200,
+            "y": 2654,
+            "w": 1200,
+            "h": 378
+          }
+        ],
+        "nodeCount": 114,
+        "contentChecksumRolling31": "e93b1d5",
+        "flowStartingPoints": [],
+        "childIds": [
+          "722:1574",
+          "722:1584",
+          "722:1612",
+          "722:1624",
+          "722:1655",
+          "722:1669"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "717:1577",
+        "name": "components · workbench",
+        "children": [
+          {
+            "id": "725:1574",
+            "name": "01 · Context Row",
+            "type": "FRAME",
+            "x": 200,
+            "y": 200,
+            "w": 1200,
+            "h": 618
+          },
+          {
+            "id": "725:1611",
+            "name": "02 · Artifact Card",
+            "type": "FRAME",
+            "x": 200,
+            "y": 978,
+            "w": 1200,
+            "h": 802
+          },
+          {
+            "id": "725:1671",
+            "name": "03 · Permission Card",
+            "type": "FRAME",
+            "x": 200,
+            "y": 1940,
+            "w": 1200,
+            "h": 986
+          },
+          {
+            "id": "725:1739",
+            "name": "04 · Run Status",
+            "type": "FRAME",
+            "x": 200,
+            "y": 3086,
+            "w": 1200,
+            "h": 968
+          },
+          {
+            "id": "725:1796",
+            "name": "05 · Validation",
+            "type": "FRAME",
+            "x": 200,
+            "y": 4214,
+            "w": 1200,
+            "h": 782
+          },
+          {
+            "id": "725:1844",
+            "name": "06 · Composer",
+            "type": "FRAME",
+            "x": 200,
+            "y": 5156,
+            "w": 1200,
+            "h": 1394
+          }
+        ],
+        "nodeCount": 346,
+        "contentChecksumRolling31": "444741f2",
+        "flowStartingPoints": [],
+        "childIds": [
+          "725:1574",
+          "725:1611",
+          "725:1671",
+          "725:1739",
+          "725:1796",
+          "725:1844"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "743:1574",
+        "name": "states · v2",
+        "children": [
+          {
+            "id": "746:1574",
+            "name": "L · 工作区库 · 扫描与恢复",
+            "type": "FRAME",
+            "x": 200,
+            "y": 200,
+            "w": 1664,
+            "h": 1708
+          },
+          {
+            "id": "746:1719",
+            "name": "S · 本机会话 · 保存、关闭与恢复",
+            "type": "FRAME",
+            "x": 2024,
+            "y": 200,
+            "w": 1664,
+            "h": 1448
+          },
+          {
+            "id": "746:1864",
+            "name": "D · 布局与上下文 · 可撤销、可键盘操作",
+            "type": "FRAME",
+            "x": 3848,
+            "y": 200,
+            "w": 1664,
+            "h": 1366
+          },
+          {
+            "id": "755:1809",
+            "name": "P · 设置与本机数据 · 受控恢复",
+            "type": "FRAME",
+            "x": 200,
+            "y": 2068,
+            "w": 1664,
+            "h": 1820
+          },
+          {
+            "id": "755:2000",
+            "name": "R · 意图、授权与运行 · 不混淆确认层级",
+            "type": "FRAME",
+            "x": 2024,
+            "y": 2068,
+            "w": 1664,
+            "h": 2420
+          },
+          {
+            "id": "756:2006",
+            "name": "A · 审阅与交付 · 同版本与真实来源",
+            "type": "FRAME",
+            "x": 3848,
+            "y": 2068,
+            "w": 1664,
+            "h": 2512
+          },
+          {
+            "id": "762:2143",
+            "name": "E · 决策结果与交互补充",
+            "type": "FRAME",
+            "x": 200,
+            "y": 4740,
+            "w": 1664,
+            "h": 1480
+          },
+          {
+            "id": "765:2197",
+            "name": "I · 列表、局部视图与输入保护",
+            "type": "FRAME",
+            "x": 2024,
+            "y": 4740,
+            "w": 1664,
+            "h": 1470
+          }
+        ],
+        "nodeCount": 1328,
+        "contentChecksumRolling31": "d2d5a6eb",
+        "flowStartingPoints": [],
+        "childIds": [
+          "746:1574",
+          "746:1719",
+          "746:1864",
+          "755:1809",
+          "755:2000",
+          "756:2006",
+          "762:2143",
+          "765:2197"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "757:1574",
+        "name": "responsive · v2",
+        "children": [
+          {
+            "id": "758:1574",
+            "name": "V · 宽度与分栏",
+            "type": "FRAME",
+            "x": 200,
+            "y": 200,
+            "w": 2340,
+            "h": 922
+          },
+          {
+            "id": "758:1715",
+            "name": "V · 最窄与短窗口",
+            "type": "FRAME",
+            "x": 200,
+            "y": 1320,
+            "w": 2080,
+            "h": 864
+          },
+          {
+            "id": "758:1830",
+            "name": "V · 759 / 760 临界",
+            "type": "FRAME",
+            "x": 200,
+            "y": 2410,
+            "w": 1679,
+            "h": 842
+          },
+          {
+            "id": "761:1761",
+            "name": "V · 审批优先与草稿保留",
+            "type": "FRAME",
+            "x": 200,
+            "y": 3412,
+            "w": 2080,
+            "h": 864
+          }
+        ],
+        "nodeCount": 467,
+        "contentChecksumRolling31": "fb346e3",
+        "flowStartingPoints": [],
+        "childIds": [
+          "758:1574",
+          "758:1715",
+          "758:1830",
+          "761:1761"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "257:725",
+        "name": "archive",
+        "children": [
+          {
+            "id": "176:2",
+            "name": "Viridis · 01 工作区库 · 配色 Demo",
+            "type": "FRAME",
+            "x": 3540,
+            "y": -1060,
+            "w": 1920,
+            "h": 1080
+          },
+          {
+            "id": "176:285",
+            "name": "Viridis · 02 任务执行 · 配色 Demo",
+            "type": "FRAME",
+            "x": 5560,
+            "y": -1060,
+            "w": 1920,
+            "h": 1080
+          },
+          {
+            "id": "202:2",
+            "name": "Pioneer · 设计语言 v2.0 · Editorial UI",
+            "type": "FRAME",
+            "x": 2170,
+            "y": -1080,
+            "w": 1320,
+            "h": 1214
+          },
+          {
+            "id": "211:286",
+            "name": "TEMP · PPT Transfer · D01",
+            "type": "COMPONENT",
+            "x": 200,
+            "y": -1080,
+            "w": 1920,
+            "h": 1080
+          },
+          {
+            "id": "212:2",
+            "name": "TEMP · PPT PAYLOAD · D01",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 10000,
+            "w": 321550,
+            "h": 15
+          },
+          {
+            "id": "212:3",
+            "name": "TEMP · PPT PAYLOAD · D04",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 10000,
+            "w": 312034,
+            "h": 15
+          },
+          {
+            "id": "212:4",
+            "name": "TEMP · PPT PAYLOAD · D09",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 10000,
+            "w": 280363,
+            "h": 15
+          },
+          {
+            "id": "214:2",
+            "name": "TEMP · PPT PAYLOAD · D01-300",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 11000,
+            "w": 246766,
+            "h": 15
+          },
+          {
+            "id": "214:3",
+            "name": "TEMP · PPT PAYLOAD · D04-300",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 11000,
+            "w": 240309,
+            "h": 15
+          },
+          {
+            "id": "214:4",
+            "name": "TEMP · PPT PAYLOAD · D09-300",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 11000,
+            "w": 204736,
+            "h": 15
+          },
+          {
+            "id": "217:2",
+            "name": "TEMP · PPT PAYLOAD · D01-180",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 12000,
+            "w": 120835,
+            "h": 15
+          },
+          {
+            "id": "217:3",
+            "name": "TEMP · PPT PAYLOAD · D04-180",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 12000,
+            "w": 118996,
+            "h": 15
+          },
+          {
+            "id": "217:4",
+            "name": "TEMP · PPT PAYLOAD · D09-180",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 12000,
+            "w": 98602,
+            "h": 15
+          },
+          {
+            "id": "218:2",
+            "name": "TEMP · PPT PAYLOAD · D01-120",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 13000,
+            "w": 67820,
+            "h": 15
+          },
+          {
+            "id": "218:3",
+            "name": "TEMP · PPT PAYLOAD · D04-120",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 13000,
+            "w": 62465,
+            "h": 15
+          },
+          {
+            "id": "218:4",
+            "name": "TEMP · PPT PAYLOAD · D09-120",
+            "type": "TEXT",
+            "x": 10000,
+            "y": 13000,
+            "w": 58593,
+            "h": 15
+          },
+          {
+            "id": "233:2",
+            "name": "ARCHIVE · Before Editorial UI v2 · 2026-09-11",
+            "type": "FRAME",
+            "x": 8500,
+            "y": 120,
+            "w": 4040,
+            "h": 8000
+          },
+          {
+            "id": "239:2",
+            "name": "Editorial UI v2 · Shared browser chrome",
+            "type": "FRAME",
+            "x": 6520,
+            "y": 1500,
+            "w": 1920,
+            "h": 266
+          },
+          {
+            "id": "261:725",
+            "name": "90 · ARCHIVE · Legacy Main",
+            "type": "SECTION",
+            "x": 200,
+            "y": 15000,
+            "w": 4171,
+            "h": 2468
+          },
+          {
+            "id": "261:726",
+            "name": "91 · ARCHIVE · Prototype · HTML Demo",
+            "type": "SECTION",
+            "x": 200,
+            "y": 17800,
+            "w": 1640,
+            "h": 1760
+          },
+          {
+            "id": "261:727",
+            "name": "92 · ARCHIVE · Visual · Before Viridis · 2026-09-09",
+            "type": "SECTION",
+            "x": 200,
+            "y": 20000,
+            "w": 4140,
+            "h": 7960
+          },
+          {
+            "id": "261:728",
+            "name": "93 · ARCHIVE · Layout · Before Polish · 2026-09-09",
+            "type": "SECTION",
+            "x": 200,
+            "y": 28500,
+            "w": 4140,
+            "h": 7280
+          }
+        ],
+        "nodeCount": 9329,
+        "contentChecksumRolling31": "5222be25",
+        "flowStartingPoints": [],
+        "childIds": [
+          "176:2",
+          "176:285",
+          "202:2",
+          "211:286",
+          "212:2",
+          "212:3",
+          "212:4",
+          "214:2",
+          "214:3",
+          "214:4",
+          "217:2",
+          "217:3",
+          "217:4",
+          "218:2",
+          "218:3",
+          "218:4",
+          "233:2",
+          "239:2",
+          "261:725",
+          "261:726",
+          "261:727",
+          "261:728"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "824:1276",
+        "name": "design-system · v3",
+        "children": [
+          {
+            "id": "824:1379",
+            "name": "Hazel × Claude / Quiet companion",
+            "type": "FRAME",
+            "x": 100,
+            "y": 100,
+            "w": 1440,
+            "h": 200
+          },
+          {
+            "id": "824:1382",
+            "name": "Color / Roles",
+            "type": "FRAME",
+            "x": 100,
+            "y": 340,
+            "w": 1440,
+            "h": 376
+          },
+          {
+            "id": "824:1422",
+            "name": "Typography / Read first",
+            "type": "FRAME",
+            "x": 100,
+            "y": 756,
+            "w": 1440,
+            "h": 684
+          },
+          {
+            "id": "824:1435",
+            "name": "Decoration / Budget",
+            "type": "FRAME",
+            "x": 100,
+            "y": 1480,
+            "w": 1440,
+            "h": 200
+          },
+          {
+            "id": "824:1438",
+            "name": "Components / Contract",
+            "type": "FRAME",
+            "x": 100,
+            "y": 1720,
+            "w": 1440,
+            "h": 176
+          },
+          {
+            "id": "824:1441",
+            "name": "Delivery / Evidence",
+            "type": "FRAME",
+            "x": 100,
+            "y": 1936,
+            "w": 1440,
+            "h": 176
+          },
+          {
+            "id": "857:1480",
+            "name": "Greendou / Usage v3.1",
+            "type": "FRAME",
+            "x": 100,
+            "y": 2252,
+            "w": 1440,
+            "h": 342
+          }
+        ],
+        "nodeCount": 93,
+        "contentChecksumRolling31": "eebf0f4c",
+        "flowStartingPoints": [],
+        "childIds": [
+          "824:1379",
+          "824:1382",
+          "824:1422",
+          "824:1435",
+          "824:1438",
+          "824:1441",
+          "857:1480"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "824:1277",
+        "name": "assets · Hazel v3",
+        "children": [
+          {
+            "id": "834:1276",
+            "name": "Hazel / Assets v3",
+            "type": "FRAME",
+            "x": 100,
+            "y": 100,
+            "w": 1440,
+            "h": 556
+          },
+          {
+            "id": "834:1307",
+            "name": "Hazel / Reference ledger",
+            "type": "FRAME",
+            "x": 100,
+            "y": 736,
+            "w": 1440,
+            "h": 1010
+          },
+          {
+            "id": "856:1288",
+            "name": "Pioneer v3 / Greendou Companion",
+            "type": "COMPONENT_SET",
+            "x": 1700,
+            "y": 1850,
+            "w": 136,
+            "h": 584
+          },
+          {
+            "id": "856:1295",
+            "name": "Pioneer v3 / Hazel Accessory",
+            "type": "COMPONENT_SET",
+            "x": 1920,
+            "y": 1850,
+            "w": 96,
+            "h": 240
+          },
+          {
+            "id": "856:1296",
+            "name": "Greendou / Expansion v3.1",
+            "type": "FRAME",
+            "x": 100,
+            "y": 1840,
+            "w": 1440,
+            "h": 974
+          }
+        ],
+        "nodeCount": 206,
+        "contentChecksumRolling31": "1d092fcb",
+        "flowStartingPoints": [],
+        "childIds": [
+          "834:1276",
+          "834:1307",
+          "856:1288",
+          "856:1295",
+          "856:1296"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "824:1278",
+        "name": "components · v3",
+        "children": [
+          {
+            "id": "830:1276",
+            "name": "Pioneer v3 / Button",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 100,
+            "w": 1056,
+            "h": 296
+          },
+          {
+            "id": "830:1353",
+            "name": "Pioneer v3 / Field",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 496,
+            "w": 1080,
+            "h": 268
+          },
+          {
+            "id": "830:1379",
+            "name": "Pioneer v3 / Status",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 864,
+            "w": 1080,
+            "h": 152
+          },
+          {
+            "id": "830:1392",
+            "name": ".Pioneer v3 / Close Button",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 1116,
+            "w": 192,
+            "h": 80
+          },
+          {
+            "id": "830:1399",
+            "name": "Pioneer v3 / Session Tab",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 1296,
+            "w": 1096,
+            "h": 96
+          },
+          {
+            "id": "830:1426",
+            "name": "Pioneer v3 / Local Tab",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 1492,
+            "w": 840,
+            "h": 84
+          },
+          {
+            "id": "830:1435",
+            "name": "Pioneer v3 / Workspace Poster",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 1676,
+            "w": 960,
+            "h": 312
+          },
+          {
+            "id": "830:1463",
+            "name": "Pioneer v3 / Panel Header",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 2088,
+            "w": 1080,
+            "h": 96
+          },
+          {
+            "id": "830:1474",
+            "name": "Pioneer v3 / Session Row",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 2284,
+            "w": 1080,
+            "h": 184
+          },
+          {
+            "id": "830:1490",
+            "name": "Pioneer v3 / Context Row",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 2568,
+            "w": 1080,
+            "h": 424
+          },
+          {
+            "id": "830:1524",
+            "name": "Pioneer v3 / Artifact Card",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 3092,
+            "w": 1080,
+            "h": 608
+          },
+          {
+            "id": "830:1593",
+            "name": "Pioneer v3 / Permission Card",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 3800,
+            "w": 1080,
+            "h": 792
+          },
+          {
+            "id": "830:1666",
+            "name": "Pioneer v3 / Run Status",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 4692,
+            "w": 1080,
+            "h": 798
+          },
+          {
+            "id": "830:1720",
+            "name": "Pioneer v3 / Validation",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 5590,
+            "w": 1080,
+            "h": 612
+          },
+          {
+            "id": "830:1773",
+            "name": "Pioneer v3 / Composer",
+            "type": "COMPONENT_SET",
+            "x": 100,
+            "y": 6302,
+            "w": 1080,
+            "h": 1200
+          }
+        ],
+        "nodeCount": 540,
+        "contentChecksumRolling31": "4a221e64",
+        "flowStartingPoints": [],
+        "childIds": [
+          "830:1276",
+          "830:1353",
+          "830:1379",
+          "830:1392",
+          "830:1399",
+          "830:1426",
+          "830:1435",
+          "830:1463",
+          "830:1474",
+          "830:1490",
+          "830:1524",
+          "830:1593",
+          "830:1666",
+          "830:1720",
+          "830:1773"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "824:1279",
+        "name": "main · v3",
+        "children": [
+          {
+            "id": "836:1276",
+            "name": "L01 · 工作区 · v3",
+            "type": "FRAME",
+            "x": 100,
+            "y": 100,
+            "w": 1440,
+            "h": 932
+          },
+          {
+            "id": "836:1277",
+            "name": "L00 · 添加工作区 · v3",
+            "type": "FRAME",
+            "x": 1740,
+            "y": 100,
+            "w": 1440,
+            "h": 932
+          },
+          {
+            "id": "836:1278",
+            "name": "W01 · 专注 · 新会话 · v3",
+            "type": "FRAME",
+            "x": 100,
+            "y": 1200,
+            "w": 1440,
+            "h": 932
+          },
+          {
+            "id": "836:1279",
+            "name": "W02 · 审阅 · 尚无内容 · v3",
+            "type": "FRAME",
+            "x": 1740,
+            "y": 1200,
+            "w": 1440,
+            "h": 932
+          },
+          {
+            "id": "836:1280",
+            "name": "S01 · 设置 · v3",
+            "type": "FRAME",
+            "x": 100,
+            "y": 2300,
+            "w": 1440,
+            "h": 932
+          },
+          {
+            "id": "836:1281",
+            "name": "R01 · 工作区 · 窄屏 · v3",
+            "type": "FRAME",
+            "x": 1740,
+            "y": 2300,
+            "w": 640,
+            "h": 832
+          },
+          {
+            "id": "836:1282",
+            "name": "R02 · 专注 · 中屏 · v3",
+            "type": "FRAME",
+            "x": 100,
+            "y": 3400,
+            "w": 900,
+            "h": 832
+          }
+        ],
+        "nodeCount": 441,
+        "contentChecksumRolling31": "7e9a8338",
+        "flowStartingPoints": [],
+        "childIds": [
+          "836:1276",
+          "836:1277",
+          "836:1278",
+          "836:1279",
+          "836:1280",
+          "836:1281",
+          "836:1282"
+        ],
+        "reactionNodes": 0,
+        "reactionsChecksumRolling31": "b62"
+      },
+      {
+        "id": "717:1578",
+        "name": "main",
+        "childIds": [
+          "733:1574",
+          "733:1578",
+          "733:1703",
+          "740:1696",
+          "740:1889",
+          "741:1858",
+          "741:2042",
+          "760:2051",
+          "800:773"
+        ],
+        "nodeCount": 2337,
+        "contentChecksumRolling31": "5cc1d2ec",
+        "flowStartingPoints": [
+          {
+            "nodeId": "800:775",
+            "name": "Workspace"
+          },
+          {
+            "nodeId": "800:824",
+            "name": "本机保存恢复"
+          },
+          {
+            "nodeId": "800:890",
+            "name": "布局与引用"
+          },
+          {
+            "nodeId": "800:1035",
+            "name": "设置数据（设计示例）"
+          },
+          {
+            "nodeId": "800:1141",
+            "name": "未来Agent（设计示例）"
+          }
+        ],
+        "reactionNodes": 57,
+        "reactionsChecksumRolling31": "ab6440c4"
+      },
+      {
+        "id": "132:2",
+        "name": "archive · main (pre-v2)",
+        "childIds": [
+          "132:3",
+          "132:64",
+          "134:2",
+          "135:258",
+          "136:105",
+          "136:284",
+          "136:558",
+          "138:46",
+          "139:58",
+          "155:2",
+          "155:350",
+          "155:460",
+          "261:729",
+          "533:726",
+          "538:782",
+          "538:1013",
+          "538:1244",
+          "549:956",
+          "549:1187",
+          "549:1418",
+          "549:1718",
+          "564:1181",
+          "564:1554",
+          "564:1927",
+          "578:1352",
+          "590:1352",
+          "592:1397",
+          "613:1343",
+          "614:1354",
+          "630:1360"
+        ],
+        "nodeCount": 6508,
+        "contentChecksumRolling31": "72c2744b",
+        "flowStartingPoints": [
+          {
+            "nodeId": "132:64",
+            "name": "Pioneer · 核心任务流程"
+          },
+          {
+            "nodeId": "590:1352",
+            "name": "Pioneer · 首次使用"
+          },
+          {
+            "nodeId": "138:46",
+            "name": "Pioneer · 收尾与 Runbook"
+          },
+          {
+            "nodeId": "538:1244",
+            "name": "Pioneer · 中断与重试"
+          },
+          {
+            "nodeId": "549:956",
+            "name": "Pioneer · 执行完成与审阅"
+          }
+        ],
+        "reactionNodes": 228,
+        "reactionsChecksumRolling31": "5e6aca9d"
+      },
+      {
+        "id": "299:725",
+        "name": "archive · workbench (pre-v2)",
+        "childIds": [
+          "299:726",
+          "299:727",
+          "299:728",
+          "299:729",
+          "318:848",
+          "324:885",
+          "326:930",
+          "343:973",
+          "349:1022",
+          "351:1079",
+          "352:1136",
+          "355:1185",
+          "362:1250",
+          "365:1325",
+          "390:1359",
+          "390:1360",
+          "390:1361",
+          "390:1362",
+          "390:1363",
+          "390:1364",
+          "390:1365",
+          "390:1366",
+          "395:1359",
+          "398:1429",
+          "399:1481",
+          "401:1531",
+          "403:1536",
+          "403:1703",
+          "405:1576",
+          "405:1659",
+          "411:1666",
+          "411:1744",
+          "413:1754",
+          "413:1775",
+          "415:1805",
+          "415:1816",
+          "415:1894",
+          "423:1896",
+          "441:1897",
+          "466:1899",
+          "468:1897",
+          "469:1941",
+          "642:2587",
+          "659:2614",
+          "686:2824",
+          "696:3338",
+          "701:3338"
+        ],
+        "nodeCount": 4267,
+        "contentChecksumRolling31": "c3229521",
+        "flowStartingPoints": [
+          {
+            "nodeId": "318:848",
+            "name": "Flow 2"
+          },
+          {
+            "nodeId": "403:1536",
+            "name": "Flow 2"
+          },
+          {
+            "nodeId": "324:885",
+            "name": "Flow 3"
+          },
+          {
+            "nodeId": "405:1576",
+            "name": "Flow 3"
+          }
+        ],
+        "reactionNodes": 307,
+        "reactionsChecksumRolling31": "598aef54"
+      }
+    ]
+  },
+  "checksumMethod": "Rolling31 uint32 of sorted descendant identity, parent, geometry, text, fills, bound variables; reaction serialization separately. Non-cryptographic readback checksum, not security or engineering proof.",
+  "after": {
+    "pageOrder": [
+      {
+        "id": "824:1279",
+        "name": "main · v3"
+      },
+      {
+        "id": "824:1276",
+        "name": "design-system · v3"
+      },
+      {
+        "id": "824:1278",
+        "name": "components · v3"
+      },
+      {
+        "id": "824:1277",
+        "name": "assets · Hazel v3"
+      },
+      {
+        "id": "717:1578",
+        "name": "archive · v2 · main + P12"
+      },
+      {
+        "id": "717:1574",
+        "name": "archive · v2 · design-system"
+      },
+      {
+        "id": "717:1575",
+        "name": "archive · v2 · controls"
+      },
+      {
+        "id": "717:1576",
+        "name": "archive · v2 · navigation"
+      },
+      {
+        "id": "717:1577",
+        "name": "archive · v2 · workbench"
+      },
+      {
+        "id": "743:1574",
+        "name": "archive · v2 · states"
+      },
+      {
+        "id": "757:1574",
+        "name": "archive · v2 · responsive"
+      },
+      {
+        "id": "132:2",
+        "name": "archive · pre-v2 · main"
+      },
+      {
+        "id": "299:725",
+        "name": "archive · pre-v2 · workbench"
+      },
+      {
+        "id": "257:725",
+        "name": "archive · pre-v2 · experiments"
+      }
+    ],
+    "mainLayerPanelTopToBottom": [
+      {
+        "id": "836:1276",
+        "name": "L01 · 工作区 · v3"
+      },
+      {
+        "id": "836:1277",
+        "name": "L00 · 添加工作区 · v3"
+      },
+      {
+        "id": "836:1278",
+        "name": "W01 · 专注 · 新会话 · v3"
+      },
+      {
+        "id": "836:1279",
+        "name": "W02 · 审阅 · 尚无内容 · v3"
+      },
+      {
+        "id": "836:1280",
+        "name": "S01 · 设置 · v3"
+      },
+      {
+        "id": "836:1281",
+        "name": "R01 · 工作区 · 窄屏 · v3"
+      },
+      {
+        "id": "836:1282",
+        "name": "R02 · 专注 · 中屏 · v3"
+      }
+    ],
+    "currentPage": {
+      "id": "824:1279",
+      "name": "main · v3"
+    },
+    "checks": [
+      {
+        "id": "717:1574",
+        "name": "archive · v2 · design-system",
+        "nodes": 208,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "717:1575",
+        "name": "archive · v2 · controls",
+        "nodes": 141,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "717:1576",
+        "name": "archive · v2 · navigation",
+        "nodes": 114,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "717:1577",
+        "name": "archive · v2 · workbench",
+        "nodes": 346,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "743:1574",
+        "name": "archive · v2 · states",
+        "nodes": 1328,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "757:1574",
+        "name": "archive · v2 · responsive",
+        "nodes": 467,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "257:725",
+        "name": "archive · pre-v2 · experiments",
+        "nodes": 9329,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "824:1276",
+        "name": "design-system · v3",
+        "nodes": 93,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "824:1277",
+        "name": "assets · Hazel v3",
+        "nodes": 206,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "824:1278",
+        "name": "components · v3",
+        "nodes": 540,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "824:1279",
+        "name": "main · v3",
+        "nodes": 441,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "717:1578",
+        "name": "archive · v2 · main + P12",
+        "nodes": 2337,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "132:2",
+        "name": "archive · pre-v2 · main",
+        "nodes": 6508,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      },
+      {
+        "id": "299:725",
+        "name": "archive · pre-v2 · workbench",
+        "nodes": 4267,
+        "contentUnchanged": true,
+        "prototypeUnchanged": true,
+        "rootChildrenPreserved": true
+      }
+    ],
+    "globalChecks": {
+      "pageIDsPreserved": true,
+      "collectionsPreserved": true,
+      "textStylesPreserved": true
+    },
+    "activePageCount": 4,
+    "archivedPageCount": 10,
+    "noRemovedNodes": true,
+    "noCrossPageMoves": true,
+    "noArtworkChanges": true,
+    "noVariableOrStyleEdits": true
+  },
+  "pass": true
+}

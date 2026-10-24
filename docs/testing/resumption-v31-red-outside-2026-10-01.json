@@ -1,0 +1,8 @@
+{
+  "phase": "red-probe",
+  "command": "pnpm exec playwright test --config tests/e2e/playwright.config.ts --grep 'Hazel stays decorative'",
+  "execution": "outside agent tool sandbox; product sandbox and CSP unchanged",
+  "exitCode": 1,
+  "log": "tests/resumption-v31-red-outside-2026-10-01.log",
+  "date": "2026-10-01T02:26:18.1689456+08:00"
+}

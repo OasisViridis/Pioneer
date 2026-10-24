@@ -1,0 +1,29 @@
+{
+  "captions": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"mutatedNodeIds\":[\"857:1503\",\"857:1505\"],\"changes\":[{\"id\":\"857:1503\",\"text\":\"审阅欢迎主题之一\"},{\"id\":\"857:1505\",\"text\":\"一个空态槽仍为 88 / 64px；配饰最多 48px，可替换原图但不得叠加。文字安全距至少 24px；容器 ≤380px 隐藏。已有消息、运行、权限、错误、未知与验收无图。按固定会话身份选静态主题，不轮播、不随任务事件切换；不新增关于页。\"}]}"
+      }
+    ],
+    "isError": false
+  },
+  "paintBindings": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"mutatedNodeIds\":[\"880:285\",\"880:291\"],\"variable\":{\"id\":\"VariableID:824:1285\",\"name\":\"color/surface-muted\"}}"
+      }
+    ],
+    "isError": false
+  },
+  "focusCaption": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"mutatedNodeIds\":[\"857:1496\"],\"board\":{\"id\":\"857:1480\",\"w\":1440,\"h\":364}}"
+      }
+    ],
+    "isError": false
+  }
+}

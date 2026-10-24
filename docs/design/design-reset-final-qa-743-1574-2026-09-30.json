@@ -1,0 +1,304 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static structure/solid-color text with recorded inside-stroke and CJK-code-fallback exceptions; not WCAG/runtime certification",
+  "result": {
+    "pageId": "743:1574",
+    "pageName": "states · v2",
+    "problems": [],
+    "qa": {
+      "structure": {
+        "pageId": "743:1574",
+        "name": "states · v2",
+        "nodes": 1328,
+        "texts": 631,
+        "instances": 208,
+        "roots": [
+          {
+            "id": "746:1574",
+            "name": "L · 工作区库 · 扫描与恢复",
+            "x": 200,
+            "y": 200,
+            "width": 1664,
+            "height": 1708
+          },
+          {
+            "id": "746:1719",
+            "name": "S · 本机会话 · 保存、关闭与恢复",
+            "x": 2024,
+            "y": 200,
+            "width": 1664,
+            "height": 1448
+          },
+          {
+            "id": "746:1864",
+            "name": "D · 布局与上下文 · 可撤销、可键盘操作",
+            "x": 3848,
+            "y": 200,
+            "width": 1664,
+            "height": 1366
+          },
+          {
+            "id": "755:1809",
+            "name": "P · 设置与本机数据 · 受控恢复",
+            "x": 200,
+            "y": 2068,
+            "width": 1664,
+            "height": 1820
+          },
+          {
+            "id": "755:2000",
+            "name": "R · 意图、授权与运行 · 不混淆确认层级",
+            "x": 2024,
+            "y": 2068,
+            "width": 1664,
+            "height": 2420
+          },
+          {
+            "id": "756:2006",
+            "name": "A · 审阅与交付 · 同版本与真实来源",
+            "x": 3848,
+            "y": 2068,
+            "width": 1664,
+            "height": 2512
+          },
+          {
+            "id": "762:2143",
+            "name": "E · 决策结果与交互补充",
+            "x": 200,
+            "y": 4740,
+            "width": 1664,
+            "height": 1480
+          },
+          {
+            "id": "765:2197",
+            "name": "I · 列表、局部视图与输入保护",
+            "x": 2024,
+            "y": 4740,
+            "width": 1664,
+            "height": 1470
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": [
+            {
+              "id": "I746:2007;725:1592",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I746:2022;725:1602",
+              "start": 13,
+              "end": 16,
+              "text": "旧提案",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I755:2149;725:1751",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I755:2167;725:1760",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I755:2186;725:1769",
+              "start": 0,
+              "end": 4,
+              "text": "已确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I755:2204;725:1778",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I755:2223;725:1787",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I756:2057;725:1662",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I756:2097;725:1636",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I756:2115;725:1649",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I756:2141;725:1623",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            }
+          ]
+        }
+      },
+      "contrast": {
+        "pageId": "743:1574",
+        "name": "states · v2",
+        "tested": 631,
+        "minRatio": 4.690847986393435,
+        "failures": [],
+        "unknown": []
+      }
+    }
+  }
+}

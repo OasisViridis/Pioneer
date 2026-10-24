@@ -3,7 +3,7 @@
 > **模块化 AI Agent 桌面工作台**  
 > 为开发者打造的本地项目与任务协同工作区。告别千篇一律的单一聊天气泡，像专业 IDE 一样自由停靠面板、管理会话草稿与查看 Agent 的工作过程。
 
-[🖼️ 交互原型预览](https://nix-medley-14707825.figma.site/) · [🎨 Figma 设计稿](https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=824-1279) · [💻 桌面工程源码](apps/desktop/) · [📖 毕业设计定位](选题收敛说明.md)
+[🖼️ 交互原型预览](https://nix-medley-14707825.figma.site/) · [🎨 Figma 设计稿](https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=925-3) · [💻 apps/desktop 桌面工程源码](apps/desktop/) · [📖 毕业设计定位](选题收敛说明.md)
 
 ---
 
@@ -27,11 +27,11 @@ Pioneer 的核心思路是 **“一切皆 UI (Everything is a UI)”** —— �
 
 ### 2. 多会话标签页与草稿隔离
 
-采用类似现代浏览器的顶部标签页机制，支持多个任务并行切换推进。每个会话拥有独立的草稿隔离存储，即使关闭应用也能自动保存与恢复状态，灵感不丢失。
+采用类似现代浏览器的顶部标签页机制，目标是多个任务自由切换，草稿和上下文各自保留。当前主线已实现项目 Tabs 与切换时的草稿隔离；跨重启会话恢复已有本地候选代码，待与新工作台整合。
 
 ### 3. 自由停靠的模块化面板
 
-借鉴专业桌面工具（如 Adobe Premiere Pro、VS Code）的面板停靠（Docking）体系。对话、上下文树、任务清单与产物面板均可按需打开，支持自由拖拽拆分、重叠分组、收起与复原，彻底打破固定分栏的束缚。
+借鉴专业桌面工具（如 Adobe Premiere Pro、VS Code）的面板停靠（Docking）体系。对话、上下文树、任务清单与产物面板均可按需打开，目标支持拖拽拆分、重叠分组、收起与复原。停靠算法与组件已有本地候选，当前 `main` 入口尚未接入；F9 原型是下一轮整合的交互参考。
 
 ### 4. 面向高智能模型的 Harness：脚手架，而不是囚笼
 
@@ -49,14 +49,14 @@ Harness 应提供清楚的目标、可靠的工具和恰当的上下文，而不
 
 ## 开发进度与后续规划 (Status & Roadmap)
 
-本项目是数字媒体技术专业本科毕业设计《模块化 AI Agent 交互系统的设计与实现》的工程实践，现阶段重心在桌面交互框架与本地工程协同体验。M3 已完成「输入 → Intent Review → READY → Runtime Session INITIALIZED → START REQUESTED」纵向切片，运行能力（模型接入、工具执行、文件写入）仍保持关闭。各模块的落地现状与规划如下：
+本项目是数字媒体技术专业本科毕业设计《基于TypeScript的模块化智能体交互系统设计与实现》的工程实践，现阶段重心在桌面交互框架与本地工程协同体验。用户于 2026-10-03 验收 v8 展示视频并恢复应用开发，P0 整合底座与 P1 可恢复会话已通过完整门禁，下一片 P2 真实只读 Harness。当前主线、本地候选和设计交付分开核对，复工与实施队列见[Wayfinder 端到端开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)（接替 [10-01 计划](docs/plans/2026-10-01-pioneer-frozen-prototype-development-plan.md)）。各模块现状如下：
 
-| 模块 / 维度 | 当前已实现 (Implemented) | 规划与进行中 (Roadmap) |
-| :--- | :--- | :--- |
-| **桌面端交互系统 (Electron + React)** | 本地项目只读扫描、海报墙检索、多标签页切换、面板自由停靠、会话草稿持久化 | 开放受控的文件写入与多工程上下文联动 |
-| **进程通信与安全契约** | 基于 TypeScript 与 Zod 定义 IPC 跨进程强契约，严格通过受限 preload 隔离渲染进程 | 动态任务意图解析与任务运行时状态机 |
-| **模型与工具链 (Harness)** | 完成轻量 Pi Agent Harness 架构设计，定义工具流与上下文路由接口 | 接入大模型在线推理、自主工具调用执行与代码 Diff 变更应用 |
-| **设计系统与交互原型** | 完整的 Figma Design 视觉规范与高保真可交互原型 | 将设计原型手感持续落地为生产级前端实现 |
+| 模块 / 维度                           | 当前已实现 (Implemented)                                               | 规划与进行中 (Roadmap)                            |
+| :------------------------------------ | :--------------------------------------------------------------------- | :------------------------------------------------ |
+| **桌面端交互系统 (Electron + React)** | 主线：只读扫描、海报墙、会话 Tabs、草稿／意图／停靠布局保存与重启恢复  | 接真实只读任务；窗口外壳与桌宠按独立阶段推进      |
+| **进程通信与安全契约**                | TypeScript/Zod IPC、受限 preload、意图修订与本地 RuntimeSession 初始化 | 可选意图辅助已进入会话；下一步接真实运行事件      |
+| **模型与工具链 (Harness)**            | Pi 底座方案与接入边界已设计                                            | 优先接通一条真实只读任务，再扩展命令、写入与 Diff |
+| **设计系统与交互原型**                | 完整的 Figma Design 视觉规范与高保真可交互原型                         | 将设计原型手感持续落地为生产级前端实现            |
 
 ---
 
@@ -107,12 +107,12 @@ pnpm check
 
 ## 深入阅读与参考文档
 
+- [文档导航](docs/README.md) —— 现役入口、工程证据与历史档案
 - [课题背景与选题收敛说明](选题收敛说明.md) —— 毕业设计立项背景、研究哲学与双主线演进
-- [桌面工程实现 (apps/desktop)](apps/desktop/) —— Electron + React 渲染层与受限 preload 安全桥
 - [产品定义与美学纲领](产品定义与美学纲领.md) —— 视觉规范、设计哲学与交互细节
 - [测试架构与质量门禁说明 (TEST_INFRA.md)](TEST_INFRA.md) —— 测试分层设计与验证标准
 - [工程路线图 (ROADMAP.md)](themasterplan/ROADMAP.md) —— 阶段目标与里程碑演进记录
-- [Figma 设计工作区](https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=824-1279) —— 完整高保真设计稿与组件库
+- [Figma 设计工作区](https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=925-3) —— 完整高保真设计稿与组件库
 
 ---
 

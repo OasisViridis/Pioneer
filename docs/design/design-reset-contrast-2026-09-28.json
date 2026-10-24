@@ -1,0 +1,85 @@
+{
+  "scope": "Design token pairs only; not runtime accessibility certification",
+  "pairs": [
+    {
+      "name": "正文",
+      "fg": "#2C3547",
+      "bg": "#F9FAF7",
+      "ratio": 11.74,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "name": "次文",
+      "fg": "#646E72",
+      "bg": "#F9FAF7",
+      "ratio": 4.99,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "name": "次文/画布",
+      "fg": "#646E72",
+      "bg": "#F1F2EE",
+      "ratio": 4.65,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "name": "按钮",
+      "fg": "#F9F9F9",
+      "bg": "#333C50",
+      "ratio": 10.48,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "name": "控件边界",
+      "fg": "#858D92",
+      "bg": "#F9FAF7",
+      "ratio": 3.22,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "name": "焦点",
+      "fg": "#333C50",
+      "bg": "#F1F2EE",
+      "ratio": 9.81,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "name": "错误文字",
+      "fg": "#934342",
+      "bg": "#EBDADA",
+      "ratio": 4.99,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "name": "成功文字",
+      "fg": "#35644B",
+      "bg": "#D7E3DA",
+      "ratio": 5.17,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "name": "待处理正文",
+      "fg": "#2C3547",
+      "bg": "#EDE4D6",
+      "ratio": 9.76,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "name": "危险按钮",
+      "fg": "#F9F9F9",
+      "bg": "#B25352",
+      "ratio": 4.69,
+      "min": 4.5,
+      "pass": true
+    }
+  ]
+}

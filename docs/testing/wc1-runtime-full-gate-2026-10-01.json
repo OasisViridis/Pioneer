@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-01T03:28:41.736791+00:00",
+  "command": "pnpm check",
+  "execution": "outside agent tool sandbox; product sandbox/contextIsolation/CSP unchanged; isolated fixture/profile",
+  "exitCode": 0,
+  "candidate": "wc1-runtime-candidate-2026-10-01.json",
+  "candidateIdentity": "e6b1011ed591cc78e9725d710f1c17461c1d3f09543a1cc258aa3f309db24527",
+  "inputsUnchanged": true,
+  "changedDuringGate": [],
+  "inputCount": 136,
+  "results": {
+    "format": 0,
+    "lint": 0,
+    "typecheck": 0,
+    "contract": {
+      "files": 24,
+      "passed": 180
+    },
+    "prototype": 210,
+    "realElectron": 29,
+    "finalPackage": 0
+  },
+  "log": "tests/wc1-runtime-full-check-2026-10-01.log",
+  "logSha256": "be0790f8612e19fa9d77501a035de168f70a98a45d39dfcf884ad1ff3f316a00",
+  "node": "24.19.0",
+  "earlierFailure": "wc1-runtime-before-package-retry-2026-10-01.json",
+  "publish": false,
+  "manualWindowsPassed": false
+}

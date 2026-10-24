@@ -1,0 +1,7 @@
+{
+  "command": "pnpm check",
+  "startedAt": "2026-09-30T11:44:59.7705401+00:00",
+  "endedAt": "2026-09-30T11:45:48.1774793+00:00",
+  "exitCode": 1,
+  "log": "tests/hazel-v3-check-2026-09-30.log"
+}

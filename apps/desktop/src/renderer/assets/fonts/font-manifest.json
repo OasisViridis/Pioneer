@@ -1,0 +1,173 @@
+{
+  "prepared_date": "2026-10-01",
+  "fonttools_version": "4.66.1",
+  "brotli_version": "1.2.0",
+  "method": "Official Google Fonts TTF to WOFF2, lossless compression, no subsetting or name changes",
+  "figma_uploaded": false,
+  "files": [
+    {
+      "file": "NotoSansSC-Variable.woff2",
+      "bytes": 7782072,
+      "sha256": "aef8c34277afad81ecd0227138a830263c0caea65b7aea66d1195395f097b55a",
+      "family": "Noto Sans SC",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf",
+      "source_sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+      "source_bytes": 17772300,
+      "version": "Version 2.004-H2;hotconv 1.0.118;makeotfexe 2.5.65603",
+      "axes": [
+        {
+          "tag": "wght",
+          "min": 100.0,
+          "default": 100.0,
+          "max": 900.0
+        }
+      ],
+      "instances": [
+        {
+          "style": "Thin",
+          "coordinates": {
+            "wght": 100.0
+          }
+        },
+        {
+          "style": "ExtraLight",
+          "coordinates": {
+            "wght": 200.0
+          }
+        },
+        {
+          "style": "Light",
+          "coordinates": {
+            "wght": 300.0
+          }
+        },
+        {
+          "style": "Regular",
+          "coordinates": {
+            "wght": 400.0
+          }
+        },
+        {
+          "style": "Medium",
+          "coordinates": {
+            "wght": 500.0
+          }
+        },
+        {
+          "style": "SemiBold",
+          "coordinates": {
+            "wght": 600.0
+          }
+        },
+        {
+          "style": "Bold",
+          "coordinates": {
+            "wght": 700.0
+          }
+        },
+        {
+          "style": "ExtraBold",
+          "coordinates": {
+            "wght": 800.0
+          }
+        },
+        {
+          "style": "Black",
+          "coordinates": {
+            "wght": 900.0
+          }
+        }
+      ],
+      "unicode_codepoints": 30890,
+      "cjk_unified_codepoints": 20976,
+      "checks": {
+        "woff2_header": true,
+        "source_cmap_preserved": true,
+        "variable_axes_preserved": true,
+        "named_instances_preserved": true,
+        "names_preserved": true,
+        "sample_glyphs_preserved_at_400_500_700": true,
+        "no_subsetting": true
+      }
+    },
+    {
+      "file": "NotoSerifSC-Variable.woff2",
+      "bytes": 11032420,
+      "sha256": "4ee9b0921ec9bd3f8b04587c7bc66c62731045e89d74eec054f37fc7a2d26383",
+      "family": "Noto Serif SC",
+      "source_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf",
+      "source_sha256": "050080d9255a86808f2945bffac582b31ef32bc36411ce29563b4961670c66f9",
+      "source_bytes": 25125512,
+      "version": "Version 2.003-H1;hotconv 1.1.1;makeotfexe 2.6.0",
+      "axes": [
+        {
+          "tag": "wght",
+          "min": 200.0,
+          "default": 200.0,
+          "max": 900.0
+        }
+      ],
+      "instances": [
+        {
+          "style": "ExtraLight",
+          "coordinates": {
+            "wght": 200.0
+          }
+        },
+        {
+          "style": "Light",
+          "coordinates": {
+            "wght": 300.0
+          }
+        },
+        {
+          "style": "Regular",
+          "coordinates": {
+            "wght": 400.0
+          }
+        },
+        {
+          "style": "Medium",
+          "coordinates": {
+            "wght": 500.0
+          }
+        },
+        {
+          "style": "SemiBold",
+          "coordinates": {
+            "wght": 600.0
+          }
+        },
+        {
+          "style": "Bold",
+          "coordinates": {
+            "wght": 700.0
+          }
+        },
+        {
+          "style": "ExtraBold",
+          "coordinates": {
+            "wght": 800.0
+          }
+        },
+        {
+          "style": "Black",
+          "coordinates": {
+            "wght": 900.0
+          }
+        }
+      ],
+      "unicode_codepoints": 30928,
+      "cjk_unified_codepoints": 20992,
+      "checks": {
+        "woff2_header": true,
+        "source_cmap_preserved": true,
+        "variable_axes_preserved": true,
+        "named_instances_preserved": true,
+        "names_preserved": true,
+        "sample_glyphs_preserved_at_400_500_700": true,
+        "no_subsetting": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "date": "2026-09-30",
+  "mode": "final-closed-ledger",
+  "scope": "local design JSON, named authority/source-document links, exact handoff IDs/counts and static evidence; no application/runtime test",
+  "jsonFiles": 78,
+  "localLinks": 113,
+  "externalLinksRecordedNotHTTPTested": 139,
+  "handoffRows": 102,
+  "screenRows": 21,
+  "stateRows": 81,
+  "problems": []
+}

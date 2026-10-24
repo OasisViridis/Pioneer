@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-01T03:24:23.111198+00:00",
+  "command": "pnpm check",
+  "exitCode": 1,
+  "candidateIdentity": "e6b1011ed591cc78e9725d710f1c17461c1d3f09543a1cc258aa3f309db24527",
+  "inputCount": 136,
+  "inputsUnchanged": true,
+  "changedDuringGate": [],
+  "results": {
+    "format": 0,
+    "lint": 0,
+    "typecheck": 0,
+    "contract": 180,
+    "prototype": 210,
+    "realElectron": 29,
+    "finalPackage": "EBUSY preload.js.map"
+  },
+  "log": "tests/wc1-runtime-full-check-before-package-retry-2026-10-01.log",
+  "notFullPass": true
+}

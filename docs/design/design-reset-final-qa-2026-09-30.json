@@ -1,0 +1,1952 @@
+{
+  "date": "2026-09-30",
+  "scope": "All 7 current editable v2 pages; static structure and actual solid-background text contrast, not prototype/Windows/runtime certification",
+  "policy": {
+    "insideStrokeBoundary": "Non-text frames or Panel Header instances only; parent auto-layout FRAME with visible INSIDE1px stroke; child x=1, width=parent.width, exactly1px right excess, no bottom/left/top excess; every ID recorded",
+    "cjkCodeFallback": "Noto Sans SC Regular CJK span, 12/20 or14/22, directly adjacent to linked JetBrains Mono Code style with same size/line-height; every range and peer recorded",
+    "retainedInitialFindings": "design-reset-completion-717-1578-2026-09-30.json and states counterpart preserve initial strict reports; these are not current QA acceptance"
+  },
+  "pageEvidence": [
+    "design-reset-final-qa-717-1574-2026-09-30.json",
+    "design-reset-final-qa-717-1575-2026-09-30.json",
+    "design-reset-final-qa-717-1576-2026-09-30.json",
+    "design-reset-strict-qa-717-1577-2026-09-30.json",
+    "design-reset-strict-qa-717-1578-2026-09-30.json",
+    "design-reset-strict-qa-743-1574-2026-09-30.json",
+    "design-reset-strict-qa-757-1574-2026-09-30.json"
+  ],
+  "pages": [
+    {
+      "structure": {
+        "pageId": "717:1574",
+        "name": "design-system",
+        "nodes": 208,
+        "texts": 130,
+        "instances": 0,
+        "roots": [
+          {
+            "id": "717:1579",
+            "name": "00 · 从对话出发，把工作留在眼前",
+            "x": 200,
+            "y": 200,
+            "width": 1440,
+            "height": 548
+          },
+          {
+            "id": "717:1603",
+            "name": "01 · 颜色承担角色，不承担装饰",
+            "x": 1800,
+            "y": 200,
+            "width": 1440,
+            "height": 712
+          },
+          {
+            "id": "717:1661",
+            "name": "02 · 清楚的字阶，安静的密度",
+            "x": 200,
+            "y": 1072,
+            "width": 1440,
+            "height": 746
+          },
+          {
+            "id": "717:1704",
+            "name": "03 · 一个窗口，一条会话主轴",
+            "x": 1800,
+            "y": 1072,
+            "width": 1440,
+            "height": 616
+          },
+          {
+            "id": "717:1733",
+            "name": "04 · 先说事实，再说影响和下一步",
+            "x": 200,
+            "y": 1978,
+            "width": 1440,
+            "height": 824
+          },
+          {
+            "id": "717:1755",
+            "name": "05 · 开发稿重置与交接",
+            "x": 1800,
+            "y": 1978,
+            "width": 1440,
+            "height": 510
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": []
+        }
+      },
+      "contrast": {
+        "pageId": "717:1574",
+        "name": "design-system",
+        "tested": 130,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    },
+    {
+      "structure": {
+        "pageId": "717:1575",
+        "name": "components · controls",
+        "nodes": 141,
+        "texts": 67,
+        "instances": 1,
+        "roots": [
+          {
+            "id": "720:1574",
+            "name": "01 · 操作按钮",
+            "x": 200,
+            "y": 200,
+            "width": 1200,
+            "height": 578
+          },
+          {
+            "id": "720:1662",
+            "name": "02 · 输入字段",
+            "x": 200,
+            "y": 938,
+            "width": 1200,
+            "height": 462
+          },
+          {
+            "id": "720:1691",
+            "name": "03 · 状态短句",
+            "x": 200,
+            "y": 1560,
+            "width": 1200,
+            "height": 346
+          },
+          {
+            "id": "721:1574",
+            "name": "04 · 属性与长文本检查",
+            "x": 200,
+            "y": 2000,
+            "width": 1200,
+            "height": 290
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": []
+        }
+      },
+      "contrast": {
+        "pageId": "717:1575",
+        "name": "components · controls",
+        "tested": 67,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    },
+    {
+      "structure": {
+        "pageId": "717:1576",
+        "name": "components · navigation",
+        "nodes": 114,
+        "texts": 68,
+        "instances": 6,
+        "roots": [
+          {
+            "id": "722:1574",
+            "name": "00 · 关闭按钮",
+            "x": 200,
+            "y": 200,
+            "width": 1200,
+            "height": 250
+          },
+          {
+            "id": "722:1584",
+            "name": "01 · Session Tab",
+            "x": 200,
+            "y": 610,
+            "width": 1200,
+            "height": 266
+          },
+          {
+            "id": "722:1612",
+            "name": "02 · Local Tab",
+            "x": 200,
+            "y": 1036,
+            "width": 1200,
+            "height": 254
+          },
+          {
+            "id": "722:1624",
+            "name": "03 · Workspace Poster",
+            "x": 200,
+            "y": 1450,
+            "width": 1200,
+            "height": 618
+          },
+          {
+            "id": "722:1655",
+            "name": "04 · Panel Header",
+            "x": 200,
+            "y": 2228,
+            "width": 1200,
+            "height": 266
+          },
+          {
+            "id": "722:1669",
+            "name": "05 · Session Row",
+            "x": 200,
+            "y": 2654,
+            "width": 1200,
+            "height": 378
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": []
+        }
+      },
+      "contrast": {
+        "pageId": "717:1576",
+        "name": "components · navigation",
+        "tested": 68,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    },
+    {
+      "structure": {
+        "pageId": "717:1577",
+        "name": "components · workbench",
+        "nodes": 346,
+        "texts": 174,
+        "instances": 40,
+        "roots": [
+          {
+            "id": "725:1574",
+            "name": "01 · Context Row",
+            "x": 200,
+            "y": 200,
+            "width": 1200,
+            "height": 618
+          },
+          {
+            "id": "725:1611",
+            "name": "02 · Artifact Card",
+            "x": 200,
+            "y": 978,
+            "width": 1200,
+            "height": 802
+          },
+          {
+            "id": "725:1671",
+            "name": "03 · Permission Card",
+            "x": 200,
+            "y": 1940,
+            "width": 1200,
+            "height": 986
+          },
+          {
+            "id": "725:1739",
+            "name": "04 · Run Status",
+            "x": 200,
+            "y": 3086,
+            "width": 1200,
+            "height": 968
+          },
+          {
+            "id": "725:1796",
+            "name": "05 · Validation",
+            "x": 200,
+            "y": 4214,
+            "width": 1200,
+            "height": 782
+          },
+          {
+            "id": "725:1844",
+            "name": "06 · Composer",
+            "x": 200,
+            "y": 5156,
+            "width": 1200,
+            "height": 1394
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": [
+            {
+              "id": "725:1582",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 12,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1592",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 12,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1602",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 12,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1623",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1636",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1649",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1662",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1751",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1760",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1769",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1778",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1787",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            }
+          ]
+        }
+      },
+      "contrast": {
+        "pageId": "717:1577",
+        "name": "components · workbench",
+        "tested": 174,
+        "minRatio": 4.9923240032632155,
+        "failures": [],
+        "unknown": []
+      }
+    },
+    {
+      "structure": {
+        "pageId": "717:1578",
+        "name": "main",
+        "nodes": 1007,
+        "texts": 430,
+        "instances": 206,
+        "roots": [
+          {
+            "id": "733:1574",
+            "name": "Pioneer · v2 开发稿",
+            "x": 200,
+            "y": 200,
+            "width": 1440,
+            "height": 240
+          },
+          {
+            "id": "733:1578",
+            "name": "L · 工作区库",
+            "x": 200,
+            "y": 576,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "733:1703",
+            "name": "S · 本机会话",
+            "x": 200,
+            "y": 1792,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "740:1696",
+            "name": "D · 布局与上下文",
+            "x": 200,
+            "y": 3008,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "740:1889",
+            "name": "P · 设置与本机数据",
+            "x": 200,
+            "y": 4224,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "741:1858",
+            "name": "R · 未来权限与运行",
+            "x": 200,
+            "y": 5440,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "741:2042",
+            "name": "A · 未来审阅与交付",
+            "x": 200,
+            "y": 6656,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "760:2051",
+            "name": "D · 交付空态 · 本机能力边界",
+            "x": 200,
+            "y": 7852,
+            "width": 3040,
+            "height": 1036
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [
+            {
+              "id": "733:1588",
+              "parent": "733:1584",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1616",
+              "parent": "733:1584",
+              "bounds": [1, 65, 1440, 802],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1630",
+              "parent": "733:1584",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1632",
+              "parent": "733:1587",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1659",
+              "parent": "733:1587",
+              "bounds": [1, 65, 1440, 802],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1701",
+              "parent": "733:1587",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1713",
+              "parent": "733:1709",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1741",
+              "parent": "733:1709",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1752",
+              "parent": "733:1709",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1767",
+              "parent": "733:1709",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1769",
+              "parent": "733:1712",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1796",
+              "parent": "733:1712",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1807",
+              "parent": "733:1712",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1824",
+              "parent": "733:1712",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1706",
+              "parent": "740:1702",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1733",
+              "parent": "740:1702",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1744",
+              "parent": "740:1702",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1746",
+              "parent": "740:1745",
+              "bounds": [1, 1, 844, 48],
+              "parentSize": [844, 682]
+            },
+            {
+              "id": "740:1753",
+              "parent": "740:1745",
+              "bounds": [1, 49, 844, 52],
+              "parentSize": [844, 682]
+            },
+            {
+              "id": "740:1758",
+              "parent": "740:1745",
+              "bounds": [1, 101, 844, 580],
+              "parentSize": [844, 682]
+            },
+            {
+              "id": "740:1767",
+              "parent": "740:1766",
+              "bounds": [1, 1, 524, 48],
+              "parentSize": [524, 682]
+            },
+            {
+              "id": "740:1772",
+              "parent": "740:1766",
+              "bounds": [1, 49, 524, 632],
+              "parentSize": [524, 682]
+            },
+            {
+              "id": "740:1785",
+              "parent": "740:1702",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1787",
+              "parent": "740:1705",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1814",
+              "parent": "740:1705",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1825",
+              "parent": "740:1705",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1827",
+              "parent": "740:1826",
+              "bounds": [1, 1, 824, 48],
+              "parentSize": [824, 682]
+            },
+            {
+              "id": "740:1832",
+              "parent": "740:1826",
+              "bounds": [1, 49, 824, 632],
+              "parentSize": [824, 682]
+            },
+            {
+              "id": "740:1848",
+              "parent": "740:1847",
+              "bounds": [1, 1, 544, 48],
+              "parentSize": [544, 682]
+            },
+            {
+              "id": "740:1853",
+              "parent": "740:1847",
+              "bounds": [1, 49, 544, 632],
+              "parentSize": [544, 682]
+            },
+            {
+              "id": "740:1887",
+              "parent": "740:1705",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1899",
+              "parent": "740:1895",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1926",
+              "parent": "740:1895",
+              "bounds": [1, 65, 1440, 802],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1954",
+              "parent": "740:1895",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1956",
+              "parent": "740:1898",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1983",
+              "parent": "740:1898",
+              "bounds": [1, 65, 1440, 802],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:2014",
+              "parent": "740:1898",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1868",
+              "parent": "741:1864",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1895",
+              "parent": "741:1864",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1906",
+              "parent": "741:1864",
+              "bounds": [1, 137, 1440, 46],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1908",
+              "parent": "741:1864",
+              "bounds": [1, 183, 1440, 684],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1910",
+              "parent": "741:1909",
+              "bounds": [1, 1, 744, 48],
+              "parentSize": [744, 636]
+            },
+            {
+              "id": "741:1915",
+              "parent": "741:1909",
+              "bounds": [1, 49, 744, 586],
+              "parentSize": [744, 636]
+            },
+            {
+              "id": "741:1928",
+              "parent": "741:1927",
+              "bounds": [1, 1, 624, 48],
+              "parentSize": [624, 636]
+            },
+            {
+              "id": "741:1933",
+              "parent": "741:1927",
+              "bounds": [1, 49, 624, 586],
+              "parentSize": [624, 636]
+            },
+            {
+              "id": "741:1955",
+              "parent": "741:1864",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1957",
+              "parent": "741:1867",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1984",
+              "parent": "741:1867",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1995",
+              "parent": "741:1867",
+              "bounds": [1, 137, 1440, 46],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1997",
+              "parent": "741:1867",
+              "bounds": [1, 183, 1440, 684],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1999",
+              "parent": "741:1998",
+              "bounds": [1, 1, 744, 48],
+              "parentSize": [744, 636]
+            },
+            {
+              "id": "741:2004",
+              "parent": "741:1998",
+              "bounds": [1, 49, 744, 586],
+              "parentSize": [744, 636]
+            },
+            {
+              "id": "741:2023",
+              "parent": "741:2022",
+              "bounds": [1, 1, 624, 48],
+              "parentSize": [624, 636]
+            },
+            {
+              "id": "741:2028",
+              "parent": "741:2022",
+              "bounds": [1, 49, 624, 586],
+              "parentSize": [624, 636]
+            },
+            {
+              "id": "741:2040",
+              "parent": "741:1867",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2052",
+              "parent": "741:2048",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2079",
+              "parent": "741:2048",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2090",
+              "parent": "741:2048",
+              "bounds": [1, 137, 1440, 46],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2092",
+              "parent": "741:2048",
+              "bounds": [1, 183, 1440, 684],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2094",
+              "parent": "741:2093",
+              "bounds": [1, 1, 844, 48],
+              "parentSize": [844, 636]
+            },
+            {
+              "id": "741:2099",
+              "parent": "741:2093",
+              "bounds": [1, 49, 844, 586],
+              "parentSize": [844, 636]
+            },
+            {
+              "id": "741:2122",
+              "parent": "741:2121",
+              "bounds": [1, 1, 524, 48],
+              "parentSize": [524, 636]
+            },
+            {
+              "id": "741:2127",
+              "parent": "741:2121",
+              "bounds": [1, 49, 524, 586],
+              "parentSize": [524, 636]
+            },
+            {
+              "id": "741:2145",
+              "parent": "741:2048",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2147",
+              "parent": "741:2051",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2174",
+              "parent": "741:2051",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2185",
+              "parent": "741:2051",
+              "bounds": [1, 137, 1440, 46],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2187",
+              "parent": "741:2051",
+              "bounds": [1, 183, 1440, 684],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2189",
+              "parent": "741:2188",
+              "bounds": [1, 1, 844, 48],
+              "parentSize": [844, 636]
+            },
+            {
+              "id": "741:2194",
+              "parent": "741:2188",
+              "bounds": [1, 49, 844, 586],
+              "parentSize": [844, 636]
+            },
+            {
+              "id": "741:2216",
+              "parent": "741:2215",
+              "bounds": [1, 1, 524, 48],
+              "parentSize": [524, 636]
+            },
+            {
+              "id": "741:2221",
+              "parent": "741:2215",
+              "bounds": [1, 49, 524, 586],
+              "parentSize": [524, 636]
+            },
+            {
+              "id": "741:2237",
+              "parent": "741:2051",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "760:2058",
+              "parent": "760:2057",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "760:2085",
+              "parent": "760:2057",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "760:2096",
+              "parent": "760:2057",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "760:2098",
+              "parent": "760:2097",
+              "bounds": [1, 1, 840, 48],
+              "parentSize": [840, 682]
+            },
+            {
+              "id": "760:2103",
+              "parent": "760:2097",
+              "bounds": [1, 49, 840, 632],
+              "parentSize": [840, 682]
+            },
+            {
+              "id": "760:2119",
+              "parent": "760:2118",
+              "bounds": [1, 1, 528, 48],
+              "parentSize": [528, 682]
+            },
+            {
+              "id": "760:2124",
+              "parent": "760:2118",
+              "bounds": [1, 49, 528, 632],
+              "parentSize": [528, 682]
+            },
+            {
+              "id": "760:2137",
+              "parent": "760:2057",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            }
+          ],
+          "cjkCodeFallbacks": [
+            {
+              "id": "I740:1856;725:1582",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 12,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I740:1871;725:1592",
+              "start": 5,
+              "end": 9,
+              "text": "项目说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 5,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I741:2007;725:1778",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "741:2100",
+              "start": 18,
+              "end": 22,
+              "text": "示例基线",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 14,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 22
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 18,
+                "textStyleId": "S:c2b51bf8345deeaf843453037b01769be1b43769,"
+              }
+            },
+            {
+              "id": "741:2100",
+              "start": 28,
+              "end": 30,
+              "text": "提案",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 14,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 22
+              },
+              "adjacentCodePeer": {
+                "start": 22,
+                "end": 28,
+                "textStyleId": "S:c2b51bf8345deeaf843453037b01769be1b43769,"
+              }
+            }
+          ]
+        }
+      },
+      "contrast": {
+        "pageId": "717:1578",
+        "name": "main",
+        "tested": 430,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    },
+    {
+      "structure": {
+        "pageId": "743:1574",
+        "name": "states · v2",
+        "nodes": 1328,
+        "texts": 631,
+        "instances": 208,
+        "roots": [
+          {
+            "id": "746:1574",
+            "name": "L · 工作区库 · 扫描与恢复",
+            "x": 200,
+            "y": 200,
+            "width": 1664,
+            "height": 1708
+          },
+          {
+            "id": "746:1719",
+            "name": "S · 本机会话 · 保存、关闭与恢复",
+            "x": 2024,
+            "y": 200,
+            "width": 1664,
+            "height": 1448
+          },
+          {
+            "id": "746:1864",
+            "name": "D · 布局与上下文 · 可撤销、可键盘操作",
+            "x": 3848,
+            "y": 200,
+            "width": 1664,
+            "height": 1366
+          },
+          {
+            "id": "755:1809",
+            "name": "P · 设置与本机数据 · 受控恢复",
+            "x": 200,
+            "y": 2068,
+            "width": 1664,
+            "height": 1820
+          },
+          {
+            "id": "755:2000",
+            "name": "R · 意图、授权与运行 · 不混淆确认层级",
+            "x": 2024,
+            "y": 2068,
+            "width": 1664,
+            "height": 2420
+          },
+          {
+            "id": "756:2006",
+            "name": "A · 审阅与交付 · 同版本与真实来源",
+            "x": 3848,
+            "y": 2068,
+            "width": 1664,
+            "height": 2512
+          },
+          {
+            "id": "762:2143",
+            "name": "E · 决策结果与交互补充",
+            "x": 200,
+            "y": 4740,
+            "width": 1664,
+            "height": 1480
+          },
+          {
+            "id": "765:2197",
+            "name": "I · 列表、局部视图与输入保护",
+            "x": 2024,
+            "y": 4740,
+            "width": 1664,
+            "height": 1470
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": [
+            {
+              "id": "I746:2007;725:1592",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 12,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I746:2022;725:1602",
+              "start": 13,
+              "end": 16,
+              "text": "旧提案",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 13,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I755:2149;725:1751",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I755:2167;725:1760",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I755:2186;725:1769",
+              "start": 0,
+              "end": 4,
+              "text": "已确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 4,
+                "end": 48,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I755:2204;725:1778",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I755:2223;725:1787",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I756:2057;725:1662",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I756:2097;725:1636",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I756:2115;725:1649",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "I756:2141;725:1623",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            }
+          ]
+        }
+      },
+      "contrast": {
+        "pageId": "743:1574",
+        "name": "states · v2",
+        "tested": 631,
+        "minRatio": 4.690847986393435,
+        "failures": [],
+        "unknown": []
+      }
+    },
+    {
+      "structure": {
+        "pageId": "757:1574",
+        "name": "responsive · v2",
+        "nodes": 467,
+        "texts": 197,
+        "instances": 95,
+        "roots": [
+          {
+            "id": "758:1574",
+            "name": "V · 宽度与分栏",
+            "x": 200,
+            "y": 200,
+            "width": 2340,
+            "height": 922
+          },
+          {
+            "id": "758:1715",
+            "name": "V · 最窄与短窗口",
+            "x": 200,
+            "y": 1320,
+            "width": 2080,
+            "height": 864
+          },
+          {
+            "id": "758:1830",
+            "name": "V · 759 / 760 临界",
+            "x": 200,
+            "y": 2410,
+            "width": 1679,
+            "height": 842
+          },
+          {
+            "id": "761:1761",
+            "name": "V · 审批优先与草稿保留",
+            "x": 200,
+            "y": 3412,
+            "width": 2080,
+            "height": 864
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [
+            {
+              "id": "758:1580",
+              "parent": "758:1579",
+              "bounds": [1, 1, 1280, 64],
+              "parentSize": [1280, 800]
+            },
+            {
+              "id": "758:1609",
+              "parent": "758:1579",
+              "bounds": [1, 65, 1280, 72],
+              "parentSize": [1280, 800]
+            },
+            {
+              "id": "758:1620",
+              "parent": "758:1579",
+              "bounds": [1, 137, 1280, 630],
+              "parentSize": [1280, 800]
+            },
+            {
+              "id": "758:1622",
+              "parent": "758:1621",
+              "bounds": [1, 1, 724, 48],
+              "parentSize": [724, 598]
+            },
+            {
+              "id": "758:1629",
+              "parent": "758:1621",
+              "bounds": [1, 49, 724, 548],
+              "parentSize": [724, 598]
+            },
+            {
+              "id": "758:1643",
+              "parent": "758:1642",
+              "bounds": [1, 1, 500, 48],
+              "parentSize": [500, 598]
+            },
+            {
+              "id": "758:1648",
+              "parent": "758:1642",
+              "bounds": [1, 49, 500, 548],
+              "parentSize": [500, 598]
+            },
+            {
+              "id": "758:1663",
+              "parent": "758:1579",
+              "bounds": [1, 767, 1280, 32],
+              "parentSize": [1280, 800]
+            },
+            {
+              "id": "758:1669",
+              "parent": "758:1668",
+              "bounds": [1, 1, 900, 64],
+              "parentSize": [900, 700]
+            },
+            {
+              "id": "758:1689",
+              "parent": "758:1668",
+              "bounds": [1, 65, 900, 72],
+              "parentSize": [900, 700]
+            },
+            {
+              "id": "758:1699",
+              "parent": "758:1668",
+              "bounds": [1, 137, 900, 530],
+              "parentSize": [900, 700]
+            },
+            {
+              "id": "758:1712",
+              "parent": "758:1668",
+              "bounds": [1, 667, 900, 32],
+              "parentSize": [900, 700]
+            },
+            {
+              "id": "758:1721",
+              "parent": "758:1720",
+              "bounds": [1, 1, 640, 64],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "758:1741",
+              "parent": "758:1720",
+              "bounds": [1, 65, 640, 72],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "758:1751",
+              "parent": "758:1720",
+              "bounds": [1, 137, 640, 550],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "758:1764",
+              "parent": "758:1720",
+              "bounds": [1, 687, 640, 32],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "758:1770",
+              "parent": "758:1769",
+              "bounds": [1, 1, 1280, 64],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "758:1797",
+              "parent": "758:1769",
+              "bounds": [1, 65, 1280, 72],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "758:1807",
+              "parent": "758:1769",
+              "bounds": [1, 137, 1280, 390],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "758:1827",
+              "parent": "758:1769",
+              "bounds": [1, 527, 1280, 32],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "758:1836",
+              "parent": "758:1835",
+              "bounds": [1, 1, 759, 64],
+              "parentSize": [759, 720]
+            },
+            {
+              "id": "758:1856",
+              "parent": "758:1835",
+              "bounds": [1, 65, 759, 72],
+              "parentSize": [759, 720]
+            },
+            {
+              "id": "758:1866",
+              "parent": "758:1835",
+              "bounds": [1, 137, 759, 550],
+              "parentSize": [759, 720]
+            },
+            {
+              "id": "758:1881",
+              "parent": "758:1835",
+              "bounds": [1, 687, 759, 32],
+              "parentSize": [759, 720]
+            },
+            {
+              "id": "758:1887",
+              "parent": "758:1886",
+              "bounds": [1, 1, 760, 64],
+              "parentSize": [760, 720]
+            },
+            {
+              "id": "758:1907",
+              "parent": "758:1886",
+              "bounds": [1, 65, 760, 72],
+              "parentSize": [760, 720]
+            },
+            {
+              "id": "758:1917",
+              "parent": "758:1886",
+              "bounds": [1, 137, 760, 550],
+              "parentSize": [760, 720]
+            },
+            {
+              "id": "758:1930",
+              "parent": "758:1886",
+              "bounds": [1, 687, 760, 32],
+              "parentSize": [760, 720]
+            },
+            {
+              "id": "761:1767",
+              "parent": "761:1766",
+              "bounds": [1, 1, 640, 64],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1787",
+              "parent": "761:1766",
+              "bounds": [1, 65, 640, 72],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1797",
+              "parent": "761:1766",
+              "bounds": [1, 137, 640, 46],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1799",
+              "parent": "761:1766",
+              "bounds": [1, 183, 640, 504],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1821",
+              "parent": "761:1766",
+              "bounds": [1, 687, 640, 32],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1827",
+              "parent": "761:1826",
+              "bounds": [1, 1, 1280, 64],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "761:1854",
+              "parent": "761:1826",
+              "bounds": [1, 65, 1280, 72],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "761:1864",
+              "parent": "761:1826",
+              "bounds": [1, 137, 1280, 46],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "761:1866",
+              "parent": "761:1826",
+              "bounds": [1, 183, 1280, 344],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "761:1882",
+              "parent": "761:1826",
+              "bounds": [1, 527, 1280, 32],
+              "parentSize": [1280, 560]
+            }
+          ],
+          "cjkCodeFallbacks": []
+        }
+      },
+      "contrast": {
+        "pageId": "757:1574",
+        "name": "responsive · v2",
+        "tested": 197,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    }
+  ],
+  "totals": {
+    "pages": 7,
+    "textNodes": 1697,
+    "insideStrokeBoundaryOffsets": 119,
+    "cjkCodeFallbackSpans": 28,
+    "blockingStructureIssues": 0,
+    "textContrastFailures": 0,
+    "unknownBackgrounds": 0
+  }
+}

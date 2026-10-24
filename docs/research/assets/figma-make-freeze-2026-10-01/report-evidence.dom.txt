@@ -1,0 +1,169 @@
+- application "Pioneer（原型）":
+  - group "窗口控制":
+    - button "关闭窗口（应用继续在托盘运行，不会退出）":
+      - generic: ×
+    - button "最小化":
+      - generic: −
+    - button "全屏 (F11) · 最大化请双击标题栏":
+      - generic: ↗
+  - tablist "会话标签":
+    - tab "工作区":
+      - text: 工作区
+    - tab "v1 待审阅 流式发票导出 关闭标签 流式发票导出（不删除会话、不停止任务）":
+      - generic "v1 待审阅"
+      - generic: 流式发票导出
+      - button "关闭标签 流式发票导出（不删除会话、不停止任务）":
+    - tab "v1 待审阅 瓦片缓存清理 关闭标签 瓦片缓存清理（不删除会话、不停止任务）":
+      - generic "v1 待审阅"
+      - generic: 瓦片缓存清理
+      - button "关闭标签 瓦片缓存清理（不删除会话、不停止任务）":
+    - tab "已交付 9 月对账差异报表 关闭标签 9 月对账差异报表（不删除会话、不停止任务）" [selected]:
+      - generic "已交付"
+      - generic: 9 月对账差异报表
+      - button "关闭标签 9 月对账差异报表（不删除会话、不停止任务）":
+    - button "新会话":
+  - button "命令 Ctrl K":
+    - text: 命令
+    - generic: Ctrl K
+  - button "桌宠开关" [pressed]
+  - button "设置":
+  - button "设计说明":
+  - banner:
+    - button "9 月对账差异报表":
+      - generic: 9 月对账差异报表
+    - generic "D:\\work\\billing-service"
+    - generic: 已交付
+    - button "面板 5":
+      - text: 面板 5
+  - region "面板组：对话":
+    - tablist "面板标签":
+      - tab "对话" [selected]:
+        - text: 对话
+      - button "关闭对话面板（会话保留）":
+    - button "面板操作：拆分、移动、合并、关闭":
+    - generic: 生成 9 月对账差异报表，按渠道汇总。
+    - text: 运行命令 · 已允许一次
+    - heading "执行 · 第 1 次" [level=3]
+    - generic: 4/4
+    - button "日志":
+      - text: 日志
+    - list:
+      - button "读取 9 月账单与到账流水 只读 · 2 张表":
+        - generic: 读取 9 月账单与到账流水
+        - generic: 只读 · 2 张表
+      - button "按渠道对齐并计算差异 第 0 轮":
+        - generic: 按渠道对齐并计算差异
+        - generic: 第 0 轮
+      - button "运行 pnpm report recon 本机终端 · 只读":
+        - generic: 运行 pnpm report recon
+        - generic: 本机终端 · 只读
+      - button "核对合计与总账":
+        - generic: 核对合计与总账
+    - paragraph: 报表已生成：6 个渠道差异合计 ¥ 18,406.20，与总账一致。253 条未匹配记录单列在第 3 页。
+    - generic: 9 月 30 日 18:12 交付 v1 · 报表与验收记录保存在本机（模拟）
+    - region "本轮结果":
+      - heading "报表 · v1" [level=3]
+      - generic: v1 已交付 · 4/4 项验收有记录
+      - list "结果进度":
+        - generic: "01"
+        - text: 报表已生成
+        - generic: "02"
+        - text: 验收通过
+        - generic: "03"
+        - text: 已交付
+      - list:
+        - button "9 月对账差异报表.xlsx 表格 · 3 页 · 86 KB 预览":
+          - generic: 9 月对账差异报表.xlsx
+          - generic: 表格 · 3 页 · 86 KB
+          - generic: 预览
+        - button "对账口径说明.md Markdown · 1.2 KB 预览":
+          - generic: 对账口径说明.md
+          - generic: Markdown · 1.2 KB
+          - generic: 预览
+      - button "验收记录与证据" [pressed]:
+        - text: 验收记录与证据
+      - button "执行日志":
+        - text: 执行日志
+    - textbox "输入消息":
+      - /placeholder: 继续提要求…
+    - button "权限：写入前询问":
+      - text: 写入前询问
+    - button "2 项上下文":
+      - text: 2 项上下文
+    - button "模型：Claude Opus 5.5":
+      - text: Claude Opus 5.5
+    - button "发送" [disabled]:
+  - separator "拖动或用方向键调整面板大小，双击或 Enter 等分"
+  - region "面板组：上下文、产物预览、验收与交付、执行日志":
+    - tablist "面板标签":
+      - tab "上下文":
+        - text: 上下文
+      - button "关闭上下文面板（任务不受影响）":
+      - tab "产物预览":
+        - text: 产物预览
+      - button "关闭产物预览面板（任务不受影响）":
+      - tab "验收与交付" [selected]:
+        - text: 验收与交付
+      - button "关闭验收与交付面板（任务不受影响）":
+      - tab "执行日志":
+        - text: 执行日志
+      - button "关闭执行日志面板（任务不受影响）":
+    - button "面板操作：拆分、移动、合并、关闭":
+    - list "结果进度":
+      - generic: "01"
+      - text: 报表已生成
+      - generic: "02"
+      - text: 验收通过
+      - generic: "03"
+      - text: 已交付
+    - heading "验收标准" [level=3]
+    - generic: v1
+    - list:
+      - generic: 差异合计与总账一致
+      - generic: ¥ 18,406.20 = 总账差异
+      - button "收起证据" [expanded] [active]:
+        - text: 收起证据
+      - list:
+        - listitem: · 总账 2026-09 应收 − 实收 = ¥ 18,406.20
+        - listitem: · 报表合计行 = ¥ 18,406.20
+        - listitem: "· 来源：ledger_monthly (只读查询 #q-0930-1)"
+      - generic: 每个渠道都有差异明细
+      - generic: 6 / 6 渠道
+      - button "证据 2 条":
+        - text: 证据 2 条
+      - generic: 未匹配记录单独列出
+      - generic: 253 行 · 另附 sheet
+      - button "证据 2 条":
+        - text: 证据 2 条
+      - generic: 你确认口径可以发给财务
+      - generic: 9 月 30 日 18:10 由你确认
+      - button "证据 2 条":
+        - text: 证据 2 条
+    - generic: v1 已交付
+    - generic: 想继续改？在对话里提出新的要求，会开始新一轮。
+    - heading "产物 · 属于此任务 v1" [level=3]
+    - button "9 月对账差异报表.xlsx 表格 · 3 页 · 86 KB · 已交付 预览":
+      - generic: 9 月对账差异报表.xlsx
+      - generic: 表格 · 3 页 · 86 KB · 已交付
+      - generic: 预览
+    - button "对账口径说明.md Markdown · 1.2 KB · 已交付 预览":
+      - generic: 对账口径说明.md
+      - generic: Markdown · 1.2 KB · 已交付
+      - generic: 预览
+    - list "记录":
+      - generic: 9/30 19:31
+      - generic: 报表已生成 · 待验收
+      - generic: 9/30 19:37
+      - generic: 验收通过
+      - generic: 9/30 19:43
+      - generic: v1 已交付
+    - paragraph: 报表只保存在 Pioneer 产物库（模拟），不会写入数据库或磁盘。
+  - generic "桌宠图层（原型）":
+    - button "桌宠灰泽满：拖动移动，单击互动，双击收起，右键或回车打开菜单"
+  - text: 本机执行器 · 模拟
+  - generic "D:\\work\\billing-service"
+  - generic: 空闲
+  - generic: 已保存到本机
+  - generic: 原型 · 模拟
+  - button "快捷键":
+    - text: 快捷键

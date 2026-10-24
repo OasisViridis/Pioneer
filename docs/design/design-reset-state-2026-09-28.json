@@ -1,0 +1,417 @@
+{
+  "runId": "pioneer-design-reset-2026-09-28",
+  "objective": "以融合后的设计规范为准，重做全局的设计规范，如有不足你可以自由改进；并整理开发稿进行重置\nPS:现在电脑已修好，你需要复工后端时无需通知我授权",
+  "phase": "complete-static-design-delivery",
+  "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+  "baseline": {
+    "pages": [
+      {
+        "id": "132:2",
+        "name": "main",
+        "roots": 30
+      },
+      {
+        "id": "257:725",
+        "name": "archive"
+      },
+      {
+        "id": "299:725",
+        "name": "workbench",
+        "roots": 47
+      }
+    ],
+    "legacyCollectionsUntouched": true
+  },
+  "scope": {
+    "codeChanges": false,
+    "publication": false,
+    "deleteLegacy": false,
+    "theme": "Light",
+    "components": [
+      "Button",
+      "Field",
+      "Session Tab",
+      "Local Tab",
+      "Status",
+      "Workspace Poster",
+      "Panel Header",
+      "Context Row",
+      "Session Row",
+      "Artifact Card",
+      "Permission Card",
+      "Run Status",
+      "Validation",
+      "Composer"
+    ],
+    "screens": "workspace/session/docking/settings and explicit future permission/run/review/delivery flows plus state and responsive matrices"
+  },
+  "completed": [
+    "P0.a",
+    "P0.b",
+    "P0.c",
+    "P0.d",
+    "P0.e",
+    "P0.f",
+    "P1.a",
+    "P1.b",
+    "P1.c",
+    "P1.d",
+    "P1.e",
+    "P1.f",
+    "P1.g",
+    "P1.h",
+    "P2.a",
+    "P2.b",
+    "P2.c",
+    "P3.b",
+    "P3.c",
+    "P3.d",
+    "P3.e",
+    "P3.f",
+    "P3.g",
+    "P3.a",
+    "P3.h",
+    "P4.a",
+    "P4.b",
+    "P4.c",
+    "P4.e",
+    "P4.d"
+  ],
+  "pending": [],
+  "updated": "2026-09-30",
+  "pages": {
+    "design-system": "717:1574",
+    "components · controls": "717:1575",
+    "components · navigation": "717:1576",
+    "components · workbench": "717:1577",
+    "states · v2": "743:1574",
+    "responsive · v2": "757:1574",
+    "main": "717:1578"
+  },
+  "components": {
+    "families": 14,
+    "variants": 78,
+    "internalCloseVariants": 3,
+    "map": "design-reset-component-map-2026-09-29.json",
+    "audit": "design-reset-component-audit-2026-09-29.json",
+    "bindingAudit": "design-reset-component-bindings-2026-09-29.json",
+    "laterFixes": [
+      "design-reset-nav-width-fix-2026-09-29.json",
+      "design-reset-workbench-paint-fix-2026-09-29.json",
+      "design-reset-status-binding-fix-2026-09-29.json"
+    ]
+  },
+  "screens": [
+    {
+      "screenId": "L00",
+      "nodeId": "733:1584",
+      "stage": "M2-local-design",
+      "screenshot": true,
+      "overflowCheck": true
+    },
+    {
+      "screenId": "L01",
+      "nodeId": "733:1587",
+      "stage": "M2-local-design",
+      "screenshot": true,
+      "overflowCheck": true
+    },
+    {
+      "screenId": "S01",
+      "nodeId": "733:1709",
+      "stage": "M2-local-design",
+      "screenshot": true,
+      "overflowCheck": true
+    },
+    {
+      "screenId": "S02",
+      "nodeId": "733:1712",
+      "stage": "M2-local-design",
+      "screenshot": true,
+      "overflowCheck": true
+    },
+    {
+      "screenId": "D01",
+      "nodeId": "740:1702",
+      "stage": "local-and-future-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-docking-settings-2026-09-29.json",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "D02",
+      "nodeId": "740:1705",
+      "stage": "local-and-future-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-docking-settings-2026-09-29.json",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "P01",
+      "nodeId": "740:1895",
+      "stage": "local-and-future-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-docking-settings-2026-09-29.json",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "P02",
+      "nodeId": "740:1898",
+      "stage": "local-and-future-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-docking-settings-2026-09-29.json",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "R01",
+      "nodeId": "741:1864",
+      "stage": "M3-M4-future-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-future-screens-2026-09-29.json",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "R02",
+      "nodeId": "741:1867",
+      "stage": "M3-M4-future-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-future-screens-2026-09-29.json",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "A01",
+      "nodeId": "741:2048",
+      "stage": "M3-M4-future-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-future-screens-2026-09-29.json",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "A02",
+      "nodeId": "741:2051",
+      "stage": "M3-M4-future-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-future-screens-2026-09-29.json",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "D12",
+      "nodeId": "760:2057",
+      "stage": "M2-local-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-main-final-fix-2026-09-29.json",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "V01",
+      "nodeId": "758:1579",
+      "stage": "responsive-design-only",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-responsive-2026-09-29.json",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "screenId": "V02",
+      "nodeId": "758:1668",
+      "stage": "responsive-design-only",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-responsive-2026-09-29.json",
+      "width": 900,
+      "height": 700
+    },
+    {
+      "screenId": "V03",
+      "nodeId": "758:1720",
+      "stage": "responsive-design-only",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-responsive-2026-09-29.json",
+      "width": 640,
+      "height": 720
+    },
+    {
+      "screenId": "V04",
+      "nodeId": "758:1769",
+      "stage": "responsive-design-only",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-responsive-2026-09-29.json",
+      "width": 1280,
+      "height": 560
+    },
+    {
+      "screenId": "V05",
+      "nodeId": "758:1835",
+      "stage": "responsive-design-only",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-responsive-2026-09-29.json",
+      "width": 759,
+      "height": 720
+    },
+    {
+      "screenId": "V06",
+      "nodeId": "758:1886",
+      "stage": "responsive-design-only",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-responsive-2026-09-29.json",
+      "width": 760,
+      "height": 720
+    },
+    {
+      "screenId": "V07",
+      "nodeId": "761:1766",
+      "wrapperId": "761:1764",
+      "width": 640,
+      "height": 720,
+      "potentialOverflows": [],
+      "stage": "M3-M4-future-responsive-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-responsive-approval-2026-09-29.json"
+    },
+    {
+      "screenId": "V08",
+      "nodeId": "761:1826",
+      "wrapperId": "761:1824",
+      "width": 1280,
+      "height": 560,
+      "potentialOverflows": [],
+      "stage": "M3-M4-future-responsive-design",
+      "screenshot": true,
+      "overflowCheck": true,
+      "evidence": "design-reset-responsive-approval-2026-09-29.json"
+    }
+  ],
+  "legacyCutover": true,
+  "stateBoards": [
+    {
+      "id": "746:1574",
+      "name": "L · 工作区库 · 扫描与恢复",
+      "x": 200,
+      "y": 200,
+      "width": 1664,
+      "height": 1708
+    },
+    {
+      "id": "746:1719",
+      "name": "S · 本机会话 · 保存、关闭与恢复",
+      "x": 2024,
+      "y": 200,
+      "width": 1664,
+      "height": 1448
+    },
+    {
+      "id": "746:1864",
+      "name": "D · 布局与上下文 · 可撤销、可键盘操作",
+      "x": 3848,
+      "y": 200,
+      "width": 1664,
+      "height": 1366
+    },
+    {
+      "id": "755:1809",
+      "name": "P · 设置与本机数据 · 受控恢复",
+      "x": 200,
+      "y": 2068,
+      "width": 1664,
+      "height": 1820
+    },
+    {
+      "id": "755:2000",
+      "name": "R · 意图、授权与运行 · 不混淆确认层级",
+      "x": 2024,
+      "y": 2068,
+      "width": 1664,
+      "height": 2420
+    },
+    {
+      "id": "756:2006",
+      "name": "A · 审阅与交付 · 同版本与真实来源",
+      "x": 3848,
+      "y": 2068,
+      "width": 1664,
+      "height": 2512
+    },
+    {
+      "id": "762:2143",
+      "name": "E · 决策结果与交互补充",
+      "x": 200,
+      "y": 4740,
+      "width": 1664,
+      "height": 1480
+    },
+    {
+      "id": "765:2197",
+      "name": "I · 列表、局部视图与输入保护",
+      "x": 2024,
+      "y": 4740,
+      "width": 1664,
+      "height": 1470
+    }
+  ],
+  "stateCompositionCount": 81,
+  "statesEvidence": [
+    "design-reset-states-local-2026-09-29.json",
+    "design-reset-states-local-fix-2026-09-29.json",
+    "design-reset-states-permission-data-2026-09-29.json",
+    "design-reset-states-artifacts-2026-09-29.json",
+    "design-reset-states-outcomes-2026-09-29.json",
+    "design-reset-states-interaction-2026-09-29.json"
+  ],
+  "qa": {
+    "tokenVerification": "design-reset-token-verification-2026-09-29.json",
+    "structureAndTextContrast": "design-reset-final-qa-2026-09-30.json",
+    "textNodes": 1697,
+    "runtimeAccessibility": false,
+    "latestTitleFix": {
+      "nodeIds": ["755:1937", "755:1938"],
+      "text": "P11 · 清空失败",
+      "screenshot": true
+    },
+    "completionAudit": "design-reset-completion-audit-2026-09-30.json",
+    "localChecks": "design-reset-local-checks-2026-09-30.json",
+    "documentReview": "design-reset-document-review-2026-09-30.json",
+    "documentedExceptions": {
+      "insideStrokeBoundaryOffsets": 119,
+      "cjkCodeFallbackSpans": 28
+    }
+  },
+  "cutoverEvidence": "design-reset-cutover-2026-09-29.json",
+  "legacyPreservationEvidence": "design-reset-legacy-after-2026-09-29.json",
+  "prototype": {
+    "pageId": "717:1578",
+    "starts": 0,
+    "reactionNodes": 0,
+    "p12": "PLANNED;build-v2-flows-before-click-audit"
+  },
+  "backendResumeAuthorization": {
+    "date": "2026-09-30",
+    "source": "direct user goal update",
+    "localBackendAsNeeded": true,
+    "repeatedResumeApprovalRequired": false,
+    "publicationDestructiveProviderOrTransferAuthorized": false
+  }
+}

@@ -1,0 +1,842 @@
+{
+  "pageId": "717:1576",
+  "createdNodeIds": [
+    "722:1574",
+    "722:1575",
+    "722:1576",
+    "722:1580",
+    "722:1577",
+    "722:1581",
+    "722:1578",
+    "722:1582",
+    "722:1579",
+    "722:1583",
+    "722:1584",
+    "722:1585",
+    "722:1586",
+    "722:1591",
+    "722:1587",
+    "722:1592",
+    "722:1593",
+    "722:1594",
+    "722:1595",
+    "I722:1595;722:1581",
+    "722:1588",
+    "722:1597",
+    "722:1598",
+    "722:1599",
+    "722:1600",
+    "I722:1600;722:1581",
+    "722:1589",
+    "722:1602",
+    "722:1603",
+    "722:1604",
+    "722:1605",
+    "I722:1605;722:1581",
+    "722:1590",
+    "722:1607",
+    "722:1608",
+    "722:1609",
+    "722:1610",
+    "I722:1610;722:1581",
+    "722:1612",
+    "722:1613",
+    "722:1614",
+    "722:1619",
+    "722:1615",
+    "722:1620",
+    "722:1616",
+    "722:1621",
+    "722:1617",
+    "722:1622",
+    "722:1618",
+    "722:1623",
+    "722:1624",
+    "722:1625",
+    "722:1626",
+    "722:1630",
+    "722:1627",
+    "722:1631",
+    "722:1632",
+    "722:1633",
+    "722:1634",
+    "722:1635",
+    "722:1636",
+    "722:1637",
+    "722:1638",
+    "722:1628",
+    "722:1639",
+    "722:1640",
+    "722:1641",
+    "722:1642",
+    "722:1643",
+    "722:1644",
+    "722:1645",
+    "722:1646",
+    "722:1629",
+    "722:1647",
+    "722:1648",
+    "722:1649",
+    "722:1650",
+    "722:1651",
+    "722:1652",
+    "722:1653",
+    "722:1654",
+    "722:1655",
+    "722:1656",
+    "722:1657",
+    "722:1660",
+    "722:1658",
+    "722:1661",
+    "722:1662",
+    "I722:1662;720:1635",
+    "I722:1662;720:1636",
+    "722:1659",
+    "722:1665",
+    "722:1666",
+    "I722:1666;720:1635",
+    "I722:1666;720:1636",
+    "722:1669",
+    "722:1670",
+    "722:1671",
+    "722:1675",
+    "722:1672",
+    "722:1676",
+    "722:1677",
+    "722:1678",
+    "722:1679",
+    "722:1673",
+    "722:1680",
+    "722:1681",
+    "722:1682",
+    "722:1683",
+    "722:1674",
+    "722:1684",
+    "722:1685",
+    "722:1686",
+    "722:1687"
+  ],
+  "sets": [
+    {
+      "id": "722:1591",
+      "name": "Pioneer v2 / Session Tab",
+      "variants": [
+        {
+          "id": "722:1587",
+          "name": "State=Active",
+          "width": 246,
+          "height": 48,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1593",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "722:1594",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "I722:1595;722:1581",
+              "size": 20,
+              "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+            }
+          ]
+        },
+        {
+          "id": "722:1588",
+          "name": "State=Inactive",
+          "width": 244,
+          "height": 48,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "722:1598",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "722:1599",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "I722:1600;722:1581",
+              "size": 20,
+              "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+            }
+          ]
+        },
+        {
+          "id": "722:1589",
+          "name": "State=Hover",
+          "width": 244,
+          "height": 48,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1615"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1603",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "722:1604",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "I722:1605;722:1581",
+              "size": 20,
+              "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+            }
+          ]
+        },
+        {
+          "id": "722:1590",
+          "name": "State=Focus",
+          "width": 248,
+          "height": 48,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1608",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "722:1609",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "I722:1610;722:1581",
+              "size": 20,
+              "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "Title#722:0": {
+          "type": "TEXT",
+          "defaultValue": "整理毕业项目"
+        },
+        "Workspace#722:5": {
+          "type": "TEXT",
+          "defaultValue": "Pioneer · 本机记录"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": [
+            "Active",
+            "Inactive",
+            "Hover",
+            "Focus"
+          ]
+        }
+      }
+    },
+    {
+      "id": "722:1619",
+      "name": "Pioneer v2 / Local Tab",
+      "variants": [
+        {
+          "id": "722:1615",
+          "name": "State=Active",
+          "width": 44,
+          "height": 36,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1615"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1620",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "722:1616",
+          "name": "State=Inactive",
+          "width": 44,
+          "height": 36,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "722:1621",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "722:1617",
+          "name": "State=Focus",
+          "width": 48,
+          "height": 36,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "722:1622",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "722:1618",
+          "name": "State=Disabled",
+          "width": 44,
+          "height": 36,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "722:1623",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "Label#722:10": {
+          "type": "TEXT",
+          "defaultValue": "预览"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": [
+            "Active",
+            "Inactive",
+            "Focus",
+            "Disabled"
+          ]
+        }
+      }
+    },
+    {
+      "id": "722:1630",
+      "name": "Pioneer v2 / Workspace Poster",
+      "variants": [
+        {
+          "id": "722:1627",
+          "name": "State=Ready",
+          "width": 248,
+          "height": 400,
+          "autoLayout": "VERTICAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1632",
+              "size": 24,
+              "style": "S:257c6c917d8fa2dde989032051b51b26f3c9a197,"
+            },
+            {
+              "id": "722:1633",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "722:1634",
+              "size": 20,
+              "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+            },
+            {
+              "id": "722:1635",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "722:1636",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "722:1637",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "722:1638",
+              "size": 12,
+              "style": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+            }
+          ]
+        },
+        {
+          "id": "722:1628",
+          "name": "State=Stale",
+          "width": 248,
+          "height": 400,
+          "autoLayout": "VERTICAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1640",
+              "size": 24,
+              "style": "S:257c6c917d8fa2dde989032051b51b26f3c9a197,"
+            },
+            {
+              "id": "722:1641",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "722:1642",
+              "size": 20,
+              "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+            },
+            {
+              "id": "722:1643",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "722:1644",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "722:1645",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "722:1646",
+              "size": 12,
+              "style": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+            }
+          ]
+        },
+        {
+          "id": "722:1629",
+          "name": "State=Unavailable",
+          "width": 248,
+          "height": 400,
+          "autoLayout": "VERTICAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1648",
+              "size": 24,
+              "style": "S:257c6c917d8fa2dde989032051b51b26f3c9a197,"
+            },
+            {
+              "id": "722:1649",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "722:1650",
+              "size": 20,
+              "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+            },
+            {
+              "id": "722:1651",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "722:1652",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "722:1653",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "722:1654",
+              "size": 12,
+              "style": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "Identifier#722:15": {
+          "type": "TEXT",
+          "defaultValue": "P"
+        },
+        "Title#722:19": {
+          "type": "TEXT",
+          "defaultValue": "Pioneer"
+        },
+        "Summary#722:23": {
+          "type": "TEXT",
+          "defaultValue": "模块化 Agent 交互系统"
+        },
+        "Timestamp#722:27": {
+          "type": "TEXT",
+          "defaultValue": "上次扫描：09:28"
+        },
+        "Path#722:31": {
+          "type": "TEXT",
+          "defaultValue": "D:/Project/Pioneer"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Ready",
+          "variantOptions": [
+            "Ready",
+            "Stale",
+            "Unavailable"
+          ]
+        }
+      }
+    },
+    {
+      "id": "722:1660",
+      "name": "Pioneer v2 / Panel Header",
+      "variants": [
+        {
+          "id": "722:1658",
+          "name": "State=Open",
+          "width": 504,
+          "height": 48,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1661",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "I722:1662;720:1636",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "722:1659",
+          "name": "State=Compact",
+          "width": 504,
+          "height": 48,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1665",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "I722:1666;720:1636",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "Title#722:35": {
+          "type": "TEXT",
+          "defaultValue": "上下文"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Open",
+          "variantOptions": [
+            "Open",
+            "Compact"
+          ]
+        }
+      }
+    },
+    {
+      "id": "722:1675",
+      "name": "Pioneer v2 / Session Row",
+      "variants": [
+        {
+          "id": "722:1672",
+          "name": "State=Open",
+          "width": 328,
+          "height": 136,
+          "autoLayout": "VERTICAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1676",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "722:1677",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "722:1678",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "722:1679",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            }
+          ]
+        },
+        {
+          "id": "722:1673",
+          "name": "State=Closed",
+          "width": 328,
+          "height": 136,
+          "autoLayout": "VERTICAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1680",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "722:1681",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "722:1682",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "722:1683",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            }
+          ]
+        },
+        {
+          "id": "722:1674",
+          "name": "State=Draft",
+          "width": 328,
+          "height": 136,
+          "autoLayout": "VERTICAL",
+          "fill": [
+            "VariableID:716:1614"
+          ],
+          "textStyles": [
+            {
+              "id": "722:1684",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "722:1685",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            },
+            {
+              "id": "722:1686",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "722:1687",
+              "size": 12,
+              "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "Title#722:38": {
+          "type": "TEXT",
+          "defaultValue": "整理毕业项目"
+        },
+        "Workspace#722:42": {
+          "type": "TEXT",
+          "defaultValue": "Pioneer"
+        },
+        "Last active#722:46": {
+          "type": "TEXT",
+          "defaultValue": "最近活动：今天 09:28"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Open",
+          "variantOptions": [
+            "Open",
+            "Closed",
+            "Draft"
+          ]
+        }
+      }
+    }
+  ],
+  "internalClose": {
+    "id": "722:1580",
+    "name": ".Pioneer v2 / Close Button",
+    "variants": [
+      {
+        "id": "722:1577",
+        "name": "State=Default",
+        "width": 32,
+        "height": 32,
+        "autoLayout": "HORIZONTAL",
+        "fill": [],
+        "textStyles": [
+          {
+            "id": "722:1581",
+            "size": 20,
+            "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+          }
+        ]
+      },
+      {
+        "id": "722:1578",
+        "name": "State=Hover",
+        "width": 32,
+        "height": 32,
+        "autoLayout": "HORIZONTAL",
+        "fill": [
+          "VariableID:716:1615"
+        ],
+        "textStyles": [
+          {
+            "id": "722:1582",
+            "size": 20,
+            "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+          }
+        ]
+      },
+      {
+        "id": "722:1579",
+        "name": "State=Focus",
+        "width": 32,
+        "height": 32,
+        "autoLayout": "HORIZONTAL",
+        "fill": [],
+        "textStyles": [
+          {
+            "id": "722:1583",
+            "size": 20,
+            "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+          }
+        ]
+      }
+    ],
+    "properties": {
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Default",
+        "variantOptions": [
+          "Default",
+          "Hover",
+          "Focus"
+        ]
+      }
+    }
+  },
+  "props": {
+    "Pioneer v2 / Session Tab": {
+      "Title": "Title#722:0",
+      "Workspace": "Workspace#722:5"
+    },
+    "Pioneer v2 / Local Tab": {
+      "Label": "Label#722:10"
+    },
+    "Pioneer v2 / Workspace Poster": {
+      "Identifier": "Identifier#722:15",
+      "Title": "Title#722:19",
+      "Summary": "Summary#722:23",
+      "Timestamp": "Timestamp#722:27",
+      "Path": "Path#722:31"
+    },
+    "Pioneer v2 / Panel Header": {
+      "Title": "Title#722:35"
+    },
+    "Pioneer v2 / Session Row": {
+      "Title": "Title#722:38",
+      "Workspace": "Workspace#722:42",
+      "Last active": "Last active#722:46"
+    }
+  },
+  "boards": [
+    {
+      "id": "722:1574",
+      "name": "00 · 关闭按钮",
+      "x": 200,
+      "y": 200,
+      "width": 1200,
+      "height": 250
+    },
+    {
+      "id": "722:1584",
+      "name": "01 · Session Tab",
+      "x": 200,
+      "y": 610,
+      "width": 1200,
+      "height": 266
+    },
+    {
+      "id": "722:1612",
+      "name": "02 · Local Tab",
+      "x": 200,
+      "y": 1036,
+      "width": 1200,
+      "height": 254
+    },
+    {
+      "id": "722:1624",
+      "name": "03 · Workspace Poster",
+      "x": 200,
+      "y": 1450,
+      "width": 1200,
+      "height": 618
+    },
+    {
+      "id": "722:1655",
+      "name": "04 · Panel Header",
+      "x": 200,
+      "y": 2228,
+      "width": 1200,
+      "height": 266
+    },
+    {
+      "id": "722:1669",
+      "name": "05 · Session Row",
+      "x": 200,
+      "y": 2654,
+      "width": 1200,
+      "height": 378
+    }
+  ]
+}

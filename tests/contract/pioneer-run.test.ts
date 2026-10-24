@@ -123,44 +123,55 @@ describe('P2 protocol contract and isolated asynchronous probe (no Pi or Electro
     expect(run.events()).toEqual(before);
   });
 
-  it.each(['stop_timeout', 'adapter_disconnected'] as const)(
-    '%s remains unknown until actual convergence',
-    async (reason) => {
-      const run = new RunProtocolProbe(identity);
-      const model = deferred();
-      run.start(model.promise);
-      run.requestStop();
-      run.unknown(reason);
-      expect(run.status).toBe('unknown');
-      expect(run.terminal()).toBe(false);
-      expect(run.start(Promise.resolve())).toBe(false);
-      expect(run.text('late')).toBe(false);
-      expect(run.requestStop()).toBe(false);
-      expect(run.confirmQuiescence()).toBe(false);
-      model.resolve();
-      await flush();
-      expect(run.status).toBe('unknown');
-      expect(run.confirmQuiescence()).toBe(true);
-      await run.waitForTerminal();
-      expect(run.status).toBe('stopped');
-      expect(types(run).slice(-2)).toEqual(['run.unknown', 'run.stopped']);
-    },
-  );
+  it('stop grace expiry force-ends with a fixed failure code instead of lingering unknown', async () => {
+    const run = new RunProtocolProbe(identity);
+    const model = deferred();
+    run.start(model.promise);
+    run.requestStop();
+    expect(run.status).toBe('stopping');
+    expect(run.forceEnd('STOP_TIMEOUT')).toBe(true);
+    expect(run.status).toBe('failed');
+    expect(run.terminal()).toBe(true);
+    expect(run.events().at(-1)?.body).toEqual({
+      type: 'run.failed',
+      code: 'STOP_TIMEOUT',
+    });
+    const frozen = run.events().length;
+    model.resolve();
+    await flush();
+    expect(run.events().length).toBe(frozen);
+    expect(run.status).toBe('failed');
+    expect(run.start(Promise.resolve())).toBe(false);
+    expect(run.text('late')).toBe(false);
+    expect(run.forceEnd('STOP_TIMEOUT')).toBe(false);
+  });
 
-  it.each(['stop_timeout', 'adapter_disconnected'] as const)(
-    'does not confuse an empty resource list with proof of convergence after %s',
-    async (reason) => {
-      const run = new RunProtocolProbe(identity);
-      run.start(Promise.resolve());
-      await flush();
-      run.unknown(reason);
-      expect(run.status).toBe('unknown');
-      expect(types(run)).not.toContain('run.stopped');
-      run.confirmQuiescence();
-      await run.waitForTerminal();
-      expect(run.status).toBe('stopped');
-    },
-  );
+  it('a disconnected adapter converges through the stop path, never a live unknown', () => {
+    const run = new RunProtocolProbe(identity);
+    const model = deferred();
+    run.start(model.promise);
+    run.requestStop('host_failure');
+    expect(run.status).toBe('stopping');
+    expect(run.forceEnd('ADAPTER_DISCONNECTED')).toBe(true);
+    expect(run.status).toBe('failed');
+    expect(run.events().at(-1)?.body).toEqual({
+      type: 'run.failed',
+      code: 'ADAPTER_DISCONNECTED',
+    });
+  });
+
+  it('force-end is reserved for the stop path and cannot preempt a healthy run', async () => {
+    const run = new RunProtocolProbe(identity);
+    const model = deferred();
+    run.start(model.promise);
+    expect(run.forceEnd('STOP_TIMEOUT')).toBe(false);
+    expect(run.status).toBe('running');
+    run.complete();
+    model.resolve();
+    await run.waitForTerminal();
+    expect(run.status).toBe('completed');
+    expect(run.forceEnd('STOP_TIMEOUT')).toBe(false);
+  });
 
   it('tool failure aborts a still pending model and preserves failure until convergence', async () => {
     const run = new RunProtocolProbe(identity);

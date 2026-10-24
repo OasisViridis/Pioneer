@@ -1,0 +1,49 @@
+{
+  "mutatedNodeIds": [
+    "725:1847",
+    "725:1848",
+    "725:1849",
+    "725:1850",
+    "725:1851",
+    "725:1852",
+    "725:1853"
+  ],
+  "fixed": [
+    {
+      "id": "725:1847",
+      "property": "fills",
+      "variable": "VariableID:716:1614"
+    },
+    {
+      "id": "725:1848",
+      "property": "fills",
+      "variable": "VariableID:716:1614"
+    },
+    {
+      "id": "725:1849",
+      "property": "fills",
+      "variable": "VariableID:716:1614"
+    },
+    {
+      "id": "725:1850",
+      "property": "fills",
+      "variable": "VariableID:716:1614"
+    },
+    {
+      "id": "725:1851",
+      "property": "fills",
+      "variable": "VariableID:716:1614"
+    },
+    {
+      "id": "725:1852",
+      "property": "fills",
+      "variable": "VariableID:716:1614"
+    },
+    {
+      "id": "725:1853",
+      "property": "fills",
+      "variable": "VariableID:716:1614"
+    }
+  ],
+  "reason": "Paint fallback RGB differed from bound semantic variable; aliases preserved."
+}

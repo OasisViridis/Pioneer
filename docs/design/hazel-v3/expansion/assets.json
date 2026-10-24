@@ -1,0 +1,218 @@
+{
+  "version": "3.1.0",
+  "date": "2026-10-01",
+  "scope": "design specification and editable Figma only",
+  "tool": "built-in image_gen.imagegen",
+  "invariants": [
+    "round rabbit ears",
+    "scalloped mint jelly",
+    "navy eyes and small smile",
+    "cream and one cherry",
+    "soft gouache"
+  ],
+  "budget": {
+    "brandMark": 20,
+    "emptyIllustration": 88,
+    "aboutMotif": 48,
+    "maxIllustrationsPerView": 1,
+    "safeTextGap": 24,
+    "activeTaskIllustrations": 0,
+    "prohibited": [
+      "wallpaper",
+      "watermark behind text",
+      "mascot status indicator",
+      "patterned work surface",
+      "repeating gold trims",
+      "automatic celebratory animation"
+    ],
+    "compactEmptyIllustration": 64
+  },
+  "assets": [
+    {
+      "file": "greendou-reading.png",
+      "sha256": "103817d6de0e73a5f803ae359b2e3253482b79bd7778d8bc9aaf28b02c1f03e2",
+      "dimensions": [1254, 1254],
+      "role": "empty-state companion",
+      "variant": "Reading",
+      "sizes": [88, 64],
+      "usage": "W02 conversation welcome; not the review-result panel",
+      "decorativeOnly": true,
+      "clickable": false,
+      "taskStatusDriven": false,
+      "figmaComponents": {
+        "88": "856:1276",
+        "64": "856:1278"
+      },
+      "figmaImageHash": "07eb833119df1c8a848f1fde0f8c5269dd89a363"
+    },
+    {
+      "file": "greendou-organizing.png",
+      "sha256": "0d54c45287fcf4f0390dc1feb57af1ba509e5482aacf3bb48c10666e131a8bdf",
+      "dimensions": [1254, 1254],
+      "role": "empty-state companion",
+      "variant": "Organizing",
+      "sizes": [88, 64],
+      "usage": "L00 workspace onboarding; does not imply files changed",
+      "decorativeOnly": true,
+      "clickable": false,
+      "taskStatusDriven": false,
+      "figmaComponents": {
+        "88": "856:1280",
+        "64": "856:1282"
+      },
+      "figmaImageHash": "804567681a23b3b1f73d16114134d3c914e3213f"
+    },
+    {
+      "file": "greendou-listening.png",
+      "sha256": "0504fbf0fead98d3a2af3e8e17bc7c1360ef09aecd4fa439a40736ecbe010505",
+      "dimensions": [1254, 1254],
+      "role": "empty-state companion",
+      "variant": "Listening",
+      "sizes": [88, 64],
+      "usage": "W01 new-session welcome and R02; no audio/online semantics",
+      "decorativeOnly": true,
+      "clickable": false,
+      "taskStatusDriven": false,
+      "figmaComponents": {
+        "88": "856:1284",
+        "64": "856:1286"
+      },
+      "figmaImageHash": "c1fa42150c9a3e8e18a9c944573c9c9aabade404"
+    },
+    {
+      "file": "cherry-bookmark.png",
+      "sha256": "4304c77ed8ab9f52e10efca1737fcd41cdce4b20e28843e226bace231a1e858b",
+      "dimensions": [1254, 1254],
+      "role": "accessory",
+      "variant": "Bookmark",
+      "sizes": [48],
+      "usage": "Source/About layout pattern only; not a bookmark control",
+      "decorativeOnly": true,
+      "clickable": false,
+      "taskStatusDriven": false,
+      "figmaComponents": {
+        "48": "856:1289"
+      },
+      "figmaImageHash": "8f87e47794fd2a6f823ad48fc87b96dd2d764d91"
+    },
+    {
+      "file": "paper-butterfly.png",
+      "sha256": "d273b13d41293c5479ca66e44286389254f3fae14a3369f7178651a298c7cf8b",
+      "dimensions": [1254, 1254],
+      "role": "accessory",
+      "variant": "Butterfly",
+      "sizes": [48],
+      "usage": "Source/About layout pattern only; not send/success",
+      "decorativeOnly": true,
+      "clickable": false,
+      "taskStatusDriven": false,
+      "figmaComponents": {
+        "48": "856:1291"
+      },
+      "figmaImageHash": "26204c0fd21fdece726b270e1e2c7e2e78a57e0e"
+    },
+    {
+      "file": "jelly-ribbon-charm.png",
+      "sha256": "4b5b7abe12d9d259d0f74ebcf651b824ad86164020af541aafd05e91b7c9029e",
+      "dimensions": [1254, 1254],
+      "role": "accessory",
+      "variant": "Charm",
+      "sizes": [48],
+      "usage": "Source/About layout pattern only; not validation/approval",
+      "decorativeOnly": true,
+      "clickable": false,
+      "taskStatusDriven": false,
+      "figmaComponents": {
+        "48": "856:1293"
+      },
+      "figmaImageHash": "6c027a5944f1d9f6db0d77f269b62a1a23d964f2"
+    }
+  ],
+  "figmaFamilies": [
+    {
+      "id": "856:1288",
+      "name": "Pioneer v3 / Greendou Companion",
+      "count": 6,
+      "properties": {
+        "Pose": {
+          "type": "VARIANT",
+          "defaultValue": "Reading",
+          "variantOptions": ["Reading", "Organizing", "Listening"]
+        },
+        "Size": {
+          "type": "VARIANT",
+          "defaultValue": "88",
+          "variantOptions": ["88", "64"]
+        }
+      }
+    },
+    {
+      "id": "856:1295",
+      "name": "Pioneer v3 / Hazel Accessory",
+      "count": 3,
+      "properties": {
+        "Motif": {
+          "type": "VARIANT",
+          "defaultValue": "Bookmark",
+          "variantOptions": ["Bookmark", "Butterfly", "Charm"]
+        },
+        "Size": {
+          "type": "VARIANT",
+          "defaultValue": "48",
+          "variantOptions": ["48"]
+        }
+      }
+    }
+  ],
+  "placements": [
+    {
+      "label": "L00",
+      "screen": "838:1350",
+      "instance": "857:1472",
+      "master": "856:1280",
+      "pose": "Organizing/88",
+      "size": [88, 88],
+      "parent": "838:1368"
+    },
+    {
+      "label": "W01",
+      "screen": "838:1379",
+      "instance": "857:1474",
+      "master": "856:1284",
+      "pose": "Listening/88",
+      "size": [88, 88],
+      "parent": "838:1433"
+    },
+    {
+      "label": "W02",
+      "screen": "838:1455",
+      "instance": "857:1476",
+      "master": "856:1276",
+      "pose": "Reading/88",
+      "size": [88, 88],
+      "parent": "838:1506"
+    },
+    {
+      "label": "R02",
+      "screen": "838:1641",
+      "instance": "857:1478",
+      "master": "856:1286",
+      "pose": "Listening/64",
+      "size": [64, 64],
+      "parent": "838:1692"
+    }
+  ],
+  "board": {
+    "id": "856:1296",
+    "w": 1440,
+    "h": 974
+  },
+  "foundation": {
+    "id": "857:1480",
+    "w": 1440,
+    "h": 342
+  },
+  "runtimeIntegrated": false,
+  "originalAssetsPreserved": true,
+  "sourceArtRedistributed": false
+}

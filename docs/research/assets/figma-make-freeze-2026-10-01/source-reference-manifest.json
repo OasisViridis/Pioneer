@@ -1,0 +1,386 @@
+{
+  "capturedAtLocalDate": "2026-10-01",
+  "prototypeId": "Pioneer-Make-F9",
+  "makeFileKey": "tcAZjzVznDTlTGcMqVGXqj",
+  "editorVersionLabel": "Version 9 · 完善对话功能与布局",
+  "editorUrl": "https://www.figma.com/make/tcAZjzVznDTlTGcMqVGXqj/Desktop-App-Prototype-Design",
+  "publishedUrl": "https://nix-medley-14707825.figma.site/",
+  "localHead": "4146c67e653175a39b8677c41e627dbca759ec3b",
+  "originMain": "6bee81f6ad5aae97b04a8a6e1c63cc5833899336",
+  "sourceArchiveStatus": "User-supplied ZIP archived and SHA256 verified; source/asset contents available for static review. No install or execution.",
+  "reviewScope": "Browser interaction acceptance; no Electron implementation or test execution.",
+  "resources": [
+    {
+      "name": "src/App.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/App.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/main.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/main.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "package.json",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/package.json",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "index.html",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/index.html",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "public/assets/hazel/cherry-bookmark.png",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/cherry-bookmark.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "public/assets/hazel/cherry-pair.svg",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/cherry-pair.svg",
+      "mimeType": "image/svg+xml"
+    },
+    {
+      "name": "public/assets/hazel/compass-seal.svg",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/compass-seal.svg",
+      "mimeType": "image/svg+xml"
+    },
+    {
+      "name": "public/assets/hazel/greendou-listening.png",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/greendou-listening.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "public/assets/hazel/greendou-organizing.png",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/greendou-organizing.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "public/assets/hazel/greendou-reading.png",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/greendou-reading.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "public/assets/hazel/jelly-companion.png",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/jelly-companion.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "public/assets/hazel/jelly-mark.svg",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/jelly-mark.svg",
+      "mimeType": "image/svg+xml"
+    },
+    {
+      "name": "public/assets/hazel/jelly-outline.svg",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/jelly-outline.svg",
+      "mimeType": "image/svg+xml"
+    },
+    {
+      "name": "public/assets/hazel/jelly-ribbon-charm.png",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/jelly-ribbon-charm.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "public/assets/hazel/paper-butterfly.png",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/paper-butterfly.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "public/assets/hazel/ribbon-outline.svg",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/ribbon-outline.svg",
+      "mimeType": "image/svg+xml"
+    },
+    {
+      "name": "public/assets/hazel/silver-paper-fold.svg",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/silver-paper-fold.svg",
+      "mimeType": "image/svg+xml"
+    },
+    {
+      "name": "public/assets/hazel/uniform-ribbon.png",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/hazel/uniform-ribbon.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "public/assets/ref/hazel-jelly.png",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/public/assets/ref/hazel-jelly.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "src/index.css",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/index.css",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/data.ts",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/data.ts",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/flow.ts",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/flow.ts",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/layout.ts",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/layout.ts",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/Library.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/Library.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/Modules.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/Modules.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/Notes.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/Notes.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/Pet.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/Pet.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/Session.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/Session.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/Settings.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/Settings.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/Shell.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/Shell.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/store.ts",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/store.ts",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/ui.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/ui.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/pioneer/Workbench.tsx",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/pioneer/Workbench.tsx",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "src/vite-env.d.ts",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/src/vite-env.d.ts",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "tsconfig.json",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/tsconfig.json",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "vite.config.ts",
+      "uri": "file://figma/make/source/tcAZjzVznDTlTGcMqVGXqj/vite.config.ts",
+      "mimeType": "text/plain"
+    },
+    {
+      "name": "07eb833119df1c8a848f1fde0f8c5269dd89a363.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/07eb833119df1c8a848f1fde0f8c5269dd89a363.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "0a01a576b04b40acf29c772f99781eea32614c8f.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/0a01a576b04b40acf29c772f99781eea32614c8f.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "0a8081477af219cb5590bd6523e0e8d090d60895.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/0a8081477af219cb5590bd6523e0e8d090d60895.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "0bdac64ceb40ba785d6063f2af28eaf7f012010c.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/0bdac64ceb40ba785d6063f2af28eaf7f012010c.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "1bfa803f77ed8e263b7ffb12e91bfe1969f2c3bd.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/1bfa803f77ed8e263b7ffb12e91bfe1969f2c3bd.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "26204c0fd21fdece726b270e1e2c7e2e78a57e0e.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/26204c0fd21fdece726b270e1e2c7e2e78a57e0e.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "289ef2ecbc082eb62cbc395ffe9264011ea54bdb.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/289ef2ecbc082eb62cbc395ffe9264011ea54bdb.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "49a8c2a650740e19e5e3e7c51bf9561caf2ddf07.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/49a8c2a650740e19e5e3e7c51bf9561caf2ddf07.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "540d6d2d30c07802c4711cd061a3db3e20072b85.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/540d6d2d30c07802c4711cd061a3db3e20072b85.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "5b97ef1fb7e7d1840d9e6193e423472e3e3bfb28.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/5b97ef1fb7e7d1840d9e6193e423472e3e3bfb28.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "603b750c8e860ec3bdad2cadc0c846722817c02f.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/603b750c8e860ec3bdad2cadc0c846722817c02f.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "6443f1731bb72386e987f86c4bbbd00653967720.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/6443f1731bb72386e987f86c4bbbd00653967720.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "647d35789b1b819cb556150ead8a44cf10f7b7be.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/647d35789b1b819cb556150ead8a44cf10f7b7be.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "64f06d9fbdb6bc59e0932dbb7c1fc02aecaf086e.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/64f06d9fbdb6bc59e0932dbb7c1fc02aecaf086e.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "67b7b9d7c5c636bd9091da5e9ca144d114f4e566.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/67b7b9d7c5c636bd9091da5e9ca144d114f4e566.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "6c027a5944f1d9f6db0d77f269b62a1a23d964f2.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/6c027a5944f1d9f6db0d77f269b62a1a23d964f2.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "797cf0578ce9e02136cfde3f5ef3849330434148.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/797cf0578ce9e02136cfde3f5ef3849330434148.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "7e48ae37aacdf825770e15f87472a74eee4c5971.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/7e48ae37aacdf825770e15f87472a74eee4c5971.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "804567681a23b3b1f73d16114134d3c914e3213f.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/804567681a23b3b1f73d16114134d3c914e3213f.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "8a645992907a7b85931029315a92ed4942bcb182.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/8a645992907a7b85931029315a92ed4942bcb182.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "8f87e47794fd2a6f823ad48fc87b96dd2d764d91.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/8f87e47794fd2a6f823ad48fc87b96dd2d764d91.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "923ebc836aeaba1c5f7efda618b940893b8eb14e.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/923ebc836aeaba1c5f7efda618b940893b8eb14e.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "9abd044750e76c54912a96a28b31c1390d771997.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/9abd044750e76c54912a96a28b31c1390d771997.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "a0acd8ea986507c500d389c39a2e1443b06e2c35.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/a0acd8ea986507c500d389c39a2e1443b06e2c35.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "a40b7f3a9ec4628ed8c1b116f127e0b3dd594610.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/a40b7f3a9ec4628ed8c1b116f127e0b3dd594610.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "a8922f36167ce213c809f1d0b7ef83758d786005.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/a8922f36167ce213c809f1d0b7ef83758d786005.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "b47d363058d246dbf785d430e0c839c0ba85a10b.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/b47d363058d246dbf785d430e0c839c0ba85a10b.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "b8c7e1f1a41beaa16243285311fa2a710e5ce97e.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/b8c7e1f1a41beaa16243285311fa2a710e5ce97e.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "c1fa42150c9a3e8e18a9c944573c9c9aabade404.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/c1fa42150c9a3e8e18a9c944573c9c9aabade404.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "c507ef5caef1d4528ca05c2bd66ef0607a0ab900.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/c507ef5caef1d4528ca05c2bd66ef0607a0ab900.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "d46eedadd0188d1ec78768e22c65a76e47453781.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/d46eedadd0188d1ec78768e22c65a76e47453781.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "de02186236a15a00204e232dd6d540514d04f5e3.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/de02186236a15a00204e232dd6d540514d04f5e3.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "e67404d3d8ac25b968bde3c01793880b978ecf10.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/e67404d3d8ac25b968bde3c01793880b978ecf10.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "eddf9ea8886e6243db798a5f487dc07c8b1704cb.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/eddf9ea8886e6243db798a5f487dc07c8b1704cb.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "f1b89edbe38b90f73297d3e549f9169ad6a64acc.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/f1b89edbe38b90f73297d3e549f9169ad6a64acc.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "f2e7b2f3184d8b578433ced417f984b3a1eb41de.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/f2e7b2f3184d8b578433ced417f984b3a1eb41de.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "f326bddbab6631f3dd7bbfc6edcaacd46609be17.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/f326bddbab6631f3dd7bbfc6edcaacd46609be17.png",
+      "mimeType": "image/png"
+    },
+    {
+      "name": "f4f490044e5cb7d91c2d92290042e2db0bf41c72.png",
+      "uri": "file://figma/make/image/tcAZjzVznDTlTGcMqVGXqj/f4f490044e5cb7d91c2d92290042e2db0bf41c72.png",
+      "mimeType": "image/png"
+    }
+  ],
+  "sourceArchive": "docs/design/make/frozen/2026-10-01-f9/pioneer-make-f9.zip",
+  "sourceArchiveSHA256": "fd1758332c24001ad36949fd7e96850d107a507589b5bd5587bfdbc630b5d1cd"
+}

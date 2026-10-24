@@ -1,0 +1,785 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static Figma delivery verification; not prototype or Electron",
+  "result": {
+    "pageId": "743:1574",
+    "pageName": "states · v2",
+    "problems": [],
+    "states": [
+      {
+        "stateId": "L02",
+        "nodeId": "746:1578",
+        "name": "L02 · 扫描中",
+        "uiId": "746:1580",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "L03",
+        "nodeId": "746:1589",
+        "name": "L03 · 工作区概览",
+        "uiId": "746:1591",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "L04",
+        "nodeId": "746:1609",
+        "name": "L04 · 部分结果 / 已过期",
+        "uiId": "746:1611",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "L05",
+        "nodeId": "746:1630",
+        "name": "L05 · 目录失联",
+        "uiId": "746:1632",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "L06",
+        "nodeId": "746:1650",
+        "name": "L06 · 重扫失败",
+        "uiId": "746:1652",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "L07",
+        "nodeId": "746:1664",
+        "name": "L07 · 键盘焦点",
+        "uiId": "746:1666",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "L08",
+        "nodeId": "746:1682",
+        "name": "L08 · 搜索无结果",
+        "uiId": "746:1684",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "L09",
+        "nodeId": "746:1696",
+        "name": "L09 · 取消选择 / 扫描取消",
+        "uiId": "746:1698",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "L10",
+        "nodeId": "746:1707",
+        "name": "L10 · 范围变更确认",
+        "uiId": "746:1709",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "S00",
+        "nodeId": "746:1723",
+        "name": "S00 · 空草稿",
+        "uiId": "746:1725",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "S03",
+        "nodeId": "746:1738",
+        "name": "S03 · 正在保存",
+        "uiId": "746:1740",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "S04",
+        "nodeId": "746:1753",
+        "name": "S04 · 保存失败",
+        "uiId": "746:1755",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "S05",
+        "nodeId": "746:1774",
+        "name": "S05 · 关闭前确认",
+        "uiId": "746:1776",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "S06",
+        "nodeId": "746:1790",
+        "name": "S06 · 全部会话 / 恢复",
+        "uiId": "746:1792",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "S07",
+        "nodeId": "746:1809",
+        "name": "S07 · 会话搜索无结果",
+        "uiId": "746:1811",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "S08",
+        "nodeId": "746:1824",
+        "name": "S08 · 已关闭，不是删除",
+        "uiId": "746:1826",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "S09",
+        "nodeId": "746:1839",
+        "name": "S09 · 标签与关闭按钮焦点",
+        "uiId": "746:1841",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "S10",
+        "nodeId": "746:1851",
+        "name": "S10 · 最近活动 / 草稿恢复",
+        "uiId": "746:1853",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "D03",
+        "nodeId": "746:1868",
+        "name": "D03 · 面板与布局菜单",
+        "uiId": "746:1870",
+        "future": false,
+        "instances": 5
+      },
+      {
+        "stateId": "D04",
+        "nodeId": "746:1891",
+        "name": "D04 · 键盘移动面板",
+        "uiId": "746:1893",
+        "future": false,
+        "instances": 6
+      },
+      {
+        "stateId": "D05",
+        "nodeId": "746:1916",
+        "name": "D05 · 调整分栏",
+        "uiId": "746:1918",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "D06",
+        "nodeId": "746:1929",
+        "name": "D06 · 暂收 / 恢复",
+        "uiId": "746:1931",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "D07",
+        "nodeId": "746:1944",
+        "name": "D07 · 保存布局中",
+        "uiId": "746:1946",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "D08",
+        "nodeId": "746:1955",
+        "name": "D08 · 保存成功 / 放弃修改",
+        "uiId": "746:1957",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "D09",
+        "nodeId": "746:1969",
+        "name": "D09 · 保存失败",
+        "uiId": "746:1971",
+        "future": false,
+        "instances": 3
+      },
+      {
+        "stateId": "D10",
+        "nodeId": "746:1983",
+        "name": "D10 · 会话隔离",
+        "uiId": "746:1985",
+        "future": false,
+        "instances": 4
+      },
+      {
+        "stateId": "D11",
+        "nodeId": "746:2002",
+        "name": "D11 · 上下文过期 / 不可访问",
+        "uiId": "746:2004",
+        "future": true,
+        "instances": 6
+      },
+      {
+        "stateId": "P03",
+        "nodeId": "755:1813",
+        "name": "P03 · 尚未配置",
+        "uiId": "755:1815",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "P04",
+        "nodeId": "755:1826",
+        "name": "P04 · 连接中",
+        "uiId": "755:1828",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "P05",
+        "nodeId": "755:1843",
+        "name": "P05 · 可用 / 能力受限",
+        "uiId": "755:1845",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "P06",
+        "nodeId": "755:1857",
+        "name": "P06 · 连接失败 / 凭据失效",
+        "uiId": "755:1859",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "P07",
+        "nodeId": "755:1875",
+        "name": "P07 · 只读范围",
+        "uiId": "755:1877",
+        "future": true,
+        "instances": 1
+      },
+      {
+        "stateId": "P08",
+        "nodeId": "755:1884",
+        "name": "P08 · 导出前确认",
+        "uiId": "755:1886",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "P09",
+        "nodeId": "755:1904",
+        "name": "P09 · 删除单条会话",
+        "uiId": "755:1906",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "P10",
+        "nodeId": "755:1918",
+        "name": "P10 · 清空全部 · 二次确认",
+        "uiId": "755:1920",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "P11",
+        "nodeId": "755:1937",
+        "name": "P11 · 清空失败",
+        "uiId": "755:1939",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "P12",
+        "nodeId": "755:1954",
+        "name": "P12 · 坏档：停止写入",
+        "uiId": "755:1956",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "P13",
+        "nodeId": "755:1970",
+        "name": "P13 · 诊断与受控恢复",
+        "uiId": "755:1972",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "P14",
+        "nodeId": "755:1984",
+        "name": "P14 · 迁移失败 / 回退",
+        "uiId": "755:1986",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "R03",
+        "nodeId": "755:2004",
+        "name": "R03 · 意图已核对，尚未授权",
+        "uiId": "755:2006",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "R04",
+        "nodeId": "755:2020",
+        "name": "R04 · 读取权限",
+        "uiId": "755:2022",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "R05",
+        "nodeId": "755:2046",
+        "name": "R05 · 写入权限 · 单独批准",
+        "uiId": "755:2048",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "R06",
+        "nodeId": "755:2061",
+        "name": "R06 · 执行命令权限",
+        "uiId": "755:2063",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "R07",
+        "nodeId": "755:2075",
+        "name": "R07 · 批准提交中 / 可撤回",
+        "uiId": "755:2077",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "R08",
+        "nodeId": "755:2091",
+        "name": "R08 · 已拒绝 / 已撤回",
+        "uiId": "755:2093",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "R09",
+        "nodeId": "755:2118",
+        "name": "R09 · 过期 / 目标版本改变",
+        "uiId": "755:2120",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "R10",
+        "nodeId": "755:2144",
+        "name": "R10 · 执行中",
+        "uiId": "755:2146",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "R11",
+        "nodeId": "755:2162",
+        "name": "R11 · 已请求停止",
+        "uiId": "755:2164",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "R12",
+        "nodeId": "755:2181",
+        "name": "R12 · 已确认停止",
+        "uiId": "755:2183",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "R13",
+        "nodeId": "755:2199",
+        "name": "R13 · 断连 / 结果未知",
+        "uiId": "755:2201",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "R14",
+        "nodeId": "755:2217",
+        "name": "R14 · 失败与核对后的恢复",
+        "uiId": "755:2219",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "A03",
+        "nodeId": "756:2010",
+        "name": "A03 · 没有改动 / 没有产物",
+        "uiId": "756:2012",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "A04",
+        "nodeId": "756:2023",
+        "name": "A04 · 不可读 / 无权限",
+        "uiId": "756:2025",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "A05",
+        "nodeId": "756:2039",
+        "name": "A05 · 二进制 / 过大文件",
+        "uiId": "756:2041",
+        "future": true,
+        "instances": 1
+      },
+      {
+        "stateId": "A06",
+        "nodeId": "756:2051",
+        "name": "A06 · 部分结果 / 来源失效",
+        "uiId": "756:2053",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "A07",
+        "nodeId": "756:2076",
+        "name": "A07 · 磁盘版本冲突",
+        "uiId": "756:2078",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "A08",
+        "nodeId": "756:2092",
+        "name": "A08 · 产物生成中 / 失败",
+        "uiId": "756:2094",
+        "future": true,
+        "instances": 6
+      },
+      {
+        "stateId": "A09",
+        "nodeId": "756:2135",
+        "name": "A09 · 预览 / 文件 / 验收同版本",
+        "uiId": "756:2137",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "A10",
+        "nodeId": "756:2160",
+        "name": "A10 · 验收未运行",
+        "uiId": "756:2162",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "A11",
+        "nodeId": "756:2179",
+        "name": "A11 · 验收进行中",
+        "uiId": "756:2181",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "A12",
+        "nodeId": "756:2200",
+        "name": "A12 · 验收通过 · 有限范围",
+        "uiId": "756:2202",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "A13",
+        "nodeId": "756:2220",
+        "name": "A13 · 验收失败",
+        "uiId": "756:2222",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "A14",
+        "nodeId": "756:2244",
+        "name": "A14 · 发布 / 外发独立批准",
+        "uiId": "756:2246",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "E01",
+        "nodeId": "762:2147",
+        "name": "E01 · 导出成功",
+        "uiId": "762:2149",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "E02",
+        "nodeId": "762:2160",
+        "name": "E02 · 删除进行中",
+        "uiId": "762:2162",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "E03",
+        "nodeId": "762:2173",
+        "name": "E03 · 清空内容匹配，等待最终决定",
+        "uiId": "762:2175",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "E04",
+        "nodeId": "762:2192",
+        "name": "E04 · 删除成功 / 清空成功",
+        "uiId": "762:2194",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "E05",
+        "nodeId": "762:2205",
+        "name": "E05 · 已批准，仅限本次",
+        "uiId": "762:2207",
+        "future": true,
+        "instances": 3
+      },
+      {
+        "stateId": "E06",
+        "nodeId": "762:2231",
+        "name": "E06 · 撤回请求已确认",
+        "uiId": "762:2233",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "E07",
+        "nodeId": "762:2245",
+        "name": "E07 · 撤回结果未知",
+        "uiId": "762:2247",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "E08",
+        "nodeId": "762:2258",
+        "name": "E08 · 会话行键盘焦点",
+        "uiId": "762:2260",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "E09",
+        "nodeId": "762:2271",
+        "name": "E09 · 关闭按钮独立焦点",
+        "uiId": "762:2273",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "I01",
+        "nodeId": "765:2201",
+        "name": "I01 · 海报 Hover",
+        "uiId": "765:2203",
+        "future": false,
+        "instances": 1
+      },
+      {
+        "stateId": "I02",
+        "nodeId": "765:2214",
+        "name": "I02 · 会话行 Hover",
+        "uiId": "765:2216",
+        "future": false,
+        "instances": 1
+      },
+      {
+        "stateId": "I03",
+        "nodeId": "765:2223",
+        "name": "I03 · 局部 Tab Hover",
+        "uiId": "765:2225",
+        "future": false,
+        "instances": 1
+      },
+      {
+        "stateId": "I04",
+        "nodeId": "765:2230",
+        "name": "I04 · 逐文件读取中",
+        "uiId": "765:2232",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "I05",
+        "nodeId": "765:2243",
+        "name": "I05 · 文件清单 · 同一产物 v3",
+        "uiId": "765:2245",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "I06",
+        "nodeId": "765:2256",
+        "name": "I06 · 验收记录 · 同一产物 v3",
+        "uiId": "765:2258",
+        "future": true,
+        "instances": 2
+      },
+      {
+        "stateId": "I07",
+        "nodeId": "765:2270",
+        "name": "I07 · 全部会话 · 尚无记录",
+        "uiId": "765:2272",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "I08",
+        "nodeId": "765:2282",
+        "name": "I08 · 关闭等待已受理保存",
+        "uiId": "765:2284",
+        "future": false,
+        "instances": 2
+      },
+      {
+        "stateId": "I09",
+        "nodeId": "765:2293",
+        "name": "I09 · 标签重排的键盘替代",
+        "uiId": "765:2295",
+        "future": false,
+        "instances": 5
+      }
+    ],
+    "qa": {
+      "structure": {
+        "pageId": "743:1574",
+        "name": "states · v2",
+        "nodes": 1328,
+        "texts": 631,
+        "instances": 208,
+        "roots": [
+          {
+            "id": "746:1574",
+            "name": "L · 工作区库 · 扫描与恢复",
+            "x": 200,
+            "y": 200,
+            "width": 1664,
+            "height": 1708
+          },
+          {
+            "id": "746:1719",
+            "name": "S · 本机会话 · 保存、关闭与恢复",
+            "x": 2024,
+            "y": 200,
+            "width": 1664,
+            "height": 1448
+          },
+          {
+            "id": "746:1864",
+            "name": "D · 布局与上下文 · 可撤销、可键盘操作",
+            "x": 3848,
+            "y": 200,
+            "width": 1664,
+            "height": 1366
+          },
+          {
+            "id": "755:1809",
+            "name": "P · 设置与本机数据 · 受控恢复",
+            "x": 200,
+            "y": 2068,
+            "width": 1664,
+            "height": 1820
+          },
+          {
+            "id": "755:2000",
+            "name": "R · 意图、授权与运行 · 不混淆确认层级",
+            "x": 2024,
+            "y": 2068,
+            "width": 1664,
+            "height": 2420
+          },
+          {
+            "id": "756:2006",
+            "name": "A · 审阅与交付 · 同版本与真实来源",
+            "x": 3848,
+            "y": 2068,
+            "width": 1664,
+            "height": 2512
+          },
+          {
+            "id": "762:2143",
+            "name": "E · 决策结果与交互补充",
+            "x": 200,
+            "y": 4740,
+            "width": 1664,
+            "height": 1480
+          },
+          {
+            "id": "765:2197",
+            "name": "I · 列表、局部视图与输入保护",
+            "x": 2024,
+            "y": 4740,
+            "width": 1664,
+            "height": 1470
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [
+            {
+              "id": "I746:2007;725:1592"
+            },
+            {
+              "id": "I746:2022;725:1602"
+            },
+            {
+              "id": "I755:2149;725:1751"
+            },
+            {
+              "id": "I755:2167;725:1760"
+            },
+            {
+              "id": "I755:2186;725:1769"
+            },
+            {
+              "id": "I755:2204;725:1778"
+            },
+            {
+              "id": "I755:2223;725:1787"
+            },
+            {
+              "id": "I756:2057;725:1662"
+            },
+            {
+              "id": "I756:2097;725:1636"
+            },
+            {
+              "id": "I756:2115;725:1649"
+            },
+            {
+              "id": "I756:2141;725:1623"
+            }
+          ],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        }
+      },
+      "contrast": {
+        "pageId": "743:1574",
+        "name": "states · v2",
+        "tested": 631,
+        "minRatio": 4.690847986393435,
+        "failures": [],
+        "unknown": []
+      }
+    }
+  }
+}
