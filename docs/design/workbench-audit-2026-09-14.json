@@ -1,0 +1,386 @@
+{
+  "page": {
+    "id": "299:725",
+    "name": "workbench"
+  },
+  "roots": [
+    {
+      "id": "299:726",
+      "name": "Workbench · 设计原则与变量",
+      "width": 3400,
+      "height": 480
+    },
+    {
+      "id": "299:727",
+      "name": "Workbench · 组件",
+      "width": 1800,
+      "height": 1030
+    },
+    {
+      "id": "299:728",
+      "name": "W02 · 专注会话",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "299:729",
+      "name": "W05 · 审阅改动",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "318:848",
+      "name": "W01 · 工作区库",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "324:885",
+      "name": "W03 · 执行批准",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "326:930",
+      "name": "W04 · 执行与记录",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "343:973",
+      "name": "W06 · 产物与交付",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "349:1022",
+      "name": "W07 · 自定义布局",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "351:1079",
+      "name": "W07b · 布局已保存",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "352:1136",
+      "name": "W08 · 整理参考素材",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "355:1185",
+      "name": "W07c · 收起会话面板",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "362:1250",
+      "name": "W09 · 审阅开题讲稿",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "365:1325",
+      "name": "W10 · 会话转入后台",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1359",
+      "name": "Overlay · O01 · 会话面板菜单",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1360",
+      "name": "Overlay · O02 · 上下文检查器",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1361",
+      "name": "Overlay · O03 · 能力与运行环境",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1362",
+      "name": "Overlay · O05 · 关闭运行中会话",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1363",
+      "name": "Overlay · O04 · 全部会话",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1364",
+      "name": "Overlay · O04b · 后台与最近关闭",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1365",
+      "name": "Overlay · O04c · 暂无最近关闭",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1366",
+      "name": "Overlay · O04d · 会话列表（关闭后）",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "395:1359",
+      "name": "W11 · 新会话草稿",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "398:1429",
+      "name": "W11b · 草稿已保存",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "399:1481",
+      "name": "W12 · 新会话首次回复",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "401:1531",
+      "name": "Overlay · O06 · 新会话工作区",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "403:1536",
+      "name": "W13 · 草稿已保留",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "403:1703",
+      "name": "Overlay · O07 · 关闭草稿",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "405:1576",
+      "name": "E01 · 本次操作未批准",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "405:1659",
+      "name": "E02 · 任务已停止",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "411:1666",
+      "name": "E02a · 正在停止",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "411:1744",
+      "name": "E03 · 连接中断 · 状态待核对",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "413:1754",
+      "name": "Overlay · O08 · 恢复前核对",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "413:1775",
+      "name": "E04 · 已核对 · 等待测试确认",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "415:1805",
+      "name": "Overlay · O09 · 单次测试确认",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "415:1816",
+      "name": "E05 · 仅重新运行测试",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "415:1894",
+      "name": "E06 · 测试未通过",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "423:1896",
+      "name": "Overlay · O10 · 失败修复思路",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "441:1897",
+      "name": "Overlay · O11 · 开题讲稿提纲",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "466:1899",
+      "name": "Overlay · O12 · 会话上下文",
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "468:1897",
+      "name": "W14 · 紧凑窗口 · 1280×800",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "469:1941",
+      "name": "S01 · 交互规范与交付边界",
+      "width": 1800,
+      "height": 873
+    }
+  ],
+  "screenRootCount": 39,
+  "visibleTextCount": 1146,
+  "fonts": [
+    "Inter / Bold",
+    "Inter / Medium",
+    "Inter / Regular",
+    "Inter / Semi Bold",
+    "JetBrains Mono / Regular",
+    "Noto Sans SC / Medium",
+    "Noto Sans SC / Regular"
+  ],
+  "rootOverflow": [],
+  "missingTargets": [],
+  "uniqueDestinationCount": 38,
+  "componentCount": 9,
+  "componentSetCount": 1,
+  "instanceCount": 481,
+  "collections": [
+    {
+      "id": "VariableCollectionId:32:2",
+      "name": "Pioneer / Color",
+      "modes": [
+        {
+          "name": "Light",
+          "modeId": "32:0"
+        }
+      ],
+      "varCount": 14
+    },
+    {
+      "id": "VariableCollectionId:32:3",
+      "name": "Pioneer / Layout",
+      "modes": [
+        {
+          "name": "Base",
+          "modeId": "32:1"
+        }
+      ],
+      "varCount": 8
+    },
+    {
+      "id": "VariableCollectionId:125:2",
+      "name": "Pioneer Demo UI",
+      "modes": [
+        {
+          "name": "Mode 1",
+          "modeId": "125:0"
+        }
+      ],
+      "varCount": 3
+    },
+    {
+      "id": "VariableCollectionId:263:725",
+      "name": "Pioneer · HAZEL",
+      "modes": [
+        {
+          "name": "Light",
+          "modeId": "263:0"
+        }
+      ],
+      "varCount": 26
+    },
+    {
+      "id": "VariableCollectionId:300:725",
+      "name": "Pioneer · Workbench",
+      "modes": [
+        {
+          "name": "Value",
+          "modeId": "300:0"
+        }
+      ],
+      "varCount": 19
+    },
+    {
+      "id": "VariableCollectionId:420:1896",
+      "name": "Pioneer · Prototype State",
+      "modes": [
+        {
+          "name": "Mode 1",
+          "modeId": "420:0"
+        }
+      ],
+      "varCount": 7
+    },
+    {
+      "id": "VariableCollectionId:460:1892",
+      "name": "Pioneer · Output View",
+      "modes": [
+        {
+          "name": "Preview",
+          "modeId": "460:0"
+        },
+        {
+          "name": "Files",
+          "modeId": "460:1"
+        },
+        {
+          "name": "Verification",
+          "modeId": "460:2"
+        }
+      ],
+      "varCount": 6
+    },
+    {
+      "id": "VariableCollectionId:466:1892",
+      "name": "Pioneer · Session Context",
+      "modes": [
+        {
+          "name": "Draft",
+          "modeId": "466:0"
+        },
+        {
+          "name": "Asset",
+          "modeId": "466:1"
+        },
+        {
+          "name": "Presentation",
+          "modeId": "466:2"
+        }
+      ],
+      "varCount": 6
+    }
+  ],
+  "evidenceBoundary": "Read-only Figma structure check. Root bounds exclude hidden nodes, not internal clipping/contrast or full interaction correctness.",
+  "sourceFile": "EQis9ep9ZQsEenrUVXwlFU",
+  "auditedAt": "2026-09-14"
+}

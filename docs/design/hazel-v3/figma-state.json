@@ -1,0 +1,895 @@
+{
+  "createdNodeIds": [
+    "824:1276",
+    "824:1277",
+    "824:1278",
+    "824:1279",
+    "824:1379",
+    "824:1380",
+    "824:1381",
+    "824:1382",
+    "824:1383",
+    "824:1384",
+    "824:1385",
+    "824:1386",
+    "824:1387",
+    "824:1388",
+    "824:1389",
+    "824:1390",
+    "824:1391",
+    "824:1392",
+    "824:1393",
+    "824:1394",
+    "824:1395",
+    "824:1396",
+    "824:1397",
+    "824:1398",
+    "824:1399",
+    "824:1400",
+    "824:1401",
+    "824:1402",
+    "824:1403",
+    "824:1404",
+    "824:1405",
+    "824:1406",
+    "824:1407",
+    "824:1408",
+    "824:1409",
+    "824:1410",
+    "824:1411",
+    "824:1412",
+    "824:1413",
+    "824:1414",
+    "824:1415",
+    "824:1416",
+    "824:1417",
+    "824:1418",
+    "824:1419",
+    "824:1420",
+    "824:1421",
+    "824:1422",
+    "824:1423",
+    "824:1424",
+    "824:1425",
+    "824:1426",
+    "824:1427",
+    "824:1428",
+    "824:1429",
+    "824:1430",
+    "824:1431",
+    "824:1432",
+    "824:1433",
+    "824:1434",
+    "824:1435",
+    "824:1436",
+    "824:1437",
+    "824:1438",
+    "824:1439",
+    "824:1440",
+    "824:1441",
+    "824:1442",
+    "824:1443"
+  ],
+  "mutatedNodeIds": [],
+  "pages": {
+    "design-system · v3": "824:1276",
+    "assets · Hazel v3": "824:1277",
+    "components · v3": "824:1278",
+    "main · v3": "824:1279"
+  },
+  "collections": [
+    {
+      "id": "VariableCollectionId:824:1280",
+      "name": "Pioneer v3 / Primitives",
+      "count": 37
+    },
+    {
+      "id": "VariableCollectionId:824:1281",
+      "name": "Pioneer v3 / Color",
+      "count": 25
+    },
+    {
+      "id": "VariableCollectionId:824:1282",
+      "name": "Pioneer v3 / Geometry",
+      "count": 24
+    }
+  ],
+  "variables": {
+    "primitive/color/canvas": "VariableID:824:1283",
+    "primitive/color/surface": "VariableID:824:1284",
+    "primitive/color/surface-muted": "VariableID:824:1285",
+    "primitive/color/ink": "VariableID:824:1286",
+    "primitive/color/secondary": "VariableID:824:1287",
+    "primitive/color/navy": "VariableID:824:1288",
+    "primitive/color/navy-hover": "VariableID:824:1289",
+    "primitive/color/on-navy": "VariableID:824:1290",
+    "primitive/color/silver": "VariableID:824:1291",
+    "primitive/color/control-border": "VariableID:824:1292",
+    "primitive/color/mint": "VariableID:824:1293",
+    "primitive/color/success-ink": "VariableID:824:1294",
+    "primitive/color/notice": "VariableID:824:1295",
+    "primitive/color/gold": "VariableID:824:1296",
+    "primitive/color/gold-ink": "VariableID:824:1297",
+    "primitive/color/rose": "VariableID:824:1298",
+    "primitive/color/risk": "VariableID:824:1299",
+    "primitive/color/risk-ink": "VariableID:824:1300",
+    "primitive/color/slate": "VariableID:824:1301",
+    "primitive/color/jade": "VariableID:824:1302",
+    "primitive/color/berry": "VariableID:824:1303",
+    "primitive/number/0": "VariableID:824:1304",
+    "primitive/number/4": "VariableID:824:1305",
+    "primitive/number/8": "VariableID:824:1306",
+    "primitive/number/12": "VariableID:824:1307",
+    "primitive/number/16": "VariableID:824:1308",
+    "primitive/number/24": "VariableID:824:1309",
+    "primitive/number/32": "VariableID:824:1310",
+    "primitive/number/48": "VariableID:824:1311",
+    "primitive/number/64": "VariableID:824:1312",
+    "primitive/number/1": "VariableID:824:1313",
+    "primitive/number/2": "VariableID:824:1314",
+    "primitive/number/14": "VariableID:824:1315",
+    "primitive/number/15": "VariableID:824:1316",
+    "primitive/number/20": "VariableID:824:1317",
+    "primitive/number/36": "VariableID:824:1318",
+    "primitive/number/40": "VariableID:824:1319",
+    "color/canvas": "VariableID:824:1320",
+    "color/surface": "VariableID:824:1321",
+    "color/surface-muted": "VariableID:824:1322",
+    "color/text-primary": "VariableID:824:1323",
+    "color/text-secondary": "VariableID:824:1324",
+    "color/text-on-action": "VariableID:824:1325",
+    "color/action": "VariableID:824:1326",
+    "color/action-hover": "VariableID:824:1327",
+    "color/border-subtle": "VariableID:824:1328",
+    "color/border-control": "VariableID:824:1329",
+    "color/focus": "VariableID:824:1330",
+    "color/notice-surface": "VariableID:824:1331",
+    "color/notice-border": "VariableID:824:1332",
+    "color/notice-text": "VariableID:824:1333",
+    "color/success-surface": "VariableID:824:1334",
+    "color/success-text": "VariableID:824:1335",
+    "color/error-surface": "VariableID:824:1336",
+    "color/error-text": "VariableID:824:1337",
+    "color/danger-action": "VariableID:824:1338",
+    "color/identity-slate": "VariableID:824:1339",
+    "color/identity-jade": "VariableID:824:1340",
+    "color/icon": "VariableID:824:1341",
+    "color/code-surface": "VariableID:824:1342",
+    "color/code-text": "VariableID:824:1343",
+    "color/decorative-berry": "VariableID:824:1344",
+    "space/0": "VariableID:824:1345",
+    "space/4": "VariableID:824:1346",
+    "space/8": "VariableID:824:1347",
+    "space/12": "VariableID:824:1348",
+    "space/16": "VariableID:824:1349",
+    "space/24": "VariableID:824:1350",
+    "space/32": "VariableID:824:1351",
+    "space/48": "VariableID:824:1352",
+    "space/64": "VariableID:824:1353",
+    "radius/0": "VariableID:824:1354",
+    "radius/8": "VariableID:824:1355",
+    "radius/12": "VariableID:824:1356",
+    "radius/16": "VariableID:824:1357",
+    "stroke/1": "VariableID:824:1358",
+    "stroke/2": "VariableID:824:1359",
+    "type/12": "VariableID:824:1360",
+    "type/14": "VariableID:824:1361",
+    "type/15": "VariableID:824:1362",
+    "type/20": "VariableID:824:1363",
+    "type/24": "VariableID:824:1364",
+    "control/32": "VariableID:824:1365",
+    "control/36": "VariableID:824:1366",
+    "control/40": "VariableID:824:1367",
+    "control/48": "VariableID:824:1368"
+  },
+  "styles": {
+    "Heading/Large": "S:5ce375458898e9d925f03f5f797fada951cf49f8,",
+    "Heading/Medium": "S:745380c35fef498e5978e532149f73b1516df9ac,",
+    "Body/Reading": "S:8c2b30c059b83e8821616cee0873c7b408e97db6,",
+    "Body/Default": "S:b29951ab5628efa4d06fc249138110390c09c732,",
+    "UI/Label": "S:d9ae42b98c941df8be748e26ce753b1f0572fa89,",
+    "UI/Small": "S:c0fd9a8014ec3f4afb2fe66a0d0d537c80d1b2b2,",
+    "UI/Small Strong": "S:20d78c8a4d3860d5c12eb6049b5615d23d80f3e8,",
+    "Code/Default": "S:6f98ead86832db917a35a9c8f9f4aa4d4387af87,",
+    "Code/Small": "S:092d7c5d7ea4d2da0e94ac9ed4ea68efb8d70352,",
+    "Display/Welcome": "S:a445943b463ff274e13637b8c2421f028b46ae0b,",
+    "UI/Card Title": "S:9db57ac50d12e40b23a3eb3bf167c1fbcbdcf727,"
+  },
+  "frames": [
+    {
+      "id": "824:1379",
+      "name": "Hazel × Claude / Quiet companion",
+      "width": 1440,
+      "height": 200
+    },
+    {
+      "id": "824:1382",
+      "name": "Color / Roles",
+      "width": 1440,
+      "height": 376
+    },
+    {
+      "id": "824:1422",
+      "name": "Typography / Read first",
+      "width": 1440,
+      "height": 684
+    },
+    {
+      "id": "824:1435",
+      "name": "Decoration / Budget",
+      "width": 1440,
+      "height": 200
+    },
+    {
+      "id": "824:1438",
+      "name": "Components / Contract",
+      "width": 1440,
+      "height": 176
+    },
+    {
+      "id": "824:1441",
+      "name": "Delivery / Evidence",
+      "width": 1440,
+      "height": 176
+    }
+  ],
+  "screens": [
+    {
+      "id": "L01",
+      "title": "工作区",
+      "width": 1440,
+      "height": 900,
+      "nodeId": "836:1276",
+      "windowId": "838:1277"
+    },
+    {
+      "id": "L00",
+      "title": "添加工作区",
+      "width": 1440,
+      "height": 900,
+      "nodeId": "836:1277",
+      "windowId": "838:1350"
+    },
+    {
+      "id": "W01",
+      "title": "专注 · 新会话",
+      "width": 1440,
+      "height": 900,
+      "nodeId": "836:1278",
+      "windowId": "838:1379"
+    },
+    {
+      "id": "W02",
+      "title": "审阅 · 尚无内容",
+      "width": 1440,
+      "height": 900,
+      "nodeId": "836:1279",
+      "windowId": "838:1455"
+    },
+    {
+      "id": "S01",
+      "title": "设置",
+      "width": 1440,
+      "height": 900,
+      "nodeId": "836:1280",
+      "windowId": "838:1530"
+    },
+    {
+      "id": "R01",
+      "title": "工作区 · 窄屏",
+      "width": 640,
+      "height": 800,
+      "nodeId": "836:1281",
+      "windowId": "838:1569"
+    },
+    {
+      "id": "R02",
+      "title": "专注 · 中屏",
+      "width": 900,
+      "height": 800,
+      "nodeId": "836:1282",
+      "windowId": "838:1641"
+    }
+  ],
+  "assets": [
+    {
+      "id": "834:1280",
+      "file": "cherry-pair.svg",
+      "width": 216,
+      "height": 236,
+      "imageHash": "9ef217f42be1a400a4b75327cdfdbd0cf46a3eba"
+    },
+    {
+      "id": "834:1284",
+      "file": "compass-seal.svg",
+      "width": 216,
+      "height": 236,
+      "imageHash": "4182daac2d6ae72145dc5bd71e6a2faf37dab03d"
+    },
+    {
+      "id": "834:1288",
+      "file": "jelly-companion.png",
+      "width": 216,
+      "height": 236,
+      "imageHash": "a8922f36167ce213c809f1d0b7ef83758d786005"
+    },
+    {
+      "id": "834:1292",
+      "file": "jelly-mark.svg",
+      "width": 216,
+      "height": 236,
+      "imageHash": "0dfd61bb16d4f8295aa0f037a83174f7620c1899"
+    },
+    {
+      "id": "834:1296",
+      "file": "ribbon-outline.svg",
+      "width": 216,
+      "height": 236,
+      "imageHash": "4d8852fa14b78e00909ed5117701a52160ec568a"
+    },
+    {
+      "id": "834:1300",
+      "file": "uniform-ribbon.png",
+      "width": 216,
+      "height": 236,
+      "imageHash": "d46eedadd0188d1ec78768e22c65a76e47453781"
+    }
+  ],
+  "componentMap": {
+    "720:1608": "830:1276",
+    "720:1584": "830:1277",
+    "720:1585": "830:1280",
+    "720:1586": "830:1283",
+    "720:1587": "830:1286",
+    "720:1588": "830:1289",
+    "720:1589": "830:1292",
+    "720:1590": "830:1296",
+    "720:1591": "830:1299",
+    "720:1592": "830:1302",
+    "720:1593": "830:1305",
+    "720:1594": "830:1308",
+    "720:1595": "830:1311",
+    "720:1596": "830:1315",
+    "720:1597": "830:1318",
+    "720:1598": "830:1321",
+    "720:1599": "830:1324",
+    "720:1600": "830:1327",
+    "720:1601": "830:1330",
+    "720:1602": "830:1334",
+    "720:1603": "830:1337",
+    "720:1604": "830:1340",
+    "720:1605": "830:1343",
+    "720:1606": "830:1346",
+    "720:1607": "830:1349",
+    "720:1670": "830:1353",
+    "720:1665": "830:1354",
+    "720:1666": "830:1359",
+    "720:1667": "830:1364",
+    "720:1668": "830:1369",
+    "720:1669": "830:1374",
+    "720:1700": "830:1379",
+    "720:1694": "830:1380",
+    "720:1695": "830:1382",
+    "720:1696": "830:1384",
+    "720:1697": "830:1386",
+    "720:1698": "830:1388",
+    "720:1699": "830:1390",
+    "722:1580": "830:1392",
+    "722:1577": "830:1393",
+    "722:1578": "830:1395",
+    "722:1579": "830:1397",
+    "722:1591": "830:1399",
+    "722:1587": "830:1400",
+    "722:1588": "830:1405",
+    "722:1589": "830:1410",
+    "722:1590": "830:1415",
+    "722:1619": "830:1426",
+    "722:1615": "830:1427",
+    "722:1616": "830:1429",
+    "722:1617": "830:1431",
+    "722:1618": "830:1433",
+    "722:1630": "830:1435",
+    "722:1627": "830:1436",
+    "722:1628": "830:1445",
+    "722:1629": "830:1454",
+    "722:1660": "830:1463",
+    "722:1658": "830:1464",
+    "722:1659": "830:1467",
+    "722:1675": "830:1474",
+    "722:1672": "830:1475",
+    "722:1673": "830:1480",
+    "722:1674": "830:1485",
+    "725:1580": "830:1490",
+    "725:1577": "830:1491",
+    "725:1578": "830:1498",
+    "725:1579": "830:1505",
+    "725:1618": "830:1524",
+    "725:1614": "830:1525",
+    "725:1615": "830:1535",
+    "725:1616": "830:1545",
+    "725:1617": "830:1555",
+    "725:1678": "830:1593",
+    "725:1674": "830:1594",
+    "725:1675": "830:1606",
+    "725:1676": "830:1618",
+    "725:1677": "830:1630",
+    "725:1747": "830:1666",
+    "725:1742": "830:1667",
+    "725:1743": "830:1675",
+    "725:1744": "830:1683",
+    "725:1745": "830:1691",
+    "725:1746": "830:1699",
+    "725:1803": "830:1720",
+    "725:1799": "830:1721",
+    "725:1800": "830:1730",
+    "725:1801": "830:1739",
+    "725:1802": "830:1748",
+    "725:1854": "830:1773",
+    "725:1847": "830:1774",
+    "725:1848": "830:1781",
+    "725:1849": "830:1788",
+    "725:1850": "830:1795",
+    "725:1851": "830:1802",
+    "725:1852": "830:1810",
+    "725:1853": "830:1820"
+  },
+  "status": "delivered",
+  "currentVersion": "3.1.0",
+  "expansion": {
+    "date": "2026-10-01",
+    "assets": [
+      {
+        "file": "greendou-reading.png",
+        "sha256": "103817d6de0e73a5f803ae359b2e3253482b79bd7778d8bc9aaf28b02c1f03e2",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "role": "empty-state companion",
+        "variant": "Reading",
+        "sizes": [
+          88,
+          64
+        ],
+        "usage": "W02 conversation welcome; not the review-result panel",
+        "decorativeOnly": true,
+        "clickable": false,
+        "taskStatusDriven": false,
+        "figmaComponents": {
+          "64": "856:1278",
+          "88": "856:1276"
+        },
+        "figmaImageHash": "07eb833119df1c8a848f1fde0f8c5269dd89a363"
+      },
+      {
+        "file": "greendou-organizing.png",
+        "sha256": "0d54c45287fcf4f0390dc1feb57af1ba509e5482aacf3bb48c10666e131a8bdf",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "role": "empty-state companion",
+        "variant": "Organizing",
+        "sizes": [
+          88,
+          64
+        ],
+        "usage": "L00 workspace onboarding; does not imply files changed",
+        "decorativeOnly": true,
+        "clickable": false,
+        "taskStatusDriven": false,
+        "figmaComponents": {
+          "64": "856:1282",
+          "88": "856:1280"
+        },
+        "figmaImageHash": "804567681a23b3b1f73d16114134d3c914e3213f"
+      },
+      {
+        "file": "greendou-listening.png",
+        "sha256": "0504fbf0fead98d3a2af3e8e17bc7c1360ef09aecd4fa439a40736ecbe010505",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "role": "empty-state companion",
+        "variant": "Listening",
+        "sizes": [
+          88,
+          64
+        ],
+        "usage": "W01 new-session welcome and R02; no audio/online semantics",
+        "decorativeOnly": true,
+        "clickable": false,
+        "taskStatusDriven": false,
+        "figmaComponents": {
+          "64": "856:1286",
+          "88": "856:1284"
+        },
+        "figmaImageHash": "c1fa42150c9a3e8e18a9c944573c9c9aabade404"
+      },
+      {
+        "file": "cherry-bookmark.png",
+        "sha256": "4304c77ed8ab9f52e10efca1737fcd41cdce4b20e28843e226bace231a1e858b",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "role": "accessory",
+        "variant": "Bookmark",
+        "sizes": [
+          48
+        ],
+        "usage": "Source/About layout pattern only; not a bookmark control",
+        "decorativeOnly": true,
+        "clickable": false,
+        "taskStatusDriven": false,
+        "figmaComponents": {
+          "48": "856:1289"
+        },
+        "figmaImageHash": "8f87e47794fd2a6f823ad48fc87b96dd2d764d91"
+      },
+      {
+        "file": "paper-butterfly.png",
+        "sha256": "d273b13d41293c5479ca66e44286389254f3fae14a3369f7178651a298c7cf8b",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "role": "accessory",
+        "variant": "Butterfly",
+        "sizes": [
+          48
+        ],
+        "usage": "Source/About layout pattern only; not send/success",
+        "decorativeOnly": true,
+        "clickable": false,
+        "taskStatusDriven": false,
+        "figmaComponents": {
+          "48": "856:1291"
+        },
+        "figmaImageHash": "26204c0fd21fdece726b270e1e2c7e2e78a57e0e"
+      },
+      {
+        "file": "jelly-ribbon-charm.png",
+        "sha256": "4b5b7abe12d9d259d0f74ebcf651b824ad86164020af541aafd05e91b7c9029e",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "role": "accessory",
+        "variant": "Charm",
+        "sizes": [
+          48
+        ],
+        "usage": "Source/About layout pattern only; not validation/approval",
+        "decorativeOnly": true,
+        "clickable": false,
+        "taskStatusDriven": false,
+        "figmaComponents": {
+          "48": "856:1293"
+        },
+        "figmaImageHash": "6c027a5944f1d9f6db0d77f269b62a1a23d964f2"
+      }
+    ],
+    "families": [
+      {
+        "id": "856:1288",
+        "name": "Pioneer v3 / Greendou Companion",
+        "count": 6,
+        "properties": {
+          "Pose": {
+            "type": "VARIANT",
+            "defaultValue": "Reading",
+            "variantOptions": [
+              "Reading",
+              "Organizing",
+              "Listening"
+            ]
+          },
+          "Size": {
+            "type": "VARIANT",
+            "defaultValue": "88",
+            "variantOptions": [
+              "88",
+              "64"
+            ]
+          }
+        }
+      },
+      {
+        "id": "856:1295",
+        "name": "Pioneer v3 / Hazel Accessory",
+        "count": 3,
+        "properties": {
+          "Motif": {
+            "type": "VARIANT",
+            "defaultValue": "Bookmark",
+            "variantOptions": [
+              "Bookmark",
+              "Butterfly",
+              "Charm"
+            ]
+          },
+          "Size": {
+            "type": "VARIANT",
+            "defaultValue": "48",
+            "variantOptions": [
+              "48"
+            ]
+          }
+        }
+      }
+    ],
+    "board": {
+      "id": "856:1296",
+      "w": 1440,
+      "h": 974
+    },
+    "foundation": {
+      "id": "857:1480",
+      "w": 1440,
+      "h": 342
+    },
+    "placements": [
+      {
+        "label": "L00",
+        "screen": "838:1350",
+        "instance": "857:1472",
+        "master": "856:1280",
+        "pose": "Organizing/88",
+        "size": [
+          88,
+          88
+        ],
+        "parent": "838:1368"
+      },
+      {
+        "label": "W01",
+        "screen": "838:1379",
+        "instance": "857:1474",
+        "master": "856:1284",
+        "pose": "Listening/88",
+        "size": [
+          88,
+          88
+        ],
+        "parent": "838:1433"
+      },
+      {
+        "label": "W02",
+        "screen": "838:1455",
+        "instance": "857:1476",
+        "master": "856:1276",
+        "pose": "Reading/88",
+        "size": [
+          88,
+          88
+        ],
+        "parent": "838:1506"
+      },
+      {
+        "label": "R02",
+        "screen": "838:1641",
+        "instance": "857:1478",
+        "master": "856:1286",
+        "pose": "Listening/64",
+        "size": [
+          64,
+          64
+        ],
+        "parent": "838:1692"
+      }
+    ],
+    "qa": "qa/expansion-figma-audit.json",
+    "runtimeIntegrated": false
+  },
+  "historicalBaseRecord": "Original v3.0 creation, v3.1 expansion and F1a runtime records are preserved as dated history. Current v3.2 decoration placement/policy is in decorationDiversity.",
+  "workspaceOrganization": {
+    "date": "2026-10-01",
+    "audit": "qa/workspace-archive-2026-10-01.json",
+    "activePages": [
+      {
+        "id": "824:1279",
+        "name": "main · v3"
+      },
+      {
+        "id": "824:1276",
+        "name": "design-system · v3"
+      },
+      {
+        "id": "824:1278",
+        "name": "components · v3"
+      },
+      {
+        "id": "824:1277",
+        "name": "assets · Hazel v3"
+      }
+    ],
+    "archivedPages": [
+      {
+        "id": "717:1578",
+        "name": "archive · v2 · main + P12"
+      },
+      {
+        "id": "717:1574",
+        "name": "archive · v2 · design-system"
+      },
+      {
+        "id": "717:1575",
+        "name": "archive · v2 · controls"
+      },
+      {
+        "id": "717:1576",
+        "name": "archive · v2 · navigation"
+      },
+      {
+        "id": "717:1577",
+        "name": "archive · v2 · workbench"
+      },
+      {
+        "id": "743:1574",
+        "name": "archive · v2 · states"
+      },
+      {
+        "id": "757:1574",
+        "name": "archive · v2 · responsive"
+      },
+      {
+        "id": "132:2",
+        "name": "archive · pre-v2 · main"
+      },
+      {
+        "id": "299:725",
+        "name": "archive · pre-v2 · workbench"
+      },
+      {
+        "id": "257:725",
+        "name": "archive · pre-v2 · experiments"
+      }
+    ],
+    "scope": "Page naming/order and v3 main layer stacking order only; original IDs, content, links and prototype reactions retained."
+  },
+  "runtimeIntegration": {
+    "date": "2026-10-01",
+    "slice": "F1a",
+    "record": "qa/runtime-integration-2026-10-01.json",
+    "integratedPoses": [
+      "greendou-organizing.png",
+      "greendou-listening.png",
+      "greendou-reading.png"
+    ],
+    "accessoriesIntegrated": false,
+    "scope": "Specified empty states only; no task/model-state switching or Figma mutation.",
+    "engineeringCandidateIdentity": "e42ce03b82dd143a8dde08c86e9624e13f0976b324e33cb7837759f487b3a621",
+    "fullGateExitCode": 0,
+    "historicalExpansionRecordUnchanged": true
+  },
+  "decorationDiversity": {
+    "date": "2026-10-01",
+    "version": "3.2",
+    "figma": {
+      "setId": "880:312",
+      "boardId": "880:313",
+      "components": {
+        "greendou-organizing.png": {
+          "64": "880:217",
+          "88": "880:214"
+        },
+        "greendou-listening.png": {
+          "64": "880:223",
+          "88": "880:220"
+        },
+        "greendou-reading.png": {
+          "64": "880:229",
+          "88": "880:226"
+        },
+        "jelly-companion.png": {
+          "64": "880:234",
+          "88": "880:232"
+        },
+        "paper-butterfly.png": {
+          "64": "880:239",
+          "88": "880:236"
+        },
+        "cherry-bookmark.png": {
+          "64": "880:245",
+          "88": "880:242"
+        },
+        "jelly-ribbon-charm.png": {
+          "64": "880:251",
+          "88": "880:248"
+        },
+        "uniform-ribbon.png": {
+          "64": "880:256",
+          "88": "880:254"
+        },
+        "ribbon-outline.svg": {
+          "64": "880:264",
+          "88": "880:258"
+        },
+        "cherry-pair.svg": {
+          "64": "880:276",
+          "88": "880:270"
+        },
+        "silver-paper-fold.svg": {
+          "64": "880:288",
+          "88": "880:282"
+        },
+        "jelly-outline.svg": {
+          "64": "880:303",
+          "88": "880:294"
+        }
+      },
+      "variantCount": 24,
+      "currentPlacements": [
+        {
+          "id": "857:1476",
+          "file": "cherry-bookmark.png",
+          "previous": {
+            "id": "856:1276",
+            "w": 88,
+            "h": 88,
+            "parent": "838:1506",
+            "x": 472,
+            "y": 0
+          },
+          "master": "880:242",
+          "w": 88,
+          "h": 88,
+          "parent": "838:1506",
+          "x": 472,
+          "y": 0,
+          "art": [
+            {
+              "id": "I857:1476;880:243",
+              "w": 48,
+              "h": 48,
+              "x": 40,
+              "y": 0
+            }
+          ]
+        },
+        {
+          "id": "857:1478",
+          "file": "paper-butterfly.png",
+          "previous": {
+            "id": "856:1286",
+            "w": 64,
+            "h": 64,
+            "parent": "838:1692",
+            "x": 472,
+            "y": 0
+          },
+          "master": "880:239",
+          "w": 64,
+          "h": 64,
+          "parent": "838:1692",
+          "x": 472,
+          "y": 0,
+          "art": [
+            {
+              "id": "I857:1478;880:240",
+              "w": 48,
+              "h": 48,
+              "x": 16,
+              "y": 0
+            }
+          ]
+        }
+      ],
+      "foundation": {
+        "id": "857:1480",
+        "w": 1440,
+        "h": 364
+      },
+      "additionalPages": 0,
+      "additionalVariables": 0,
+      "additionalStyles": 0
+    },
+    "policy": "decoration-policy.json",
+    "sourceAndRuntimeRecord": "qa/decoration-review-2026-10-01.json",
+    "outputAssetCount": 14,
+    "directRuntimeFileCount": 12,
+    "historicalExpansionUnchanged": true
+  }
+}

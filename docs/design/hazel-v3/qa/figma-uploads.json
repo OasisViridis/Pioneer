@@ -1,0 +1,182 @@
+[
+  {
+    "file": "cherry-pair.svg",
+    "response": {
+      "success": true,
+      "imageHash": "9ef217f42be1a400a4b75327cdfdbd0cf46a3eba",
+      "sizeBytes": 393,
+      "contentType": "image/svg+xml",
+      "placedOnNodeId": "833:1276"
+    }
+  },
+  {
+    "file": "compass-seal.svg",
+    "response": {
+      "success": true,
+      "imageHash": "4182daac2d6ae72145dc5bd71e6a2faf37dab03d",
+      "sizeBytes": 327,
+      "contentType": "image/svg+xml",
+      "placedOnNodeId": "833:5564"
+    }
+  },
+  {
+    "file": "jelly-companion.png",
+    "response": {
+      "success": true,
+      "imageHash": "a8922f36167ce213c809f1d0b7ef83758d786005",
+      "sizeBytes": 925794,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5568"
+    }
+  },
+  {
+    "file": "jelly-mark.svg",
+    "response": {
+      "success": true,
+      "imageHash": "0dfd61bb16d4f8295aa0f037a83174f7620c1899",
+      "sizeBytes": 458,
+      "contentType": "image/svg+xml",
+      "placedOnNodeId": "833:5569"
+    }
+  },
+  {
+    "file": "ribbon-outline.svg",
+    "response": {
+      "success": true,
+      "imageHash": "4d8852fa14b78e00909ed5117701a52160ec568a",
+      "sizeBytes": 526,
+      "contentType": "image/svg+xml",
+      "placedOnNodeId": "833:5572"
+    }
+  },
+  {
+    "file": "uniform-ribbon.png",
+    "response": {
+      "success": true,
+      "imageHash": "d46eedadd0188d1ec78768e22c65a76e47453781",
+      "sizeBytes": 703549,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5577"
+    }
+  },
+  {
+    "file": "image-1.png",
+    "response": {
+      "success": true,
+      "imageHash": "647d35789b1b819cb556150ead8a44cf10f7b7be",
+      "sizeBytes": 120946,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5578"
+    }
+  },
+  {
+    "file": "image-2.png",
+    "response": {
+      "success": true,
+      "imageHash": "797cf0578ce9e02136cfde3f5ef3849330434148",
+      "sizeBytes": 977070,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5579"
+    }
+  },
+  {
+    "file": "image-3.png",
+    "response": {
+      "success": true,
+      "imageHash": "64f06d9fbdb6bc59e0932dbb7c1fc02aecaf086e",
+      "sizeBytes": 164677,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5580"
+    }
+  },
+  {
+    "file": "image-4.jpg",
+    "response": {
+      "success": true,
+      "imageHash": "eddf9ea8886e6243db798a5f487dc07c8b1704cb",
+      "sizeBytes": 485799,
+      "contentType": "image/jpeg",
+      "placedOnNodeId": "833:5581"
+    }
+  },
+  {
+    "file": "image-5.jpg",
+    "response": {
+      "success": true,
+      "imageHash": "289ef2ecbc082eb62cbc395ffe9264011ea54bdb",
+      "sizeBytes": 823305,
+      "contentType": "image/jpeg",
+      "placedOnNodeId": "833:5582"
+    }
+  },
+  {
+    "file": "image-6.png",
+    "response": {
+      "success": true,
+      "imageHash": "de02186236a15a00204e232dd6d540514d04f5e3",
+      "sizeBytes": 2916808,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5583"
+    }
+  },
+  {
+    "file": "image-7.png",
+    "response": {
+      "success": true,
+      "imageHash": "a40b7f3a9ec4628ed8c1b116f127e0b3dd594610",
+      "sizeBytes": 5087909,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5584"
+    }
+  },
+  {
+    "file": "image-8.png",
+    "response": {
+      "success": true,
+      "imageHash": "6443f1731bb72386e987f86c4bbbd00653967720",
+      "sizeBytes": 5129758,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5585"
+    }
+  },
+  {
+    "file": "image-9.png",
+    "response": {
+      "success": true,
+      "imageHash": "0a8081477af219cb5590bd6523e0e8d090d60895",
+      "sizeBytes": 4225777,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5586"
+    }
+  },
+  {
+    "file": "image-10.png",
+    "response": {
+      "success": true,
+      "imageHash": "9abd044750e76c54912a96a28b31c1390d771997",
+      "sizeBytes": 4822475,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5587"
+    }
+  },
+  {
+    "file": "image-11.png",
+    "response": {
+      "success": true,
+      "imageHash": "603b750c8e860ec3bdad2cadc0c846722817c02f",
+      "sizeBytes": 4968731,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5588"
+    }
+  },
+  {
+    "file": "image-12.png",
+    "response": {
+      "success": true,
+      "imageHash": "c507ef5caef1d4528ca05c2bd66ef0607a0ab900",
+      "sizeBytes": 7601775,
+      "contentType": "image/png",
+      "placedOnNodeId": "833:5589"
+    }
+  }
+]

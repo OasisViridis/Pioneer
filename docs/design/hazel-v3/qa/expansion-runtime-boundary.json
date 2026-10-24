@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-01",
+  "pass": true,
+  "scope": "13 previously verified engineering input files, not a rerun of pnpm check",
+  "runtimeAssetIntegrated": false,
+  "checks": [
+    {
+      "file": "tests/e2e/hazel-design.e2e.spec.ts",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/src/renderer/components/Conversation.tsx",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/src/renderer/styles/tokens.css",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "tests/e2e/playwright.config.ts",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/src/renderer/components/TabStrip.tsx",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/src/renderer/components/HazelCompanion.tsx",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/src/renderer/styles/app.css",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/webpack.renderer.config.ts",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/src/renderer/global.d.ts",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/src/renderer/components/ProjectLibrary.tsx",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "tests/e2e/session-persistence.e2e.spec.ts",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/src/renderer/components/HazelMark.tsx",
+      "matchesPriorEngineeringFingerprint": true
+    },
+    {
+      "file": "apps/desktop/src/renderer/components/ProjectPoster.tsx",
+      "matchesPriorEngineeringFingerprint": true
+    }
+  ]
+}

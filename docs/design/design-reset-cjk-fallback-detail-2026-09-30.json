@@ -1,0 +1,583 @@
+[
+  {
+    "id": "I746:2007;725:1592",
+    "name": "Path",
+    "text": "docs/design/设计说明.md",
+    "segments": [
+      {
+        "characters": "docs/design/",
+        "start": 0,
+        "end": 12,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      },
+      {
+        "characters": "设计说明",
+        "start": 12,
+        "end": 16,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": ".md",
+        "start": 16,
+        "end": 19,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I746:2022;725:1602",
+    "name": "Path",
+    "text": "docs/archive/旧提案.md",
+    "segments": [
+      {
+        "characters": "docs/archive/",
+        "start": 0,
+        "end": 13,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      },
+      {
+        "characters": "旧提案",
+        "start": 13,
+        "end": 16,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": ".md",
+        "start": 16,
+        "end": 19,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I755:2149;725:1751",
+    "name": "Last event",
+    "text": "最后确认：task-example / event-12 / 09:28:12",
+    "segments": [
+      {
+        "characters": "最后确认：",
+        "start": 0,
+        "end": 5,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": "task-example / event-12 / 09:28:12",
+        "start": 5,
+        "end": 39,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I755:2167;725:1760",
+    "name": "Last event",
+    "text": "最后确认：task-example / event-12 / 09:28:12",
+    "segments": [
+      {
+        "characters": "最后确认：",
+        "start": 0,
+        "end": 5,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": "task-example / event-12 / 09:28:12",
+        "start": 5,
+        "end": 39,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I755:2186;725:1769",
+    "name": "Last event",
+    "text": "已确认：task-example / event-18 / stopped / 09:31:04",
+    "segments": [
+      {
+        "characters": "已确认：",
+        "start": 0,
+        "end": 4,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": "task-example / event-18 / stopped / 09:31:04",
+        "start": 4,
+        "end": 48,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I755:2204;725:1778",
+    "name": "Last event",
+    "text": "最后确认：task-example / event-12 / 09:28:12",
+    "segments": [
+      {
+        "characters": "最后确认：",
+        "start": 0,
+        "end": 5,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": "task-example / event-12 / 09:28:12",
+        "start": 5,
+        "end": 39,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I755:2223;725:1787",
+    "name": "Last event",
+    "text": "最后确认：task-example / event-12 / 09:28:12",
+    "segments": [
+      {
+        "characters": "最后确认：",
+        "start": 0,
+        "end": 5,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": "task-example / event-12 / 09:28:12",
+        "start": 5,
+        "end": 39,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I756:2057;725:1662",
+    "name": "Path",
+    "text": "artifacts/结构梳理.md",
+    "segments": [
+      {
+        "characters": "artifacts/",
+        "start": 0,
+        "end": 10,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      },
+      {
+        "characters": "结构梳理",
+        "start": 10,
+        "end": 14,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": ".md",
+        "start": 14,
+        "end": 17,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I756:2097;725:1636",
+    "name": "Path",
+    "text": "artifacts/结构梳理.md",
+    "segments": [
+      {
+        "characters": "artifacts/",
+        "start": 0,
+        "end": 10,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      },
+      {
+        "characters": "结构梳理",
+        "start": 10,
+        "end": 14,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": ".md",
+        "start": 14,
+        "end": 17,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I756:2115;725:1649",
+    "name": "Path",
+    "text": "artifacts/结构梳理.md",
+    "segments": [
+      {
+        "characters": "artifacts/",
+        "start": 0,
+        "end": 10,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      },
+      {
+        "characters": "结构梳理",
+        "start": 10,
+        "end": 14,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": ".md",
+        "start": 14,
+        "end": 17,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  },
+  {
+    "id": "I756:2141;725:1623",
+    "name": "Path",
+    "text": "artifacts/结构梳理.md",
+    "segments": [
+      {
+        "characters": "artifacts/",
+        "start": 0,
+        "end": 10,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      },
+      {
+        "characters": "结构梳理",
+        "start": 10,
+        "end": 14,
+        "fontSize": 12,
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": ""
+      },
+      {
+        "characters": ".md",
+        "start": 14,
+        "end": 17,
+        "fontSize": 12,
+        "fontName": {
+          "family": "JetBrains Mono",
+          "style": "Regular",
+          "variationSettings": {
+            "wght": 400
+          }
+        },
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 20
+        },
+        "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+      }
+    ]
+  }
+]

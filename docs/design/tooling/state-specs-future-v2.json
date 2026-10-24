@@ -1,0 +1,662 @@
+[
+  {
+    "key": "P",
+    "title": "设置与本机数据 · 受控恢复",
+    "desc": "所有连接与数据管理卡均为待实现的界面合同；配置成功不是任务授权。完整窗口见 P01 / P02。",
+    "tiles": [
+      {
+        "id": "P03",
+        "title": "尚未配置",
+        "badge": [
+          "Neutral",
+          "尚未配置运行器"
+        ],
+        "lead": "本机会话与只读工作区库仍可使用。",
+        "actions": [
+          [
+            "配置本地运行器",
+            "Primary"
+          ]
+        ],
+        "note": "焦点进入首个字段；不预填密钥、不默认远程Provider、不自动上传工作区。",
+        "future": true
+      },
+      {
+        "id": "P04",
+        "title": "连接中",
+        "badge": [
+          "Wait",
+          "正在检查连接"
+        ],
+        "fields": [
+          [
+            "Loading",
+            {
+              "Label": "本地运行器地址",
+              "Value": "http://127.0.0.1:3080",
+              "Progress message": "只检查端点，不提交任务或发送工作区内容"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "取消连接",
+            "Secondary"
+          ]
+        ],
+        "note": "取消后恢复原配置。健康检查只发最小必要信息，不能当成用户授权。",
+        "future": true
+      },
+      {
+        "id": "P05",
+        "title": "可用 / 能力受限",
+        "badge": [
+          "Info",
+          "连接可用 · 仅允许读取"
+        ],
+        "lead": "运行器：本地示例\n能力：只读观察\n不可用：写文件、执行命令、外发",
+        "actions": [
+          [
+            "查看连接详情",
+            "Secondary"
+          ]
+        ],
+        "note": "能力列表来自运行器合同；可用不等于任务成功。受限操作保留原因而不是可点击假按钮。",
+        "future": true
+      },
+      {
+        "id": "P06",
+        "title": "连接失败 / 凭据失效",
+        "fields": [
+          [
+            "Error",
+            {
+              "Label": "连接状态",
+              "Value": "凭据已失效",
+              "Error message": "无法建立连接。原本机记录未改变。"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "更新凭据",
+            "Primary"
+          ],
+          [
+            "取消",
+            "Secondary"
+          ]
+        ],
+        "note": "提示不回显密钥。失败后不偷偷切Provider；操作完成焦点回连接状态并播报。",
+        "future": true
+      },
+      {
+        "id": "P07",
+        "title": "只读范围",
+        "lead": "允许读取：D:/Project\n不包含：其他盘符、系统目录、凭据文件\n当前不可编辑：此任务已进入核对流程。",
+        "badge": [
+          "Neutral",
+          "只读 · 不包含模型外发"
+        ],
+        "note": "只读字段使用文本语义，信息可复制；不可编辑原因可见。改范围使旧批准失效。",
+        "future": true
+      },
+      {
+        "id": "P08",
+        "title": "导出前确认",
+        "lead": "将 3 条本机会话导出为明文 JSON。\n可能包含输入、路径与引用。不会自动上传。",
+        "fields": [
+          [
+            "Focus",
+            {
+              "Label": "本机导出目标",
+              "Value": "D:/Exports/pioneer-sessions.json",
+              "Helper": "仅写入你选定的文件；同名文件需再次确认"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "取消",
+            "Secondary"
+          ],
+          [
+            "确认导出",
+            "Primary"
+          ]
+        ],
+        "note": "选择位置后才导出；导出失败保留原数据。读屏先读敏感内容警告，不默认云同步目录。",
+        "future": true
+      },
+      {
+        "id": "P09",
+        "title": "删除单条会话",
+        "lead": "删除「设计调研」的本机记录与草稿。\n不会删除工作区文件；该记录不可恢复。",
+        "actions": [
+          [
+            "取消",
+            "Secondary",
+            "Focus"
+          ],
+          [
+            "删除此会话",
+            "Danger"
+          ]
+        ],
+        "note": "危险确认有明确对象。初始焦点取消，Esc取消；成功返回列表，失败保留原记录。",
+        "future": true
+      },
+      {
+        "id": "P10",
+        "title": "清空全部 · 二次确认",
+        "lead": "将清除全部 3 条本机会话、草稿与布局。\n工作区文件不会删除。此操作不可撤销。",
+        "fields": [
+          [
+            "Focus",
+            {
+              "Label": "输入「清空本机记录」",
+              "Value": "",
+              "Helper": "完全匹配后才启用清空；默认不勾选"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "取消",
+            "Secondary"
+          ],
+          [
+            "清空全部",
+            "Danger",
+            "Disabled"
+          ]
+        ],
+        "note": "清空独立于删除单条。只有显式匹配与最终确认才执行；取消不写数据。",
+        "future": true
+      },
+      {
+        "id": "P11",
+        "title": "清空失败",
+        "badge": [
+          "Error",
+          "未清空，原记录仍在"
+        ],
+        "lead": "无法取得数据写锁。没有删除任何记录。",
+        "actions": [
+          [
+            "返回数据管理",
+            "Secondary"
+          ],
+          [
+            "查看错误详情",
+            "Quiet"
+          ]
+        ],
+        "note": "这是失败结果样例，不报部分成功。导出成功另显示真实目标/数量/时间；无法确认时标结果未知。",
+        "future": true
+      },
+      {
+        "id": "P12",
+        "title": "坏档：停止写入",
+        "badge": [
+          "Error",
+          "本机数据无法读取"
+        ],
+        "lead": "原始文件已保留，已停止自动写入。\n不要创建空文件覆盖旧内容。",
+        "actions": [
+          [
+            "保留原件并诊断",
+            "Primary"
+          ],
+          [
+            "只读打开应用",
+            "Secondary"
+          ]
+        ],
+        "note": "诊断不上传数据；先确认字节级备份可读，失败则留在只读模式。不能把解析失败当空会话。",
+        "future": true
+      },
+      {
+        "id": "P13",
+        "title": "诊断与受控恢复",
+        "lead": "恢复来源：sessions.backup-20260929.json\n检查：版本兼容、结构有效\n预览：3 条会话；不会合并未知格式",
+        "actions": [
+          [
+            "取消",
+            "Secondary",
+            "Focus"
+          ],
+          [
+            "确认恢复副本",
+            "Primary"
+          ]
+        ],
+        "note": "备份与原件保留；成功后才允许写入。恢复失败回到诊断，不能循环覆盖最后好副本。",
+        "future": true
+      },
+      {
+        "id": "P14",
+        "title": "迁移失败 / 回退",
+        "badge": [
+          "Error",
+          "数据迁移未完成"
+        ],
+        "lead": "新格式未启用，继续使用迁移前有效版本。\n已保留原文件与迁移失败副本。",
+        "actions": [
+          [
+            "查看诊断",
+            "Secondary"
+          ],
+          [
+            "重试迁移",
+            "Quiet"
+          ]
+        ],
+        "note": "验证完整后原子替换；回退失败仍只读。不得自动删除、静默降级或把坏档迁移成空档。",
+        "future": true
+      }
+    ]
+  },
+  {
+    "key": "R",
+    "title": "意图、授权与运行 · 不混淆确认层级",
+    "desc": "全部为 M3/M4 设计示例，无运行器、事件或授权效力。完整窗口见 R01 / R02。",
+    "tiles": [
+      {
+        "id": "R03",
+        "title": "意图已核对，尚未授权",
+        "badge": [
+          "Info",
+          "目标已就绪 · 未获执行许可"
+        ],
+        "lead": "目标：梳理设计文档\n范围：D:/Project/Pioneer/docs\n不做：修改文件、执行命令、外发",
+        "actions": [
+          [
+            "核对本次权限",
+            "Primary"
+          ],
+          [
+            "修改目标",
+            "Secondary"
+          ]
+        ],
+        "note": "ready 只证明意图核对。修改目标/版本使已有权限失效；焦点回变更摘要。",
+        "future": true
+      },
+      {
+        "id": "R04",
+        "title": "读取权限",
+        "components": [
+          [
+            "Permission Card",
+            "Awaiting",
+            {}
+          ]
+        ],
+        "note": "读完整对象、路径、权限、接收方、时效后才能批准。拒绝保留讨论；默认不批准。",
+        "future": true
+      },
+      {
+        "id": "R05",
+        "title": "写入权限 · 单独批准",
+        "lead": "对象：docs/outline.md\n预计动作：以提案 v3 替换当前 v2\n后果：文件内容改变\n恢复：应用前快照 snapshot-example\n时效：一次；磁盘版本改变即失效",
+        "actions": [
+          [
+            "取消",
+            "Secondary",
+            "Focus"
+          ],
+          [
+            "核对差异与写入",
+            "Primary"
+          ]
+        ],
+        "note": "示例，不沿用只读批准。先校验最新版本与备份，再启用最终写入；无可恢复证据则拒绝。",
+        "future": true
+      },
+      {
+        "id": "R06",
+        "title": "执行命令权限",
+        "lead": "命令：pnpm test:contract\n工作目录：D:/Project/Pioneer\n范围：仅该命令；测试可能产生缓存\n网络：不允许\n超时：120秒；只对本次有效",
+        "actions": [
+          [
+            "拒绝",
+            "Secondary",
+            "Focus"
+          ],
+          [
+            "批准本次命令",
+            "Primary"
+          ]
+        ],
+        "note": "命令/参数/目录改变需重签；不把任意shell或后续命令打包进本次批准。",
+        "future": true
+      },
+      {
+        "id": "R07",
+        "title": "批准提交中 / 可撤回",
+        "badge": [
+          "Wait",
+          "正在提交本次决定"
+        ],
+        "actions": [
+          [
+            "提交中",
+            "Primary",
+            "Loading"
+          ],
+          [
+            "撤回决定",
+            "Secondary"
+          ]
+        ],
+        "note": "提交未确认前不启动；重复点击幂等。撤回只有得到确认才显示已撤回，否则标未知待核对。",
+        "future": true
+      },
+      {
+        "id": "R08",
+        "title": "已拒绝 / 已撤回",
+        "components": [
+          [
+            "Permission Card",
+            "Denied",
+            {}
+          ]
+        ],
+        "note": "拒绝/确认撤回后不得执行；回到讨论但保留决定审计。想继续必须发起新的范围请求。",
+        "future": true
+      },
+      {
+        "id": "R09",
+        "title": "过期 / 目标版本改变",
+        "components": [
+          [
+            "Permission Card",
+            "Expired",
+            {}
+          ]
+        ],
+        "note": "凭证绑定目标、动作、版本、接收方与时效。任一变化旧批准失效；不可静默续期。",
+        "future": true
+      },
+      {
+        "id": "R10",
+        "title": "执行中",
+        "components": [
+          [
+            "Run Status",
+            "Running",
+            {}
+          ]
+        ],
+        "note": "事件携带taskId/sessionId/sequence/time与来源。关闭会话不停止；停止始终可达。",
+        "future": true
+      },
+      {
+        "id": "R11",
+        "title": "已请求停止",
+        "components": [
+          [
+            "Run Status",
+            "Stopping",
+            {}
+          ]
+        ],
+        "note": "按钮请求≠任务停止；保留输出和最后事件。等待确认不能显示已停止或回到可重试。",
+        "future": true
+      },
+      {
+        "id": "R12",
+        "title": "已确认停止",
+        "components": [
+          [
+            "Run Status",
+            "Stopped",
+            {
+              "Last event": "已确认：task-example / event-18 / stopped / 09:31:04"
+            }
+          ]
+        ],
+        "note": "仅收到运行器停止事件才显示该状态；已有产物保留但注明是否完整。",
+        "future": true
+      },
+      {
+        "id": "R13",
+        "title": "断连 / 结果未知",
+        "components": [
+          [
+            "Run Status",
+            "Unknown",
+            {}
+          ]
+        ],
+        "note": "连接中断不等于失败，不自动重新执行。重连先核对任务、事件序列与授权时效。",
+        "future": true
+      },
+      {
+        "id": "R14",
+        "title": "失败与核对后的恢复",
+        "components": [
+          [
+            "Run Status",
+            "Failed",
+            {}
+          ]
+        ],
+        "lead": "重连核对后：若仍运行→恢复观察；已停止→显示确认；无法核对→保留未知。",
+        "note": "重试是新执行，重新核对目标版本和权限。不能用“恢复连接”按钮绕过执行批准。",
+        "future": true
+      }
+    ]
+  },
+  {
+    "key": "A",
+    "title": "审阅与交付 · 同版本与真实来源",
+    "desc": "全部为未来能力设计示例，不代表真实文件变更、运行产物或测试结果。完整窗口见 A01 / A02。",
+    "tiles": [
+      {
+        "id": "A03",
+        "title": "没有改动 / 没有产物",
+        "badge": [
+          "Neutral",
+          "当前没有可审阅的改动"
+        ],
+        "lead": "这里仅显示有来源的差异与产物。\n不会为填充页面生成假 Diff 或验收记录。",
+        "actions": [
+          [
+            "返回会话",
+            "Secondary"
+          ]
+        ],
+        "note": "空态焦点回会话；未接运行器时说明原因，不展示“全部通过”。",
+        "future": true
+      },
+      {
+        "id": "A04",
+        "title": "不可读 / 无权限",
+        "badge": [
+          "Error",
+          "无法读取此文件"
+        ],
+        "lead": "文件：docs/private.md\n原因：读取被拒绝\n未显示或缓存文件内容",
+        "actions": [
+          [
+            "查看权限范围",
+            "Secondary"
+          ],
+          [
+            "跳过此文件",
+            "Quiet"
+          ]
+        ],
+        "note": "不可读不伪装成空文件。跳过保留未覆盖清单；不会自动提权。",
+        "future": true
+      },
+      {
+        "id": "A05",
+        "title": "二进制 / 过大文件",
+        "lead": "image.bin · 12 MB · 二进制\narchive.txt · 40 MB · 超出预览上限\n仅显示元信息；未读取全文。",
+        "actions": [
+          [
+            "查看文件详情",
+            "Secondary"
+          ]
+        ],
+        "note": "不绘制虚构文本Diff；外部打开是独立可见动作，先核对路径与安全边界。",
+        "future": true
+      },
+      {
+        "id": "A06",
+        "title": "部分结果 / 来源失效",
+        "components": [
+          [
+            "Artifact Card",
+            "Stale",
+            {}
+          ]
+        ],
+        "lead": "3 个文件仅有 2 个可核对。旧预览仍可读，但不代表当前版本。",
+        "note": "总览明确部分覆盖与缺口。不能以局部通过代替整项验收。",
+        "future": true
+      },
+      {
+        "id": "A07",
+        "title": "磁盘版本冲突",
+        "badge": [
+          "Error",
+          "当前文件已变更，旧批准失效"
+        ],
+        "lead": "提案基于 v2；磁盘现为 v4。\n不会直接覆盖，也不自动合并未知变更。",
+        "actions": [
+          [
+            "重新读取并核对",
+            "Primary"
+          ],
+          [
+            "保留提案副本",
+            "Secondary"
+          ]
+        ],
+        "note": "显示base/current/proposal来源；重新生成差异和写入批准，保留用户修改。",
+        "future": true
+      },
+      {
+        "id": "A08",
+        "title": "产物生成中 / 失败",
+        "components": [
+          [
+            "Artifact Card",
+            "Generating",
+            {}
+          ],
+          [
+            "Artifact Card",
+            "Failed",
+            {}
+          ]
+        ],
+        "note": "生成状态来自真实事件；失败保留已确认部分和诊断。不能凭预览打开判定生成成功。",
+        "future": true
+      },
+      {
+        "id": "A09",
+        "title": "预览 / 文件 / 验收同版本",
+        "components": [
+          [
+            "Artifact Card",
+            "Ready",
+            {}
+          ]
+        ],
+        "lead": "预览：结构梳理.md · v3\n文件清单：artifacts/结构梳理.md · v3\n验收目标：同一产物 v3",
+        "note": "切换局部Tab保持同版本与来源。版本切换使旧验收仅作历史，不自动算当前通过。",
+        "future": true
+      },
+      {
+        "id": "A10",
+        "title": "验收未运行",
+        "components": [
+          [
+            "Validation",
+            "Never",
+            {}
+          ]
+        ],
+        "note": "显示目标、方法、范围；没有exit code与时间就不造通过记录。运行验证本身可能需命令授权。",
+        "future": true
+      },
+      {
+        "id": "A11",
+        "title": "验收进行中",
+        "components": [
+          [
+            "Validation",
+            "Running",
+            {
+              "Method": "方法：示例脚本核对产物v3的章节与引用"
+            }
+          ]
+        ],
+        "lead": "示例命令：node verify-artifact.mjs --version v3\n目标：结构梳理.md · v3\n开始：09:32:00 · 退出码：尚无",
+        "note": "可查看日志与停止入口；观察中断显示未知。未结束的测试不能标PASS。",
+        "future": true
+      },
+      {
+        "id": "A12",
+        "title": "验收通过 · 有限范围",
+        "components": [
+          [
+            "Validation",
+            "Passed",
+            {
+              "Method": "方法：示例脚本核对产物v3的章节与引用"
+            }
+          ]
+        ],
+        "lead": "示例命令：node verify-artifact.mjs --version v3\n时间：09:32:00–09:32:08 · 退出码：0\n范围：章节与引用；不覆盖Electron功能",
+        "note": "这里是手工设计示例。生产通过只能来自该修订的真实记录；局部测试不能冒充完整pnpm check。",
+        "future": true
+      },
+      {
+        "id": "A13",
+        "title": "验收失败",
+        "components": [
+          [
+            "Validation",
+            "Failed",
+            {
+              "Method": "方法：示例脚本核对产物v3的章节与引用"
+            }
+          ]
+        ],
+        "lead": "示例命令：node verify-artifact.mjs --version v3\n时间：09:32:00–09:32:06 · 退出码：1\n范围：章节与引用；失败日志保留",
+        "actions": [
+          [
+            "查看失败记录",
+            "Secondary"
+          ]
+        ],
+        "note": "显示可定位错误与版本；修复后重跑生成新记录，不能覆盖或隐藏旧失败。",
+        "future": true
+      },
+      {
+        "id": "A14",
+        "title": "发布 / 外发独立批准",
+        "lead": "接收方：用户选定的远程仓库\n内容：提案v3的指定文件\n不包含：会话、凭据、其他目录\n动作：仅创建PR，不合并或发布",
+        "actions": [
+          [
+            "取消",
+            "Secondary",
+            "Focus"
+          ],
+          [
+            "核对外发内容",
+            "Primary"
+          ]
+        ],
+        "note": "默认不外发。列清接收方、文件、可见范围与后果；批准写本机文件不包含上传权限。",
+        "future": true
+      }
+    ]
+  }
+]

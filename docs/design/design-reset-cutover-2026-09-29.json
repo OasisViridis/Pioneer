@@ -1,0 +1,116 @@
+{
+  "previous": {
+    "pages": [
+      {
+        "id": "132:2",
+        "name": "main"
+      },
+      {
+        "id": "257:725",
+        "name": "archive"
+      },
+      {
+        "id": "299:725",
+        "name": "workbench"
+      },
+      {
+        "id": "717:1574",
+        "name": "design-system"
+      },
+      {
+        "id": "717:1575",
+        "name": "components · controls"
+      },
+      {
+        "id": "717:1576",
+        "name": "components · navigation"
+      },
+      {
+        "id": "717:1577",
+        "name": "components · workbench"
+      },
+      {
+        "id": "717:1578",
+        "name": "main · v2 reset"
+      },
+      {
+        "id": "743:1574",
+        "name": "states · v2"
+      },
+      {
+        "id": "757:1574",
+        "name": "responsive · v2"
+      }
+    ],
+    "oldNames": {
+      "main": "main",
+      "workbench": "workbench",
+      "newMain": "main · v2 reset"
+    }
+  },
+  "mutatedNodeIds": [
+    "717:1578",
+    "717:1574",
+    "717:1575",
+    "717:1576",
+    "717:1577",
+    "743:1574",
+    "757:1574",
+    "132:2",
+    "299:725",
+    "257:725",
+    "733:1576",
+    "733:1577"
+  ],
+  "pages": [
+    {
+      "id": "717:1578",
+      "name": "main"
+    },
+    {
+      "id": "717:1574",
+      "name": "design-system"
+    },
+    {
+      "id": "717:1575",
+      "name": "components · controls"
+    },
+    {
+      "id": "717:1576",
+      "name": "components · navigation"
+    },
+    {
+      "id": "717:1577",
+      "name": "components · workbench"
+    },
+    {
+      "id": "743:1574",
+      "name": "states · v2"
+    },
+    {
+      "id": "757:1574",
+      "name": "responsive · v2"
+    },
+    {
+      "id": "132:2",
+      "name": "archive · main (pre-v2)"
+    },
+    {
+      "id": "299:725",
+      "name": "archive · workbench (pre-v2)"
+    },
+    {
+      "id": "257:725",
+      "name": "archive"
+    }
+  ],
+  "guide": {
+    "screenId": "Main index",
+    "nodeId": "733:1574",
+    "wrapperId": "733:1574",
+    "width": 1440,
+    "height": 240,
+    "potentialOverflows": []
+  },
+  "rollback": "Restore previous page names and previous.pages order; no content nodes removed"
+}

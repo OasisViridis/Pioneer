@@ -1,0 +1,807 @@
+{
+  "date": "2026-09-30",
+  "scope": "static Figma recheck with explicit documented exceptions; no prototype clicking or Electron",
+  "result": {
+    "pageId": "717:1578",
+    "pageName": "main",
+    "problems": [],
+    "prototype": {
+      "starts": [],
+      "reactionNodes": 0
+    },
+    "screens": [
+      {
+        "screenId": "L00",
+        "nodeId": "733:1584",
+        "name": "L00 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": false,
+        "instances": 8
+      },
+      {
+        "screenId": "L01",
+        "nodeId": "733:1587",
+        "name": "L01 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": false,
+        "instances": 12
+      },
+      {
+        "screenId": "S01",
+        "nodeId": "733:1709",
+        "name": "S01 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": false,
+        "instances": 12
+      },
+      {
+        "screenId": "S02",
+        "nodeId": "733:1712",
+        "name": "S02 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": false,
+        "instances": 12
+      },
+      {
+        "screenId": "D01",
+        "nodeId": "740:1702",
+        "name": "D01 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": false,
+        "instances": 19
+      },
+      {
+        "screenId": "D02",
+        "nodeId": "740:1705",
+        "name": "D02 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": true,
+        "instances": 22
+      },
+      {
+        "screenId": "P01",
+        "nodeId": "740:1895",
+        "name": "P01 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": false,
+        "instances": 13
+      },
+      {
+        "screenId": "P02",
+        "nodeId": "740:1898",
+        "name": "P02 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": true,
+        "instances": 14
+      },
+      {
+        "screenId": "R01",
+        "nodeId": "741:1864",
+        "name": "R01 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": true,
+        "instances": 18
+      },
+      {
+        "screenId": "R02",
+        "nodeId": "741:1867",
+        "name": "R02 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": true,
+        "instances": 18
+      },
+      {
+        "screenId": "A01",
+        "nodeId": "741:2048",
+        "name": "A01 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": true,
+        "instances": 18
+      },
+      {
+        "screenId": "A02",
+        "nodeId": "741:2051",
+        "name": "A02 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": true,
+        "instances": 20
+      },
+      {
+        "screenId": "D12",
+        "nodeId": "760:2057",
+        "name": "D12 / Window",
+        "width": 1440,
+        "height": 900,
+        "future": false,
+        "instances": 20
+      }
+    ],
+    "qa": {
+      "structure": {
+        "pageId": "717:1578",
+        "name": "main",
+        "nodes": 1007,
+        "texts": 430,
+        "instances": 206,
+        "roots": [
+          {
+            "id": "733:1574",
+            "name": "Pioneer · v2 开发稿",
+            "x": 200,
+            "y": 200,
+            "width": 1440,
+            "height": 240
+          },
+          {
+            "id": "733:1578",
+            "name": "L · 工作区库",
+            "x": 200,
+            "y": 576,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "733:1703",
+            "name": "S · 本机会话",
+            "x": 200,
+            "y": 1792,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "740:1696",
+            "name": "D · 布局与上下文",
+            "x": 200,
+            "y": 3008,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "740:1889",
+            "name": "P · 设置与本机数据",
+            "x": 200,
+            "y": 4224,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "741:1858",
+            "name": "R · 未来权限与运行",
+            "x": 200,
+            "y": 5440,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "741:2042",
+            "name": "A · 未来审阅与交付",
+            "x": 200,
+            "y": 6656,
+            "width": 3040,
+            "height": 1036
+          },
+          {
+            "id": "760:2051",
+            "name": "D · 交付空态 · 本机能力边界",
+            "x": 200,
+            "y": 7852,
+            "width": 3040,
+            "height": 1036
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": [
+            {
+              "id": "740:1746",
+              "parent": "740:1745",
+              "bounds": [1, 1, 844, 48],
+              "parentSize": [844, 682]
+            },
+            {
+              "id": "740:1767",
+              "parent": "740:1766",
+              "bounds": [1, 1, 524, 48],
+              "parentSize": [524, 682]
+            },
+            {
+              "id": "740:1827",
+              "parent": "740:1826",
+              "bounds": [1, 1, 824, 48],
+              "parentSize": [824, 682]
+            },
+            {
+              "id": "740:1848",
+              "parent": "740:1847",
+              "bounds": [1, 1, 544, 48],
+              "parentSize": [544, 682]
+            },
+            {
+              "id": "741:1910",
+              "parent": "741:1909",
+              "bounds": [1, 1, 744, 48],
+              "parentSize": [744, 636]
+            },
+            {
+              "id": "741:1928",
+              "parent": "741:1927",
+              "bounds": [1, 1, 624, 48],
+              "parentSize": [624, 636]
+            },
+            {
+              "id": "741:1999",
+              "parent": "741:1998",
+              "bounds": [1, 1, 744, 48],
+              "parentSize": [744, 636]
+            },
+            {
+              "id": "741:2023",
+              "parent": "741:2022",
+              "bounds": [1, 1, 624, 48],
+              "parentSize": [624, 636]
+            },
+            {
+              "id": "741:2094",
+              "parent": "741:2093",
+              "bounds": [1, 1, 844, 48],
+              "parentSize": [844, 636]
+            },
+            {
+              "id": "741:2122",
+              "parent": "741:2121",
+              "bounds": [1, 1, 524, 48],
+              "parentSize": [524, 636]
+            },
+            {
+              "id": "741:2189",
+              "parent": "741:2188",
+              "bounds": [1, 1, 844, 48],
+              "parentSize": [844, 636]
+            },
+            {
+              "id": "741:2216",
+              "parent": "741:2215",
+              "bounds": [1, 1, 524, 48],
+              "parentSize": [524, 636]
+            },
+            {
+              "id": "760:2098",
+              "parent": "760:2097",
+              "bounds": [1, 1, 840, 48],
+              "parentSize": [840, 682]
+            },
+            {
+              "id": "760:2119",
+              "parent": "760:2118",
+              "bounds": [1, 1, 528, 48],
+              "parentSize": [528, 682]
+            }
+          ]
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [
+            {
+              "id": "733:1588",
+              "parent": "733:1584",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1616",
+              "parent": "733:1584",
+              "bounds": [1, 65, 1440, 802],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1630",
+              "parent": "733:1584",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1632",
+              "parent": "733:1587",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1659",
+              "parent": "733:1587",
+              "bounds": [1, 65, 1440, 802],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1701",
+              "parent": "733:1587",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1713",
+              "parent": "733:1709",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1741",
+              "parent": "733:1709",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1752",
+              "parent": "733:1709",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1767",
+              "parent": "733:1709",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1769",
+              "parent": "733:1712",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1796",
+              "parent": "733:1712",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1807",
+              "parent": "733:1712",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "733:1824",
+              "parent": "733:1712",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1706",
+              "parent": "740:1702",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1733",
+              "parent": "740:1702",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1744",
+              "parent": "740:1702",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1753",
+              "parent": "740:1745",
+              "bounds": [1, 49, 844, 52],
+              "parentSize": [844, 682]
+            },
+            {
+              "id": "740:1758",
+              "parent": "740:1745",
+              "bounds": [1, 101, 844, 580],
+              "parentSize": [844, 682]
+            },
+            {
+              "id": "740:1772",
+              "parent": "740:1766",
+              "bounds": [1, 49, 524, 632],
+              "parentSize": [524, 682]
+            },
+            {
+              "id": "740:1785",
+              "parent": "740:1702",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1787",
+              "parent": "740:1705",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1814",
+              "parent": "740:1705",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1825",
+              "parent": "740:1705",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1832",
+              "parent": "740:1826",
+              "bounds": [1, 49, 824, 632],
+              "parentSize": [824, 682]
+            },
+            {
+              "id": "740:1853",
+              "parent": "740:1847",
+              "bounds": [1, 49, 544, 632],
+              "parentSize": [544, 682]
+            },
+            {
+              "id": "740:1887",
+              "parent": "740:1705",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1899",
+              "parent": "740:1895",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1926",
+              "parent": "740:1895",
+              "bounds": [1, 65, 1440, 802],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1954",
+              "parent": "740:1895",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1956",
+              "parent": "740:1898",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:1983",
+              "parent": "740:1898",
+              "bounds": [1, 65, 1440, 802],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "740:2014",
+              "parent": "740:1898",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1868",
+              "parent": "741:1864",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1895",
+              "parent": "741:1864",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1906",
+              "parent": "741:1864",
+              "bounds": [1, 137, 1440, 46],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1908",
+              "parent": "741:1864",
+              "bounds": [1, 183, 1440, 684],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1915",
+              "parent": "741:1909",
+              "bounds": [1, 49, 744, 586],
+              "parentSize": [744, 636]
+            },
+            {
+              "id": "741:1933",
+              "parent": "741:1927",
+              "bounds": [1, 49, 624, 586],
+              "parentSize": [624, 636]
+            },
+            {
+              "id": "741:1955",
+              "parent": "741:1864",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1957",
+              "parent": "741:1867",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1984",
+              "parent": "741:1867",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1995",
+              "parent": "741:1867",
+              "bounds": [1, 137, 1440, 46],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:1997",
+              "parent": "741:1867",
+              "bounds": [1, 183, 1440, 684],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2004",
+              "parent": "741:1998",
+              "bounds": [1, 49, 744, 586],
+              "parentSize": [744, 636]
+            },
+            {
+              "id": "741:2028",
+              "parent": "741:2022",
+              "bounds": [1, 49, 624, 586],
+              "parentSize": [624, 636]
+            },
+            {
+              "id": "741:2040",
+              "parent": "741:1867",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2052",
+              "parent": "741:2048",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2079",
+              "parent": "741:2048",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2090",
+              "parent": "741:2048",
+              "bounds": [1, 137, 1440, 46],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2092",
+              "parent": "741:2048",
+              "bounds": [1, 183, 1440, 684],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2099",
+              "parent": "741:2093",
+              "bounds": [1, 49, 844, 586],
+              "parentSize": [844, 636]
+            },
+            {
+              "id": "741:2127",
+              "parent": "741:2121",
+              "bounds": [1, 49, 524, 586],
+              "parentSize": [524, 636]
+            },
+            {
+              "id": "741:2145",
+              "parent": "741:2048",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2147",
+              "parent": "741:2051",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2174",
+              "parent": "741:2051",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2185",
+              "parent": "741:2051",
+              "bounds": [1, 137, 1440, 46],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2187",
+              "parent": "741:2051",
+              "bounds": [1, 183, 1440, 684],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "741:2194",
+              "parent": "741:2188",
+              "bounds": [1, 49, 844, 586],
+              "parentSize": [844, 636]
+            },
+            {
+              "id": "741:2221",
+              "parent": "741:2215",
+              "bounds": [1, 49, 524, 586],
+              "parentSize": [524, 636]
+            },
+            {
+              "id": "741:2237",
+              "parent": "741:2051",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "760:2058",
+              "parent": "760:2057",
+              "bounds": [1, 1, 1440, 64],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "760:2085",
+              "parent": "760:2057",
+              "bounds": [1, 65, 1440, 72],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "760:2096",
+              "parent": "760:2057",
+              "bounds": [1, 137, 1440, 730],
+              "parentSize": [1440, 900]
+            },
+            {
+              "id": "760:2103",
+              "parent": "760:2097",
+              "bounds": [1, 49, 840, 632],
+              "parentSize": [840, 682]
+            },
+            {
+              "id": "760:2124",
+              "parent": "760:2118",
+              "bounds": [1, 49, 528, 632],
+              "parentSize": [528, 682]
+            },
+            {
+              "id": "760:2137",
+              "parent": "760:2057",
+              "bounds": [1, 867, 1440, 32],
+              "parentSize": [1440, 900]
+            }
+          ],
+          "cjkCodeFallbacks": [
+            {
+              "id": "I740:1856;725:1582",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I740:1871;725:1592",
+              "start": 5,
+              "end": 9,
+              "text": "项目说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "I741:2007;725:1778",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "741:2100",
+              "start": 18,
+              "end": 22,
+              "text": "示例基线",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 14,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 22
+              }
+            },
+            {
+              "id": "741:2100",
+              "start": 28,
+              "end": 30,
+              "text": "提案",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 14,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 22
+              }
+            }
+          ]
+        }
+      },
+      "contrast": {
+        "pageId": "717:1578",
+        "name": "main",
+        "tested": 430,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    }
+  }
+}

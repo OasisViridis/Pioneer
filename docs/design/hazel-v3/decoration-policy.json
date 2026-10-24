@@ -1,0 +1,275 @@
+{
+  "version": "3.2.0",
+  "date": "2026-10-01",
+  "scope": "Single-slot empty-state diversity; no added UI function, task capability or window-chrome implementation.",
+  "budget": {
+    "brandMark": 20,
+    "maxIllustrationsPerView": 1,
+    "emptyIllustration": 88,
+    "compactEmptyIllustration": 64,
+    "accessory": 48,
+    "safeTextGap": 24,
+    "hideConversationBelow": 380,
+    "activeTaskIllustrations": 0,
+    "errorPermissionUnknownIllustrations": 0,
+    "hideConversationBoundary": "max-width: 380px (inclusive)"
+  },
+  "selection": {
+    "onboarding": "greendou-organizing.png",
+    "pools": {
+      "focus": [
+        "greendou-listening.png",
+        "paper-butterfly.png",
+        "jelly-ribbon-charm.png",
+        "jelly-outline.svg"
+      ],
+      "review": [
+        "greendou-reading.png",
+        "cherry-bookmark.png",
+        "silver-paper-fold.svg"
+      ],
+      "delivery": [
+        "jelly-companion.png",
+        "uniform-ribbon.png",
+        "ribbon-outline.svg",
+        "cherry-pair.svg"
+      ]
+    },
+    "method": "Last UTF-16 code unit of immutable session.id modulo layout pool length. Pure/deterministic/local; no timer, random, activity, title, path or task status.",
+    "emptyOnly": true,
+    "removeOnMessagesOrSaveError": true,
+    "reservedNoRuntime": [
+      "jelly-mark.svg",
+      "compass-seal.svg"
+    ]
+  },
+  "assets": [
+    {
+      "file": "greendou-organizing.png",
+      "sha256": "0d54c45287fcf4f0390dc1feb57af1ba509e5482aacf3bb48c10666e131a8bdf",
+      "size": 88,
+      "new": false,
+      "intrinsicWidth": 1254
+    },
+    {
+      "file": "greendou-listening.png",
+      "sha256": "0504fbf0fead98d3a2af3e8e17bc7c1360ef09aecd4fa439a40736ecbe010505",
+      "size": 88,
+      "new": false,
+      "intrinsicWidth": 1254
+    },
+    {
+      "file": "paper-butterfly.png",
+      "sha256": "d273b13d41293c5479ca66e44286389254f3fae14a3369f7178651a298c7cf8b",
+      "size": 48,
+      "new": false,
+      "intrinsicWidth": 1254
+    },
+    {
+      "file": "jelly-ribbon-charm.png",
+      "sha256": "4b5b7abe12d9d259d0f74ebcf651b824ad86164020af541aafd05e91b7c9029e",
+      "size": 48,
+      "new": false,
+      "intrinsicWidth": 1254
+    },
+    {
+      "file": "jelly-outline.svg",
+      "sha256": "49a6d0165613ec0913834f95e03264cac6892b6664caaeed89a6a384bf82604c",
+      "size": 48,
+      "new": true,
+      "intrinsicWidth": null
+    },
+    {
+      "file": "greendou-reading.png",
+      "sha256": "103817d6de0e73a5f803ae359b2e3253482b79bd7778d8bc9aaf28b02c1f03e2",
+      "size": 88,
+      "new": false,
+      "intrinsicWidth": 1254
+    },
+    {
+      "file": "cherry-bookmark.png",
+      "sha256": "4304c77ed8ab9f52e10efca1737fcd41cdce4b20e28843e226bace231a1e858b",
+      "size": 48,
+      "new": false,
+      "intrinsicWidth": 1254
+    },
+    {
+      "file": "silver-paper-fold.svg",
+      "sha256": "4c4316d859ca45094b921274f07586fc11d8270420533c56c3c23a651f8ef1f5",
+      "size": 48,
+      "new": true,
+      "intrinsicWidth": null
+    },
+    {
+      "file": "jelly-companion.png",
+      "sha256": "585be08d03ce7668c74790114cacd1a1ecd948e41fabf76e494392d17c68a6f7",
+      "size": 88,
+      "new": false,
+      "intrinsicWidth": 1254
+    },
+    {
+      "file": "uniform-ribbon.png",
+      "sha256": "bfbe5ac5e8c79a9c7b17b4765bec87eb47a4bf74ee5e540b626afe8735b9374f",
+      "size": 48,
+      "new": false,
+      "intrinsicWidth": 1295
+    },
+    {
+      "file": "ribbon-outline.svg",
+      "sha256": "99c3dc492867a4de712a0335547f7a664f7a4d2c7c3557355af6360b39162b4a",
+      "size": 48,
+      "new": false,
+      "intrinsicWidth": null
+    },
+    {
+      "file": "cherry-pair.svg",
+      "sha256": "3a465d752198008391ab7eda84893806a6a6541705fea6ad30b20374d9a8d86b",
+      "size": 48,
+      "new": false,
+      "intrinsicWidth": null
+    }
+  ],
+  "illustrativeFixtures": {
+    "session:0": {
+      "focus": "greendou-listening.png",
+      "review": "greendou-reading.png",
+      "delivery": "jelly-companion.png"
+    },
+    "session:1": {
+      "focus": "paper-butterfly.png",
+      "review": "cherry-bookmark.png",
+      "delivery": "uniform-ribbon.png"
+    },
+    "session:2": {
+      "focus": "jelly-ribbon-charm.png",
+      "review": "silver-paper-fold.svg",
+      "delivery": "ribbon-outline.svg"
+    },
+    "session:3": {
+      "focus": "jelly-outline.svg",
+      "review": "greendou-reading.png",
+      "delivery": "cherry-pair.svg"
+    }
+  },
+  "runtimeIntegrated": true,
+  "figma": {
+    "setId": "880:312",
+    "boardId": "880:313",
+    "components": {
+      "greendou-organizing.png": {
+        "64": "880:217",
+        "88": "880:214"
+      },
+      "greendou-listening.png": {
+        "64": "880:223",
+        "88": "880:220"
+      },
+      "greendou-reading.png": {
+        "64": "880:229",
+        "88": "880:226"
+      },
+      "jelly-companion.png": {
+        "64": "880:234",
+        "88": "880:232"
+      },
+      "paper-butterfly.png": {
+        "64": "880:239",
+        "88": "880:236"
+      },
+      "cherry-bookmark.png": {
+        "64": "880:245",
+        "88": "880:242"
+      },
+      "jelly-ribbon-charm.png": {
+        "64": "880:251",
+        "88": "880:248"
+      },
+      "uniform-ribbon.png": {
+        "64": "880:256",
+        "88": "880:254"
+      },
+      "ribbon-outline.svg": {
+        "64": "880:264",
+        "88": "880:258"
+      },
+      "cherry-pair.svg": {
+        "64": "880:276",
+        "88": "880:270"
+      },
+      "silver-paper-fold.svg": {
+        "64": "880:288",
+        "88": "880:282"
+      },
+      "jelly-outline.svg": {
+        "64": "880:303",
+        "88": "880:294"
+      }
+    },
+    "variantCount": 24,
+    "currentPlacements": [
+      {
+        "id": "857:1476",
+        "file": "cherry-bookmark.png",
+        "previous": {
+          "id": "856:1276",
+          "w": 88,
+          "h": 88,
+          "parent": "838:1506",
+          "x": 472,
+          "y": 0
+        },
+        "master": "880:242",
+        "w": 88,
+        "h": 88,
+        "parent": "838:1506",
+        "x": 472,
+        "y": 0,
+        "art": [
+          {
+            "id": "I857:1476;880:243",
+            "w": 48,
+            "h": 48,
+            "x": 40,
+            "y": 0
+          }
+        ]
+      },
+      {
+        "id": "857:1478",
+        "file": "paper-butterfly.png",
+        "previous": {
+          "id": "856:1286",
+          "w": 64,
+          "h": 64,
+          "parent": "838:1692",
+          "x": 472,
+          "y": 0
+        },
+        "master": "880:239",
+        "w": 64,
+        "h": 64,
+        "parent": "838:1692",
+        "x": 472,
+        "y": 0,
+        "art": [
+          {
+            "id": "I857:1478;880:240",
+            "w": 48,
+            "h": 48,
+            "x": 16,
+            "y": 0
+          }
+        ]
+      }
+    ],
+    "foundation": {
+      "id": "857:1480",
+      "w": 1440,
+      "h": 364
+    },
+    "additionalPages": 0,
+    "additionalVariables": 0,
+    "additionalStyles": 0
+  },
+  "runtimeEvidence": "qa/decoration-review-2026-10-01.json"
+}

@@ -1,0 +1,242 @@
+{
+  "status": "PASS_NATIVE_STRUCTURE",
+  "date": "2026-10-02",
+  "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+  "page": "824:1279",
+  "section": "925:2",
+  "cover": "925:3",
+  "notes": "925:1819",
+  "pages": [
+    {
+      "id": "824:1279",
+      "name": "00 · MAKE F9 · 当前设计"
+    },
+    {
+      "id": "824:1276",
+      "name": "10 · Hazel × Claude · 规范"
+    },
+    {
+      "id": "824:1278",
+      "name": "11 · Hazel × Claude · 组件"
+    },
+    {
+      "id": "824:1277",
+      "name": "12 · Hazel · 素材"
+    },
+    {
+      "id": "257:725",
+      "name": "99 · ARCHIVE"
+    }
+  ],
+  "screens": [
+    {
+      "id": "925:31",
+      "name": "L01 · 工作区媒体库",
+      "w": 1280,
+      "h": 720
+    },
+    {
+      "id": "925:194",
+      "name": "W01 · 新会话 · 完整基础面板",
+      "w": 1280,
+      "h": 720
+    },
+    {
+      "id": "925:324",
+      "name": "W02 · 执行中 · 按需授权",
+      "w": 1280,
+      "h": 720
+    },
+    {
+      "id": "925:490",
+      "name": "W03 · 对话 ＋ 改动面板",
+      "w": 1280,
+      "h": 720
+    },
+    {
+      "id": "925:665",
+      "name": "W04 · 报表结果 ＋ 产物预览",
+      "w": 1280,
+      "h": 720
+    },
+    {
+      "id": "925:941",
+      "name": "W05 · 验收标准 ＋ 证据",
+      "w": 1280,
+      "h": 720
+    },
+    {
+      "id": "925:1157",
+      "name": "W06 · 可停靠面板 · 三组布局",
+      "w": 1280,
+      "h": 720
+    },
+    {
+      "id": "925:1351",
+      "name": "R01 · 窄窗 · 对话仍完整",
+      "w": 640,
+      "h": 720
+    },
+    {
+      "id": "925:1482",
+      "name": "R02 · 窄窗 · 显式打开预览",
+      "w": 640,
+      "h": 720
+    },
+    {
+      "id": "925:1715",
+      "name": "S01 · 设置 · 外观与动效",
+      "w": 1280,
+      "h": 720
+    }
+  ],
+  "counts": {
+    "FRAME": 641,
+    "GROUP": 12,
+    "VECTOR": 331,
+    "TEXT": 512,
+    "INSTANCE": 338,
+    "ELLIPSE": 14,
+    "RECTANGLE": 3
+  },
+  "fonts": [
+    "Noto Serif SC/Medium",
+    "Noto Sans SC/Medium",
+    "Noto Sans SC/Regular",
+    "JetBrains Mono/Regular",
+    "JetBrains Mono/Medium",
+    "Noto Sans SC/Bold"
+  ],
+  "missingFonts": [],
+  "images": [
+    {
+      "id": "I925:191;927:1260",
+      "name": "Make source / hazel-jelly.png",
+      "w": 100,
+      "h": 100,
+      "hash": "647d35789b1b819cb556150ead8a44cf10f7b7be"
+    },
+    {
+      "id": "I925:321;856:1292",
+      "name": "Illustration / paper-butterfly.png",
+      "w": 48,
+      "h": 48,
+      "hash": "26204c0fd21fdece726b270e1e2c7e2e78a57e0e"
+    },
+    {
+      "id": "I925:938;927:1260",
+      "name": "Make source / hazel-jelly.png",
+      "w": 100,
+      "h": 100,
+      "hash": "647d35789b1b819cb556150ead8a44cf10f7b7be"
+    }
+  ],
+  "links": 53,
+  "archiveSection": "922:5678",
+  "old": [
+    {
+      "id": "836:1282",
+      "name": "R02 · 专注 · 中屏 · v3",
+      "w": 900,
+      "h": 832,
+      "nodes": 75,
+      "reactions": 0
+    },
+    {
+      "id": "836:1281",
+      "name": "R01 · 工作区 · 窄屏 · v3",
+      "w": 640,
+      "h": 832,
+      "nodes": 69,
+      "reactions": 0
+    },
+    {
+      "id": "836:1280",
+      "name": "S01 · 设置 · v3",
+      "w": 1440,
+      "h": 932,
+      "nodes": 39,
+      "reactions": 0
+    },
+    {
+      "id": "836:1279",
+      "name": "W02 · 审阅 · 尚无内容 · v3",
+      "w": 1440,
+      "h": 932,
+      "nodes": 79,
+      "reactions": 0
+    },
+    {
+      "id": "836:1278",
+      "name": "W01 · 专注 · 新会话 · v3",
+      "w": 1440,
+      "h": 932,
+      "nodes": 74,
+      "reactions": 0
+    },
+    {
+      "id": "836:1277",
+      "name": "L00 · 添加工作区 · v3",
+      "w": 1440,
+      "h": 932,
+      "nodes": 30,
+      "reactions": 0
+    },
+    {
+      "id": "836:1276",
+      "name": "L01 · 工作区 · v3",
+      "w": 1440,
+      "h": 932,
+      "nodes": 70,
+      "reactions": 0
+    }
+  ],
+  "mutatedNodeIds": [
+    "925:7",
+    "925:8",
+    "925:82",
+    "925:83",
+    "925:104",
+    "925:105",
+    "925:244",
+    "925:245",
+    "925:369",
+    "925:370",
+    "925:535",
+    "925:536",
+    "925:710",
+    "925:711",
+    "925:986",
+    "925:987",
+    "925:1202",
+    "925:1203",
+    "925:1385",
+    "925:1386",
+    "925:1516",
+    "925:1517",
+    "925:1760",
+    "925:1761"
+  ],
+  "fullUiRasterCount": 0,
+  "archiveRetention": {
+    "verifiedOnPage": "257:725",
+    "originalDescendantCountsRetained": true,
+    "sectionDescendants": 444,
+    "sections": 13
+  },
+  "visualValidation": {
+    "compositionReviewed": true,
+    "componentsReviewed": true,
+    "libraryAt1280Reviewed": true,
+    "reportAt1280Reviewed": true,
+    "targetedFixes": [
+      "warm canvas on library",
+      "source Make pet asset in same slot",
+      "SVG stroke scale",
+      "remove suggestion-to-execution navigation"
+    ]
+  },
+  "prototypeScope": "53 explicit click-only storyboard links, not the Make React state machine; drag/input/windows remain references",
+  "componentSection": "921:497",
+  "petComponent": "927:1259"
+}

@@ -1,0 +1,366 @@
+{
+  "date": "2026-09-30",
+  "scope": "strict static audit: exact 1px right-boundary geometry and adjacent linked Code-style CJK fallback; no runtime certification",
+  "result": {
+    "pageId": "717:1577",
+    "pageName": "components · workbench",
+    "problems": [],
+    "qa": {
+      "structure": {
+        "pageId": "717:1577",
+        "name": "components · workbench",
+        "nodes": 346,
+        "texts": 174,
+        "instances": 40,
+        "roots": [
+          {
+            "id": "725:1574",
+            "name": "01 · Context Row",
+            "x": 200,
+            "y": 200,
+            "width": 1200,
+            "height": 618
+          },
+          {
+            "id": "725:1611",
+            "name": "02 · Artifact Card",
+            "x": 200,
+            "y": 978,
+            "width": 1200,
+            "height": 802
+          },
+          {
+            "id": "725:1671",
+            "name": "03 · Permission Card",
+            "x": 200,
+            "y": 1940,
+            "width": 1200,
+            "height": 986
+          },
+          {
+            "id": "725:1739",
+            "name": "04 · Run Status",
+            "x": 200,
+            "y": 3086,
+            "width": 1200,
+            "height": 968
+          },
+          {
+            "id": "725:1796",
+            "name": "05 · Validation",
+            "x": 200,
+            "y": 4214,
+            "width": 1200,
+            "height": 782
+          },
+          {
+            "id": "725:1844",
+            "name": "06 · Composer",
+            "x": 200,
+            "y": 5156,
+            "width": 1200,
+            "height": 1394
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": [
+            {
+              "id": "725:1582",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 12,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1592",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 12,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1602",
+              "start": 12,
+              "end": 16,
+              "text": "设计说明",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 12,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1623",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1636",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1649",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1662",
+              "start": 10,
+              "end": 14,
+              "text": "结构梳理",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 0,
+                "end": 10,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1751",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1760",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1769",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1778",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            },
+            {
+              "id": "725:1787",
+              "start": 0,
+              "end": 5,
+              "text": "最后确认：",
+              "font": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontSize": 12,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 20
+              },
+              "adjacentCodePeer": {
+                "start": 5,
+                "end": 39,
+                "textStyleId": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+              }
+            }
+          ]
+        }
+      },
+      "contrast": {
+        "pageId": "717:1577",
+        "name": "components · workbench",
+        "tested": 174,
+        "minRatio": 4.9923240032632155,
+        "failures": [],
+        "unknown": []
+      }
+    }
+  }
+}

@@ -1,0 +1,268 @@
+{
+  "id": "Pioneer-Make-F9",
+  "date": "2026-10-01",
+  "makeFileKey": "tcAZjzVznDTlTGcMqVGXqj",
+  "editorLabel": "Version 9 · 完善对话功能与布局",
+  "archive": "pioneer-make-f9.zip",
+  "archiveBytes": 7134970,
+  "sha256": "fd1758332c24001ad36949fd7e96850d107a507589b5bd5587bfdbc630b5d1cd",
+  "source": "User supplied ZIP",
+  "archiveRole": "Reference only; not installed, executed, or extracted into active application",
+  "entries": [
+    {
+      "path": ".figma/make/analyze-routes",
+      "bytes": 70,
+      "sha256": "7a81578bcfa5ba5f2105d7165e0cd2d8d1c6151d2a0c5ba766b3ef1c824ee788"
+    },
+    {
+      "path": ".figma/make/deploy",
+      "bytes": 88,
+      "sha256": "fe35b0aff744f5aa8bb16eb1590c720ff6b0ff4bce9ede78f73e02bbfd7e7f3f"
+    },
+    {
+      "path": ".figma/make/deploy-preview",
+      "bytes": 163,
+      "sha256": "3b82ce85bad03ce7b0e4e288a6e40e5caf119c41a392de3d3420ff17c42d0e8b"
+    },
+    {
+      "path": ".figma/make/dev",
+      "bytes": 52,
+      "sha256": "91f795e632539988b0fe3de57084839f41a827ba5c274590388f7d0650ec2314"
+    },
+    {
+      "path": ".figma/make/dev.json",
+      "bytes": 959,
+      "sha256": "e78b91a2a63456a6eab9756c3fb6d767dfe3673adcef1dcfe4f52c010238c3e7"
+    },
+    {
+      "path": ".figma/make/format",
+      "bytes": 63,
+      "sha256": "254598ef0d1a61c3abc2a426c7065487ca140c8f9b90e4d66ea05dff20832335"
+    },
+    {
+      "path": ".figma/make/install",
+      "bytes": 90,
+      "sha256": "90705d33ffd6b0700def7f2f304fd24ae04e17af5fc7d8437df44cf546d64891"
+    },
+    {
+      "path": ".figma/make/langserver",
+      "bytes": 106,
+      "sha256": "e6b9034d28bbc82e6333a3b77f8d5fd593ac54eeed7e4e76569329fdbb534fff"
+    },
+    {
+      "path": ".figma/make/site.json",
+      "bytes": 304,
+      "sha256": "d0656a6b012b3c2f9ac18d231bb5789cf7198b65f6645772e3473615db6a79de"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 7728,
+      "sha256": "fdd53ecc7bf79a69d3ef228ec98e0151f10e02702b90b553f04785b61db68354"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 424,
+      "sha256": "6770e60e045a25964f62df2a396a19b3f5c402facbf43c73c125b021b2fc5674"
+    },
+    {
+      "path": ".mise.toml",
+      "bytes": 43,
+      "sha256": "6d2834ef5f78a7dc4c384570a62b895137fdf63df171d237f0747932bd001435"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 2321,
+      "sha256": "b39f6ead09e39e9f6eb5a132342519fb7bf9c77ab14522f0da38edf9224c6b77"
+    },
+    {
+      "path": "CLAUDE.md",
+      "bytes": 11,
+      "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
+    },
+    {
+      "path": "index.html",
+      "bytes": 440,
+      "sha256": "768eac67e6271681de61c23f1c94a6bf688607bbad2d0bccafd8f4bfe789a079"
+    },
+    {
+      "path": "package.json",
+      "bytes": 585,
+      "sha256": "2e6f3ba99dbd8a4d567d2f058699451326aa73e3d95fb6a9e555654a99d4f7f2"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 29455,
+      "sha256": "811aecd91f12d4f77c1b88c0ea1edd5127b6bf2150e668e62659cadaac366460"
+    },
+    {
+      "path": "public/assets/hazel/cherry-bookmark.png",
+      "bytes": 684965,
+      "sha256": "4304c77ed8ab9f52e10efca1737fcd41cdce4b20e28843e226bace231a1e858b"
+    },
+    {
+      "path": "public/assets/hazel/cherry-pair.svg",
+      "bytes": 761,
+      "sha256": "fdd4eda1617d6b8f65cc811673f99f97e7e515f598ac9fa2f1f603cdca336c22"
+    },
+    {
+      "path": "public/assets/hazel/compass-seal.svg",
+      "bytes": 599,
+      "sha256": "ac1a9dc7797f78a1156f45c04012ef299ac265d682a158848221c9ddc823ee5c"
+    },
+    {
+      "path": "public/assets/hazel/greendou-listening.png",
+      "bytes": 1025208,
+      "sha256": "0504fbf0fead98d3a2af3e8e17bc7c1360ef09aecd4fa439a40736ecbe010505"
+    },
+    {
+      "path": "public/assets/hazel/greendou-organizing.png",
+      "bytes": 1142689,
+      "sha256": "0d54c45287fcf4f0390dc1feb57af1ba509e5482aacf3bb48c10666e131a8bdf"
+    },
+    {
+      "path": "public/assets/hazel/greendou-reading.png",
+      "bytes": 1035490,
+      "sha256": "103817d6de0e73a5f803ae359b2e3253482b79bd7778d8bc9aaf28b02c1f03e2"
+    },
+    {
+      "path": "public/assets/hazel/jelly-companion.png",
+      "bytes": 925794,
+      "sha256": "585be08d03ce7668c74790114cacd1a1ecd948e41fabf76e494392d17c68a6f7"
+    },
+    {
+      "path": "public/assets/hazel/jelly-mark.svg",
+      "bytes": 627,
+      "sha256": "8da4f6402ce5a2c2c4f638d9f18817d7b74e076fae16b05ab9a45220c0f17c12"
+    },
+    {
+      "path": "public/assets/hazel/jelly-outline.svg",
+      "bytes": 1339,
+      "sha256": "f0b8d73b889e429d1e1674840a114c5079fa278c50e8dbf521551ebdf53ce6ef"
+    },
+    {
+      "path": "public/assets/hazel/jelly-ribbon-charm.png",
+      "bytes": 803609,
+      "sha256": "4b5b7abe12d9d259d0f74ebcf651b824ad86164020af541aafd05e91b7c9029e"
+    },
+    {
+      "path": "public/assets/hazel/paper-butterfly.png",
+      "bytes": 727046,
+      "sha256": "d273b13d41293c5479ca66e44286389254f3fae14a3369f7178651a298c7cf8b"
+    },
+    {
+      "path": "public/assets/hazel/ribbon-outline.svg",
+      "bytes": 1127,
+      "sha256": "afe4decac415209071bbf2061f4344f9287a749c88a93dfcf991ae86f6b112f4"
+    },
+    {
+      "path": "public/assets/hazel/silver-paper-fold.svg",
+      "bytes": 656,
+      "sha256": "3075794b66055d199792b320e2451a09eb5bc4aab31545ce5f6f0919269afe47"
+    },
+    {
+      "path": "public/assets/hazel/uniform-ribbon.png",
+      "bytes": 703549,
+      "sha256": "bfbe5ac5e8c79a9c7b17b4765bec87eb47a4bf74ee5e540b626afe8735b9374f"
+    },
+    {
+      "path": "public/assets/ref/hazel-jelly.png",
+      "bytes": 120946,
+      "sha256": "a47e06e5006240722b06ee7c1c182e2b900e835f5928476aa48d12e3ac70ff60"
+    },
+    {
+      "path": "src/App.tsx",
+      "bytes": 19616,
+      "sha256": "5574208acba0883f5440b55d478a2b547e81a726efec7c31b2d6b6c34fcdff8c"
+    },
+    {
+      "path": "src/index.css",
+      "bytes": 4721,
+      "sha256": "d76e8d39bcd3a852748cbeed96c32a3bbb163276bd31bd9d5d33944a5855b057"
+    },
+    {
+      "path": "src/main.tsx",
+      "bytes": 232,
+      "sha256": "5f49dce6e6cc4b5d678cf529ef892af0ab7dfa6afb300b11ad559224019b8b05"
+    },
+    {
+      "path": "src/pioneer/Library.tsx",
+      "bytes": 16004,
+      "sha256": "92a11d7fdd181b17d4dda9203a4a02d2043421a38179a631249f4c38653411ef"
+    },
+    {
+      "path": "src/pioneer/Modules.tsx",
+      "bytes": 9724,
+      "sha256": "c26f2de96dd4421ac50e0d326c9ecde84ff879b56f19ff58a4d75f1907116c75"
+    },
+    {
+      "path": "src/pioneer/Notes.tsx",
+      "bytes": 6964,
+      "sha256": "ca7f4302655b119f5b1a8a7dfc6ac1035bdbacdf0b7a51656076284e66940c45"
+    },
+    {
+      "path": "src/pioneer/Pet.tsx",
+      "bytes": 9603,
+      "sha256": "f9aa873e77dfda21dcb58a3ec3b6d55140ef1835894d427f3448d5a7691b3370"
+    },
+    {
+      "path": "src/pioneer/Session.tsx",
+      "bytes": 54412,
+      "sha256": "97c1f9e15550424197904526c474f46bd7f95f5fd9ecbbe66f1c8c0deba8ed8d"
+    },
+    {
+      "path": "src/pioneer/Settings.tsx",
+      "bytes": 7648,
+      "sha256": "a8deae8945de1f2662ef10113af2de775a66b4b0ea48b0b264fdc1277201f377"
+    },
+    {
+      "path": "src/pioneer/Shell.tsx",
+      "bytes": 22990,
+      "sha256": "bbe0d28aa0e86cf5b663ca58dc58835b8a32b5953441b04d11f4f618f8c9d5a5"
+    },
+    {
+      "path": "src/pioneer/Workbench.tsx",
+      "bytes": 19632,
+      "sha256": "03d537ed3604665be56f791de7845e6602664189822e241d96eac13c8edd5093"
+    },
+    {
+      "path": "src/pioneer/data.ts",
+      "bytes": 32341,
+      "sha256": "b37fdf800618a094138f59d6f5bd838de7701bdb6c4bf33646d99e3f750f596a"
+    },
+    {
+      "path": "src/pioneer/flow.ts",
+      "bytes": 14160,
+      "sha256": "b1a6520c8e47fa5df4afce88e5d018d21d2b97eb90796dd97c58035802e1cc42"
+    },
+    {
+      "path": "src/pioneer/layout.ts",
+      "bytes": 5859,
+      "sha256": "4f538d50f682f83fc9485d09a03728d99143b319a297a811d37fc0b151e10f04"
+    },
+    {
+      "path": "src/pioneer/store.ts",
+      "bytes": 3349,
+      "sha256": "5e1b34f6cdcbc9fc3e2bc121dc1353604af9a0c09d4f2962e7e24ebe3496085e"
+    },
+    {
+      "path": "src/pioneer/ui.tsx",
+      "bytes": 10168,
+      "sha256": "992060d6a4ac86b7fa1687404ea023d9c465cac90f5cbaf30906068f55912143"
+    },
+    {
+      "path": "src/vite-env.d.ts",
+      "bytes": 38,
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+    },
+    {
+      "path": "tsconfig.json",
+      "bytes": 556,
+      "sha256": "9a1e96d63eaccd5416b2f78ecaccf2b3a27ca71e213fa5859cf5349c66123bf9"
+    },
+    {
+      "path": "vite.config.ts",
+      "bytes": 11751,
+      "sha256": "414a100df447463da3c94c92497f734cc4c9fb2e1ea883ddf9a8ad71ba1e9c15"
+    }
+  ]
+}

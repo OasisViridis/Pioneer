@@ -1,0 +1,83 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static Figma delivery verification; not prototype or Electron",
+  "result": {
+    "pageId": "757:1574",
+    "pageName": "responsive · v2",
+    "problems": [],
+    "screens": [
+      {
+        "screenId": "V01",
+        "nodeId": "758:1579",
+        "name": "V01 / Window",
+        "width": 1280,
+        "height": 800,
+        "future": false,
+        "instances": 19
+      },
+      {
+        "screenId": "V02",
+        "nodeId": "758:1668",
+        "name": "V02 / Window",
+        "width": 900,
+        "height": 700,
+        "future": false,
+        "instances": 10
+      },
+      {
+        "screenId": "V03",
+        "nodeId": "758:1720",
+        "name": "V03 / Window",
+        "width": 640,
+        "height": 720,
+        "future": false,
+        "instances": 10
+      },
+      {
+        "screenId": "V04",
+        "nodeId": "758:1769",
+        "name": "V04 / Window",
+        "width": 1280,
+        "height": 560,
+        "future": false,
+        "instances": 13
+      },
+      {
+        "screenId": "V05",
+        "nodeId": "758:1835",
+        "name": "V05 / Window",
+        "width": 759,
+        "height": 720,
+        "future": false,
+        "instances": 10
+      },
+      {
+        "screenId": "V06",
+        "nodeId": "758:1886",
+        "name": "V06 / Window",
+        "width": 760,
+        "height": 720,
+        "future": false,
+        "instances": 10
+      },
+      {
+        "screenId": "V07",
+        "nodeId": "761:1766",
+        "name": "V07 / Window",
+        "width": 640,
+        "height": 720,
+        "future": true,
+        "instances": 11
+      },
+      {
+        "screenId": "V08",
+        "nodeId": "761:1826",
+        "name": "V08 / Window",
+        "width": 1280,
+        "height": 560,
+        "future": true,
+        "instances": 12
+      }
+    ]
+  }
+}

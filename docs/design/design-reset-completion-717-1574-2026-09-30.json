@@ -1,0 +1,98 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static Figma delivery verification; not prototype or Electron",
+  "result": {
+    "pageId": "717:1574",
+    "pageName": "design-system",
+    "problems": [],
+    "foundations": {
+      "collections": [
+        {
+          "id": "VariableCollectionId:716:1574",
+          "count": 36
+        },
+        {
+          "id": "VariableCollectionId:716:1575",
+          "count": 24
+        },
+        {
+          "id": "VariableCollectionId:716:1576",
+          "count": 24
+        }
+      ],
+      "colors": 24,
+      "dimensions": 24,
+      "textStyles": 9,
+      "effects": [
+        {
+          "id": "S:43eabf74852819294e4c160b892848375d07c072,",
+          "name": "Pioneer v2 / Elevation / Flat",
+          "effects": []
+        },
+        {
+          "id": "S:6362f0e1103f41c9d20b804efecca4ce35cba08a,",
+          "name": "Pioneer v2 / Elevation / Overlay",
+          "effects": [
+            {
+              "type": "DROP_SHADOW",
+              "visible": true,
+              "radius": 24,
+              "boundVariables": {},
+              "color": {
+                "r": 0.12941177189350128,
+                "g": 0.16470588743686676,
+                "b": 0.23137255012989044,
+                "a": 0.11999999731779099
+              },
+              "offset": {
+                "x": 0,
+                "y": 8
+              },
+              "spread": 0,
+              "blendMode": "NORMAL",
+              "showShadowBehindNode": true
+            }
+          ]
+        }
+      ],
+      "boards": [
+        {
+          "id": "717:1579",
+          "name": "00 · 从对话出发，把工作留在眼前",
+          "width": 1440,
+          "height": 548
+        },
+        {
+          "id": "717:1603",
+          "name": "01 · 颜色承担角色，不承担装饰",
+          "width": 1440,
+          "height": 712
+        },
+        {
+          "id": "717:1661",
+          "name": "02 · 清楚的字阶，安静的密度",
+          "width": 1440,
+          "height": 746
+        },
+        {
+          "id": "717:1704",
+          "name": "03 · 一个窗口，一条会话主轴",
+          "width": 1440,
+          "height": 616
+        },
+        {
+          "id": "717:1733",
+          "name": "04 · 先说事实，再说影响和下一步",
+          "width": 1440,
+          "height": 824
+        },
+        {
+          "id": "717:1755",
+          "name": "05 · 开发稿重置与交接",
+          "width": 1440,
+          "height": 510
+        }
+      ]
+    }
+  }
+}

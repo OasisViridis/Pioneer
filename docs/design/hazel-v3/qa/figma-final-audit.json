@@ -1,0 +1,415 @@
+{
+  "date": "2026-09-30",
+  "pass": true,
+  "tokenVerification": {
+    "collections": [
+      {
+        "id": "VariableCollectionId:824:1280",
+        "name": "Pioneer v3 / Primitives",
+        "count": 37,
+        "modes": 1
+      },
+      {
+        "id": "VariableCollectionId:824:1281",
+        "name": "Pioneer v3 / Color",
+        "count": 25,
+        "modes": 1
+      },
+      {
+        "id": "VariableCollectionId:824:1282",
+        "name": "Pioneer v3 / Geometry",
+        "count": 24,
+        "modes": 1
+      }
+    ],
+    "variables": 86,
+    "semanticAliases": 49,
+    "styles": [
+      {
+        "id": "S:5ce375458898e9d925f03f5f797fada951cf49f8,",
+        "name": "Pioneer v3 / Heading/Large",
+        "family": "Noto Sans SC",
+        "style": "Bold",
+        "size": 24,
+        "line": 32
+      },
+      {
+        "id": "S:745380c35fef498e5978e532149f73b1516df9ac,",
+        "name": "Pioneer v3 / Heading/Medium",
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "size": 20,
+        "line": 28
+      },
+      {
+        "id": "S:8c2b30c059b83e8821616cee0873c7b408e97db6,",
+        "name": "Pioneer v3 / Body/Reading",
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "size": 15,
+        "line": 24
+      },
+      {
+        "id": "S:b29951ab5628efa4d06fc249138110390c09c732,",
+        "name": "Pioneer v3 / Body/Default",
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "size": 14,
+        "line": 22
+      },
+      {
+        "id": "S:d9ae42b98c941df8be748e26ce753b1f0572fa89,",
+        "name": "Pioneer v3 / UI/Label",
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "size": 14,
+        "line": 20
+      },
+      {
+        "id": "S:c0fd9a8014ec3f4afb2fe66a0d0d537c80d1b2b2,",
+        "name": "Pioneer v3 / UI/Small",
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "size": 12,
+        "line": 18
+      },
+      {
+        "id": "S:20d78c8a4d3860d5c12eb6049b5615d23d80f3e8,",
+        "name": "Pioneer v3 / UI/Small Strong",
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "size": 12,
+        "line": 18
+      },
+      {
+        "id": "S:6f98ead86832db917a35a9c8f9f4aa4d4387af87,",
+        "name": "Pioneer v3 / Code/Default",
+        "family": "JetBrains Mono",
+        "style": "Regular",
+        "size": 14,
+        "line": 22
+      },
+      {
+        "id": "S:092d7c5d7ea4d2da0e94ac9ed4ea68efb8d70352,",
+        "name": "Pioneer v3 / Code/Small",
+        "family": "JetBrains Mono",
+        "style": "Regular",
+        "size": 12,
+        "line": 20
+      },
+      {
+        "id": "S:a445943b463ff274e13637b8c2421f028b46ae0b,",
+        "name": "Pioneer v3 / Display/Welcome",
+        "family": "Noto Serif SC",
+        "style": "Medium",
+        "size": 28,
+        "line": 40
+      },
+      {
+        "id": "S:9db57ac50d12e40b23a3eb3bf167c1fbcbdcf727,",
+        "name": "Pioneer v3 / UI/Card Title",
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "size": 16,
+        "line": 24
+      }
+    ],
+    "frames": [
+      {
+        "id": "824:1379",
+        "name": "Hazel × Claude / Quiet companion",
+        "width": 1440,
+        "height": 200
+      },
+      {
+        "id": "824:1382",
+        "name": "Color / Roles",
+        "width": 1440,
+        "height": 376
+      },
+      {
+        "id": "824:1422",
+        "name": "Typography / Read first",
+        "width": 1440,
+        "height": 684
+      },
+      {
+        "id": "824:1435",
+        "name": "Decoration / Budget",
+        "width": 1440,
+        "height": 200
+      },
+      {
+        "id": "824:1438",
+        "name": "Components / Contract",
+        "width": 1440,
+        "height": 176
+      },
+      {
+        "id": "824:1441",
+        "name": "Delivery / Evidence",
+        "width": 1440,
+        "height": 176
+      }
+    ],
+    "errors": []
+  },
+  "components": {
+    "sets": [
+      {
+        "id": "830:1276",
+        "name": "Pioneer v3 / Button",
+        "variants": 24
+      },
+      {
+        "id": "830:1353",
+        "name": "Pioneer v3 / Field",
+        "variants": 5
+      },
+      {
+        "id": "830:1379",
+        "name": "Pioneer v3 / Status",
+        "variants": 6
+      },
+      {
+        "id": "830:1392",
+        "name": ".Pioneer v3 / Close Button",
+        "variants": 3
+      },
+      {
+        "id": "830:1399",
+        "name": "Pioneer v3 / Session Tab",
+        "variants": 4
+      },
+      {
+        "id": "830:1426",
+        "name": "Pioneer v3 / Local Tab",
+        "variants": 4
+      },
+      {
+        "id": "830:1435",
+        "name": "Pioneer v3 / Workspace Poster",
+        "variants": 3
+      },
+      {
+        "id": "830:1463",
+        "name": "Pioneer v3 / Panel Header",
+        "variants": 2
+      },
+      {
+        "id": "830:1474",
+        "name": "Pioneer v3 / Session Row",
+        "variants": 3
+      },
+      {
+        "id": "830:1490",
+        "name": "Pioneer v3 / Context Row",
+        "variants": 3
+      },
+      {
+        "id": "830:1524",
+        "name": "Pioneer v3 / Artifact Card",
+        "variants": 4
+      },
+      {
+        "id": "830:1593",
+        "name": "Pioneer v3 / Permission Card",
+        "variants": 4
+      },
+      {
+        "id": "830:1666",
+        "name": "Pioneer v3 / Run Status",
+        "variants": 5
+      },
+      {
+        "id": "830:1720",
+        "name": "Pioneer v3 / Validation",
+        "variants": 4
+      },
+      {
+        "id": "830:1773",
+        "name": "Pioneer v3 / Composer",
+        "variants": 7
+      }
+    ],
+    "variantTotal": 81,
+    "nestedWrong": [],
+    "contrastIssues": [],
+    "reactionCount": 0,
+    "pass": true,
+    "note": "14 families / 78 variants + 3 internal Close variants. Leading-dot internal set membership validated by captured component IDs."
+  },
+  "main": {
+    "page": "824:1279",
+    "editableTextNodes": 176,
+    "instanceCount": 68,
+    "fontFamilies": [
+      "Noto Sans SC",
+      "Noto Serif SC",
+      "JetBrains Mono"
+    ],
+    "badBindings": [],
+    "badStyles": [],
+    "badInstances": [],
+    "flattenedScreenImages": 0,
+    "reactionCount": 0,
+    "screens": [
+      {
+        "id": "L01",
+        "nodeId": "838:1277",
+        "width": 1440,
+        "height": 900,
+        "overflowingText": [],
+        "illustrations": 0
+      },
+      {
+        "id": "L00",
+        "nodeId": "838:1350",
+        "width": 1440,
+        "height": 900,
+        "overflowingText": [],
+        "illustrations": 1
+      },
+      {
+        "id": "W01",
+        "nodeId": "838:1379",
+        "width": 1440,
+        "height": 900,
+        "overflowingText": [],
+        "illustrations": 1
+      },
+      {
+        "id": "W02",
+        "nodeId": "838:1455",
+        "width": 1440,
+        "height": 900,
+        "overflowingText": [],
+        "illustrations": 1
+      },
+      {
+        "id": "S01",
+        "nodeId": "838:1530",
+        "width": 1440,
+        "height": 900,
+        "overflowingText": [],
+        "illustrations": 0
+      },
+      {
+        "id": "R01",
+        "nodeId": "838:1569",
+        "width": 640,
+        "height": 800,
+        "overflowingText": [],
+        "illustrations": 0
+      },
+      {
+        "id": "R02",
+        "nodeId": "838:1641",
+        "width": 900,
+        "height": 800,
+        "overflowingText": [],
+        "illustrations": 1
+      }
+    ]
+  },
+  "assets": {
+    "assets": [
+      {
+        "file": "cherry-pair.svg",
+        "nodeId": "834:1280",
+        "type": "COMPONENT",
+        "vectors": 4,
+        "imageFills": 0
+      },
+      {
+        "file": "compass-seal.svg",
+        "nodeId": "834:1284",
+        "type": "COMPONENT",
+        "vectors": 3,
+        "imageFills": 0
+      },
+      {
+        "file": "jelly-companion.png",
+        "nodeId": "834:1288",
+        "type": "COMPONENT",
+        "vectors": 0,
+        "imageFills": 1
+      },
+      {
+        "file": "jelly-mark.svg",
+        "nodeId": "834:1292",
+        "type": "COMPONENT",
+        "vectors": 2,
+        "imageFills": 0
+      },
+      {
+        "file": "ribbon-outline.svg",
+        "nodeId": "834:1296",
+        "type": "COMPONENT",
+        "vectors": 4,
+        "imageFills": 0
+      },
+      {
+        "file": "uniform-ribbon.png",
+        "nodeId": "834:1300",
+        "type": "COMPONENT",
+        "vectors": 0,
+        "imageFills": 1
+      }
+    ],
+    "referenceImageNodes": 12,
+    "originalArtOnApplicationPages": false,
+    "boards": [
+      {
+        "id": "834:1276",
+        "name": "Assets"
+      },
+      {
+        "id": "834:1307",
+        "name": "Reference ledger"
+      }
+    ]
+  },
+  "visualInspection": {
+    "passingScreenshotNodes": [
+      "824:1382",
+      "834:1276",
+      "834:1307",
+      "830:1276",
+      "830:1435",
+      "838:1277",
+      "838:1350",
+      "838:1379",
+      "838:1455",
+      "838:1530",
+      "838:1569",
+      "838:1641"
+    ],
+    "fixes": [
+      "palette wrapping",
+      "header/filter fixed widths",
+      "welcome auto height",
+      "composer reading width"
+    ],
+    "intentionalExceptions": [
+      "R01 extends below clipped viewport, as scrolling content",
+      "Figma state-contract Composer differs in height from runtime",
+      "Windows font fallback differs from Figma Noto"
+    ]
+  },
+  "historicalPagesRetained": [
+    "717:1574",
+    "717:1575",
+    "717:1576",
+    "717:1577",
+    "717:1578",
+    "743:1574",
+    "757:1574",
+    "132:2",
+    "257:725",
+    "299:725"
+  ],
+  "noLibraryPublish": true,
+  "codeConnect": "not configured",
+  "notRuntimeProof": true
+}

@@ -1,0 +1,186 @@
+{
+  "problems": [],
+  "collections": [
+    {
+      "id": "VariableCollectionId:716:1574",
+      "name": "Pioneer v2 / Primitives",
+      "count": 36,
+      "modes": [
+        {
+          "name": "Value",
+          "modeId": "716:0"
+        }
+      ]
+    },
+    {
+      "id": "VariableCollectionId:716:1575",
+      "name": "Pioneer v2 / Color",
+      "count": 24,
+      "modes": [
+        {
+          "name": "Light",
+          "modeId": "716:1"
+        }
+      ]
+    },
+    {
+      "id": "VariableCollectionId:716:1576",
+      "name": "Pioneer v2 / Geometry",
+      "count": 24,
+      "modes": [
+        {
+          "name": "Base",
+          "modeId": "716:2"
+        }
+      ]
+    }
+  ],
+  "colorsChecked": 24,
+  "dimensionsChecked": 24,
+  "styles": [
+    {
+      "name": "Pioneer v2 / Heading/Large",
+      "id": "S:257c6c917d8fa2dde989032051b51b26f3c9a197,",
+      "fontName": {
+        "family": "Noto Sans SC",
+        "style": "Bold",
+        "variationSettings": {
+          "wght": 700
+        }
+      },
+      "fontSize": 24,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 32
+      }
+    },
+    {
+      "name": "Pioneer v2 / Heading/Medium",
+      "id": "S:5f654470ee0fa802090097da484862b9991ae33e,",
+      "fontName": {
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "variationSettings": {
+          "wght": 500
+        }
+      },
+      "fontSize": 20,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 28
+      }
+    },
+    {
+      "name": "Pioneer v2 / Body/Reading",
+      "id": "S:009108471da5abf19de0f60cac5d933e051e0b67,",
+      "fontName": {
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "fontSize": 15,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 24
+      }
+    },
+    {
+      "name": "Pioneer v2 / Body/Default",
+      "id": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,",
+      "fontName": {
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "fontSize": 14,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 22
+      }
+    },
+    {
+      "name": "Pioneer v2 / UI/Label",
+      "id": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,",
+      "fontName": {
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "variationSettings": {
+          "wght": 500
+        }
+      },
+      "fontSize": 14,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 20
+      }
+    },
+    {
+      "name": "Pioneer v2 / UI/Small",
+      "id": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,",
+      "fontName": {
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "fontSize": 12,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 18
+      }
+    },
+    {
+      "name": "Pioneer v2 / UI/Small Strong",
+      "id": "S:162f281c8522b6bd9b95f7172ec5385575cedc60,",
+      "fontName": {
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "variationSettings": {
+          "wght": 500
+        }
+      },
+      "fontSize": 12,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 18
+      }
+    },
+    {
+      "name": "Pioneer v2 / Code/Default",
+      "id": "S:c2b51bf8345deeaf843453037b01769be1b43769,",
+      "fontName": {
+        "family": "JetBrains Mono",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "fontSize": 14,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 22
+      }
+    },
+    {
+      "name": "Pioneer v2 / Code/Small",
+      "id": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,",
+      "fontName": {
+        "family": "JetBrains Mono",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "fontSize": 12,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 20
+      }
+    }
+  ]
+}

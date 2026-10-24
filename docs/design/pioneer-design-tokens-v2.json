@@ -1,0 +1,459 @@
+{
+  "version": "2.0.0",
+  "status": "static-design-delivered",
+  "date": "2026-09-29",
+  "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+  "source": "Claude × Hazel adopted fusion; not Claude client tokens",
+  "theme": "Light only",
+  "palette": {
+    "canvas": "#F1F2EE",
+    "surface": "#F9FAF7",
+    "surface-muted": "#E9EBE6",
+    "ink": "#2C3547",
+    "secondary": "#646E72",
+    "navy": "#333C50",
+    "navy-hover": "#212A3B",
+    "on-navy": "#F9F9F9",
+    "silver": "#D3D3D3",
+    "control-border": "#858D92",
+    "mint": "#D7E3DA",
+    "success-ink": "#35644B",
+    "notice": "#EDE4D6",
+    "gold": "#C6AF94",
+    "gold-ink": "#76614B",
+    "rose": "#EBDADA",
+    "risk": "#B25352",
+    "risk-ink": "#934342",
+    "slate": "#DDE2E9",
+    "jade": "#DCEADF"
+  },
+  "colors": [
+    {
+      "name": "color/canvas",
+      "primitive": "color/canvas",
+      "css": "--pioneer-background",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/surface",
+      "primitive": "color/surface",
+      "css": "--pioneer-surface",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/surface-muted",
+      "primitive": "color/surface-muted",
+      "css": "--pioneer-surface-muted",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/text-primary",
+      "primitive": "color/ink",
+      "css": "--pioneer-foreground",
+      "scopes": ["TEXT_FILL"]
+    },
+    {
+      "name": "color/text-secondary",
+      "primitive": "color/secondary",
+      "css": "--pioneer-muted",
+      "scopes": ["TEXT_FILL"]
+    },
+    {
+      "name": "color/text-on-action",
+      "primitive": "color/on-navy",
+      "css": "--pioneer-on-action",
+      "scopes": ["TEXT_FILL"]
+    },
+    {
+      "name": "color/action",
+      "primitive": "color/navy",
+      "css": "--pioneer-action",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/action-hover",
+      "primitive": "color/navy-hover",
+      "css": "--pioneer-action-hover",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/border-subtle",
+      "primitive": "color/silver",
+      "css": "--pioneer-border",
+      "scopes": ["STROKE_COLOR"]
+    },
+    {
+      "name": "color/border-control",
+      "primitive": "color/control-border",
+      "css": "--pioneer-border-control",
+      "scopes": ["STROKE_COLOR"]
+    },
+    {
+      "name": "color/focus",
+      "primitive": "color/navy",
+      "css": "--pioneer-focus",
+      "scopes": ["STROKE_COLOR"]
+    },
+    {
+      "name": "color/notice-surface",
+      "primitive": "color/notice",
+      "css": "--pioneer-notice",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/notice-border",
+      "primitive": "color/gold",
+      "css": "--pioneer-gold",
+      "scopes": ["STROKE_COLOR"]
+    },
+    {
+      "name": "color/notice-text",
+      "primitive": "color/ink",
+      "css": "--pioneer-notice-text",
+      "scopes": ["TEXT_FILL"]
+    },
+    {
+      "name": "color/success-surface",
+      "primitive": "color/mint",
+      "css": "--pioneer-mint",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/success-text",
+      "primitive": "color/success-ink",
+      "css": "--pioneer-success-text",
+      "scopes": ["TEXT_FILL"]
+    },
+    {
+      "name": "color/error-surface",
+      "primitive": "color/rose",
+      "css": "--pioneer-rose",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/error-text",
+      "primitive": "color/risk-ink",
+      "css": "--pioneer-error-text",
+      "scopes": ["TEXT_FILL"]
+    },
+    {
+      "name": "color/danger-action",
+      "primitive": "color/risk",
+      "css": "--pioneer-risk",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/identity-slate",
+      "primitive": "color/slate",
+      "css": "--pioneer-slate",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/identity-jade",
+      "primitive": "color/jade",
+      "css": "--pioneer-jade",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/icon",
+      "primitive": "color/secondary",
+      "css": "--pioneer-icon",
+      "scopes": ["SHAPE_FILL", "STROKE_COLOR"]
+    },
+    {
+      "name": "color/code-surface",
+      "primitive": "color/navy-hover",
+      "css": "--pioneer-code-surface",
+      "scopes": ["FRAME_FILL", "SHAPE_FILL"]
+    },
+    {
+      "name": "color/code-text",
+      "primitive": "color/on-navy",
+      "css": "--pioneer-code-text",
+      "scopes": ["TEXT_FILL"]
+    }
+  ],
+  "dimensions": [
+    {
+      "name": "space/0",
+      "value": 0,
+      "scope": "GAP",
+      "css": "--pioneer-space-0"
+    },
+    {
+      "name": "space/4",
+      "value": 4,
+      "scope": "GAP",
+      "css": "--pioneer-space-4"
+    },
+    {
+      "name": "space/8",
+      "value": 8,
+      "scope": "GAP",
+      "css": "--pioneer-space-8"
+    },
+    {
+      "name": "space/12",
+      "value": 12,
+      "scope": "GAP",
+      "css": "--pioneer-space-12"
+    },
+    {
+      "name": "space/16",
+      "value": 16,
+      "scope": "GAP",
+      "css": "--pioneer-space-16"
+    },
+    {
+      "name": "space/24",
+      "value": 24,
+      "scope": "GAP",
+      "css": "--pioneer-space-24"
+    },
+    {
+      "name": "space/32",
+      "value": 32,
+      "scope": "GAP",
+      "css": "--pioneer-space-32"
+    },
+    {
+      "name": "space/48",
+      "value": 48,
+      "scope": "GAP",
+      "css": "--pioneer-space-48"
+    },
+    {
+      "name": "space/64",
+      "value": 64,
+      "scope": "GAP",
+      "css": "--pioneer-space-64"
+    },
+    {
+      "name": "radius/0",
+      "value": 0,
+      "scope": "CORNER_RADIUS",
+      "css": "--pioneer-radius-0"
+    },
+    {
+      "name": "radius/8",
+      "value": 8,
+      "scope": "CORNER_RADIUS",
+      "css": "--pioneer-radius-8"
+    },
+    {
+      "name": "radius/12",
+      "value": 12,
+      "scope": "CORNER_RADIUS",
+      "css": "--pioneer-radius-12"
+    },
+    {
+      "name": "radius/16",
+      "value": 16,
+      "scope": "CORNER_RADIUS",
+      "css": "--pioneer-radius-16"
+    },
+    {
+      "name": "stroke/1",
+      "value": 1,
+      "scope": "STROKE_FLOAT",
+      "css": "--pioneer-stroke-1"
+    },
+    {
+      "name": "stroke/2",
+      "value": 2,
+      "scope": "STROKE_FLOAT",
+      "css": "--pioneer-stroke-2"
+    },
+    {
+      "name": "type/12",
+      "value": 12,
+      "scope": "FONT_SIZE",
+      "css": "--pioneer-type-12"
+    },
+    {
+      "name": "type/14",
+      "value": 14,
+      "scope": "FONT_SIZE",
+      "css": "--pioneer-type-14"
+    },
+    {
+      "name": "type/15",
+      "value": 15,
+      "scope": "FONT_SIZE",
+      "css": "--pioneer-type-15"
+    },
+    {
+      "name": "type/20",
+      "value": 20,
+      "scope": "FONT_SIZE",
+      "css": "--pioneer-type-20"
+    },
+    {
+      "name": "type/24",
+      "value": 24,
+      "scope": "FONT_SIZE",
+      "css": "--pioneer-type-24"
+    },
+    {
+      "name": "control/32",
+      "value": 32,
+      "scope": "WIDTH_HEIGHT",
+      "css": "--pioneer-control-32"
+    },
+    {
+      "name": "control/36",
+      "value": 36,
+      "scope": "WIDTH_HEIGHT",
+      "css": "--pioneer-control-36"
+    },
+    {
+      "name": "control/40",
+      "value": 40,
+      "scope": "WIDTH_HEIGHT",
+      "css": "--pioneer-control-40"
+    },
+    {
+      "name": "control/48",
+      "value": 48,
+      "scope": "WIDTH_HEIGHT",
+      "css": "--pioneer-control-48"
+    }
+  ],
+  "textStyles": [
+    {
+      "name": "Pioneer v2 / Heading/Large",
+      "family": "Noto Sans SC",
+      "style": "Bold",
+      "size": 24,
+      "lineHeight": 32
+    },
+    {
+      "name": "Pioneer v2 / Heading/Medium",
+      "family": "Noto Sans SC",
+      "style": "Medium",
+      "size": 20,
+      "lineHeight": 28
+    },
+    {
+      "name": "Pioneer v2 / Body/Reading",
+      "family": "Noto Sans SC",
+      "style": "Regular",
+      "size": 15,
+      "lineHeight": 24
+    },
+    {
+      "name": "Pioneer v2 / Body/Default",
+      "family": "Noto Sans SC",
+      "style": "Regular",
+      "size": 14,
+      "lineHeight": 22
+    },
+    {
+      "name": "Pioneer v2 / UI/Label",
+      "family": "Noto Sans SC",
+      "style": "Medium",
+      "size": 14,
+      "lineHeight": 20
+    },
+    {
+      "name": "Pioneer v2 / UI/Small",
+      "family": "Noto Sans SC",
+      "style": "Regular",
+      "size": 12,
+      "lineHeight": 18
+    },
+    {
+      "name": "Pioneer v2 / UI/Small Strong",
+      "family": "Noto Sans SC",
+      "style": "Medium",
+      "size": 12,
+      "lineHeight": 18
+    },
+    {
+      "name": "Pioneer v2 / Code/Default",
+      "family": "JetBrains Mono",
+      "style": "Regular",
+      "size": 14,
+      "lineHeight": 22
+    },
+    {
+      "name": "Pioneer v2 / Code/Small",
+      "family": "JetBrains Mono",
+      "style": "Regular",
+      "size": 12,
+      "lineHeight": 20
+    }
+  ],
+  "components": [
+    {
+      "name": "Button",
+      "variants": 24,
+      "axes": "Style=Primary|Secondary|Quiet|Danger × State=Default|Hover|Pressed|Focus|Disabled|Loading"
+    },
+    {
+      "name": "Field",
+      "variants": 5,
+      "axes": "State=Default|Focus|Disabled|Error|Loading"
+    },
+    {
+      "name": "Session Tab",
+      "variants": 4,
+      "axes": "State=Active|Inactive|Hover|Focus"
+    },
+    {
+      "name": "Local Tab",
+      "variants": 4,
+      "axes": "State=Active|Inactive|Focus|Disabled"
+    },
+    {
+      "name": "Status",
+      "variants": 6,
+      "axes": "Tone=Neutral|Info|Wait|Success|Error|Unknown"
+    },
+    {
+      "name": "Workspace Poster",
+      "variants": 3,
+      "axes": "State=Ready|Stale|Unavailable"
+    },
+    {
+      "name": "Panel Header",
+      "variants": 2,
+      "axes": "State=Open|Compact"
+    },
+    {
+      "name": "Context Row",
+      "variants": 3,
+      "axes": "State=Attached|Stale|Unavailable"
+    },
+    {
+      "name": "Session Row",
+      "variants": 3,
+      "axes": "State=Open|Closed|Draft"
+    },
+    {
+      "name": "Artifact Card",
+      "variants": 4,
+      "axes": "State=Ready|Generating|Failed|Stale"
+    },
+    {
+      "name": "Permission Card",
+      "variants": 4,
+      "axes": "State=Awaiting|Denied|Expired|Approved"
+    },
+    {
+      "name": "Run Status",
+      "variants": 5,
+      "axes": "State=Running|Stopping|Stopped|Unknown|Failed"
+    },
+    {
+      "name": "Validation",
+      "variants": 4,
+      "axes": "State=Never|Running|Passed|Failed"
+    },
+    {
+      "name": "Composer",
+      "variants": 7,
+      "axes": "State=LocalEmpty|LocalDraft|Saving|Saved|Error|RemoteReady|Running"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "date": "2026-09-30",
+  "command": "pnpm check",
+  "exitCode": 0,
+  "execution": "outside tool sandbox; isolated Electron fixture/profile; product sandbox and CSP unchanged",
+  "format": "passed",
+  "lint": "passed",
+  "typecheck": "passed",
+  "contract": {
+    "files": 20,
+    "tests": 124,
+    "passed": 124
+  },
+  "prototype": {
+    "tests": 210,
+    "passed": 210,
+    "classification": "M1 simulator/probes, not Electron"
+  },
+  "electron": {
+    "tests": 18,
+    "passed": 18,
+    "real": true,
+    "fixtureHashUnchanged": true,
+    "visualWidths": [
+      640,
+      900,
+      1440
+    ],
+    "offlineAssetLoaded": true,
+    "activeConversationDecorationRemoved": true
+  },
+  "packageSmoke": "passed",
+  "log": "engineering-final.log",
+  "unverified": [
+    "native Windows directory picker",
+    "200% Windows DPI",
+    "forced colors",
+    "screen reader"
+  ],
+  "publish": false,
+  "verifiedInputsSha256": {
+    "tests/e2e/hazel-design.e2e.spec.ts": "684D7123908D2C27F03BEB6509818AFA64F121AF70A9973907EAB552945289CF",
+    "apps/desktop/src/renderer/components/Conversation.tsx": "32F898F4120F191CBB9ECCBEA1AC71121A77CBDCAFCDA6A0C1E85E5B367305CA",
+    "apps/desktop/src/renderer/styles/tokens.css": "4BBB824C85E14AC3090B1E16F0DC4ED608354586BE30C27064F8FE589F633FBC",
+    "tests/e2e/playwright.config.ts": "1A172BE129EF492959FA505893EF6F461E794F072B3529E7CA2557B5481A7AC4",
+    "apps/desktop/src/renderer/components/TabStrip.tsx": "80083C2A229656E7C6FAF09C9E268620297DC78DA9043ED01DE5DBBF4DEA4696",
+    "apps/desktop/src/renderer/components/HazelCompanion.tsx": "4606C43B0968953E78891EA785A4742134CCCDCE2B0AF1C4D7BF61870AADF81A",
+    "apps/desktop/src/renderer/styles/app.css": "DF077F6CD5D5AB5A301B4D44C370AA6FC4E6B7133742CEEABEF3B678DB32CC33",
+    "apps/desktop/webpack.renderer.config.ts": "9FCED17DDD8110B8E5D2C172BB8AC13B79390D3F229461BB6D9FDF51281E7CE8",
+    "apps/desktop/src/renderer/global.d.ts": "0F12FDC405EAAB0D40B1EA4338AA1AE8D41627FF93B35A56E8453AA91B0C4532",
+    "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "E391FE5DD5716C81497D7CCC8C5C36FC8DC25E755A382B8AD060F23E73FBD772",
+    "tests/e2e/session-persistence.e2e.spec.ts": "FA7C8FFFF6C2569C894918E1712028D73ABAB4EA5829E4B735F7F2F718343391",
+    "apps/desktop/src/renderer/components/HazelMark.tsx": "B77B6E0D621E4BC4D1CC999559BF275C684E5FE844102A5F510CC9509CC4D677",
+    "apps/desktop/src/renderer/components/ProjectPoster.tsx": "7D0C68279AD0C2335B4A690C6C513A4FFA7F93AF8AED560AFAFC1D36837D3D0C"
+  }
+}
