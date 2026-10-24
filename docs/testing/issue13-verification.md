@@ -23,6 +23,8 @@
 | A02 开发入口探针 | `PIONEER_PI_PROBE_OUT` | `{"ok":true,"stage":"release","piAiVersion":"1.4.0","nodeVersion":"v24.20.0"}`（`tmp/issue13/pi-probe-dev.json`） |
 | A02 打包成品探针 | `electron-forge package` 产物 + 同一探针（脱离源码目录、asar 打包） | `{"ok":true,"stage":"release","piAiVersion":"1.4.0","nodeVersion":"v24.20.0"}`（`tmp/issue13/pi-probe-packaged.json`） |
 | 打包成品完整性 | `app.asar` SHA-256 | `5de730882514e99ad6504356bbe3d245eccec4f0dd029b979ff14831dfda8b57`（33,897,641 字节） |
+| A08 完整门禁（开发树） | `pnpm check` | 退出码 0（2026-10-24：格式/lint/类型、Contract 339/339、Prototype 210/210、Real E2E 24/24、package smoke；日志 `tmp/issue13/full-check-2.log`） |
+| A08 干净检出复建 | 分支 `92824a4e738ae7095f40f14235cd3c10dbafc942` 的 detached worktree + `pnpm install --frozen-lockfile` + 完整 `pnpm check` | 退出码 0（2026-10-25；Contract 339/339、Prototype 210/210、E2E 24/24、打包冒烟；日志 `tmp/issue13/a08-clean-check.log`；本地专属未跟踪档案不参与构建） |
 | 仓库规范化 | `pnpm verify:repository` | 6/6 通过 |
 
 ### 打包工具链修复记录（extract-zip）
