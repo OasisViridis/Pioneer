@@ -62,6 +62,17 @@ function isSafeRelativePath(path: string): boolean {
   );
 }
 
+/** Reusable per-entry filter for traversals: skipped entries never get enumerated outward. */
+export function isSensitiveEntryName(part: string): boolean {
+  return (
+    part.startsWith('.') ||
+    part.toLowerCase() === 'node_modules' ||
+    /^(?:auth|credentials?|secrets?)(?:\.|$)/i.test(part) ||
+    /^id_(?:rsa|dsa|ecdsa|ed25519)(?:\.|$)/i.test(part) ||
+    /\.(?:pem|key|p12|pfx|keystore)$/i.test(part)
+  );
+}
+
 /** Main-only preflight. The root must come from main's selected project, never tool input.
  * A successful check is not an atomic filesystem capability; see the P2 policy decision.
  */
