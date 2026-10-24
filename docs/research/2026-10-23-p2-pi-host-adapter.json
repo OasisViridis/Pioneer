@@ -1,0 +1,335 @@
+{
+  "issue": "https://github.com/OasisViridis/Pioneer/issues/10",
+  "observedDate": "2026-10-23",
+  "timezone": "Asia/Shanghai",
+  "source": {
+    "repository": "https://github.com/earendil-works/pi",
+    "tag": "v1.4.0",
+    "commit": "4a080252f06caf63a525d7873c5d94d3c23887e0",
+    "tagApi": "https://api.github.com/repos/earendil-works/pi/git/ref/tags/v1.4.0",
+    "tarballSourceByteComparison": "NOT_RUN"
+  },
+  "host": {
+    "node": "v24.17.0",
+    "pnpm": "11.7.0",
+    "electron": "44.2.0",
+    "electronEmbeddedNode": "24.20.0",
+    "electronProbe": "development Electron executable, ELECTRON_RUN_AS_NODE=1, process.versions",
+    "piImport": "NOT_RUN",
+    "piForgePackage": "NOT_RUN",
+    "realProvider": "NOT_RUN"
+  },
+  "packages": [
+    {
+      "name": "@earendil-works/pi-agent-core",
+      "version": "1.4.0",
+      "observedDistTag": "latest",
+      "registryUrl": "https://registry.npmjs.org/@earendil-works/pi-agent-core/1.4.0",
+      "deprecated": null,
+      "type": "module",
+      "engines": {
+        "node": ">=22.19.0"
+      },
+      "exports": {
+        ".": {
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js"
+        },
+        "./package.json": "./package.json"
+      },
+      "main": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "repository": {
+        "url": "git+https://github.com/earendil-works/pi.git",
+        "type": "git",
+        "directory": "packages/agent"
+      },
+      "dependencies": {
+        "typebox": "1.3.27",
+        "@earendil-works/pi-ai": "1.4.0"
+      },
+      "integrity": "sha512-PoKY84SKUwnt7S5QBZaGUqfNO1kjP3KHpHUA9QpFTj4cOjaVWMYIcBPJ6FDRCdE8Zen9OSECQUd0uUfVgtSmgA==",
+      "gitHead": null
+    },
+    {
+      "name": "@earendil-works/pi-ai",
+      "version": "1.4.0",
+      "observedDistTag": "latest",
+      "registryUrl": "https://registry.npmjs.org/@earendil-works/pi-ai/1.4.0",
+      "deprecated": null,
+      "type": "module",
+      "engines": {
+        "node": ">=22.19.0"
+      },
+      "exports": {
+        ".": {
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js"
+        },
+        "./api/*": {
+          "types": "./dist/api/*.d.ts",
+          "import": "./dist/api/*.js"
+        },
+        "./oauth": {
+          "types": "./dist/oauth.d.ts",
+          "import": "./dist/oauth.js"
+        },
+        "./compat": {
+          "types": "./dist/compat.d.ts",
+          "import": "./dist/compat.js"
+        },
+        "./models": {
+          "types": "./dist/models.d.ts",
+          "import": "./dist/models.js"
+        },
+        "./utils/*": {
+          "types": "./dist/utils/*.d.ts",
+          "import": "./dist/utils/*.js"
+        },
+        "./bun-oauth": {
+          "types": "./dist/bun-oauth.d.ts",
+          "import": "./dist/bun-oauth.js"
+        },
+        "./providers/*": {
+          "types": "./dist/providers/*.d.ts",
+          "import": "./dist/providers/*.js"
+        },
+        "./bedrock-provider": {
+          "types": "./dist/bedrock-provider.d.ts",
+          "import": "./dist/bedrock-provider.js"
+        }
+      },
+      "main": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "repository": {
+        "url": "git+https://github.com/earendil-works/pi.git",
+        "type": "git",
+        "directory": "packages/ai"
+      },
+      "dependencies": {
+        "openai": "7.19.0",
+        "typebox": "1.3.27",
+        "partial-json": "0.1.7",
+        "@google/genai": "2.21.0",
+        "http-proxy-agent": "9.1.0",
+        "@anthropic-ai/sdk": "0.129.0",
+        "https-proxy-agent": "9.1.0",
+        "@smithy/node-http-handler": "4.12.1",
+        "@earendil-works/pi-telemetry": "1.4.0",
+        "@aws-sdk/client-bedrock-runtime": "3.1127.0"
+      },
+      "integrity": "sha512-hQM/C4+1w8rHYACzDDf+0vQMnEnpzIop1tptIERVgR3ZeT/hHSzBNG8PaWPgxWQjqSeKCyBZSyp8uTT6eKK1pQ==",
+      "gitHead": null
+    },
+    {
+      "name": "@earendil-works/pi-coding-agent",
+      "version": "1.4.0",
+      "observedDistTag": "latest",
+      "registryUrl": "https://registry.npmjs.org/@earendil-works/pi-coding-agent/1.4.0",
+      "deprecated": null,
+      "type": "module",
+      "engines": {
+        "node": ">=22.19.0"
+      },
+      "exports": {
+        ".": {
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js"
+        },
+        "./rpc-entry": {
+          "import": "./dist/bundle/rpc-entry.js"
+        }
+      },
+      "main": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "repository": {
+        "url": "git+https://github.com/earendil-works/pi.git",
+        "type": "git",
+        "directory": "packages/coding-agent"
+      },
+      "dependencies": {
+        "diff": "8.0.4",
+        "jiti": "2.7.0",
+        "yaml": "2.9.0",
+        "chalk": "6.0.0",
+        "ignore": "7.0.8",
+        "semver": "7.8.5",
+        "undici": "8.10.2",
+        "typebox": "1.3.27",
+        "minimatch": "10.2.6",
+        "cross-spawn": "7.0.6",
+        "grok-mermaid": "0.2.3",
+        "highlight.js": "10.7.3",
+        "quickjs-wasi": "3.6.2",
+        "brace-expansion": "5.0.12",
+        "hosted-git-info": "9.0.3",
+        "proper-lockfile": "4.1.2",
+        "@earendil-works/pi-ai": "1.4.0",
+        "@earendil-works/pi-mcp": "1.4.0",
+        "@earendil-works/pi-tui": "1.4.0",
+        "@silvia-odwyer/photon-node": "0.3.4",
+        "@earendil-works/pi-codemode": "1.4.0",
+        "@earendil-works/pi-agent-core": "1.4.0"
+      },
+      "integrity": "sha512-Z41LpZ3yYHSC/UUps6Mr39UMFPwH8elhJBG9DY1P7kuzsE5qSK/6eMj2EHzO5evJRQWLbKSqUMw+4nCNtIyiQg==",
+      "gitHead": null
+    },
+    {
+      "name": "@mariozechner/pi-agent-core",
+      "version": "0.73.1",
+      "observedDistTag": "latest",
+      "registryUrl": "https://registry.npmjs.org/@mariozechner/pi-agent-core/0.73.1",
+      "deprecated": "please use @earendil-works/pi-agent-core instead going forward",
+      "type": "module",
+      "engines": {
+        "node": ">=20.0.0"
+      },
+      "exports": null,
+      "main": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "repository": {
+        "url": "git+https://github.com/badlogic/pi-mono.git",
+        "type": "git",
+        "directory": "packages/agent"
+      },
+      "dependencies": {
+        "typebox": "^1.1.24",
+        "@mariozechner/pi-ai": "^0.73.1"
+      },
+      "integrity": "sha512-Y/KVOhuKSgRQgYBlwmRtO2gPkUcoavOSqGF9bpQIINvNZvc19k6Z1H3bFDTce3Vp5ApMmTsfLH3+tNvOg75fAQ==",
+      "gitHead": "781152fc24841dc54b22284514604048ebe5e2c9"
+    },
+    {
+      "name": "@mariozechner/pi-ai",
+      "version": "0.73.1",
+      "observedDistTag": "latest",
+      "registryUrl": "https://registry.npmjs.org/@mariozechner/pi-ai/0.73.1",
+      "deprecated": "please use @earendil-works/pi-ai instead going forward",
+      "type": "module",
+      "engines": {
+        "node": ">=20.0.0"
+      },
+      "exports": {
+        ".": {
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js"
+        },
+        "./oauth": {
+          "types": "./dist/oauth.d.ts",
+          "import": "./dist/oauth.js"
+        },
+        "./google": {
+          "types": "./dist/providers/google.d.ts",
+          "import": "./dist/providers/google.js"
+        },
+        "./mistral": {
+          "types": "./dist/providers/mistral.d.ts",
+          "import": "./dist/providers/mistral.js"
+        },
+        "./anthropic": {
+          "types": "./dist/providers/anthropic.d.ts",
+          "import": "./dist/providers/anthropic.js"
+        },
+        "./google-vertex": {
+          "types": "./dist/providers/google-vertex.d.ts",
+          "import": "./dist/providers/google-vertex.js"
+        },
+        "./bedrock-provider": {
+          "types": "./dist/bedrock-provider.d.ts",
+          "import": "./dist/bedrock-provider.js"
+        },
+        "./openai-responses": {
+          "types": "./dist/providers/openai-responses.d.ts",
+          "import": "./dist/providers/openai-responses.js"
+        },
+        "./openai-completions": {
+          "types": "./dist/providers/openai-completions.d.ts",
+          "import": "./dist/providers/openai-completions.js"
+        },
+        "./azure-openai-responses": {
+          "types": "./dist/providers/azure-openai-responses.d.ts",
+          "import": "./dist/providers/azure-openai-responses.js"
+        },
+        "./openai-codex-responses": {
+          "types": "./dist/providers/openai-codex-responses.d.ts",
+          "import": "./dist/providers/openai-codex-responses.js"
+        }
+      },
+      "main": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "repository": {
+        "url": "git+https://github.com/badlogic/pi-mono.git",
+        "type": "git",
+        "directory": "packages/ai"
+      },
+      "dependencies": {
+        "chalk": "^5.6.2",
+        "openai": "6.26.0",
+        "undici": "^7.19.1",
+        "typebox": "^1.1.24",
+        "proxy-agent": "^6.5.0",
+        "partial-json": "^0.1.7",
+        "@google/genai": "^1.40.0",
+        "@anthropic-ai/sdk": "^0.91.1",
+        "zod-to-json-schema": "^3.24.6",
+        "@mistralai/mistralai": "^2.2.0",
+        "@aws-sdk/client-bedrock-runtime": "^3.1030.0"
+      },
+      "integrity": "sha512-Jh4lXawZYuC83HzSIYuVum9NBqJD49i4JOt3H96cGW/924cwJMOyUs1Mv/e4QPzTXnzrqMoGviNQnvGgSu1LSg==",
+      "gitHead": "781152fc24841dc54b22284514604048ebe5e2c9"
+    },
+    {
+      "name": "@mariozechner/pi-coding-agent",
+      "version": "0.73.1",
+      "observedDistTag": "latest",
+      "registryUrl": "https://registry.npmjs.org/@mariozechner/pi-coding-agent/0.73.1",
+      "deprecated": "please use @earendil-works/pi-coding-agent instead going forward",
+      "type": "module",
+      "engines": {
+        "node": ">=20.6.0"
+      },
+      "exports": {
+        ".": {
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js"
+        },
+        "./hooks": {
+          "types": "./dist/core/hooks/index.d.ts",
+          "import": "./dist/core/hooks/index.js"
+        }
+      },
+      "main": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "repository": {
+        "url": "git+https://github.com/badlogic/pi-mono.git",
+        "type": "git",
+        "directory": "packages/coding-agent"
+      },
+      "dependencies": {
+        "diff": "^8.0.2",
+        "glob": "^13.0.1",
+        "jiti": "^2.7.0",
+        "uuid": "^14.0.0",
+        "yaml": "^2.8.2",
+        "chalk": "^5.5.0",
+        "ignore": "^7.0.5",
+        "marked": "^15.0.12",
+        "undici": "^7.19.1",
+        "typebox": "^1.1.24",
+        "file-type": "^21.1.1",
+        "minimatch": "^10.2.3",
+        "strip-ansi": "^7.1.0",
+        "extract-zip": "^2.0.1",
+        "cli-highlight": "^2.1.11",
+        "hosted-git-info": "^9.0.2",
+        "proper-lockfile": "^4.1.2",
+        "@mariozechner/pi-ai": "^0.73.1",
+        "@mariozechner/pi-tui": "^0.73.1",
+        "@silvia-odwyer/photon-node": "^0.3.4",
+        "@mariozechner/pi-agent-core": "^0.73.1"
+      },
+      "integrity": "sha512-gXQh3SaZmWTfVMc4Ao5+LGbVeKvzyO7tolok0nLsZgq9nGjZx/EEU3NM8C+qUnB4Nvs2rswG5qOVgLzQkq0fHQ==",
+      "gitHead": "781152fc24841dc54b22284514604048ebe5e2c9"
+    }
+  ]
+}
