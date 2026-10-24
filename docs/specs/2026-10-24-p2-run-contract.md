@@ -54,7 +54,7 @@ RunPage 包含 identity、status、lastSeq、oldestSeq、gap、最多 32 条 eve
 
 main 私有 HarnessAdapter seam 固定为 `create(context, emit) -> handle`，同步构造 handle 并在可能产生首个回调之前建立缓冲；`handle.start(): Promise<Outcome>`、`handle.requestStop(): void`、`handle.quiescent: Promise<void>`、`handle.dispose(): Promise<void>`。构造函数不得启动网络或工具；start 才能启动。context 由 main 创建，包含不可变身份、批准材料、预算、受限模型传输、自有工具及 AbortSignal。`emit` 只接受已限定的 adapter 消息；main 生成完整事件身份、callId、seq、时间和来源。
 
-Outcome 与 quiescent 独立：前者是归一化结果（success/failure/aborted），后者只在模型流关闭、Agent idle、所有工具/回调和待处理输出结束后 resolve。拒绝的 quiescent Promise/断连不能证明结束。`dispose` 只在 quiescent 确认后正常释放；强制退出只记录 unknown，不伪造释放成功。订阅撤销或收到 `agent_end`、prompt resolve 均不能单独证明收敛。
+Outcome 与 quiescent 独立：前者是归一化结果（success/failure/aborted），后者只在模型流关闭、Agent idle、所有工具/回调和待处理输出结束后 resolve。拒绝的 quiescent Promise/断连不能证明结束。`dispose` 只在 quiescent 确认后正常释放；宽限到期后的强制结束记录固定错误码（STOP_TIMEOUT 等）并尽力释放，不伪造释放成功。订阅撤销或收到 `agent_end`、prompt resolve 均不能单独证明收敛。
 
 Pi 适配沿用 #10 的 `Agent + Models + 显式 streamFn` 方向与候选 1.4.0 快照。#13 引入时复核 exports/认证默认行为，固定精确版本与锁文件；没有本轮 Pi 安装或成品兼容性结论。唯一替换点是 main 的 HarnessAdapter factory，可替换成受控适配器；控制入口只由测试启动配置注入，不能由 renderer 请求切换。真实 E2E 保留实际 main/preload/renderer/文件 IO。
 
@@ -70,28 +70,30 @@ Pi 适配沿用 #10 的 `Agent + Models + 显式 streamFn` 方向与候选 1.4.0
 | tool.requested | main callId、白名单工具名；未知工具为 null，原始名/参数不反射 |
 | tool.result | 对应 callId；succeeded 含安全 text/truncated；rejected/failed/cancelled 只含固定 code，无原始错误 |
 | run.stop_requested | 已阻止新准入并发送 Abort，reason=user/window_closed/deadline/authorization_revoked/host_failure |
-| run.unknown | stop_timeout/adapter_disconnected/host_restarted；结果未确认，仍非收敛终态 |
+| run.unknown | 仅 host_restarted；崩溃/重启后对历史 run 的墓碑标注，不是活状态 |
 | run.completed | 成功且资源全部收敛；usage 数字分别可为 null，未报告不能填零 |
 | run.failed | 已知失败且资源全部收敛；固定 failure code |
 | run.stopped | 停止请求已接受且资源全部收敛 |
 
-已接受 run 必须有且只有一个收敛终态；unknown 可随后追加 stopped/failed，不改写历史。拒绝 admission 不创建 run/seq。启动同步失败是 accepted → failed(START_FAILED)，不能生成 started。工具请求/结果按 callId 配对、每个 call 仅一个结果，callId 由 main 分配；模型侧 callId 只驻留适配器内部。拒绝工具本身允许模型解释并继续，绝不能输出假空成功或退回 shell。执行器失败停止本 run。
+已接受 run 必须有且只有一个收敛终态（completed/failed/stopped）；终态后回调一律丢弃，不改写历史。拒绝 admission 不创建 run/seq。启动同步失败是 accepted → failed(START_FAILED)，不能生成 started。工具请求/结果按 callId 配对、每个 call 仅一个结果，callId 由 main 分配；模型侧 callId 只驻留适配器内部。拒绝工具本身允许模型解释并继续，绝不能输出假空成功或退回 shell。执行器失败停止本 run。
 
 main 在 start 之前保留事件，避免早到丢失。重复 seq 忽略；缺序暂停增量并 getRun 补页；foreign session/project/run/revision 拒绝；事件版本或 schema 不合法拒绝并展示协议错误，不能修改运行状态。旧 run 的迟到文本、未知 call result、终态后回调均丢弃并计入本地限额诊断，不追加第二终态。历史 run 的正确修订不能被当前编辑修订误滤掉。
 
 ## 4. 停止、竞态与故障
 
-状态迁移：starting → running → completed/failed；starting/running → stopping → stopped/failed；stopping 或断连 → unknown → stopped/failed。unknown 在当前 host 存活时保持资源槽与资源引用，不能自动允许同 session 新运行。
+状态迁移：starting → running → completed/failed；starting/running → stopping → stopped/failed(固定错误码)。`stopping` 只通向 `stopped` 或 `failed(固定错误码)`，不存在活的 `unknown` 等待态；`unknown` 仅在崩溃/重启后作为历史墓碑标注出现（见下）。同 session 的新运行仍须等当前 run 进入终态。
 
 main 串行 reducer 的处理顺序决定竞态：终态先提交，后到 stop 返回已有状态；stop 先提交，后来 success 不能翻回 completed。停止前已确定的失败优先保留 failed；停止后由 Abort 引起的拒绝不升级为新的模型失败。工具已开始时必须等待结束，停止后不发布其正文，只追加 cancelled 结果。取消不回滚只读扫描，也不能宣称远端 Provider 已停止计费；确认的是本地模型传输与工具收敛。
 
 停止过程固定为：关新准入 → 记录 stop_requested → Abort → 等模型流和工具/回调全部结束 → 追加唯一终态 → 释放资源。准备中取消也执行同一规则；adapter 迟到构造成功后不得 start，须释放该未运行 handle。正常结果在 quiescent 前到达时继续显示运行/停止中，不能提前确认。
 
-5 秒未收敛显示 unknown（“停止结果尚未确认”），保留占位并继续等待；不自动重试或把 timeout 当 stopped。运行总时限 120 秒触发 RUN_DEADLINE 失败原因与停止，同样须等待资源才能发 failed。有限静态诊断不能混入路径、密钥或原始异常。
+停止宽限 5 秒：宽限内资源全部收敛则按通常规则落 stopped/failed；宽限到期仍未收敛由主进程强制结束并记 failed(STOP_TIMEOUT)——不新增等待态、不自动重试、不把超时当 stopped。停止时已确定的失败原因（RUN_DEADLINE/AUTHORIZATION_REVOKED/OUTPUT_LIMIT 等）在强制结束时保留原错误码。适配器通道断连走同一停止路径：宽限内本地资源可证收敛则 stopped，否则 failed(ADAPTER_DISCONNECTED)。运行总时限 120 秒触发 RUN_DEADLINE 失败原因与停止。有限静态诊断不能混入路径、密钥或原始异常。
 
-关闭 panel/tab 只隐藏内容，不停止 run；关闭真正所属窗口或 renderer 崩溃则撤销授权和订阅、请求停止。正常应用退出先走最多 5 秒停止等待；未收敛时提供等待或用户明确强制退出，强退记录 unknown，不能阻塞到无限等待或声称成功。窗口重建增加 epoch，旧窗口不能订阅/控制，新窗口通过 main 显式恢复只读历史访问。
+用户可见结果仅五种：运行中 / 正在停止 / 已停止 / 已完成 / 失败（附固定错误码）。停止按钮自身承担即时反馈（点击后显示"停止中…"并不可再点，属界面本地反应）；真正"已停止"以后台收敛确认为准，不因回执提前显示。
 
-main 在 userData 中单独存有界运行日志，接受记录在 adapter start 前完成原子写入；终态也是原子写入。日志保存失败时不再接受新运行，当前 run 停止并显示错误。启动恢复凡没有已提交收敛终态的 run 一律 unknown/host_restarted，清除所有授权、SDK、订阅和自动执行计划；只恢复历史材料。新 host 无旧资源，但必须提示上次未知并由用户重新授权新 run；绝不重放旧 request/grant。未知 schema/坏档沿用保留原件与显式恢复原则。
+关闭 panel/tab 只隐藏内容，不停止 run；关闭真正所属窗口或 renderer 崩溃则撤销授权和订阅、请求停止。正常应用退出先走最多 5 秒停止等待；仍未收敛即由主进程强制结束并记 failed(STOP_TIMEOUT)，不能阻塞到无限等待或声称成功。窗口重建增加 epoch，旧窗口不能订阅/控制，新窗口通过 main 显式恢复只读历史访问。
+
+main 在 userData 中单独存有界运行日志，接受记录在 adapter start 前完成原子写入；终态也是原子写入。日志保存失败时不再接受新运行，当前 run 停止并显示错误。启动恢复凡没有已提交收敛终态的 run 一律标注 unknown/host_restarted 墓碑，清除所有授权、SDK、订阅和自动执行计划；只恢复历史材料。墓碑不占资源槽、不等待、不自动重跑。新 host 无旧资源，但必须提示上次未知并由用户重新授权新 run；绝不重放旧 request/grant。未知 schema/坏档沿用保留原件与显式恢复原则。
 
 ## 5. 预算、背压与材料复检
 
