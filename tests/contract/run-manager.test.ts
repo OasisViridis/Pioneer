@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile, mkdir } from 'node:fs/promises';
+import { mkdtemp, writeFile, mkdir, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -79,7 +79,11 @@ async function createManager(
   const journalStore = store ?? memoryStore();
   const { journal } = await RunJournal.open(journalStore);
   const sender = collectSender();
-  const projectRoot = await mkdtemp(join(tmpdir(), 'pioneer-run-'));
+  // Normalize the CI temp root (8.3 short names) so the #11 preflight's
+  // canonical-root check passes.
+  const projectRoot = await realpath(
+    await mkdtemp(join(tmpdir(), 'pioneer-run-')),
+  );
   const manager = new RunManager({
     journal,
     adapterFactory: createControlledAdapterFactory(script),

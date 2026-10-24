@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, realpath, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -12,7 +12,9 @@ describe('P2 read-only tool executor budgets and rechecks (contract §5)', () =>
   let root: string;
 
   beforeAll(async () => {
-    root = await mkdtemp(join(tmpdir(), 'pioneer-tools-'));
+    // CI temp roots may arrive via 8.3 short names; the #11 preflight
+    // requires the canonical root, so normalize before any tool runs.
+    root = await realpath(await mkdtemp(join(tmpdir(), 'pioneer-tools-')));
     await writeFile(join(root, 'readme.txt'), 'alpha\nbeta\n', 'utf-8');
     await writeFile(join(root, 'secret.key'), 'private', 'utf-8');
     await writeFile(
