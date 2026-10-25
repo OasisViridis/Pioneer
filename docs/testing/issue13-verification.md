@@ -43,16 +43,11 @@
 | A06 文件不变量 | PASS（E2E） | fixture 前后哈希一致；E2E userData 隔离（PIONEER_E2E_ROOT/USER_DATA 不相交）；不读用户全局凭证 |
 | A07 P1 整合 | PASS（Contract + E2E） | 313+ 合同测试含 P1 会话/持久化/意图流；E2E 覆盖会话恢复与意图修订；按需面板，不自动导航 |
 | A08 门禁 | 见门禁记录 | `pnpm verify:repository`、完整 `pnpm check`、独立审阅 |
-| A09 真实 Provider | **NOT_RUN** | 本机无已授权 Provider 凭证；按合同「缺少授权或未运行时记录未验证」保留待办。记录字段见下 |
+| A09 真实 Provider | **PASS**（开发入口） | 2026-10-25 用户授权后完成：DeepSeek `deepseek-flash` 两次真实运行——completed（含 4 次真实只读工具调用与拒绝恢复）+ stopped（运行中途停止）；fixture 前后哈希一致。完整固定字段见 [A09 记录](issue13-real-provider.md)。打包成品内的真实 Provider 运行因 E2E 隔离缝仅限非打包构建而未自动化，留作人工后续项 |
 
-## A09 NOT_RUN 记录（固定字段）
+## A09 记录
 
-- evidenceKind = real-provider；结果 = NOT_RUN
-- **2026-10-25 用户已授权**：Provider = DeepSeek，模型 = `deepseek-v4.1-flash`（用户口述 "Deepseek v41f"），外发材料授权 = 任务文本 + fixture 工作区 `tests/fixtures/workspaces/library/alpha-app` 的 `README.md`（由实施者选定）。
-- **阻塞原因（凭证无效）**：环境变量 `DEEPSEEK_API_KEY`（`sk-` 前缀、35 字符、尾号 `****f04b`，与 Windows 用户级环境变量一致）被 DeepSeek 官方端点拒绝：`https://api.deepseek.com` 的 `/models`、`/chat/completions` 与 `/anthropic/v1/messages` 均返回 `authentication_error`（"Your api key: ****f04b is invalid"，含 request_id），直连与经本地代理（127.0.0.1:7897）结果一致。本机未运行 Ollama/本地网关（11434 等端口无服务），环境无 `DEEPSEEK_BASE_URL`/OpenRouter 等替代凭证。
-- 解除阻塞需要任一：① 在 platform.deepseek.com 重新生成有效 key 并更新 `DEEPSEEK_API_KEY`；② 若该 key 属于某个兼容网关，提供其 base URL（配置 `PIONEER_PI_ENDPOINT`）；③ 若指本地部署，启动相应服务并告知端口。
-- 软件 commit/dirty 状态：本分支 HEAD（见门禁记录）；包 SHA-256、平台与 Node/Electron/Pi 版本随打包成品记录补充。
-- 后续待办：凭证修复后以 `PIONEER_PI_PROVIDER_ID=deepseek PIONEER_PI_MODEL_ID=deepseek-v4.1-flash PIONEER_PI_API_KEY_ENV=DEEPSEEK_API_KEY` 在桌面应用完成一次真实问答 + 只读工具结果 + 中途停止，并按合同 §6 固定字段补全记录。拒绝外发/无凭证/服务不可用分别记录原因与 NOT_RUN/FAILED。
+**PASS（开发入口，2026-10-25）**：完整固定字段见 [A09 真实 Provider 运行记录](issue13-real-provider.md)。过程存档：首轮尝试 NOT_RUN——环境变量 `DEEPSEEK_API_KEY`（`****f04b`）被 `https://api.deepseek.com` 的 `/models`、`/chat/completions`、`/anthropic` 三端点一致拒绝（authentication_error）；用户随后在 ZCode 配置新 key（`****2a2d`，验证有效）。模型按用户 "v41f" 意图解析为官方目录中的 `deepseek-flash`（官方无 `deepseek-v4.1-flash`，该 id 仅存在于第三方网关目录，已在记录中注明）。
 
 ## 停止语义修订对照
 
