@@ -1,4 +1,7 @@
 # Figma & Figma Make 设计与协作开发方案
+> 当前同步路线与能力核验见 [#34 · S0 研究交付](../research/design-sync-s0/README.md)（2026-10-25—26）。
+> 下文保留早期协作规划；不代表 Code Connect、变量生成或外部写入已经启用。
+
 > **项目**：Wonderwall-Pi Agent (2027 届数字媒体技术毕业设计)
 > **设计目标**：利用 Figma 建立全局设计系统变量 (Variables / Styles)，并利用 Figma Make 快速生成高保真界面与组件原型。
 

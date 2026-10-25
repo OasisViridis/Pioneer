@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-26T00:13:01+08:00",
+  "timezone": "Asia/Shanghai",
+  "scope": "Documentation and read-only design evidence only",
+  "mainCommit": "0410d5a8a1e8a262b811721e5cfa8234d4b79795",
+  "developmentCommit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+  "checks": {
+    "componentSets": 3,
+    "completeVariants": 8,
+    "projectedComponentNodes": 62,
+    "sceneAnchors": 11,
+    "nativeVariableCollections": 6,
+    "nativeVariables": 101,
+    "aliasesPreservedAndResolvedInExport": 53,
+    "codeReferences": [
+      {
+        "export": "ProjectPoster",
+        "blob": "5d906b384f7f1297182986844cd8882d148dccc9",
+        "inAcceptedMain": true,
+        "contractAndTestPathsExist": true
+      },
+      {
+        "export": "LocalTabs",
+        "blob": "a60d9345a1ef480e5a20bfd53b3571173b176a99",
+        "inAcceptedMain": false,
+        "contractAndTestPathsExist": true
+      },
+      {
+        "export": "SessionTabStrip",
+        "blob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
+        "inAcceptedMain": false,
+        "contractAndTestPathsExist": true
+      }
+    ],
+    "absentNamedExports": ["WorkspacePoster", "PanelTab", "SessionTab"],
+    "allFourLiveReadProjectionsRepeatedEqual": true,
+    "localMarkdownLinks": 8,
+    "sensitiveDataScan": "PASS: no account identifiers, tokens, session UUID, temporary asset URLs or image bytes in deliverables"
+  },
+  "commands": {
+    "pnpm verify:repository": "PASS: 6/6; final rerun recorded before delivery",
+    "pnpm exec prettier --check docs/research/design-sync-s0": "PASS",
+    "git diff --check": "PASS"
+  },
+  "notRun": {
+    "pnpm check": "Documentation-only change; no application code/configuration/lockfile changes. No claim of Contract/Prototype/Electron/package validation.",
+    "Windows manual acceptance": "Not run",
+    "Figma writes/library publication/Code Connect publication": "Not run",
+    "Tokens Studio Git Sync/Webhook/Dev Resources": "Not run"
+  },
+  "hashAlgorithm": "SHA-256 of committed UTF-8 file bytes; validation.json excluded to avoid self-reference",
+  "files": {
+    "docs/design/FIGMA-COLLABORATION-PLAN.md": "50f4e45e65c538761e5021d4cdbb747df1d5397657de9edfe674821ade6a951d",
+    "docs/research/design-sync-s0/README.md": "4651e5830cc6d2980ca96b6f19235e62f9a14b87b5689c0cbc23555aa400ead9",
+    "docs/research/design-sync-s0/component-index.json": "1b509e7dd68cbfe32db5677abc5ee6474ddd97a0e6649f0d2a19b4d6750841da",
+    "docs/research/design-sync-s0/design-snapshot.json": "a6b28d7cb42a1c384d0b381aeee81d91bbbba81717950319f9a296d95c6619aa",
+    "docs/research/design-sync-s0/native-variables.json": "506329556481e7705d6cb960cbdc3082ddd4a21d5d43cb6a5ff42f59a97e8a32",
+    "docs/research/design-sync-s0/read-requests.json": "dff08265d274a0d405ca68e29fdfc371c8d41ce8d1e76e85441507e77e399bf6"
+  }
+}

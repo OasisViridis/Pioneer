@@ -1,0 +1,1832 @@
+{
+  "schemaVersion": 1,
+  "kind": "snapshot-only",
+  "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+  "captureDate": "2026-10-26",
+  "timezone": "Asia/Shanghai",
+  "historicalVersionId": null,
+  "historicalLabel": "F9 frozen source 2026-10-01 (label only; this capture is not a historical-version read)",
+  "scenario": "L01 choose a workspace, then W01 new session: component and navigation handoff",
+  "existingIssues": [34, 35, 13, 17, 25],
+  "scope": {
+    "components": "All variant descendants, projected to IDs, geometry, solid fills, text, fonts and properties",
+    "scene": "Only listed frame/instance anchors; not a complete screen tree",
+    "variables": "Resolved definitions returned for W01 node 925:194; not a complete variable/alias/mode export",
+    "excluded": [
+      "image bytes",
+      "vector paths",
+      "temporary asset URLs",
+      "account and team identifiers",
+      "unrelated screen text",
+      "private source images"
+    ]
+  },
+  "summary": "Three sets, eight variants; 11 scene anchors; runtime behavior and Figma historical replay are not included.",
+  "components": {
+    "pageId": "824:1278",
+    "roots": [
+      {
+        "id": "921:706",
+        "type": "COMPONENT_SET",
+        "name": "Pioneer F9 / Workspace Poster",
+        "x": 40,
+        "y": 970,
+        "width": 908,
+        "height": 222,
+        "visible": true,
+        "layoutMode": "NONE",
+        "itemSpacing": 0,
+        "paddingTop": 0,
+        "paddingRight": 0,
+        "paddingBottom": 0,
+        "paddingLeft": 0,
+        "cornerRadius": 5,
+        "properties": {
+          "Cover": {
+            "type": "VARIANT",
+            "defaultValue": "Code",
+            "variantOptions": ["Code", "Map", "Doc", "Unavailable"]
+          }
+        },
+        "solidFills": [],
+        "children": [
+          {
+            "id": "921:675",
+            "type": "COMPONENT",
+            "name": "Cover=Code",
+            "x": 24,
+            "y": 24,
+            "width": 200,
+            "height": 174,
+            "visible": true,
+            "layoutMode": "VERTICAL",
+            "itemSpacing": 8,
+            "paddingTop": 12,
+            "paddingRight": 12,
+            "paddingBottom": 12,
+            "paddingLeft": 12,
+            "cornerRadius": 12,
+            "solidFills": [
+              {
+                "color": {
+                  "r": 0.9921568632125854,
+                  "g": 0.9882352948188782,
+                  "b": 0.9803921580314636
+                },
+                "opacity": 1,
+                "visible": true
+              }
+            ],
+            "children": [
+              {
+                "id": "921:676",
+                "type": "FRAME",
+                "name": "Cover / Code",
+                "x": 13,
+                "y": 13,
+                "width": 174,
+                "height": 98,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 8,
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.8627451062202454,
+                      "g": 0.9137254953384399,
+                      "b": 0.8745098114013672
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ],
+                "children": [
+                  {
+                    "id": "921:677",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 174,
+                    "height": 98,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "921:678",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 14,
+                        "y": 18,
+                        "width": 142,
+                        "height": 50,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0,
+                              "g": 0,
+                              "b": 0
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "921:679",
+                "type": "TEXT",
+                "name": "Title",
+                "x": 13,
+                "y": 119,
+                "width": 95,
+                "height": 22,
+                "visible": true,
+                "characters": "billing-service",
+                "fontSize": 14,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Medium",
+                  "variationSettings": {
+                    "wght": 500
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 22
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.1725490242242813,
+                      "g": 0.2078431397676468,
+                      "b": 0.27843138575553894
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              },
+              {
+                "id": "921:680",
+                "type": "TEXT",
+                "name": "Meta",
+                "x": 13,
+                "y": 149,
+                "width": 162,
+                "height": 18,
+                "visible": true,
+                "characters": "TypeScript · Node 22 · 发票…",
+                "fontSize": 11,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "wght": 400
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 18
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.3921568691730499,
+                      "g": 0.4117647111415863,
+                      "b": 0.43529412150382996
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "921:681",
+            "type": "COMPONENT",
+            "name": "Cover=Map",
+            "x": 244,
+            "y": 24,
+            "width": 200,
+            "height": 174,
+            "visible": true,
+            "layoutMode": "VERTICAL",
+            "itemSpacing": 8,
+            "paddingTop": 12,
+            "paddingRight": 12,
+            "paddingBottom": 12,
+            "paddingLeft": 12,
+            "cornerRadius": 12,
+            "solidFills": [
+              {
+                "color": {
+                  "r": 0.9921568632125854,
+                  "g": 0.9882352948188782,
+                  "b": 0.9803921580314636
+                },
+                "opacity": 1,
+                "visible": true
+              }
+            ],
+            "children": [
+              {
+                "id": "921:682",
+                "type": "FRAME",
+                "name": "Cover / Map",
+                "x": 13,
+                "y": 13,
+                "width": 174,
+                "height": 98,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 8,
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.8941176533699036,
+                      "g": 0.9019607901573181,
+                      "b": 0.8901960849761963
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ],
+                "children": [
+                  {
+                    "id": "921:683",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 174,
+                    "height": 98,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "921:684",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 0,
+                        "y": 10,
+                        "width": 174,
+                        "height": 64.88888549804688,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": []
+                      },
+                      {
+                        "id": "921:685",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 68,
+                        "y": 0,
+                        "width": 66,
+                        "height": 100,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0,
+                              "g": 0,
+                              "b": 0
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "921:686",
+                "type": "TEXT",
+                "name": "Title",
+                "x": 13,
+                "y": 119,
+                "width": 92,
+                "height": 22,
+                "visible": true,
+                "characters": "atlas-desktop",
+                "fontSize": 14,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Medium",
+                  "variationSettings": {
+                    "wght": 500
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 22
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.1725490242242813,
+                      "g": 0.2078431397676468,
+                      "b": 0.27843138575553894
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              },
+              {
+                "id": "921:687",
+                "type": "TEXT",
+                "name": "Meta",
+                "x": 13,
+                "y": 149,
+                "width": 133,
+                "height": 18,
+                "visible": true,
+                "characters": "Rust · Tauri 2 · 离线地图",
+                "fontSize": 11,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "wght": 400
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 18
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.3921568691730499,
+                      "g": 0.4117647111415863,
+                      "b": 0.43529412150382996
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "921:688",
+            "type": "COMPONENT",
+            "name": "Cover=Doc",
+            "x": 464,
+            "y": 24,
+            "width": 200,
+            "height": 174,
+            "visible": true,
+            "layoutMode": "VERTICAL",
+            "itemSpacing": 8,
+            "paddingTop": 12,
+            "paddingRight": 12,
+            "paddingBottom": 12,
+            "paddingLeft": 12,
+            "cornerRadius": 12,
+            "solidFills": [
+              {
+                "color": {
+                  "r": 0.9921568632125854,
+                  "g": 0.9882352948188782,
+                  "b": 0.9803921580314636
+                },
+                "opacity": 1,
+                "visible": true
+              }
+            ],
+            "children": [
+              {
+                "id": "921:689",
+                "type": "FRAME",
+                "name": "Cover / Doc",
+                "x": 13,
+                "y": 13,
+                "width": 174,
+                "height": 98,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 8,
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.9450980424880981,
+                      "g": 0.9137254953384399,
+                      "b": 0.8705882430076599
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ],
+                "children": [
+                  {
+                    "id": "921:690",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 174,
+                    "height": 98,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "921:691",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 48,
+                        "y": 8,
+                        "width": 78,
+                        "height": 100,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0.9921568632125854,
+                              "g": 0.9882352948188782,
+                              "b": 0.9803921580314636
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      },
+                      {
+                        "id": "921:692",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 55,
+                        "y": 18,
+                        "width": 55,
+                        "height": 30,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0,
+                              "g": 0,
+                              "b": 0
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "921:693",
+                "type": "TEXT",
+                "name": "Title",
+                "x": 13,
+                "y": 119,
+                "width": 78,
+                "height": 22,
+                "visible": true,
+                "characters": "Q3 复盘草稿",
+                "fontSize": 14,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Medium",
+                  "variationSettings": {
+                    "wght": 500
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 22
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.1725490242242813,
+                      "g": 0.2078431397676468,
+                      "b": 0.27843138575553894
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              },
+              {
+                "id": "921:694",
+                "type": "TEXT",
+                "name": "Meta",
+                "x": 13,
+                "y": 149,
+                "width": 134,
+                "height": 18,
+                "visible": true,
+                "characters": "Markdown · 12 篇 · 只读",
+                "fontSize": 11,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "wght": 400
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 18
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.3921568691730499,
+                      "g": 0.4117647111415863,
+                      "b": 0.43529412150382996
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "921:695",
+            "type": "COMPONENT",
+            "name": "Cover=Unavailable",
+            "x": 684,
+            "y": 24,
+            "width": 200,
+            "height": 174,
+            "visible": true,
+            "layoutMode": "VERTICAL",
+            "itemSpacing": 8,
+            "paddingTop": 12,
+            "paddingRight": 12,
+            "paddingBottom": 12,
+            "paddingLeft": 12,
+            "cornerRadius": 12,
+            "solidFills": [
+              {
+                "color": {
+                  "r": 0.9921568632125854,
+                  "g": 0.9882352948188782,
+                  "b": 0.9803921580314636
+                },
+                "opacity": 1,
+                "visible": true
+              }
+            ],
+            "children": [
+              {
+                "id": "921:696",
+                "type": "FRAME",
+                "name": "Cover / Unavailable",
+                "x": 13,
+                "y": 13,
+                "width": 174,
+                "height": 98,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 8,
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.9333333373069763,
+                      "g": 0.929411768913269,
+                      "b": 0.9176470637321472
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ],
+                "children": [
+                  {
+                    "id": "921:697",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 174,
+                    "height": 98,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "921:698",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 12,
+                        "y": 12,
+                        "width": 48,
+                        "height": 32,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0.9647058844566345,
+                              "g": 0.9607843160629272,
+                              "b": 0.9450980424880981
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      },
+                      {
+                        "id": "921:699",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 65,
+                        "y": 12,
+                        "width": 48,
+                        "height": 32,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0.9647058844566345,
+                              "g": 0.9607843160629272,
+                              "b": 0.9450980424880981
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      },
+                      {
+                        "id": "921:700",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 118,
+                        "y": 12,
+                        "width": 44,
+                        "height": 32,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0.9647058844566345,
+                              "g": 0.9607843160629272,
+                              "b": 0.9450980424880981
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      },
+                      {
+                        "id": "921:701",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 12,
+                        "y": 53,
+                        "width": 48,
+                        "height": 32,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0.9647058844566345,
+                              "g": 0.9607843160629272,
+                              "b": 0.9450980424880981
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      },
+                      {
+                        "id": "921:702",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 65,
+                        "y": 53,
+                        "width": 48,
+                        "height": 32,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0.9647058844566345,
+                              "g": 0.9607843160629272,
+                              "b": 0.9450980424880981
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      },
+                      {
+                        "id": "921:703",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 118,
+                        "y": 53,
+                        "width": 44,
+                        "height": 32,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": [
+                          {
+                            "color": {
+                              "r": 0.9647058844566345,
+                              "g": 0.9607843160629272,
+                              "b": 0.9450980424880981
+                            },
+                            "opacity": 1,
+                            "visible": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "921:704",
+                "type": "TEXT",
+                "name": "Title",
+                "x": 13,
+                "y": 119,
+                "width": 82,
+                "height": 22,
+                "visible": true,
+                "characters": "hazel-assets",
+                "fontSize": 14,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Medium",
+                  "variationSettings": {
+                    "wght": 500
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 22
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.1725490242242813,
+                      "g": 0.2078431397676468,
+                      "b": 0.27843138575553894
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              },
+              {
+                "id": "921:705",
+                "type": "TEXT",
+                "name": "Meta",
+                "x": 13,
+                "y": 149,
+                "width": 130,
+                "height": 18,
+                "visible": true,
+                "characters": "不可用 · 驱动器 E: 未连接",
+                "fontSize": 11,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "wght": 400
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 18
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.5803921818733215,
+                      "g": 0.29411765933036804,
+                      "b": 0.3490196168422699
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "921:648",
+        "type": "COMPONENT_SET",
+        "name": "Pioneer F9 / PanelTab",
+        "x": 40,
+        "y": 610,
+        "width": 396,
+        "height": 84,
+        "visible": true,
+        "layoutMode": "NONE",
+        "itemSpacing": 0,
+        "paddingTop": 0,
+        "paddingRight": 0,
+        "paddingBottom": 0,
+        "paddingLeft": 0,
+        "cornerRadius": 5,
+        "properties": {
+          "Label#921:23": {
+            "type": "TEXT",
+            "defaultValue": "产物预览"
+          },
+          "State": {
+            "type": "VARIANT",
+            "defaultValue": "Active",
+            "variantOptions": ["Active", "Inactive"]
+          }
+        },
+        "solidFills": [],
+        "children": [
+          {
+            "id": "921:633",
+            "type": "COMPONENT",
+            "name": "State=Active",
+            "x": 24,
+            "y": 24,
+            "width": 113,
+            "height": 36,
+            "visible": true,
+            "layoutMode": "HORIZONTAL",
+            "itemSpacing": 8,
+            "paddingTop": 0,
+            "paddingRight": 12,
+            "paddingBottom": 0,
+            "paddingLeft": 12,
+            "cornerRadius": 8,
+            "solidFills": [
+              {
+                "color": {
+                  "r": 0.9921568632125854,
+                  "g": 0.9882352948188782,
+                  "b": 0.9803921580314636
+                },
+                "opacity": 1,
+                "visible": true
+              }
+            ],
+            "children": [
+              {
+                "id": "921:634",
+                "type": "INSTANCE",
+                "name": "Icon / panel",
+                "x": 12,
+                "y": 11.5,
+                "width": 13,
+                "height": 13,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "properties": {},
+                "mainComponentId": "921:525",
+                "solidFills": [],
+                "children": [
+                  {
+                    "id": "I921:634;921:526",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 16,
+                    "height": 16,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "I921:634;921:527",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 2.5,
+                        "y": 3,
+                        "width": 11,
+                        "height": 10,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": []
+                      },
+                      {
+                        "id": "I921:634;921:528",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 10,
+                        "y": 3,
+                        "width": 0,
+                        "height": 10,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "921:638",
+                "type": "TEXT",
+                "name": "Label",
+                "x": 33,
+                "y": 8,
+                "width": 50,
+                "height": 20,
+                "visible": true,
+                "characters": "产物预览",
+                "fontSize": 12.5,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Medium",
+                  "variationSettings": {
+                    "wght": 500
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 20
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.1725490242242813,
+                      "g": 0.2078431397676468,
+                      "b": 0.27843138575553894
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              },
+              {
+                "id": "921:639",
+                "type": "INSTANCE",
+                "name": "Icon / x",
+                "x": 91,
+                "y": 13,
+                "width": 10,
+                "height": 10,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "properties": {},
+                "mainComponentId": "921:503",
+                "solidFills": [],
+                "children": [
+                  {
+                    "id": "I921:639;921:504",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 16,
+                    "height": 16,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "I921:639;921:505",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 4,
+                        "y": 4,
+                        "width": 8,
+                        "height": 8,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "921:642",
+            "type": "COMPONENT",
+            "name": "State=Inactive",
+            "x": 208,
+            "y": 24,
+            "width": 95,
+            "height": 36,
+            "visible": true,
+            "layoutMode": "HORIZONTAL",
+            "itemSpacing": 8,
+            "paddingTop": 0,
+            "paddingRight": 12,
+            "paddingBottom": 0,
+            "paddingLeft": 12,
+            "cornerRadius": 8,
+            "solidFills": [],
+            "children": [
+              {
+                "id": "921:643",
+                "type": "INSTANCE",
+                "name": "Icon / panel",
+                "x": 12,
+                "y": 11.5,
+                "width": 13,
+                "height": 13,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "properties": {},
+                "mainComponentId": "921:525",
+                "solidFills": [],
+                "children": [
+                  {
+                    "id": "I921:643;921:526",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 16,
+                    "height": 16,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "I921:643;921:527",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 2.5,
+                        "y": 3,
+                        "width": 11,
+                        "height": 10,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": []
+                      },
+                      {
+                        "id": "I921:643;921:528",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 10,
+                        "y": 3,
+                        "width": 0,
+                        "height": 10,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "921:647",
+                "type": "TEXT",
+                "name": "Label",
+                "x": 33,
+                "y": 8,
+                "width": 50,
+                "height": 20,
+                "visible": true,
+                "characters": "产物预览",
+                "fontSize": 12.5,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "wght": 400
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 20
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.3921568691730499,
+                      "g": 0.4117647111415863,
+                      "b": 0.43529412150382996
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "921:632",
+        "type": "COMPONENT_SET",
+        "name": "Pioneer F9 / SessionTab",
+        "x": 40,
+        "y": 510,
+        "width": 396,
+        "height": 82,
+        "visible": true,
+        "layoutMode": "NONE",
+        "itemSpacing": 0,
+        "paddingTop": 0,
+        "paddingRight": 0,
+        "paddingBottom": 0,
+        "paddingLeft": 0,
+        "cornerRadius": 5,
+        "properties": {
+          "Label#921:20": {
+            "type": "TEXT",
+            "defaultValue": "流式发票导出"
+          },
+          "State": {
+            "type": "VARIANT",
+            "defaultValue": "Active",
+            "variantOptions": ["Active", "Inactive"]
+          }
+        },
+        "solidFills": [],
+        "children": [
+          {
+            "id": "921:619",
+            "type": "COMPONENT",
+            "name": "State=Active",
+            "x": 24,
+            "y": 24,
+            "width": 138,
+            "height": 34,
+            "visible": true,
+            "layoutMode": "HORIZONTAL",
+            "itemSpacing": 8,
+            "paddingTop": 0,
+            "paddingRight": 12,
+            "paddingBottom": 0,
+            "paddingLeft": 12,
+            "cornerRadius": 8,
+            "solidFills": [
+              {
+                "color": {
+                  "r": 0.9921568632125854,
+                  "g": 0.9882352948188782,
+                  "b": 0.9803921580314636
+                },
+                "opacity": 1,
+                "visible": true
+              }
+            ],
+            "children": [
+              {
+                "id": "921:620",
+                "type": "INSTANCE",
+                "name": "Icon / chat",
+                "x": 12,
+                "y": 10.5,
+                "width": 13,
+                "height": 13,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "properties": {},
+                "mainComponentId": "921:522",
+                "solidFills": [],
+                "children": [
+                  {
+                    "id": "I921:620;921:523",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 16,
+                    "height": 16,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "I921:620;921:524",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 3,
+                        "y": 3,
+                        "width": 10,
+                        "height": 10.5,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "921:623",
+                "type": "TEXT",
+                "name": "Label",
+                "x": 33,
+                "y": 7,
+                "width": 75,
+                "height": 20,
+                "visible": true,
+                "characters": "流式发票导出",
+                "fontSize": 12.5,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Medium",
+                  "variationSettings": {
+                    "wght": 500
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 20
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.1725490242242813,
+                      "g": 0.2078431397676468,
+                      "b": 0.27843138575553894
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              },
+              {
+                "id": "921:624",
+                "type": "INSTANCE",
+                "name": "Icon / x",
+                "x": 116,
+                "y": 12,
+                "width": 10,
+                "height": 10,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "properties": {},
+                "mainComponentId": "921:503",
+                "solidFills": [],
+                "children": [
+                  {
+                    "id": "I921:624;921:504",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 16,
+                    "height": 16,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "I921:624;921:505",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 4,
+                        "y": 4,
+                        "width": 8,
+                        "height": 8,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "921:627",
+            "type": "COMPONENT",
+            "name": "State=Inactive",
+            "x": 208,
+            "y": 24,
+            "width": 120,
+            "height": 34,
+            "visible": true,
+            "layoutMode": "HORIZONTAL",
+            "itemSpacing": 8,
+            "paddingTop": 0,
+            "paddingRight": 12,
+            "paddingBottom": 0,
+            "paddingLeft": 12,
+            "cornerRadius": 8,
+            "solidFills": [],
+            "children": [
+              {
+                "id": "921:628",
+                "type": "INSTANCE",
+                "name": "Icon / chat",
+                "x": 12,
+                "y": 10.5,
+                "width": 13,
+                "height": 13,
+                "visible": true,
+                "layoutMode": "NONE",
+                "itemSpacing": 0,
+                "paddingTop": 0,
+                "paddingRight": 0,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "cornerRadius": 0,
+                "properties": {},
+                "mainComponentId": "921:522",
+                "solidFills": [],
+                "children": [
+                  {
+                    "id": "I921:628;921:523",
+                    "type": "FRAME",
+                    "name": "Frame",
+                    "x": 0,
+                    "y": 0,
+                    "width": 16,
+                    "height": 16,
+                    "visible": true,
+                    "layoutMode": "NONE",
+                    "itemSpacing": 0,
+                    "paddingTop": 0,
+                    "paddingRight": 0,
+                    "paddingBottom": 0,
+                    "paddingLeft": 0,
+                    "cornerRadius": 0,
+                    "solidFills": [
+                      {
+                        "color": {
+                          "r": 1,
+                          "g": 1,
+                          "b": 1
+                        },
+                        "opacity": 1,
+                        "visible": false
+                      }
+                    ],
+                    "children": [
+                      {
+                        "id": "I921:628;921:524",
+                        "type": "VECTOR",
+                        "name": "Vector",
+                        "x": 3,
+                        "y": 3,
+                        "width": 10,
+                        "height": 10.5,
+                        "visible": true,
+                        "cornerRadius": 0,
+                        "solidFills": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "921:631",
+                "type": "TEXT",
+                "name": "Label",
+                "x": 33,
+                "y": 7,
+                "width": 75,
+                "height": 20,
+                "visible": true,
+                "characters": "流式发票导出",
+                "fontSize": 12.5,
+                "fontName": {
+                  "family": "Noto Sans SC",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "wght": 400
+                  }
+                },
+                "lineHeight": {
+                  "unit": "PIXELS",
+                  "value": 20
+                },
+                "solidFills": [
+                  {
+                    "color": {
+                      "r": 0.3921568691730499,
+                      "g": 0.4117647111415863,
+                      "b": 0.43529412150382996
+                    },
+                    "opacity": 1,
+                    "visible": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "scene": {
+    "pageId": "824:1279",
+    "nodes": [
+      {
+        "id": "925:31",
+        "parentId": "925:2",
+        "type": "FRAME",
+        "name": "L01 · 工作区媒体库",
+        "x": 40,
+        "y": 470,
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "id": "925:194",
+        "parentId": "925:2",
+        "type": "FRAME",
+        "name": "W01 · 新会话 · 完整基础面板",
+        "x": 1400,
+        "y": 470,
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "id": "925:32",
+        "parentId": "925:31",
+        "type": "FRAME",
+        "name": "Window titlebar",
+        "x": 1,
+        "y": 1,
+        "width": 1280,
+        "height": 44
+      },
+      {
+        "id": "925:195",
+        "parentId": "925:194",
+        "type": "FRAME",
+        "name": "Window titlebar",
+        "x": 1,
+        "y": 1,
+        "width": 1280,
+        "height": 44
+      },
+      {
+        "id": "925:272",
+        "parentId": "925:271",
+        "type": "FRAME",
+        "name": "Panel tabs",
+        "x": 1,
+        "y": 1,
+        "width": 1274,
+        "height": 36
+      },
+      {
+        "id": "925:130",
+        "parentId": "925:129",
+        "type": "INSTANCE",
+        "name": "Workspace / Code",
+        "x": 0,
+        "y": 0,
+        "width": 200,
+        "height": 174,
+        "properties": {
+          "Cover": {
+            "value": "Code",
+            "type": "VARIANT",
+            "boundVariables": {}
+          }
+        },
+        "mainComponentId": "921:675"
+      },
+      {
+        "id": "925:136",
+        "parentId": "925:129",
+        "type": "INSTANCE",
+        "name": "Workspace / Map",
+        "x": 212,
+        "y": 0,
+        "width": 200,
+        "height": 174,
+        "properties": {
+          "Cover": {
+            "value": "Map",
+            "type": "VARIANT",
+            "boundVariables": {}
+          }
+        },
+        "mainComponentId": "921:681"
+      },
+      {
+        "id": "925:144",
+        "parentId": "925:143",
+        "type": "INSTANCE",
+        "name": "Workspace / Doc",
+        "x": 0,
+        "y": 0,
+        "width": 200,
+        "height": 174,
+        "properties": {
+          "Cover": {
+            "value": "Doc",
+            "type": "VARIANT",
+            "boundVariables": {}
+          }
+        },
+        "mainComponentId": "921:688"
+      },
+      {
+        "id": "925:151",
+        "parentId": "925:143",
+        "type": "INSTANCE",
+        "name": "Workspace / Unavailable",
+        "x": 212,
+        "y": 0,
+        "width": 200,
+        "height": 174,
+        "properties": {
+          "Cover": {
+            "value": "Unavailable",
+            "type": "VARIANT",
+            "boundVariables": {}
+          }
+        },
+        "mainComponentId": "921:695"
+      },
+      {
+        "id": "925:229",
+        "parentId": "925:195",
+        "type": "INSTANCE",
+        "name": "Tab / 新会话",
+        "x": 610,
+        "y": 5,
+        "width": 101,
+        "height": 34,
+        "properties": {
+          "Label#921:20": {
+            "type": "TEXT",
+            "value": "新会话"
+          },
+          "State": {
+            "value": "Active",
+            "type": "VARIANT",
+            "boundVariables": {}
+          }
+        },
+        "mainComponentId": "921:619"
+      },
+      {
+        "id": "925:273",
+        "parentId": "925:272",
+        "type": "INSTANCE",
+        "name": "Panel / 对话",
+        "x": 6,
+        "y": 0,
+        "width": 88,
+        "height": 36,
+        "properties": {
+          "Label#921:23": {
+            "type": "TEXT",
+            "value": "对话"
+          },
+          "State": {
+            "value": "Active",
+            "type": "VARIANT",
+            "boundVariables": {}
+          }
+        },
+        "mainComponentId": "921:633"
+      }
+    ]
+  },
+  "variables": {
+    "var(--window-close)": "#ff5f57",
+    "var(--window-minimize)": "#febc2e",
+    "var(--window-fullscreen)": "#28c840",
+    "var(--pioneer-muted)": "#64696f",
+    "Pioneer F9 / Noto Sans SC/Regular/12.5": "Font(family: \"Noto Sans SC\", style: Regular, size: 12.5, weight: 400, lineHeight: 20, letterSpacing: 0)",
+    "var(--pioneer-space-8)": "8",
+    "var(--pioneer-space-12)": "12",
+    "var(--pioneer-radius-8)": "8",
+    "var(--pioneer-foreground)": "#2c3547",
+    "Pioneer F9 / Noto Sans SC/Medium/12.5": "Font(family: \"Noto Sans SC\", style: Medium, size: 12.5, weight: 500, lineHeight: 20, letterSpacing: 0)",
+    "var(--pioneer-surface)": "#fdfcfa",
+    "Pioneer F9 / Noto Sans SC/Regular/12": "Font(family: \"Noto Sans SC\", style: Regular, size: 12, weight: 400, lineHeight: 19, letterSpacing: 0)",
+    "var(--pioneer-background)": "#f6f5f1",
+    "Pioneer F9 / Noto Sans SC/Medium/14": "Font(family: \"Noto Sans SC\", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: 0)",
+    "Pioneer F9 / JetBrains Mono/Regular/11.5": "Font(family: \"JetBrains Mono\", style: Regular, size: 11.5, weight: 400, lineHeight: 18, letterSpacing: 0)",
+    "Pioneer F9 / Noto Sans SC/Medium/12": "Font(family: \"Noto Sans SC\", style: Medium, size: 12, weight: 500, lineHeight: 19, letterSpacing: 0)",
+    "var(--pioneer-surface-muted)": "#eeedea",
+    "var(--pioneer-space-16)": "16",
+    "var(--pioneer-space-0)": "0",
+    "Pioneer F9 / JetBrains Mono/Regular/12": "Font(family: \"JetBrains Mono\", style: Regular, size: 12, weight: 400, lineHeight: 19, letterSpacing: 0)",
+    "Pioneer F9 / Noto Serif SC/Medium/22": "Font(family: \"Noto Serif SC\", style: Medium, size: 22, weight: 500, lineHeight: 35, letterSpacing: 0)",
+    "Pioneer F9 / Noto Sans SC/Regular/14": "Font(family: \"Noto Sans SC\", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: 0)",
+    "var(--pioneer-radius-12)": "12",
+    "var(--pioneer-border)": "#d9d7d2",
+    "Pioneer F9 / Noto Sans SC/Regular/14.5": "Font(family: \"Noto Sans SC\", style: Regular, size: 14.5, weight: 400, lineHeight: 23, letterSpacing: 0)",
+    "var(--pioneer-on-action)": "#f9f9f9",
+    "var(--pioneer-action)": "#333c50",
+    "var(--pioneer-radius-16)": "16",
+    "var(--pioneer-border-control)": "#858d92",
+    "var(--color-silver-2)": "#e7e5e0",
+    "Pioneer F9 / Noto Sans SC/Regular/11": "Font(family: \"Noto Sans SC\", style: Regular, size: 11, weight: 400, lineHeight: 18, letterSpacing: 0)",
+    "Pioneer F9 / JetBrains Mono/Regular/10.5": "Font(family: \"JetBrains Mono\", style: Regular, size: 10.5, weight: 400, lineHeight: 17, letterSpacing: 0)"
+  }
+}
