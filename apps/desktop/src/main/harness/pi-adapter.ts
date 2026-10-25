@@ -153,7 +153,84 @@ async function loadPiProvider(providerId: PiProviderId): Promise<unknown> {
   }
 }
 
-/** Text-only Pi run loop; tool-enabled Pi runs stay a follow-up (A09 record). */
+/** TypeBox builder from pi-ai; only the Object/String shape is needed here. */
+interface TypeBoxLike {
+  Object: (properties: Record<string, unknown>, options?: unknown) => unknown;
+  String: (options?: unknown) => unknown;
+}
+
+/**
+ * Bridges the three read-only tools to Pi's AgentTool shape. Execution goes
+ * through the harness executor port (main's wrapped executor), so every call
+ * is rechecked by the #11 preflight, budgeted by §5, and published as wire
+ * tool.requested/tool.result events with main-assigned callIds.
+ */
+function buildReadOnlyTools(
+  type: TypeBoxLike,
+  context: Parameters<HarnessAdapterFactory>[0],
+): unknown[] {
+  const outcomeToResult = (
+    outcome: Awaited<ReturnType<typeof context.tools.execute>>,
+    label: string,
+  ): Record<string, unknown> => {
+    if (outcome.status === 'succeeded') {
+      return {
+        content: [{ type: 'text', text: outcome.text }],
+        details: { tool: label, truncated: outcome.truncated },
+      };
+    }
+    return {
+      content: [
+        { type: 'text', text: `${label} ${outcome.status}: ${outcome.code}` },
+      ],
+      details: { tool: label, code: outcome.code },
+      isError: true,
+    };
+  };
+  const base = (name: string, label: string, parameters: unknown) => ({
+    name,
+    label,
+    description:
+      name === 'read_file'
+        ? '读取项目内一个 UTF-8 文本文件的内容（只读，单次最多 64 KiB）。'
+        : name === 'list_directory'
+          ? '列出项目内一个目录的条目（只读，最多 200 项）。'
+          : '在项目文件中做字面量搜索（只读，返回 文件:行号: 内容）。',
+    parameters,
+    execute: async (
+      _toolCallId: string,
+      params: Record<string, string>,
+    ): Promise<Record<string, unknown>> => {
+      if (name === 'search_in_files') {
+        return outcomeToResult(
+          await context.tools.execute({
+            tool: 'search_in_files',
+            arguments: { path: params.path ?? '.', query: params.query ?? '' },
+          }),
+          name,
+        );
+      }
+      return outcomeToResult(
+        await context.tools.execute({
+          tool: name as 'read_file' | 'list_directory',
+          arguments: { path: params.path ?? '.' },
+        }),
+        name,
+      );
+    },
+  });
+  return [
+    base('read_file', '读取文件', type.Object({ path: type.String() })),
+    base('list_directory', '列出目录', type.Object({ path: type.String() })),
+    base(
+      'search_in_files',
+      '搜索文本',
+      type.Object({ path: type.String(), query: type.String() }),
+    ),
+  ];
+}
+
+/** Pi run loop with the three read-only tools bridged to the harness executor. */
 export function createPiAdapterFactory(
   config: PiRuntimeConfig,
   environment: NodeJS.ProcessEnv = process.env,
@@ -197,8 +274,16 @@ export function createPiAdapterFactory(
             streamFn: (requestModel, requestContext, options) =>
               models.streamSimple(requestModel, requestContext, options),
             identity: { attribution: null },
+            initialState: {
+              model,
+              tools: buildReadOnlyTools(
+                ai.Type as unknown as TypeBoxLike,
+                context,
+              ) as never,
+              systemPrompt:
+                '你是 Pioneer 桌面应用内的只读任务助手。你只能通过三个只读工具查看项目文件：read_file、list_directory、search_in_files。回答文件相关问题时优先调用工具获取真实内容；禁止声称访问过未读取的文件。',
+            },
           });
-          agent.state.model = model;
           release = (): void => {
             agent.abort();
           };
