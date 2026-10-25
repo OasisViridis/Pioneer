@@ -48,9 +48,11 @@
 ## A09 NOT_RUN 记录（固定字段）
 
 - evidenceKind = real-provider；结果 = NOT_RUN
-- 原因：缺少显式授权的真实 Provider 服务、模型与允许外发材料清单；未配置 `PIONEER_PI_*` 运行时配置，凭证环境变量缺失。
+- **2026-10-25 用户已授权**：Provider = DeepSeek，模型 = `deepseek-v4.1-flash`（用户口述 "Deepseek v41f"），外发材料授权 = 任务文本 + fixture 工作区 `tests/fixtures/workspaces/library/alpha-app` 的 `README.md`（由实施者选定）。
+- **阻塞原因（凭证无效）**：环境变量 `DEEPSEEK_API_KEY`（`sk-` 前缀、35 字符、尾号 `****f04b`，与 Windows 用户级环境变量一致）被 DeepSeek 官方端点拒绝：`https://api.deepseek.com` 的 `/models`、`/chat/completions` 与 `/anthropic/v1/messages` 均返回 `authentication_error`（"Your api key: ****f04b is invalid"，含 request_id），直连与经本地代理（127.0.0.1:7897）结果一致。本机未运行 Ollama/本地网关（11434 等端口无服务），环境无 `DEEPSEEK_BASE_URL`/OpenRouter 等替代凭证。
+- 解除阻塞需要任一：① 在 platform.deepseek.com 重新生成有效 key 并更新 `DEEPSEEK_API_KEY`；② 若该 key 属于某个兼容网关，提供其 base URL（配置 `PIONEER_PI_ENDPOINT`）；③ 若指本地部署，启动相应服务并告知端口。
 - 软件 commit/dirty 状态：本分支 HEAD（见门禁记录）；包 SHA-256、平台与 Node/Electron/Pi 版本随打包成品记录补充。
-- 后续待办：用户明确授权 Provider/模型/材料清单并注入凭证环境变量后，在桌面应用完成一次真实问答 + 只读工具结果 + 中途停止，并按合同 §6 固定字段补全记录。拒绝外发/无凭证/服务不可用分别记录原因与 NOT_RUN/FAILED。
+- 后续待办：凭证修复后以 `PIONEER_PI_PROVIDER_ID=deepseek PIONEER_PI_MODEL_ID=deepseek-v4.1-flash PIONEER_PI_API_KEY_ENV=DEEPSEEK_API_KEY` 在桌面应用完成一次真实问答 + 只读工具结果 + 中途停止，并按合同 §6 固定字段补全记录。拒绝外发/无凭证/服务不可用分别记录原因与 NOT_RUN/FAILED。
 
 ## 停止语义修订对照
 
