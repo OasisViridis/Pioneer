@@ -1,0 +1,35 @@
+{
+  "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+  "notes": [
+    "Use a fresh create_session UUID for a new task; do not copy the previous session ID.",
+    "Execute component and scene reads as separate use_figma calls; each selects one page only.",
+    "These scripts only read nodes. Store text results as JSON and compare the projected contents to design-snapshot.json.",
+    "For an identical frozen input, read the committed JSON offline. A changed live Figma file produces a new snapshot; historical replay is unverified."
+  ],
+  "componentRead": {
+    "tool": "use_figma",
+    "skillNames": "resource:figma-use",
+    "code": "const page = await figma.getNodeByIdAsync('824:1278'); await figma.setCurrentPageAsync(page); const ids = ['921:706','921:648','921:632']; const roots=await Promise.all(ids.map(id=>figma.getNodeByIdAsync(id))); function project(n) { const o={id:n.id,type:n.type,name:n.name}; for(const k of ['x','y','width','height','visible','layoutMode','itemSpacing','paddingTop','paddingRight','paddingBottom','paddingLeft','cornerRadius']) { if(k in n && typeof n[k] !== 'symbol') o[k]=n[k]; } if(n.type==='TEXT') {o.characters=n.characters; if(typeof n.fontSize==='number')o.fontSize=n.fontSize; if(typeof n.fontName!=='symbol')o.fontName=n.fontName; if(typeof n.lineHeight!=='symbol')o.lineHeight=n.lineHeight;} if(n.type==='COMPONENT_SET' || (n.type==='COMPONENT' && n.parent.type!=='COMPONENT_SET'))o.properties=n.componentPropertyDefinitions; if(n.type==='INSTANCE'){o.properties=n.componentProperties;o.mainComponentId=n.mainComponent ? n.mainComponent.id:null;} if('fills' in n && Array.isArray(n.fills))o.solidFills=n.fills.filter(p=>p.type==='SOLID').map(p=>({color:p.color,opacity:p.opacity,visible:p.visible})); if('children' in n)o.children=n.children.map(project); return o; } return {pageId:page.id,roots:roots.map(project)};"
+  },
+  "sceneRead": {
+    "tool": "use_figma",
+    "skillNames": "resource:figma-use",
+    "code": "const page=await figma.getNodeByIdAsync('824:1279'); await figma.setCurrentPageAsync(page); const ids=['925:31','925:194','925:32','925:195','925:272','925:130','925:136','925:144','925:151','925:229','925:273']; const nodes=await Promise.all(ids.map(id=>figma.getNodeByIdAsync(id))); return {pageId:page.id,nodes:nodes.map(n=>{const o={id:n.id,parentId:n.parent.id,type:n.type,name:n.name,x:n.x,y:n.y,width:n.width,height:n.height};if(n.type==='INSTANCE'){o.properties=n.componentProperties;o.mainComponentId=n.mainComponent?n.mainComponent.id:null;}return o;})};"
+  },
+  "variablesRead": {
+    "tool": "get_variable_defs",
+    "nodeId": "925:194"
+  },
+  "nativeVariablesRead": {
+    "tool": "use_figma",
+    "skillNames": "resource:figma-use",
+    "code": "const ids=['VariableCollectionId:824:1280','VariableCollectionId:824:1281','VariableCollectionId:824:1282','VariableCollectionId:894:289','VariableCollectionId:894:290','VariableCollectionId:921:472']; const cs=await Promise.all(ids.map(id=>figma.variables.getVariableCollectionByIdAsync(id))); const vs=await Promise.all(cs.flatMap(c=>c.variableIds).map(id=>figma.variables.getVariableByIdAsync(id))); return {collections:cs.map(c=>({id:c.id,name:c.name,modes:c.modes,defaultModeId:c.defaultModeId,variableIds:c.variableIds})),variables:vs.map(v=>({id:v.id,name:v.name,resolvedType:v.resolvedType,variableCollectionId:v.variableCollectionId,valuesByMode:v.valuesByMode,scopes:v.scopes,codeSyntax:v.codeSyntax}))};"
+  },
+  "replayEvidence": {
+    "nativeVariablesProjectionEqual": true,
+    "componentProjectionEqual": true,
+    "sceneProjectionEqual": true,
+    "variablesProjectionEqual": true,
+    "method": "Second live read using the exact same requests; compare parsed JSON.stringify results; performed 2026-10-26 Asia/Shanghai."
+  }
+}
