@@ -1,6 +1,12 @@
 # Pioneer · 工程证据账本
 
-## 当前核对 · 2026-10-03
+## 当前核对 · 2026-10-26
+
+- **P0、P1、P2 COMPLETE；M3 IN PROGRESS。** P2 只读 Harness 经 PR #16 合并进 `main`（merge `3f262fe`），随后合入七轮复审修复与 PR #40，HEAD 为 `fd26d06`。最后一次完整门禁在 `0bfd5de`：Contract 375/375（39 文件）、Prototype 210/210、Real Electron 24/24、package smoke，退出码 0；合并后 CI 的一次 200/201 目录边界用例超时已在 `474fb16` 修复。
+- 模型接入与三只只读工具（`read_file`／`list_directory`／`search_in_files`）在显式一次性授权下可用；写入、命令、通用文件系统 IPC 与 Runtime 子进程仍关闭。真实 Provider 证据见 [A09 记录](issue13-real-provider.md)。
+- 当前前沿为 P3：#17 面板接真实数据、#41 移除意图卡、#42 修正运行提示。证据细节见 [Issue #13 验证记录](issue13-verification.md)。
+
+## 历史核对 · 2026-10-03（记录当时状态）
 
 - **P0、P1 COMPLETE；M3 IN PROGRESS。** 生产 App 已挂 SessionWorkbench，main / preload / renderer 真接线，会话草稿／消息／意图／单布局恢复通过。Pi / 模型 / 工具 / 写入仍未接入，下一片 P2。
 - 新完整 `pnpm check` exit 0：200 Contract、21 Real Electron E2E、最终 package；冻结 M1 Prototype 门独立通过。精确输入哈希、日志与场景见[P1 收口](p1-session-closeout-2026-10-03.md)。
