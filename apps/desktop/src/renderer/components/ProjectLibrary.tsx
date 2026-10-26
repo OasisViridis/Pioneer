@@ -137,6 +137,9 @@ export function ProjectLibrary({
               key={project.id}
               onOpen={onOpenProject}
               project={project}
+              unavailableReason={
+                stale ? '目录状态已过期，请重新扫描后打开。' : undefined
+              }
             />
           ))}
         </div>

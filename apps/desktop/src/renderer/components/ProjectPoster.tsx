@@ -1,10 +1,11 @@
-import type { CSSProperties } from 'react';
+import { useId, type CSSProperties } from 'react';
 
 import type { ProjectSummary } from '../../shared/contracts/catalog';
 
 export interface ProjectPosterProps {
   project: ProjectSummary;
   onOpen: (project: ProjectSummary) => void;
+  unavailableReason?: string;
 }
 
 function seedNumber(seed: string): number {
@@ -31,7 +32,10 @@ const relativeRecency = (lastModifiedAt: string): string => {
 export function ProjectPoster({
   project,
   onOpen,
+  unavailableReason,
 }: ProjectPosterProps): React.JSX.Element {
+  const reasonId = useId();
+  const unavailable = unavailableReason !== undefined;
   const seed = seedNumber(project.coverSeed);
   const coverStyle = {
     '--cover-hue-a': String(seed % 360),
@@ -42,9 +46,11 @@ export function ProjectPoster({
     <article className="project-poster">
       <button
         aria-label={`Open project ${project.name}`}
+        aria-describedby={unavailable ? reasonId : undefined}
         className="project-poster__button"
+        disabled={unavailable}
         onClick={() => {
-          onOpen(project);
+          if (!unavailable) onOpen(project);
         }}
         type="button"
       >
@@ -73,6 +79,11 @@ export function ProjectPoster({
           </span>
         </span>
       </button>
+      {unavailable ? (
+        <p className="project-poster__unavailable" id={reasonId}>
+          {unavailableReason.trim() || 'Project is unavailable.'}
+        </p>
+      ) : null}
     </article>
   );
 }

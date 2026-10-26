@@ -20,3 +20,11 @@
 Code Connect 官方发布/回读、Tokens Studio Git Sync、Figma 回灌、原生目录选择器人工验收均未执行。沿用 S0 轻量索引与文件导出路线，不将未执行项目标为通过。
 
 合并前同步：解决 `package.json` 格式命令冲突，保留 main 的 `newSessionForProject` 会话入口并叠加生成样式断言。新增接受后真实导出/props 校验用例，Unavailable 防护只用于 Cover 组件；既有未接受候选与虚构 props 的拒绝路径仍受测试保护。`pnpm install --frozen-lockfile`、24 项设计测试、6 项仓库检查、格式、lint、typecheck 均重新通过。完整 Windows 门禁等待最新提交 CI，不修改产品或 fixture 来绕过环境边界。
+
+## 三组件与资产补全（main d11dede 之后）
+
+本次交付把八个变体连接到真实 typed JSX 示例，新增目录不可验证状态，改用已有 DockSurface 组合，补齐 SessionTab 的交互与关闭 Run 不变性检查。历史资产通过新的纯读校验，运行时预算通过当前单工作区的 Electron 用例验证。
+
+本地：frozen lockfile 安装、28 项设计测试、6 项仓库检查、示例类型检查通过。完整结果需以最新 PR 提交的 Windows CI 为准；Linux 环境缺少图形运行依赖；本次 package smoke 的 webpack 构建通过，但 Electron 解包被仓库既有 win32 bsdtar 补丁拒绝，退出 1。本文件不将计划运行或静态注册当作 Electron / 打包通过，Windows CI 是本次完整门禁的验证环境。
+
+CI 的最终门禁改为 `pnpm design:acceptance`，内部执行完整 `pnpm check` 后检查三组件无未完成项。`s1-visual-evidence` artifact 保存实际截图；像素完全一致、官方 Code Connect 发布和人工无障碍验收不在本次通过声明中。

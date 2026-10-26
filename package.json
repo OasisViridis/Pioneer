@@ -12,7 +12,7 @@
     "dev": "pnpm --filter @pioneer/desktop start",
     "format": "prettier --write apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync",
     "format:check": "prettier --check apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync",
-    "lint": "eslint apps/desktop/src tests/contract tests/e2e *.config.* tools/design-*.mjs tests/design-sync",
+    "lint": "eslint apps/desktop/src apps/desktop/design tests/contract tests/e2e *.config.* tools/design-*.mjs tests/design-sync",
     "typecheck": "pnpm --filter @pioneer/desktop typecheck",
     "package:smoke": "pnpm --filter @pioneer/desktop build",
     "verify:repository": "node --test tests/repository/normalization.test.mjs",
@@ -25,8 +25,10 @@
     "check": "pnpm design:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:contract && pnpm test:prototype && pnpm test:e2e && pnpm package:smoke",
     "tokens:build": "node tools/design-tokens.mjs build",
     "tokens:check": "node tools/design-tokens.mjs check",
-    "design:check": "pnpm tokens:check && node tools/design-mappings.mjs && node --test tests/design-sync/*.test.mjs",
-    "design:acceptance": "pnpm design:check && node tools/design-mappings.mjs --require-complete"
+    "design:check": "pnpm tokens:check && pnpm design:types && pnpm design:assets && node tools/design-mappings.mjs && node --test tests/design-sync/*.test.mjs",
+    "design:acceptance": "pnpm check && node tools/design-mappings.mjs --require-complete",
+    "design:types": "tsc --noEmit -p apps/desktop/design/tsconfig.json",
+    "design:assets": "node tools/design-assets.mjs"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.1",

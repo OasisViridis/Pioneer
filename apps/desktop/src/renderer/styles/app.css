@@ -186,6 +186,21 @@ input:focus-visible {
   display: block;
 }
 
+.project-poster__button:disabled {
+  cursor: not-allowed;
+  background: var(--pioneer-surface-muted);
+}
+
+.project-poster__button:disabled .project-poster__cover {
+  filter: grayscale(1);
+}
+
+.project-poster__unavailable {
+  color: var(--pioneer-muted);
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0;
+}
+
 .project-poster__body {
   display: grid;
   gap: 0.5rem;

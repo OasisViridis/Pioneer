@@ -11,5 +11,10 @@
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "forge.config.ts", "webpack.*.config.ts"]
+  "include": [
+    "src/**/*",
+    "forge.config.ts",
+    "webpack.*.config.ts",
+    "design/**/*.tsx"
+  ]
 }

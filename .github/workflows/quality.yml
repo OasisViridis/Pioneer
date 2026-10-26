@@ -68,5 +68,13 @@ jobs:
       - name: Package smoke
         run: pnpm package:smoke
 
-      - name: Confirm aggregate quality command
-        run: pnpm check
+      - name: Confirm aggregate quality and S1 acceptance
+        run: pnpm design:acceptance
+
+      - name: Upload S1 visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s1-visual-evidence
+          path: tests/e2e/test-output/artifacts/**/s1-*.png
+          if-no-files-found: ignore
