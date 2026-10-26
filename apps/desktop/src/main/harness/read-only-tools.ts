@@ -2,14 +2,12 @@ import type { Stats } from 'node:fs';
 import { lstat, open, opendir, readdir, realpath } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 
-import {
-  RUN_LIMITS,
-  type RunEventBody,
-} from '../../shared/contracts/pioneer-run';
+import type { RunEventBody } from '../../shared/contracts/pioneer-run';
 import type { ReadOnlyToolRequest } from '../../shared/contracts/read-only-tools';
 import { isPathInsideRoot, normalizeRootPath } from '../catalog/path-policy';
 import { checkReadOnlyToolRequest } from './read-only-tool-policy';
 import { isSensitiveEntryName } from './read-only-tool-policy';
+import { TEXT_CHUNK_BYTES } from './text-budget';
 
 /**
  * Executes the three read-only tools against main's project root with the
@@ -28,7 +26,7 @@ export const TOOL_BUDGETS = Object.freeze({
   searchFileBytes: 65_536,
   searchTotalBytes: 4_194_304,
   searchHits: 100,
-  resultTextBytes: RUN_LIMITS.textChunkBytes,
+  resultTextBytes: TEXT_CHUNK_BYTES,
 });
 
 export type ToolOutcome = Extract<

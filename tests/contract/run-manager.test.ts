@@ -442,7 +442,10 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       start: () => {
         // Main must still guard against an adapter that publishes one chunk
         // above the wire budget, even though adapters chunk defensively.
-        emit({ type: 'text.delta', text: 'x'.repeat(4_097) });
+        emit({
+          type: 'text.delta',
+          text: 'x'.repeat(RUN_LIMITS.textChunkBytes + 1),
+        });
         return new Promise<AdapterOutcome>((resolve) => {
           setTimeout(() => {
             resolve({ status: 'aborted' });
@@ -1003,5 +1006,109 @@ describe('P2 run manager edge hardening', () => {
     );
     expect(conflict).toEqual({ ok: false, code: 'REQUEST_CONFLICT' });
     await waitFor(() => pageOf(manager, first.runId)?.status === 'completed');
+  });
+
+  it('converges and releases when the terminal journal write fails', async () => {
+    const base = memoryStore();
+    const store = {
+      ...base,
+      save: (value: string) => {
+        if (value.includes('"kind":"terminal"')) {
+          return Promise.reject(new Error('terminal write failed'));
+        }
+        return base.save(value);
+      },
+    };
+    let disposed = 0;
+    const factory: HarnessAdapterFactory = () => ({
+      start: () =>
+        Promise.resolve({
+          status: 'success',
+          usage: { inputTokens: null, outputTokens: null },
+        }),
+      requestStop: () => undefined,
+      quiescent: Promise.resolve(),
+      dispose: () => {
+        disposed += 1;
+        return Promise.resolve();
+      },
+    });
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      { adapterFactory: factory },
+      store,
+    );
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+    await waitFor(() => disposed === 1);
+    // The unhealthy journal refuses the next authorization instead of replaying.
+    const reply = await manager.authorize({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      revision: 1,
+      task: 'again',
+      ...binding,
+    });
+    expect(reply).toEqual({ ok: false, code: 'JOURNAL_UNAVAILABLE' });
+  });
+
+  it('does not upgrade a user stop to a budget failure', async () => {
+    const oversizeAfterStop: HarnessAdapterFactory = (_context, emit) => ({
+      start: () =>
+        new Promise<AdapterOutcome>((resolve) => {
+          setTimeout(() => {
+            emit({
+              type: 'text.delta',
+              text: 'x'.repeat(RUN_LIMITS.textChunkBytes + 1),
+            });
+            resolve({ status: 'aborted' });
+          }, 40);
+        }),
+      requestStop: () => undefined,
+      quiescent: Promise.resolve(),
+      dispose: () => Promise.resolve(),
+    });
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      { adapterFactory: oversizeAfterStop },
+    );
+    const { runId } = await launchRun(manager);
+    manager.stop({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      ...binding,
+    });
+    await waitFor(() => pageOf(manager, runId)?.status === 'stopped', 3_000);
+    expect(readAllEvents(manager, runId).at(-1)?.body).toEqual({
+      type: 'run.stopped',
+    });
+  });
+
+  it('serves future events to a subscriber whose cursor is stale', async () => {
+    const { manager, sender } = await createManager({
+      steps: [
+        { action: 'wait', ms: 80 },
+        { action: 'text', text: '后续' },
+        { action: 'complete' },
+      ],
+    });
+    const { runId } = await launchRun(manager);
+    const subscribed = manager.subscribe({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      afterSeq: 9_999,
+      ...binding,
+    });
+    expect(subscribed).toBe(true);
+    await waitFor(() =>
+      sender.batches.some((batch) =>
+        batch.page.events.some((event) => event.body.type === 'text.delta'),
+      ),
+    );
+    manager.unsubscribe({ runId, webContentsId });
   });
 });

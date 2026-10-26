@@ -318,5 +318,17 @@ describe('P2 read-only list_directory budget boundary', () => {
     if (over.status !== 'succeeded') return;
     expect(over.truncated).toBe(true);
     expect(over.text.split('\n')).toHaveLength(200);
+
+    // Two past the budget forces the streaming early-stop, not just the clamp.
+    await writeFile(join(crowded, 'f201.txt'), 'x', 'utf-8');
+    const far = await executeReadOnlyTool(
+      root,
+      { tool: 'list_directory', arguments: { path: 'crowded' } },
+      never,
+    );
+    expect(far.status).toBe('succeeded');
+    if (far.status !== 'succeeded') return;
+    expect(far.truncated).toBe(true);
+    expect(far.text.split('\n')).toHaveLength(200);
   });
 });

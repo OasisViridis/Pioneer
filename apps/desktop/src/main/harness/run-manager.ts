@@ -292,12 +292,12 @@ export class RunManager {
     const previousRunId = this.requestIndex.get(requestId);
     if (previousRunId === undefined) return null;
     const run = this.runs.get(previousRunId);
-    const previousPayload =
-      run?.requestPayload ?? this.finishedPayloads.get(requestId) ?? null;
-    if (previousPayload === null || run === undefined) {
+    if (run === undefined) {
+      // The run was evicted from memory; the consumed grant is the only honest
+      // answer (contract §1: expired requests never replay).
       return { ok: false, code: 'AUTHORIZATION_REQUIRED' };
     }
-    if (previousPayload !== payload) {
+    if (run.requestPayload !== payload) {
       return { ok: false, code: 'REQUEST_CONFLICT' };
     }
     if (run.admission !== null) {
@@ -428,16 +428,17 @@ export class RunManager {
       if (oldest === undefined) break;
       this.requestIndex.delete(oldest);
     }
-    // The accepted event is buffered before any await so a stop racing the
-    // journal write can never precede run.accepted in the sequence.
-    this.emit(run, { type: 'run.accepted' }, 'host');
-
-    // A concurrent duplicate replays only once this settles, so it can never
-    // hand back a runId whose accept record was never written (contract §1).
+    // The admission promise exists before the first event is buffered: a
+    // duplicate that finds this run always has a promise to wait on, even if
+    // the accepted emit itself throws.
     let settleAdmission: (accepted: boolean) => void = () => undefined;
     run.admission = new Promise<boolean>((resolve) => {
       settleAdmission = resolve;
     });
+    // The accepted event is buffered before any await so a stop racing the
+    // journal write can never precede run.accepted in the sequence.
+    this.emit(run, { type: 'run.accepted' }, 'host');
+
     let accepted = false;
     try {
       accepted = await this.dependencies.journal.appendAccept({
@@ -466,7 +467,7 @@ export class RunManager {
     }
     if (run.stopRequestedAt !== null) {
       // Stopped during preparation: the late-constructed handle must not start.
-      await this.terminateQuiet(run, 'stopped', null);
+      await this.terminateConverged(run, 'stopped', null);
       return { ok: true, runId };
     }
 
@@ -474,7 +475,7 @@ export class RunManager {
     try {
       handle = this.constructAdapter(run, project, task);
     } catch {
-      await this.terminateQuiet(run, 'failed', 'START_FAILED');
+      await this.terminateConverged(run, 'failed', 'START_FAILED');
       return { ok: true, runId };
     }
     run.handle = handle;
@@ -515,7 +516,7 @@ export class RunManager {
       startRun = handle.start();
     } catch {
       // Synchronous start failure never produces run.started.
-      await this.terminateQuiet(run, 'failed', 'START_FAILED');
+      await this.terminateConverged(run, 'failed', 'START_FAILED');
       return;
     }
     run.status = 'running';
@@ -549,22 +550,22 @@ export class RunManager {
       return;
     }
     if (run.pendingFailure !== null) {
-      await this.terminateQuiet(run, 'failed', run.pendingFailure);
+      await this.terminateConverged(run, 'failed', run.pendingFailure);
       return;
     }
     if (run.stopRequestedAt !== null) {
       if (outcome.status === 'failure') {
-        await this.terminateQuiet(run, 'failed', outcome.code);
+        await this.terminateConverged(run, 'failed', outcome.code);
       } else {
-        await this.terminateQuiet(run, 'stopped', null);
+        await this.terminateConverged(run, 'stopped', null);
       }
       return;
     }
     if (outcome.status === 'failure') {
-      await this.terminateQuiet(run, 'failed', outcome.code);
+      await this.terminateConverged(run, 'failed', outcome.code);
       return;
     }
-    await this.terminateQuiet(run, 'completed', null, {
+    await this.terminateConverged(run, 'completed', null, {
       inputTokens:
         outcome.status === 'success' ? outcome.usage.inputTokens : null,
       outputTokens:
@@ -572,15 +573,20 @@ export class RunManager {
     });
   }
 
-  /** Quiescent path: publish the terminal outcome, then release the adapter. */
-  private async terminateQuiet(
+  /** Converged path: publish the terminal outcome, then release the adapter. */
+  private async terminateConverged(
     run: ActiveRun,
     status: 'completed' | 'failed' | 'stopped',
     code: RunFailureCode | null,
     usage?: { inputTokens: number | null; outputTokens: number | null },
   ): Promise<void> {
-    await this.terminate(run, status, code, usage);
-    await this.disposeAdapter(run);
+    try {
+      await this.terminate(run, status, code, usage);
+    } finally {
+      // Release even when the terminal bookkeeping threw: a stuck adapter must
+      // not outlive the run it belongs to.
+      await this.disposeAdapter(run);
+    }
   }
 
   private acceptAdapterMessage(run: ActiveRun, message: AdapterMessage): void {
@@ -692,9 +698,9 @@ export class RunManager {
   ): boolean {
     if (this.isTerminal(run)) return false;
     if (run.stopRequestedAt !== null) return false;
-    if (reason === 'deadline') run.pendingFailure = 'RUN_DEADLINE';
+    if (reason === 'deadline') run.pendingFailure ??= 'RUN_DEADLINE';
     if (reason === 'authorization_revoked')
-      run.pendingFailure = 'AUTHORIZATION_REVOKED';
+      run.pendingFailure ??= 'AUTHORIZATION_REVOKED';
     run.stopRequestedAt = this.now();
     run.stopReason = reason;
     if (run.status !== 'starting') run.status = 'stopping';
@@ -714,25 +720,29 @@ export class RunManager {
     const code = run.pendingFailure ?? 'STOP_TIMEOUT';
     run.stopTimer = null;
     // Contract §2: dispose is the normal release after quiescence; the forced
-    // end is not quiescent, but §4 still asks for a best-effort release.
-    void this.terminate(run, 'failed', code).finally(() => {
-      void this.disposeAdapter(run);
-    });
+    // end is not quiescent, but §4 still asks for a best-effort release. The
+    // rejection is swallowed so a failing terminal write never surfaces as an
+    // unhandled rejection from a timer.
+    void this.terminate(run, 'failed', code)
+      .catch(() => undefined)
+      .finally(() => this.disposeAdapter(run));
   }
 
   /**
    * First confirmed failure wins (contract §4): a later budget or protocol
-   * overflow must not rewrite the reason the run is already stopping for.
+   * overflow must not rewrite the reason the run is already stopping for, and
+   * a stop the user requested stays `stopped` rather than being upgraded to a
+   * failure after the fact.
    */
   private failWith(run: ActiveRun, code: RunFailureCode): void {
+    if (run.stopRequestedAt !== null) return;
     run.pendingFailure ??= code;
     this.requestStop(run, 'host_failure');
   }
 
   /** Shared budget stop so both tool paths converge identically (contract §5). */
   private exhaustToolBudget(run: ActiveRun): void {
-    run.pendingFailure ??= 'TOOL_FAILED';
-    this.requestStop(run, 'host_failure');
+    this.failWith(run, 'TOOL_FAILED');
   }
 
   stop(input: {
@@ -849,12 +859,18 @@ export class RunManager {
       run.identity.revision !== input.revision
     )
       return false;
+    // A stale cursor past the newest seq must still receive future events
+    // instead of waiting for a page that can never exist.
+    const startSeq = Math.min(
+      input.afterSeq,
+      run.events.at(-1)?.seq ?? input.afterSeq,
+    );
     run.subscribers.set(input.webContentsId, {
       webContentsId: input.webContentsId,
       windowEpoch: input.windowEpoch,
-      afterSeq: input.afterSeq,
-      ackedSeq: input.afterSeq,
-      deliveredSeq: input.afterSeq,
+      afterSeq: startSeq,
+      ackedSeq: startSeq,
+      deliveredSeq: startSeq,
       awaitingBatch: false,
       lastActivityAt: this.now(),
     });
@@ -999,8 +1015,12 @@ export class RunManager {
     for (const subscriber of run.subscribers.values()) {
       subscriber.awaitingBatch = false;
     }
-    // A throwing append must never strand the hold: the renderer has to see a
-    // terminal state even when the journal write itself failed.
+    // A throwing or failing append must never strand the hold or the release
+    // bookkeeping: the renderer has to see a terminal state even when the
+    // journal write itself failed, and the slot must still be released.
+    // The boolean is deliberately ignored here (unlike the accept path): the
+    // write failure already marked the journal unavailable, so the next run is
+    // rejected with JOURNAL_UNAVAILABLE while this run keeps its real outcome.
     try {
       await this.dependencies.journal.appendTerminal({
         kind: 'terminal',
@@ -1010,20 +1030,14 @@ export class RunManager {
         at: new Date().toISOString(),
         lastSeq: run.events.at(-1)?.seq ?? 0,
       });
+    } catch {
+      // Bookkeeping below still runs; the journal marks itself unhealthy.
     } finally {
       run.publishHeld = false;
       this.deliverBatches(run);
+      this.releaseSlot(run);
     }
-    this.finishedPayloads.set(run.requestId, run.requestPayload);
-    while (this.finishedPayloads.size > 128) {
-      const oldest = this.finishedPayloads.keys().next().value;
-      if (oldest === undefined) break;
-      this.finishedPayloads.delete(oldest);
-    }
-    this.releaseSlot(run);
   }
-
-  private readonly finishedPayloads = new Map<string, string>();
 
   private releaseSlot(run: ActiveRun): void {
     // Terminal runs stay readable for the retention window, then are dropped.
