@@ -117,7 +117,7 @@ const rejectionCopy: Record<string, string> = {
   INVALID_REQUEST: '请求无效',
   UNTRUSTED_SENDER: '来源不受信任',
   BINDING_MISMATCH: '窗口绑定不一致，请重试',
-  STALE_REVISION: '任务修订已过期，请重新整理任务',
+  STALE_REVISION: '任务版本已过期，请重新保存任务并启动',
   REQUEST_CONFLICT: '请求冲突，请重试',
   AUTHORIZATION_REQUIRED: '缺少授权（真实模型未配置或未获准）',
   RUN_ACTIVE: '该会话已有运行中的任务',

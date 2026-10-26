@@ -18,9 +18,7 @@ export function Conversation({
   const run = useSyncExternalStore(runViews.subscribe, () =>
     runViews.get(session.id),
   );
-  const showDecoration =
-    allowDecoration &&
-    run.phase === 'idle';
+  const showDecoration = allowDecoration && run.phase === 'idle';
   useEffect(() => {
     if (transcript.current)
       transcript.current.scrollTop = transcript.current.scrollHeight;

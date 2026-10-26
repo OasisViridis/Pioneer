@@ -56,20 +56,20 @@ export function RunPanel({
               : '先在会话下方填写任务并保存，再启动运行。'}
           </p>
           <button
-          type="button"
-          className="button button--primary"
-          disabled={state.phase === 'authorizing' || !task.trim()}
-          onClick={() => {
-            void runViews.launch({
-              sessionId: session.id,
-              projectId: project.id,
-              revision: 1,
-              task,
-              summaryText: `${project.name} · ${task.slice(0, 48)}`,
-            });
-          }}
-        >
-          {state.phase === 'authorizing' ? '正在授权…' : '启动运行'}
+            type="button"
+            className="button button--primary"
+            disabled={state.phase === 'authorizing' || !task.trim()}
+            onClick={() => {
+              void runViews.launch({
+                sessionId: session.id,
+                projectId: project.id,
+                revision: 1,
+                task,
+                summaryText: `${project.name} · ${task.slice(0, 48)}`,
+              });
+            }}
+          >
+            {state.phase === 'authorizing' ? '正在授权…' : '启动运行'}
           </button>
         </>
       ) : null}

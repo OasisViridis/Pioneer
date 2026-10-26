@@ -305,7 +305,7 @@ describe('session state store', () => {
 });
 
 describe('session state migration', () => {
-  it('loads v4 records without intentState and never rewrites the source merely by reading', async () => {
+  it('loads missing v4 intentState without rewriting bytes', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
     const existing = JSON.parse(JSON.stringify(record())) as {
@@ -337,7 +337,7 @@ describe('session state migration', () => {
     ).toBe(4);
   });
 
-  it('ignores invalid legacy intent metadata without hiding unrelated record corruption', async () => {
+  it('ignores invalid intent data but rejects invalid dock data', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
     const existing = JSON.parse(JSON.stringify(record())) as {

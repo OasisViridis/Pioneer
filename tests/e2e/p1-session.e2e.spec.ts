@@ -258,7 +258,7 @@ test('persists a moved panel and keyboard-resized single layout without changing
   }
 });
 
-test('opens old v4 records with or without intentState without rewriting drafts, messages or dock', async ({}, info) => {
+test('opens v4 records with and without intentState', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);
   const userData = info.outputPath('user-data');
   await mkdir(userData, { recursive: true });

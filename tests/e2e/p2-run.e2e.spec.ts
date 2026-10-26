@@ -61,6 +61,8 @@ const prepareTask = async (page: Page): Promise<void> => {
     .getByRole('textbox', { name: '给 Agent 的消息' })
     .fill('读取 alpha-app 的 README 并总结内容。');
   await page.getByRole('button', { name: '保存到会话' }).click();
+  await expect(page.getByRole('button', { name: '澄清任务' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: '意图摘要' })).toHaveCount(0);
   await page.locator('details.run-log summary').click();
   await expect(page.getByRole('button', { name: '启动运行' })).toBeEnabled();
 };
