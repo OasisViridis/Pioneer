@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import test from 'node:test';
+import { check } from 'prettier';
 import {
   canonical,
   gate,
@@ -447,4 +448,16 @@ test('an undeclared Unknown design variant is reported rather than inferred as R
   const { deliver, state } = boundary();
   assert.equal((await deliver(null, pack)).state, 'materials-only');
   assert.equal(state.writes.length, 0);
+});
+
+test('published package follows repository formatting inferred from its actual filename', async () => {
+  const { deliver, state } = boundary();
+  assert.equal((await deliver()).state, 'validation-pending');
+  const manifest = state.tree.find((file) =>
+    file.path.endsWith('/package.json'),
+  );
+  assert.equal(
+    await check(manifest.content, { filepath: manifest.path }),
+    true,
+  );
 });

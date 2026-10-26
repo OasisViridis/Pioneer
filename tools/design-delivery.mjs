@@ -411,7 +411,7 @@ export async function publish({ root, pkg, output, api, actor }) {
       })),
     };
     const manifestText = await format(JSON.stringify(manifest), {
-      parser: 'json',
+      filepath: packagePath,
     });
     const existing = await optional(api, `${prefix}/git/ref/heads/${branch}`);
     let headSha;
