@@ -55,11 +55,9 @@
 
 ---
 
-### 2026-10-03 开发恢复
+### 2026-10-03 开发恢复（历史记录；P2 已于 2026-10-26 合并，当前状态见下一节）
 
 用户已验收 v8 展示视频并明确恢复应用开发。M3 仍为 **IN PROGRESS**。现役计划 P0 底座与 P1 可恢复会话均已完成：生产 main / preload / App 接通，媒体库支持同项目多会话，草稿／消息／可选意图／单一停靠布局可保存、关闭重开和重启恢复，旧三模式入口已移除。新完整 `pnpm check` exit 0（200 Contract、21 Real Electron E2E、最终 package；冻结 Prototype 门同时通过）。下一片 P2 接真实、可停止的只读 Harness；模型／工具／写入当前仍关闭。见[P1 收口](../docs/testing/p1-session-closeout-2026-10-03.md)和[Wayfinder 端到端开发计划](../docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)（接替 [10-01 计划](../docs/plans/2026-10-01-pioneer-frozen-prototype-development-plan.md)）。
-
-> 该段记录的是 2026-10-03 的状态。P2 已于 2026-10-26 合并进 `main`，当前状态见下一节。
 
 ### 2026-10-26 P2 合并
 
