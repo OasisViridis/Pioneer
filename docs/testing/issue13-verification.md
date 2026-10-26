@@ -72,11 +72,11 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 | 超长 chunk 记错码 | 超 4 KiB chunk 归一 `OUTPUT_LIMIT`；两个适配器按 UTF-8 字节边界切分 |
 | `read_file` 整文件读入（大文件可撑爆主进程） | 改为句柄有界读（64 KiB+1），fstat 前后身份复检，非普通文件/硬链接拒绝 |
 | list/search 只预检起始路径 | 新增 `recheckEntry`（lstat + realpath 包含性 + nlink）逐条复检；list 在 200 项外提前停止 |
-| renderer 分页丢事件（游标取 `lastSeq`） | 游标改用 `nextAfterSeq` 并回填初始页；主进程 ACK 钳到已发布 seq |
+| renderer 分页丢事件（游标取 `lastSeq`） | 游标改用 `nextAfterSeq` 并回填初始页；主进程 ACK 钳到已投递给该订阅者的 seq（`deliveredSeq`） |
 | 二次重启丢 `host_restarted` 墓碑 | `restorePending` 返回所有未终止 accept，仅对未标记者追加 tombstone |
 | 关窗/导航/渲染进程崩溃不停止运行 | 新增 `RunManager.abandonWindow`；导航、渲染进程崩溃、窗口关闭时换 epoch 并停止该窗口的运行 |
 | `before-quit` 不等 shutdown | 退出前先等有界停止（宽限 +1s 上限）再退出 |
-| GLOSSARY 与修订后停止语义冲突 | 术语改为「正常停止收敛后落终态；宽限到期强制结束记 `STOP_TIMEOUT`」 |
+| GLOSSARY 与修订后停止语义冲突 | 术语改为「正常停止收敛后落终态；宽限到期强制结束保留既定失败原因，无既定原因才记 `STOP_TIMEOUT`」 |
 | `modelOutputTokens` 只在合同里声明 | 适配器把 `RUN_LIMITS.modelOutputTokens` 作为每次请求的 `maxTokens` 下发给 Pi `streamSimple`，SDK 默认值不得放宽预算 |
 
 ### 第二次复审修复（`8328bdc`，2026-10-26）
@@ -91,21 +91,38 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 | ACK 钳到「最新已发布 seq」而非「已发给该订阅者的 seq」，超前 ACK 仍可跳过在途页 | 订阅者记录 `deliveredSeq`，ACK 钳到它 |
 | 终态事件先投递、后落盘，写失败也像已收敛 | `terminate()` 进入时挂起投递，`appendTerminal` 完成后才释放；写失败仍释放（否则 UI 不收敛），此时 journal 已标记不可用、不再接受新运行 |
 | `dispose` 只在 `shutdown` 调用 | 收敛路径 `finish()` 在终态后释放适配器；`disposeAdapter` 幂等 |
-| `list_directory` 仍然先全量 `readdir` | 改用 `opendir` 流式枚举，超过 201 个候选即停止 |
-| `splitTextChunks` 在两个适配器与两份测试里逐字重复 | 抽到 `harness/text-budget.ts`，四份副本合一 |
+| `list_directory` 仍然先全量 `readdir` | 改用 `opendir` 流式枚举：通过复检的条目达到 201 即停止（被过滤的条目不计数） |
+| `splitTextChunks` 在两个适配器里逐字重复 | 抽到 `harness/text-budget.ts`，两份副本合一；测试只保留各自的字节计量辅助 |
 | `admissionCode` 被塞入停止被拒的 code（名不副实） | 重命名 `rejectionCode` / `rejectionText` |
 | `EntryIdentity` 在 `sameIdentity` 改吃 `Stats` 后成了死类型 | 删除，直接用 `Stats` |
 | GLOSSARY 把宽限期强制结束一律写成 `STOP_TIMEOUT`，与 §4「保留既定失败原因」冲突 | 术语改为「保留既定原因，无既定原因才 `STOP_TIMEOUT`」 |
+
+### 第三次复审修复（`97594a2`，2026-10-26）
+
+对第二轮修复再做复审后补的边界：
+
+| 复审缺口 | 修复 |
+| --- | --- |
+| 预算/协议越限会覆盖已确定的停止原因（`RUN_DEADLINE` 被改成 `OUTPUT_LIMIT`） | 统一走 `failWith`：`pendingFailure ??= code`，第一个原因胜出（§4） |
+| `publishHeld` 只在 await 之后释放，`appendTerminal` 抛错会让终态投递与槽位永久挂起 | 释放移入 `try/finally`，抛错也收敛；写失败仍投递，journal 已标记不可用 |
+| `forceEnd` 从不尝试释放适配器 | 强制结束后 best-effort `disposeAdapter`（§2/§4）；`disposeAdapter` 幂等 |
+| 重放竞态在 `appendAccept` 落盘前就返回 `ok`，写失败会泄露幽灵 runId | `replay()` 等胜者的 admission 结果：成功才回同一 runId，写失败回 `JOURNAL_UNAVAILABLE`；内存淘汰的载荷回 `AUTHORIZATION_REQUIRED` |
+| `tool.unknown` 与执行器各写一份预算停止逻辑 | 抽 `exhaustToolBudget`，两条路径一致 |
+| `splitTextChunks` 的 `maxBytes` 默认值无人使用 | 常量 `TEXT_CHUNK_BYTES` 单一来源，参数删除 |
+
+新增测试：截止时间 vs 越限的原因优先级、强制结束后的 dispose、终态落盘先于投递、幽灵 runId 重放、`REQUEST_CONFLICT` 分支、ACK 钳到已投递游标、`list_directory` 200/201 边界。
 
 ### 门禁记录
 
 | 项 | 命令 | 结果 |
 | --- | --- | --- |
-| 完整门禁（第二轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `8328bdc` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **363/363**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
-| A08 干净检出（第二轮） | `8328bdc` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
+| 完整门禁（第三轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `97594a2` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **369/369**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
+| A08 干净检出（第三轮） | `97594a2` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
+| 完整门禁（第二轮） | `pnpm check`，提交 `8328bdc` | 退出码 0（2026-10-26）：Contract **363/363**、Prototype **210/210**、Real E2E **24/24**、package smoke |
+| A08 干净检出（第二轮） | `8328bdc` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26） |
 | 完整门禁（第一轮） | `pnpm check`，提交 `de0e0f1` | 退出码 0（2026-10-26）：Contract **361/361**、Prototype **210/210**、Real E2E **24/24**、package smoke |
-| 仓库规范化 | `pnpm verify:repository` | 6/6 |
-| 定向套件（第二轮） | `vitest run` run-manager（21）/ controlled-adapter（12）/ pi-adapter-tools（2）/ read-only-tools-exec（13）/ run-view（2） | 全绿 |
+| 仓库规范化 | `pnpm verify:repository`（文档改动后复跑） | 6/6 |
+| 定向套件（第三轮） | `vitest run` run-manager（26）/ controlled-adapter（12）/ pi-adapter-tools（2）/ read-only-tools-exec（14）/ run-view（2） | 全绿 |
 
 **环境注意**：本机 DSH 会话会继承 `ELECTRON_RUN_AS_NODE=1`，此时 Electron 按 Node 解释并拒绝 `--remote-debugging-port`，E2E 全红；这不是代码回归，跑 E2E 或 `pnpm check` 前需清除该变量（CI 无此变量）。
 
@@ -116,5 +133,5 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 - **`authorize` 仍信任 renderer 自报的会话与任务**：main 已有 P1 会话存储，但运行层还没有会话事实端口；修订只在本进程的 `sessionLastRevision` 内可见。补齐需要把会话存储接入 run host。
 - **墓碑不带窗口归属**：`host_restarted` 记录只有 run 身份，无法校验「该窗口是否曾拥有它」，跨窗口读墓碑目前靠 session/project/revision 拒绝。
 - **`modelOutputTokens` 是单次请求上限**：合同按「每 run」表述，多轮合计仍靠 `outputBytes` 兜底；需真实 Provider 多轮 usage 才能验证（A09 记录仍按合同记 null）。
-- **停止时在途工具配对、16 KiB 事件丢弃、`abandonWindow`/epoch 切换没有自动化测试**：实现有，覆盖没有。
+- **仍缺自动化覆盖**：停止时在途工具配对的「真实结果晚到」路径、16 KiB 事件丢弃、`abandonWindow`/epoch 切换与渲染进程崩溃恢复。实现有，但只有间接证据。
 - **P1 资产仍与 P2 同 PR**（463 文件、+75,619 行）：拆分属人工决策。
