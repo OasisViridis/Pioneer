@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 2,
+  "issue": 35,
+  "route": "lightweight-index",
+  "officialCodeConnectPublished": false,
+  "codeConnectReason": "S0 actual read denied by plan gate; fallback selected. No publish or readback performed.",
+  "complete": true,
+  "components": [
+    {
+      "designNode": "921:706",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-706",
+      "designProperties": {
+        "Cover": {
+          "type": "VARIANT",
+          "defaultValue": "Code",
+          "variantOptions": ["Code", "Map", "Doc", "Unavailable"]
+        }
+      },
+      "designVersion": "S0 snapshot-only; three component-set screenshots re-read on 2026-10-26; no official Code Connect publication",
+      "status": "mapped",
+      "code": {
+        "exportName": "ProjectPoster",
+        "path": "apps/desktop/src/renderer/components/ProjectPoster.tsx",
+        "commit": null,
+        "blob": "2c34b00da414d9d1f967832a52f6a9c586cde8b0",
+        "inAcceptedMain": false,
+        "mainBlob": "5d906b384f7f1297182986844cd8882d148dccc9",
+        "props": {
+          "project": "ProjectSummary",
+          "onOpen": "(project: ProjectSummary) => void",
+          "unavailableReason": "string | undefined"
+        },
+        "proposedInThisPR": true,
+        "baseCommit": "d11dedefbd732f97c5cf549b103f405f3741a3af"
+      },
+      "usedProps": ["project", "onOpen", "unavailableReason"],
+      "example": "<ProjectPoster project={project} onOpen={onOpen} unavailableReason={unavailableReason} />",
+      "variants": [
+        {
+          "nodeId": "921:675",
+          "name": "Cover=Code",
+          "status": "preserved-difference",
+          "reason": "Explicit retained difference: Code/Map/Doc all use the existing seeded gradient, responsive card geometry and actual catalog text. No inferred category, new asset or cover prop. Mapping examples are identical for these three visual categories by design.",
+          "exercise": "Render actual catalog projects; verify enabled card and computed gradient, then open through the existing session picker.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 poster variants retain gradients and unavailable cards recover after rescan"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:681",
+          "name": "Cover=Map",
+          "status": "preserved-difference",
+          "reason": "Explicit retained difference: Code/Map/Doc all use the existing seeded gradient, responsive card geometry and actual catalog text. No inferred category, new asset or cover prop. Mapping examples are identical for these three visual categories by design.",
+          "exercise": "Render actual catalog projects; verify enabled card and computed gradient, then open through the existing session picker.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 poster variants retain gradients and unavailable cards recover after rescan"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:688",
+          "name": "Cover=Doc",
+          "status": "preserved-difference",
+          "reason": "Explicit retained difference: Code/Map/Doc all use the existing seeded gradient, responsive card geometry and actual catalog text. No inferred category, new asset or cover prop. Mapping examples are identical for these three visual categories by design.",
+          "exercise": "Render actual catalog projects; verify enabled card and computed gradient, then open through the existing session picker.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 poster variants retain gradients and unavailable cards recover after rescan"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:695",
+          "name": "Cover=Unavailable",
+          "status": "mapped",
+          "reason": "A stale catalog passes unavailableReason; native disabled button, grayscale cover and a visible accessible reason prevent opening until a successful rescan.",
+          "exercise": "Change workspace to an unavailable root, verify disabled cards and no modal, then rescan the retained root and open a real session.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 poster variants retain gradients and unavailable cards recover after rescan"
+            }
+          ]
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Cover=Code|Map|Doc",
+          "code": "project.coverSeed",
+          "status": "preserved-difference",
+          "reason": "Same gradient treatment for all three; catalog has no category contract."
+        },
+        {
+          "figma": "Cover=Unavailable",
+          "code": "unavailableReason",
+          "status": "mapped",
+          "reason": "ProjectLibrary supplies an explanation when the catalog is stale; it does not claim every individual directory has disappeared."
+        },
+        {
+          "figma": "Nested title/description text",
+          "code": "project.name / project.description",
+          "status": "mapped",
+          "reason": "Real catalog metadata; Figma sample text is not application data."
+        }
+      ],
+      "examplesExport": "WorkspacePosterExamples"
+    },
+    {
+      "designNode": "921:648",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-648",
+      "designProperties": {
+        "Label#921:23": {
+          "type": "TEXT",
+          "defaultValue": "产物预览"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": ["Active", "Inactive"]
+        }
+      },
+      "designVersion": "S0 snapshot-only; three component-set screenshots re-read on 2026-10-26; no official Code Connect publication",
+      "status": "mapped",
+      "code": {
+        "exportName": "DockSurface",
+        "path": "apps/desktop/src/renderer/components/DockSurface.tsx",
+        "commit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
+        "blob": "74dcbed5af0ca5f7935cd09360386d5b83129802",
+        "inAcceptedMain": true,
+        "mainBlob": "74dcbed5af0ca5f7935cd09360386d5b83129802",
+        "props": {
+          "session": "Session",
+          "dispatch": "Dispatch<SessionWorkspaceAction>",
+          "renderPanel": "(panel: DockPanelId) => ReactNode"
+        }
+      },
+      "usedProps": ["session", "dispatch", "renderPanel"],
+      "example": "<DockSurface session={session} dispatch={dispatch} renderPanel={renderPanel} />",
+      "variants": [
+        {
+          "nodeId": "921:633",
+          "name": "State=Active",
+          "status": "preserved-difference",
+          "reason": "An existing DockSurface header is the mapped unit. Current panels remain visible together: Active means :focus-within, Inactive means focus outside. This is an explicit composition difference from Figma stacked tabs; no selected/onClose prop is invented.",
+          "exercise": "Focus the context header, then the conversation input; verify both highlight states. Drag the context panel and collapse it through its real menu, retaining the session and draft.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:642",
+          "name": "State=Inactive",
+          "status": "preserved-difference",
+          "reason": "An existing DockSurface header is the mapped unit. Current panels remain visible together: Active means :focus-within, Inactive means focus outside. This is an explicit composition difference from Figma stacked tabs; no selected/onClose prop is invented.",
+          "exercise": "Focus the context header, then the conversation input; verify both highlight states. Drag the context panel and collapse it through its real menu, retaining the session and draft.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            }
+          ]
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Label#921:23",
+          "code": "DockSurface names[panel]",
+          "status": "composition",
+          "reason": "Labels are actual panel identities supplied by the existing panelNames registry."
+        },
+        {
+          "figma": "State=Active|Inactive",
+          "code": ".dock-panel:focus-within > .module-header",
+          "status": "preserved-difference",
+          "reason": "Focus state in a simultaneous-panel layout, not tab selection hiding sibling content."
+        },
+        {
+          "figma": "close icon / dock tab",
+          "code": "DockSurface drag handle + PanelMenu / TOGGLE_PANEL",
+          "status": "composition",
+          "reason": "Close is the existing menu action 收起面板; drag and keyboard menu moves use DOCK_PANEL. Neither stops a Run. The last visible panel cannot be hidden."
+        }
+      ],
+      "examplesExport": "PanelTabExamples"
+    },
+    {
+      "designNode": "921:632",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-632",
+      "designProperties": {
+        "Label#921:20": {
+          "type": "TEXT",
+          "defaultValue": "流式发票导出"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": ["Active", "Inactive"]
+        }
+      },
+      "designVersion": "S0 snapshot-only; three component-set screenshots re-read on 2026-10-26; no official Code Connect publication",
+      "status": "mapped",
+      "code": {
+        "exportName": "SessionTabStrip",
+        "path": "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
+        "commit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
+        "blob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
+        "inAcceptedMain": true,
+        "mainBlob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
+        "props": {
+          "state": "SessionWorkspaceState",
+          "dispatch": "Dispatch<SessionWorkspaceAction>"
+        }
+      },
+      "usedProps": ["state", "dispatch"],
+      "example": "<SessionTabStrip state={state} dispatch={dispatch} />",
+      "variants": [
+        {
+          "nodeId": "921:619",
+          "name": "State=Active",
+          "status": "preserved-difference",
+          "reason": "Map one session item inside SessionTabStrip; state.activeTabId determines aria-selected. Preserve current responsive width, project subtitle and inactive close button (pointer accessible, tabindex -1), rather than claiming pixel parity with Figma.",
+          "exercise": "Create two real sessions, verify selected/unselected colors and close focus policy, activate and close each, reopen retained sessions. Close and reopen a running session without stopping its Run.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            },
+            {
+              "path": "tests/e2e/p2-run.e2e.spec.ts",
+              "test": "stops mid-run and shows 已停止 only after background convergence"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:627",
+          "name": "State=Inactive",
+          "status": "preserved-difference",
+          "reason": "Map one session item inside SessionTabStrip; state.activeTabId determines aria-selected. Preserve current responsive width, project subtitle and inactive close button (pointer accessible, tabindex -1), rather than claiming pixel parity with Figma.",
+          "exercise": "Create two real sessions, verify selected/unselected colors and close focus policy, activate and close each, reopen retained sessions. Close and reopen a running session without stopping its Run.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            },
+            {
+              "path": "tests/e2e/p2-run.e2e.spec.ts",
+              "test": "stops mid-run and shows 已停止 only after background convergence"
+            }
+          ]
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Label#921:20",
+          "code": "state.sessions[].title",
+          "status": "composition",
+          "reason": "Library and Settings labels are fixed; project subtitle derives from session.project.name."
+        },
+        {
+          "figma": "State=Active|Inactive",
+          "code": "state.activeTabId",
+          "status": "composition",
+          "reason": "SessionTabStrip renders a list from state.openSessionIds; a single instance is not the entire strip."
+        },
+        {
+          "figma": "close icon",
+          "code": "dispatch({ type: 'CLOSE_TAB', tabId })",
+          "status": "composition",
+          "reason": "Rendered only for session tabs; closing does not delete the session or stop its run."
+        }
+      ],
+      "examplesExport": "SessionTabExamples"
+    }
+  ],
+  "acceptedBaseCommit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
+  "completionScope": "Complete lightweight mappings with explicit retained differences and typed examples; CI must execute the named Electron cases. Same-PR source extensions are proposed, not falsely marked as already accepted in main.",
+  "examples": {
+    "path": "apps/desktop/design/component-examples.tsx",
+    "typecheck": "apps/desktop/design/tsconfig.json"
+  },
+  "electronTests": [
+    "tests/e2e/design-mappings.e2e.spec.ts",
+    "tests/e2e/p2-run.e2e.spec.ts",
+    "tests/e2e/design-decoration.e2e.spec.ts"
+  ],
+  "evidenceFiles": {
+    "apps/desktop/design/component-examples.tsx": "eff2447744389d9dc531222ed992b64b92f91b34",
+    "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "2d39cd9aeeeb35137a6813016a4cf1e8dce9fcf1",
+    "apps/desktop/src/renderer/components/Conversation.tsx": "fdb5fdc0bd051bc7f979fb8c42bd6afc875ffff1",
+    "apps/desktop/src/renderer/styles/app.css": "9328955da08caabddb2437f934e5c021d65dbe29",
+    "apps/desktop/src/renderer/styles/session-workbench.css": "5ecf0dd83e7770337724833bb9814609de3cf1ab",
+    "tests/e2e/design-mappings.e2e.spec.ts": "41968a251c1e44c8b29d1ffb704e6dd23815f7e6",
+    "tests/e2e/p2-run.e2e.spec.ts": "1a754a3d80c1155134794d48b8d62a5b30efc536",
+    "tests/e2e/design-decoration.e2e.spec.ts": "f45e80ff9e357a194a7262a4f3c2069b39fdbaeb"
+  }
+}

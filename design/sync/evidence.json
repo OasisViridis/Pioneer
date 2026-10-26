@@ -1,0 +1,1609 @@
+{
+  "schemaVersion": 1,
+  "verifiedDate": "2026-10-26",
+  "timezone": "Asia/Shanghai",
+  "baseCommit": "d5a2f87ab2c79af76ffbe721fc32472404345952",
+  "historicalCommit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+  "kind": "snapshot-only",
+  "liveRead": {
+    "nativeVariablesEqualS0": true,
+    "componentProjectionEqualS0": true,
+    "method": "Replayed componentRead and nativeVariablesRead from S0 read-requests.json using read-only Figma Plugin API; compared parsed JSON, excluding S0 wrapper metadata."
+  },
+  "nativeVariableDecisions": [
+    {
+      "id": "VariableID:824:1283",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/canvas",
+      "nativeValue": "#f6f5f1",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#F1F2EE",
+        "v3": "#F6F5F1"
+      },
+      "runtimeVariable": "hazel-canvas",
+      "runtimeBefore": "#f1f2ee",
+      "decision": "preserve-runtime-difference",
+      "reason": "Keep accepted main color and alias; broader palette/focus changes require separate visual acceptance."
+    },
+    {
+      "id": "VariableID:824:1284",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/surface",
+      "nativeValue": "#fdfcfa",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#F9FAF7",
+        "v3": "#FDFCFA"
+      },
+      "runtimeVariable": "hazel-surface",
+      "runtimeBefore": "#f9faf7",
+      "decision": "preserve-runtime-difference",
+      "reason": "Keep accepted main color and alias; broader palette/focus changes require separate visual acceptance."
+    },
+    {
+      "id": "VariableID:824:1285",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/surface-muted",
+      "nativeValue": "#eeedea",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#E9EBE6",
+        "v3": "#EEEDEA"
+      },
+      "runtimeVariable": "hazel-tool-surface",
+      "runtimeBefore": "#eef1f3",
+      "decision": "accept",
+      "reason": "Small S1 color proposal: tool surface #eef1f3 -> native #eeedea; retain existing CSS names and semantic alias."
+    },
+    {
+      "id": "VariableID:824:1286",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/ink",
+      "nativeValue": "#2c3547",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#2C3547",
+        "v3": "#2C3547"
+      },
+      "runtimeVariable": "hazel-ink",
+      "runtimeBefore": "#2c3547",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1287",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/secondary",
+      "nativeValue": "#64696f",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#646E72",
+        "v3": "#64696F"
+      },
+      "runtimeVariable": "hazel-secondary",
+      "runtimeBefore": "#646e72",
+      "decision": "accept",
+      "reason": "Accept native #64696f together with muted #eeedea; the old #646e72 foreground falls below 4.5:1 on the proposed muted surface."
+    },
+    {
+      "id": "VariableID:824:1288",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/navy",
+      "nativeValue": "#333c50",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#333C50",
+        "v3": "#333C50"
+      },
+      "runtimeVariable": "hazel-navy",
+      "runtimeBefore": "#333c50",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1289",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/navy-hover",
+      "nativeValue": "#212a3b",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#212A3B",
+        "v3": "#212A3B"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1290",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/on-navy",
+      "nativeValue": "#f9f9f9",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#F9F9F9",
+        "v3": "#F9F9F9"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1291",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/silver",
+      "nativeValue": "#d9d7d2",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#D3D3D3",
+        "v3": "#D9D7D2"
+      },
+      "runtimeVariable": "hazel-line",
+      "runtimeBefore": "#d3d3d3",
+      "decision": "preserve-runtime-difference",
+      "reason": "Keep accepted main color and alias; broader palette/focus changes require separate visual acceptance."
+    },
+    {
+      "id": "VariableID:824:1292",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/control-border",
+      "nativeValue": "#858d92",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#858D92",
+        "v3": "#858D92"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1293",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/mint",
+      "nativeValue": "#dce9df",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#D7E3DA",
+        "v3": "#DCE9DF"
+      },
+      "runtimeVariable": "hazel-mint",
+      "runtimeBefore": "#d7e3da",
+      "decision": "preserve-runtime-difference",
+      "reason": "Keep accepted main color and alias; broader palette/focus changes require separate visual acceptance."
+    },
+    {
+      "id": "VariableID:824:1294",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/success-ink",
+      "nativeValue": "#35644b",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#35644B",
+        "v3": "#35644B"
+      },
+      "runtimeVariable": "hazel-success-ink",
+      "runtimeBefore": "#35644b",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1295",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/notice",
+      "nativeValue": "#ede4d6",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#EDE4D6",
+        "v3": "#EDE4D6"
+      },
+      "runtimeVariable": "hazel-warm",
+      "runtimeBefore": "#ede4d6",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1296",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/gold",
+      "nativeValue": "#c6af94",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#C6AF94",
+        "v3": "#C6AF94"
+      },
+      "runtimeVariable": "hazel-gold",
+      "runtimeBefore": "#c6af94",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1297",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/gold-ink",
+      "nativeValue": "#76614b",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#76614B",
+        "v3": "#76614B"
+      },
+      "runtimeVariable": "hazel-gold-ink",
+      "runtimeBefore": "#76614b",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1298",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/rose",
+      "nativeValue": "#ebdada",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#EBDADA",
+        "v3": "#EBDADA"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1299",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/risk",
+      "nativeValue": "#b25352",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#B25352",
+        "v3": "#B25352"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1300",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/risk-ink",
+      "nativeValue": "#934342",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#934342",
+        "v3": "#934342"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1301",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/slate",
+      "nativeValue": "#dde2e9",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#DDE2E9",
+        "v3": "#DDE2E9"
+      },
+      "runtimeVariable": "hazel-slate",
+      "runtimeBefore": "#dde2e9",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1302",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/jade",
+      "nativeValue": "#dceadf",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": "#DCEADF",
+        "v3": "#DCEADF"
+      },
+      "runtimeVariable": "hazel-jade",
+      "runtimeBefore": "#dceadf",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1303",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "color/berry",
+      "nativeValue": "#944b59",
+      "nativeAliasId": null,
+      "historical": {
+        "v2": null,
+        "v3": "#944B59"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1304",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/0",
+      "nativeValue": 0,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1305",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/4",
+      "nativeValue": 4,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1306",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/8",
+      "nativeValue": 8,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1307",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/12",
+      "nativeValue": 12,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1308",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/16",
+      "nativeValue": 16,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1309",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/24",
+      "nativeValue": 24,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1310",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/32",
+      "nativeValue": 32,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1311",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/48",
+      "nativeValue": 48,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1312",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/64",
+      "nativeValue": 64,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1313",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/1",
+      "nativeValue": 1,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1314",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/2",
+      "nativeValue": 2,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1315",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/14",
+      "nativeValue": 14,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1316",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/15",
+      "nativeValue": 15,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1317",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/20",
+      "nativeValue": 20,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1318",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/36",
+      "nativeValue": 36,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1319",
+      "collection": "Pioneer v3 / Primitives",
+      "name": "number/40",
+      "nativeValue": 40,
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1320",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/canvas",
+      "nativeValue": "#f6f5f1",
+      "nativeAliasId": "VariableID:824:1283",
+      "historical": {
+        "v2": "#F1F2EE",
+        "v3": "#F6F5F1"
+      },
+      "runtimeVariable": "pioneer-background",
+      "runtimeBefore": "var(--hazel-canvas)",
+      "decision": "preserve-runtime-difference",
+      "reason": "Keep accepted main color and alias; broader palette/focus changes require separate visual acceptance."
+    },
+    {
+      "id": "VariableID:824:1321",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/surface",
+      "nativeValue": "#fdfcfa",
+      "nativeAliasId": "VariableID:824:1284",
+      "historical": {
+        "v2": "#F9FAF7",
+        "v3": "#FDFCFA"
+      },
+      "runtimeVariable": "pioneer-surface",
+      "runtimeBefore": "var(--hazel-surface)",
+      "decision": "preserve-runtime-difference",
+      "reason": "Keep accepted main color and alias; broader palette/focus changes require separate visual acceptance."
+    },
+    {
+      "id": "VariableID:824:1322",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/surface-muted",
+      "nativeValue": "#eeedea",
+      "nativeAliasId": "VariableID:824:1285",
+      "historical": {
+        "v2": "#E9EBE6",
+        "v3": "#EEEDEA"
+      },
+      "runtimeVariable": "pioneer-surface-muted",
+      "runtimeBefore": "var(--hazel-tool-surface)",
+      "decision": "accept",
+      "reason": "Small S1 color proposal: tool surface #eef1f3 -> native #eeedea; retain existing CSS names and semantic alias."
+    },
+    {
+      "id": "VariableID:824:1323",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/text-primary",
+      "nativeValue": "#2c3547",
+      "nativeAliasId": "VariableID:824:1286",
+      "historical": {
+        "v2": "#2C3547",
+        "v3": "#2C3547"
+      },
+      "runtimeVariable": "pioneer-foreground",
+      "runtimeBefore": "var(--hazel-ink)",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1324",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/text-secondary",
+      "nativeValue": "#64696f",
+      "nativeAliasId": "VariableID:824:1287",
+      "historical": {
+        "v2": "#646E72",
+        "v3": "#64696F"
+      },
+      "runtimeVariable": "pioneer-muted",
+      "runtimeBefore": "var(--hazel-secondary)",
+      "decision": "accept",
+      "reason": "Accept native #64696f together with muted #eeedea; the old #646e72 foreground falls below 4.5:1 on the proposed muted surface."
+    },
+    {
+      "id": "VariableID:824:1325",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/text-on-action",
+      "nativeValue": "#f9f9f9",
+      "nativeAliasId": "VariableID:824:1290",
+      "historical": {
+        "v2": "#F9F9F9",
+        "v3": "#F9F9F9"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1326",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/action",
+      "nativeValue": "#333c50",
+      "nativeAliasId": "VariableID:824:1288",
+      "historical": {
+        "v2": "#333C50",
+        "v3": "#333C50"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1327",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/action-hover",
+      "nativeValue": "#212a3b",
+      "nativeAliasId": "VariableID:824:1289",
+      "historical": {
+        "v2": "#212A3B",
+        "v3": "#212A3B"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1328",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/border-subtle",
+      "nativeValue": "#d9d7d2",
+      "nativeAliasId": "VariableID:824:1291",
+      "historical": {
+        "v2": "#D3D3D3",
+        "v3": "#D9D7D2"
+      },
+      "runtimeVariable": "pioneer-border",
+      "runtimeBefore": "var(--hazel-line)",
+      "decision": "preserve-runtime-difference",
+      "reason": "Keep accepted main color and alias; broader palette/focus changes require separate visual acceptance."
+    },
+    {
+      "id": "VariableID:824:1329",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/border-control",
+      "nativeValue": "#858d92",
+      "nativeAliasId": "VariableID:824:1292",
+      "historical": {
+        "v2": "#858D92",
+        "v3": "#858D92"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1330",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/focus",
+      "nativeValue": "#333c50",
+      "nativeAliasId": "VariableID:824:1288",
+      "historical": {
+        "v2": "#333C50",
+        "v3": "#333C50"
+      },
+      "runtimeVariable": "pioneer-focus",
+      "runtimeBefore": "#0071e3",
+      "decision": "preserve-runtime-difference",
+      "reason": "Keep accepted main color and alias; broader palette/focus changes require separate visual acceptance."
+    },
+    {
+      "id": "VariableID:824:1331",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/notice-surface",
+      "nativeValue": "#ede4d6",
+      "nativeAliasId": "VariableID:824:1295",
+      "historical": {
+        "v2": "#EDE4D6",
+        "v3": "#EDE4D6"
+      },
+      "runtimeVariable": "pioneer-notice",
+      "runtimeBefore": "var(--hazel-warm)",
+      "decision": "accept",
+      "reason": "Same resolved color; preserve the existing runtime semantic alias and compatibility name."
+    },
+    {
+      "id": "VariableID:824:1332",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/notice-border",
+      "nativeValue": "#c6af94",
+      "nativeAliasId": "VariableID:824:1296",
+      "historical": {
+        "v2": "#C6AF94",
+        "v3": "#C6AF94"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1333",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/notice-text",
+      "nativeValue": "#2c3547",
+      "nativeAliasId": "VariableID:824:1286",
+      "historical": {
+        "v2": "#2C3547",
+        "v3": "#2C3547"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1334",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/success-surface",
+      "nativeValue": "#dce9df",
+      "nativeAliasId": "VariableID:824:1293",
+      "historical": {
+        "v2": "#D7E3DA",
+        "v3": "#DCE9DF"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1335",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/success-text",
+      "nativeValue": "#35644b",
+      "nativeAliasId": "VariableID:824:1294",
+      "historical": {
+        "v2": "#35644B",
+        "v3": "#35644B"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1336",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/error-surface",
+      "nativeValue": "#ebdada",
+      "nativeAliasId": "VariableID:824:1298",
+      "historical": {
+        "v2": "#EBDADA",
+        "v3": "#EBDADA"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1337",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/error-text",
+      "nativeValue": "#934342",
+      "nativeAliasId": "VariableID:824:1300",
+      "historical": {
+        "v2": "#934342",
+        "v3": "#934342"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1338",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/danger-action",
+      "nativeValue": "#b25352",
+      "nativeAliasId": "VariableID:824:1299",
+      "historical": {
+        "v2": "#B25352",
+        "v3": "#B25352"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1339",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/identity-slate",
+      "nativeValue": "#dde2e9",
+      "nativeAliasId": "VariableID:824:1301",
+      "historical": {
+        "v2": "#DDE2E9",
+        "v3": "#DDE2E9"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1340",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/identity-jade",
+      "nativeValue": "#dceadf",
+      "nativeAliasId": "VariableID:824:1302",
+      "historical": {
+        "v2": "#DCEADF",
+        "v3": "#DCEADF"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1341",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/icon",
+      "nativeValue": "#64696f",
+      "nativeAliasId": "VariableID:824:1287",
+      "historical": {
+        "v2": "#646E72",
+        "v3": "#64696F"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1342",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/code-surface",
+      "nativeValue": "#212a3b",
+      "nativeAliasId": "VariableID:824:1289",
+      "historical": {
+        "v2": "#212A3B",
+        "v3": "#212A3B"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1343",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/code-text",
+      "nativeValue": "#f9f9f9",
+      "nativeAliasId": "VariableID:824:1290",
+      "historical": {
+        "v2": "#F9F9F9",
+        "v3": "#F9F9F9"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1344",
+      "collection": "Pioneer v3 / Color",
+      "name": "color/decorative-berry",
+      "nativeValue": "#944b59",
+      "nativeAliasId": "VariableID:824:1303",
+      "historical": {
+        "v2": null,
+        "v3": "#944B59"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1345",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "space/0",
+      "nativeValue": 0,
+      "nativeAliasId": "VariableID:824:1304",
+      "historical": {
+        "name": "space/0",
+        "value": 0,
+        "scope": "GAP",
+        "css": "--pioneer-space-0"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1346",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "space/4",
+      "nativeValue": 4,
+      "nativeAliasId": "VariableID:824:1305",
+      "historical": {
+        "name": "space/4",
+        "value": 4,
+        "scope": "GAP",
+        "css": "--pioneer-space-4"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1347",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "space/8",
+      "nativeValue": 8,
+      "nativeAliasId": "VariableID:824:1306",
+      "historical": {
+        "name": "space/8",
+        "value": 8,
+        "scope": "GAP",
+        "css": "--pioneer-space-8"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1348",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "space/12",
+      "nativeValue": 12,
+      "nativeAliasId": "VariableID:824:1307",
+      "historical": {
+        "name": "space/12",
+        "value": 12,
+        "scope": "GAP",
+        "css": "--pioneer-space-12"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1349",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "space/16",
+      "nativeValue": 16,
+      "nativeAliasId": "VariableID:824:1308",
+      "historical": {
+        "name": "space/16",
+        "value": 16,
+        "scope": "GAP",
+        "css": "--pioneer-space-16"
+      },
+      "runtimeVariable": "pioneer-space",
+      "runtimeBefore": "1rem",
+      "decision": "preserve-runtime-difference",
+      "reason": "Native FLOAT length is px by explicit geometry scope; retain existing rem semantics (not identical when root font size changes)."
+    },
+    {
+      "id": "VariableID:824:1350",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "space/24",
+      "nativeValue": 24,
+      "nativeAliasId": "VariableID:824:1309",
+      "historical": {
+        "name": "space/24",
+        "value": 24,
+        "scope": "GAP",
+        "css": "--pioneer-space-24"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1351",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "space/32",
+      "nativeValue": 32,
+      "nativeAliasId": "VariableID:824:1310",
+      "historical": {
+        "name": "space/32",
+        "value": 32,
+        "scope": "GAP",
+        "css": "--pioneer-space-32"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1352",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "space/48",
+      "nativeValue": 48,
+      "nativeAliasId": "VariableID:824:1311",
+      "historical": {
+        "name": "space/48",
+        "value": 48,
+        "scope": "GAP",
+        "css": "--pioneer-space-48"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1353",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "space/64",
+      "nativeValue": 64,
+      "nativeAliasId": "VariableID:824:1312",
+      "historical": {
+        "name": "space/64",
+        "value": 64,
+        "scope": "GAP",
+        "css": "--pioneer-space-64"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1354",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "radius/0",
+      "nativeValue": 0,
+      "nativeAliasId": "VariableID:824:1304",
+      "historical": {
+        "name": "radius/0",
+        "value": 0,
+        "scope": "CORNER_RADIUS",
+        "css": "--pioneer-radius-0"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1355",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "radius/8",
+      "nativeValue": 8,
+      "nativeAliasId": "VariableID:824:1306",
+      "historical": {
+        "name": "radius/8",
+        "value": 8,
+        "scope": "CORNER_RADIUS",
+        "css": "--pioneer-radius-8"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1356",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "radius/12",
+      "nativeValue": 12,
+      "nativeAliasId": "VariableID:824:1307",
+      "historical": {
+        "name": "radius/12",
+        "value": 12,
+        "scope": "CORNER_RADIUS",
+        "css": "--pioneer-radius-12"
+      },
+      "runtimeVariable": "pioneer-radius",
+      "runtimeBefore": "0.75rem",
+      "decision": "preserve-runtime-difference",
+      "reason": "Native FLOAT length is px by explicit geometry scope; retain existing rem semantics (not identical when root font size changes)."
+    },
+    {
+      "id": "VariableID:824:1357",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "radius/16",
+      "nativeValue": 16,
+      "nativeAliasId": "VariableID:824:1308",
+      "historical": {
+        "name": "radius/16",
+        "value": 16,
+        "scope": "CORNER_RADIUS",
+        "css": "--pioneer-radius-16"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1358",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "stroke/1",
+      "nativeValue": 1,
+      "nativeAliasId": "VariableID:824:1313",
+      "historical": {
+        "name": "stroke/1",
+        "value": 1,
+        "scope": "STROKE_FLOAT",
+        "css": "--pioneer-stroke-1"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1359",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "stroke/2",
+      "nativeValue": 2,
+      "nativeAliasId": "VariableID:824:1314",
+      "historical": {
+        "name": "stroke/2",
+        "value": 2,
+        "scope": "STROKE_FLOAT",
+        "css": "--pioneer-stroke-2"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1360",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "type/12",
+      "nativeValue": 12,
+      "nativeAliasId": "VariableID:824:1307",
+      "historical": {
+        "name": "type/12",
+        "value": 12,
+        "scope": "FONT_SIZE",
+        "css": "--pioneer-type-12"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1361",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "type/14",
+      "nativeValue": 14,
+      "nativeAliasId": "VariableID:824:1315",
+      "historical": {
+        "name": "type/14",
+        "value": 14,
+        "scope": "FONT_SIZE",
+        "css": "--pioneer-type-14"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1362",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "type/15",
+      "nativeValue": 15,
+      "nativeAliasId": "VariableID:824:1316",
+      "historical": {
+        "name": "type/15",
+        "value": 15,
+        "scope": "FONT_SIZE",
+        "css": "--pioneer-type-15"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1363",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "type/20",
+      "nativeValue": 20,
+      "nativeAliasId": "VariableID:824:1317",
+      "historical": {
+        "name": "type/20",
+        "value": 20,
+        "scope": "FONT_SIZE",
+        "css": "--pioneer-type-20"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1364",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "type/24",
+      "nativeValue": 24,
+      "nativeAliasId": "VariableID:824:1309",
+      "historical": {
+        "name": "type/24",
+        "value": 24,
+        "scope": "FONT_SIZE",
+        "css": "--pioneer-type-24"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1365",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "control/32",
+      "nativeValue": 32,
+      "nativeAliasId": "VariableID:824:1310",
+      "historical": {
+        "name": "control/32",
+        "value": 32,
+        "scope": "WIDTH_HEIGHT",
+        "css": "--pioneer-control-32"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1366",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "control/36",
+      "nativeValue": 36,
+      "nativeAliasId": "VariableID:824:1318",
+      "historical": {
+        "name": "control/36",
+        "value": 36,
+        "scope": "WIDTH_HEIGHT",
+        "css": "--pioneer-control-36"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1367",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "control/40",
+      "nativeValue": 40,
+      "nativeAliasId": "VariableID:824:1319",
+      "historical": {
+        "name": "control/40",
+        "value": 40,
+        "scope": "WIDTH_HEIGHT",
+        "css": "--pioneer-control-40"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:824:1368",
+      "collection": "Pioneer v3 / Geometry",
+      "name": "control/48",
+      "nativeValue": 48,
+      "nativeAliasId": "VariableID:824:1311",
+      "historical": {
+        "name": "control/48",
+        "value": 48,
+        "scope": "WIDTH_HEIGHT",
+        "css": "--pioneer-control-48"
+      },
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "No accepted main consumer; retain native metadata in S0, do not activate unused values or infer units."
+    },
+    {
+      "id": "VariableID:894:291",
+      "collection": "Pioneer v3 / Window Primitives",
+      "name": "window/close",
+      "nativeValue": "#ff5f57",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve design-only window colors; duplicate native codeSyntax names across primitive/semantic collections are not imported. Native window chrome remains unchanged."
+    },
+    {
+      "id": "VariableID:894:293",
+      "collection": "Pioneer v3 / Window Primitives",
+      "name": "window/minimize",
+      "nativeValue": "#febc2e",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve design-only window colors; duplicate native codeSyntax names across primitive/semantic collections are not imported. Native window chrome remains unchanged."
+    },
+    {
+      "id": "VariableID:894:295",
+      "collection": "Pioneer v3 / Window Primitives",
+      "name": "window/fullscreen",
+      "nativeValue": "#28c840",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve design-only window colors; duplicate native codeSyntax names across primitive/semantic collections are not imported. Native window chrome remains unchanged."
+    },
+    {
+      "id": "VariableID:894:297",
+      "collection": "Pioneer v3 / Window Primitives",
+      "name": "window/inactive",
+      "nativeValue": "#b8b3b1",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve design-only window colors; duplicate native codeSyntax names across primitive/semantic collections are not imported. Native window chrome remains unchanged."
+    },
+    {
+      "id": "VariableID:894:292",
+      "collection": "Pioneer v3 / Window Controls",
+      "name": "color/close",
+      "nativeValue": "#ff5f57",
+      "nativeAliasId": "VariableID:894:291",
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve design-only window colors; duplicate native codeSyntax names across primitive/semantic collections are not imported. Native window chrome remains unchanged."
+    },
+    {
+      "id": "VariableID:894:294",
+      "collection": "Pioneer v3 / Window Controls",
+      "name": "color/minimize",
+      "nativeValue": "#febc2e",
+      "nativeAliasId": "VariableID:894:293",
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve design-only window colors; duplicate native codeSyntax names across primitive/semantic collections are not imported. Native window chrome remains unchanged."
+    },
+    {
+      "id": "VariableID:894:296",
+      "collection": "Pioneer v3 / Window Controls",
+      "name": "color/fullscreen",
+      "nativeValue": "#28c840",
+      "nativeAliasId": "VariableID:894:295",
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve design-only window colors; duplicate native codeSyntax names across primitive/semantic collections are not imported. Native window chrome remains unchanged."
+    },
+    {
+      "id": "VariableID:894:298",
+      "collection": "Pioneer v3 / Window Controls",
+      "name": "color/inactive",
+      "nativeValue": "#b8b3b1",
+      "nativeAliasId": "VariableID:894:297",
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve design-only window colors; duplicate native codeSyntax names across primitive/semantic collections are not imported. Native window chrome remains unchanged."
+    },
+    {
+      "id": "VariableID:921:473",
+      "collection": "Pioneer F9 / Source additions",
+      "name": "f9/navy-deep",
+      "nativeValue": "#252c3b",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve all seven F9 additions as design-only evidence; no accepted main consumer. Do not import new UI or palette implicitly."
+    },
+    {
+      "id": "VariableID:921:474",
+      "collection": "Pioneer F9 / Source additions",
+      "name": "f9/silver-2",
+      "nativeValue": "#e7e5e0",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve all seven F9 additions as design-only evidence; no accepted main consumer. Do not import new UI or palette implicitly."
+    },
+    {
+      "id": "VariableID:921:475",
+      "collection": "Pioneer F9 / Source additions",
+      "name": "f9/mint-2",
+      "nativeValue": "#c6dccb",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve all seven F9 additions as design-only evidence; no accepted main consumer. Do not import new UI or palette implicitly."
+    },
+    {
+      "id": "VariableID:921:476",
+      "collection": "Pioneer F9 / Source additions",
+      "name": "f9/mint-ink",
+      "nativeValue": "#2f5e45",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve all seven F9 additions as design-only evidence; no accepted main consumer. Do not import new UI or palette implicitly."
+    },
+    {
+      "id": "VariableID:921:477",
+      "collection": "Pioneer F9 / Source additions",
+      "name": "f9/gold-soft",
+      "nativeValue": "#f1e9de",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve all seven F9 additions as design-only evidence; no accepted main consumer. Do not import new UI or palette implicitly."
+    },
+    {
+      "id": "VariableID:921:478",
+      "collection": "Pioneer F9 / Source additions",
+      "name": "f9/desk",
+      "nativeValue": "#c9cbc8",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve all seven F9 additions as design-only evidence; no accepted main consumer. Do not import new UI or palette implicitly."
+    },
+    {
+      "id": "VariableID:921:479",
+      "collection": "Pioneer F9 / Source additions",
+      "name": "f9/map-tint",
+      "nativeValue": "#e4e6e3",
+      "nativeAliasId": null,
+      "historical": null,
+      "runtimeVariable": null,
+      "runtimeBefore": null,
+      "decision": "preserve-design-only",
+      "reason": "Preserve all seven F9 additions as design-only evidence; no accepted main consumer. Do not import new UI or palette implicitly."
+    }
+  ],
+  "runtimeBefore": {
+    "hazel-canvas": "#f1f2ee",
+    "hazel-surface": "#f9faf7",
+    "hazel-ink": "#2c3547",
+    "hazel-navy": "#333c50",
+    "hazel-secondary": "#646e72",
+    "hazel-line": "#d3d3d3",
+    "hazel-mint": "#d7e3da",
+    "hazel-slate": "#dde2e9",
+    "hazel-jade": "#dceadf",
+    "hazel-warm": "#ede4d6",
+    "hazel-gold": "#c6af94",
+    "hazel-gold-ink": "#76614b",
+    "hazel-success-ink": "#35644b",
+    "hazel-tool-surface": "#eef1f3",
+    "pioneer-background": "var(--hazel-canvas)",
+    "pioneer-surface": "var(--hazel-surface)",
+    "pioneer-surface-muted": "var(--hazel-tool-surface)",
+    "pioneer-border": "var(--hazel-line)",
+    "pioneer-foreground": "var(--hazel-ink)",
+    "pioneer-focus": "#0071e3",
+    "pioneer-muted": "var(--hazel-secondary)",
+    "pioneer-notice": "var(--hazel-warm)",
+    "pioneer-radius": "0.75rem",
+    "pioneer-space": "1rem"
+  },
+  "historicalTypography": [
+    {
+      "name": "Pioneer v3 / Heading/Large",
+      "family": "Noto Sans SC",
+      "style": "Bold",
+      "size": 24,
+      "lineHeight": 32
+    },
+    {
+      "name": "Pioneer v3 / Heading/Medium",
+      "family": "Noto Sans SC",
+      "style": "Medium",
+      "size": 20,
+      "lineHeight": 28
+    },
+    {
+      "name": "Pioneer v3 / Body/Reading",
+      "family": "Noto Sans SC",
+      "style": "Regular",
+      "size": 15,
+      "lineHeight": 24
+    },
+    {
+      "name": "Pioneer v3 / Body/Default",
+      "family": "Noto Sans SC",
+      "style": "Regular",
+      "size": 14,
+      "lineHeight": 22
+    },
+    {
+      "name": "Pioneer v3 / UI/Label",
+      "family": "Noto Sans SC",
+      "style": "Medium",
+      "size": 14,
+      "lineHeight": 20
+    },
+    {
+      "name": "Pioneer v3 / UI/Small",
+      "family": "Noto Sans SC",
+      "style": "Regular",
+      "size": 12,
+      "lineHeight": 18
+    },
+    {
+      "name": "Pioneer v3 / UI/Small Strong",
+      "family": "Noto Sans SC",
+      "style": "Medium",
+      "size": 12,
+      "lineHeight": 18
+    },
+    {
+      "name": "Pioneer v3 / Code/Default",
+      "family": "JetBrains Mono",
+      "style": "Regular",
+      "size": 14,
+      "lineHeight": 22
+    },
+    {
+      "name": "Pioneer v3 / Code/Small",
+      "family": "JetBrains Mono",
+      "style": "Regular",
+      "size": 12,
+      "lineHeight": 20
+    },
+    {
+      "name": "Pioneer v3 / Display/Welcome",
+      "family": "Noto Serif SC",
+      "style": "Medium",
+      "size": 28,
+      "lineHeight": 40
+    },
+    {
+      "size": 16,
+      "name": "Pioneer v3 / UI/Card Title",
+      "lineHeight": 24,
+      "family": "Noto Sans SC",
+      "style": "Medium"
+    }
+  ],
+  "typographyDecision": "Preserve runtime Inter, Noto Sans SC, system-ui, sans-serif and unitless line-height 1.5 as DTCG. Native text styles remain snapshot metadata; do not infer installed fonts or collapse style/weight/lineHeight into FLOAT.",
+  "legacyToolingDecision": "Historical build-local.py and validate-kit.py stay deprecated: they rewrite CSS, QA and ZIP and require an author home image store. Pure hash/catalog checks now run in tools/design-assets.mjs; runtime budgets use the current Electron suite, with no asset rewrites.",
+  "files": {
+    "docs/research/design-sync-s0/native-variables.json": "506329556481e7705d6cb960cbdc3082ddd4a21d5d43cb6a5ff42f59a97e8a32",
+    "docs/research/design-sync-s0/design-snapshot.json": "a6b28d7cb42a1c384d0b381aeee81d91bbbba81717950319f9a296d95c6619aa",
+    "docs/research/design-sync-s0/validation.json": "261f56fb3924166b4ee996b297b2f77fac0f641c9a2267488486b62e1e05bfa6",
+    "docs/research/design-sync-s0/README.md": "4651e5830cc6d2980ca96b6f19235e62f9a14b87b5689c0cbc23555aa400ead9",
+    "docs/research/design-sync-s0/component-index.json": "1b509e7dd68cbfe32db5677abc5ee6474ddd97a0e6649f0d2a19b4d6750841da",
+    "docs/research/design-sync-s0/read-requests.json": "dff08265d274a0d405ca68e29fdfc371c8d41ce8d1e76e85441507e77e399bf6"
+  },
+  "historicalFiles": {
+    "docs/design/hazel-v3/tokens.json": "f1432eae1566ab3deae7cf2cd948d78f5f49acc3a29e9d74fbe5fa8ef432b0b8",
+    "docs/design/pioneer-design-tokens-v2.json": "d3b0d8e8e0943468a2f052454decc8142a763c242c6bda2fee360ee14ba80a34",
+    "docs/design/hazel-v3/decoration-policy.json": "696b58381ce5b0fb964038c4668501a687cd6d9f8072f1e2fbb968589c9f6d85",
+    "docs/design/hazel-v3/provenance.json": "fc7270f96ca80ccc124f6daee17f04d1725651994e3db231a18952cd24a49e39",
+    "docs/design/hazel-v3/Pioneer-Hazel-v3-assets.zip": "5d9d8bbc7b30708200dcb5127af407f55df31196df76c1e4a1fe1f2bb8a5ee77"
+  },
+  "integrationCommit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
+  "integrationNote": "PR #39 delivered the token pipeline. Current follow-up completes lightweight component dispositions and adapts historical asset checks to the accepted single workspace; see mapping-acceptance.md and asset-policy.json. Token comparison remains pinned to baseCommit."
+}

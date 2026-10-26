@@ -130,6 +130,11 @@
   border-bottom: 1px solid var(--hazel-line);
   flex-shrink: 0;
 }
+/* The single workspace keeps panels visible together. Active means focus
+   inside a panel, not a selected tab hiding another panel. */
+.dock-panel:focus-within > .module-header {
+  background: var(--pioneer-surface-muted);
+}
 .panel-drag-handle,
 .quiet-button {
   border: 0;
@@ -295,6 +300,7 @@
     500 26px/1.5 'Noto Serif SC',
     serif;
   margin: 16px 0 8px;
+  margin-right: 112px;
 }
 .conversation-welcome > p {
   margin: 0 112px 24px 0;
@@ -571,6 +577,9 @@
     display: none;
   }
   .conversation-welcome > p {
+    margin-right: 0;
+  }
+  .conversation-welcome h2 {
     margin-right: 0;
   }
 }

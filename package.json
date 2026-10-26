@@ -10,9 +10,9 @@
   "scripts": {
     "build:desktop": "pnpm --filter @pioneer/desktop build",
     "dev": "pnpm --filter @pioneer/desktop start",
-    "format": "prettier --write apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts",
-    "format:check": "prettier --check apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts",
-    "lint": "eslint apps/desktop/src tests/contract tests/e2e *.config.*",
+    "format": "prettier --write apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync",
+    "format:check": "prettier --check apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync",
+    "lint": "eslint apps/desktop/src apps/desktop/design tests/contract tests/e2e *.config.* tools/design-*.mjs tests/design-sync",
     "typecheck": "pnpm --filter @pioneer/desktop typecheck",
     "package:smoke": "pnpm --filter @pioneer/desktop build",
     "verify:repository": "node --test tests/repository/normalization.test.mjs",
@@ -22,7 +22,13 @@
     "test:contract:types": "tsc --noEmit -p tsconfig.tests.json",
     "test:contract": "pnpm test:contract:types && vitest run --config vitest.config.ts",
     "test:e2e": "pnpm build:desktop && playwright test --config tests/e2e/playwright.config.ts",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:contract && pnpm test:prototype && pnpm test:e2e && pnpm package:smoke"
+    "check": "pnpm design:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:contract && pnpm test:prototype && pnpm test:e2e && pnpm package:smoke",
+    "tokens:build": "node tools/design-tokens.mjs build",
+    "tokens:check": "node tools/design-tokens.mjs check",
+    "design:check": "pnpm tokens:check && pnpm design:types && pnpm design:assets && node tools/design-mappings.mjs && node --test tests/design-sync/*.test.mjs",
+    "design:acceptance": "pnpm check && node tools/design-mappings.mjs --require-complete",
+    "design:types": "tsc --noEmit -p apps/desktop/design/tsconfig.json",
+    "design:assets": "node tools/design-assets.mjs"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.1",
@@ -35,7 +41,9 @@
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.12.0",
+    "jsonc-parser": "3.3.1",
     "prettier": "3.9.6",
+    "style-dictionary": "5.7.1",
     "typescript": "6.0.3",
     "vitest": "5.0.0"
   }

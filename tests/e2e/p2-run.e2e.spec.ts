@@ -91,7 +91,9 @@ test('completes a controlled read-only run with a real tool result and unchanged
     await newSessionForProject(page, 'alpha-app');
     await prepareTask(page);
 
+    await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await page.getByRole('button', { name: '启动运行' }).click();
+    await expect(page.locator('.hazel-companion')).toHaveCount(0);
 
     await expect(
       page.getByText('工具请求：read_file', { exact: true }),
@@ -140,11 +142,25 @@ test('stops mid-run and shows 已停止 only after background convergence', asyn
     await newSessionForProject(page, 'alpha-app');
     await prepareTask(page);
 
+    await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await page.getByRole('button', { name: '启动运行' }).click();
+    await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await expect(
       page.locator('.run-status', { hasText: '运行中' }),
     ).toBeVisible();
 
+    // Closing a mapped SessionTab must not stop the background Run.
+    await page
+      .getByRole('button', { name: 'Close alpha-app', exact: true })
+      .click();
+    await page
+      .getByRole('button', { name: '打开会话 alpha-app', exact: true })
+      .click();
+    await page.locator('details.run-log summary').click();
+    await expect(
+      page.locator('.run-status', { hasText: '运行中' }),
+    ).toBeVisible();
+    await expect(page.locator('.hazel-companion')).toHaveCount(0);
     const stopButton = page.getByRole('button', { name: '停止', exact: true });
     await stopButton.click();
 
@@ -192,7 +208,9 @@ test('allows a fresh authorized run after a stopped one converges', async ({}, t
     await newSessionForProject(page, 'alpha-app');
     await prepareTask(page);
 
+    await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await page.getByRole('button', { name: '启动运行' }).click();
+    await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await expect(
       page.locator('.run-status', { hasText: '运行中' }),
     ).toBeVisible();
@@ -204,7 +222,9 @@ test('allows a fresh authorized run after a stopped one converges', async ({}, t
     });
 
     // A terminal run releases the session slot: the launch action returns.
+    await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await page.getByRole('button', { name: '启动运行' }).click();
+    await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await expect(
       page.locator('.run-status', { hasText: '运行中' }),
     ).toBeVisible();

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "baseline": "d11dedefbd732f97c5cf549b103f405f3741a3af",
+  "historicalPolicy": "docs/design/hazel-v3/decoration-policy.json",
+  "budget": {
+    "brandMark": 20,
+    "maxIllustrationsPerView": 1,
+    "emptyIllustration": 88,
+    "compactEmptyIllustration": 64,
+    "accessory": 48,
+    "safeTextGap": 24,
+    "hideConversationBelow": 380,
+    "activeTaskIllustrations": 0,
+    "errorPermissionUnknownIllustrations": 0,
+    "hideConversationBoundary": "max-width: 380px (inclusive)"
+  },
+  "conversationPool": [
+    "greendou-listening.png",
+    "paper-butterfly.png",
+    "jelly-ribbon-charm.png",
+    "jelly-outline.svg",
+    "greendou-reading.png",
+    "cherry-bookmark.png",
+    "silver-paper-fold.svg",
+    "jelly-companion.png",
+    "uniform-ribbon.png",
+    "ribbon-outline.svg",
+    "cherry-pair.svg"
+  ],
+  "dormantAssets": ["greendou-organizing.png"],
+  "reservedNoRuntime": ["jelly-mark.svg", "compass-seal.svg"],
+  "selection": "Last UTF-16 code unit of immutable session.id modulo the single conversation pool length; no legacy layout switching.",
+  "visibility": "Only a fresh empty conversation, idle run view, no intent/error, no save error. Hide at container width <= 380px. No promise of onboarding placement in the current App."
+}
