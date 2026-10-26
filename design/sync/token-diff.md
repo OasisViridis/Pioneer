@@ -131,7 +131,7 @@
 
 初始基线 `d5a2f87` 未包含历史 Hazel v3 包、ZIP、provenance、decoration-policy 与 v2 JSON；历史固定 commit 路径和 SHA-256 保留在 evidence.json。合并前同步 main `fd26d06` 后已继承 #13 的这些材料，本 PR 相对该 main 不改资产、ZIP/manifest 或运行时素材接入。原生变量与历史文字样式差异保留，未迁移内容不是已接受输入。
 
-历史 `build-local.py` 和 `validate-kit.py` **退出日常生产路线**：它们含重建 CSS、写 QA/ZIP 及读取用户目录生成图的副作用。当前复用的是纯读的对比度公式、S0 哈希及已有 Electron fixture 不变量。素材哈希/装饰预算的运行时规则仍须按 #13 已接受的主线适配；本票未运行历史 12 素材预算，不将继承资产等同于该预算通过。
+历史 `build-local.py` 和 `validate-kit.py` **退出日常生产路线**：它们含重建 CSS、写 QA/ZIP 及读取用户目录生成图的副作用。当前复用纯读的对比度公式、S0 哈希与历史素材校验；`tools/design-assets.mjs` 检查 14 份历史素材、12 份运行时副本、2 份字体及冻结材料，拒绝额外素材和消费者。`asset-policy.json` 将已接受的单工作区十一种会话主题显式记录，保留 organizing 为未启用资产；`design-decoration.e2e.spec.ts` 验证真实显示数量、尺寸、文字间距、窄屏、重启和错误状态，`p2-run.e2e.spec.ts` 验证运行时隐藏。具体执行结果以交付提交的完整 Windows CI 为准，旧三布局 E2E 不作为当前验收证据。
 
 ## 参考
 

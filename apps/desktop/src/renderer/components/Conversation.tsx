@@ -1,10 +1,11 @@
-import { useEffect, useRef, type Dispatch } from 'react';
+import { useEffect, useRef, useSyncExternalStore, type Dispatch } from 'react';
 import type { Session } from '../../shared/contracts/session-workspace';
 import type { SessionWorkspaceAction } from '../state/session-workspace-reducer';
 import { workspaceIdentity } from './workspace-identity';
 import { HazelCompanion } from './HazelCompanion';
 import { SessionIntent } from './SessionIntent';
 import { RunPanel } from './RunPanel';
+import { runViews } from '../state/run-view-instance';
 export function Conversation({
   session,
   dispatch,
@@ -15,6 +16,15 @@ export function Conversation({
   allowDecoration: boolean;
 }): React.JSX.Element {
   const transcript = useRef<HTMLDivElement>(null);
+  const run = useSyncExternalStore(runViews.subscribe, () =>
+    runViews.get(session.id),
+  );
+  const showDecoration =
+    allowDecoration &&
+    run.phase === 'idle' &&
+    session.intentState.phase === 'compose' &&
+    session.intentState.intent === null &&
+    session.intentState.error === null;
   useEffect(() => {
     if (transcript.current)
       transcript.current.scrollTop = transcript.current.scrollHeight;
@@ -61,7 +71,7 @@ export function Conversation({
               </span>
               <h2>从一个具体任务开始</h2>
               <p>描述你要完成什么。工作区与草稿留在这段会话里。</p>
-              {allowDecoration ? (
+              {showDecoration ? (
                 <HazelCompanion sessionId={session.id} />
               ) : null}
               <div className="connection-notice">

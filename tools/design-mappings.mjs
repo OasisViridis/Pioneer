@@ -24,7 +24,7 @@ export function validateMapping(mapping, design, source) {
   );
   for (const variant of mapping.variants) {
     assert(
-      ['preserved-difference', 'unsupported', 'blocked'].includes(
+      ['mapped', 'preserved-difference', 'unsupported', 'blocked'].includes(
         variant.status,
       ),
       `Unsupported mapping status: ${variant.status}`,
@@ -42,7 +42,7 @@ export function validateMapping(mapping, design, source) {
       'mapped',
       'Incomplete variants cannot be marked mapped',
     );
-  if (!mapping.code.inAcceptedMain) {
+  if (!mapping.code.inAcceptedMain && !mapping.code.proposedInThisPR) {
     assert.equal(
       source,
       null,
@@ -103,13 +103,74 @@ export function validateMapping(mapping, design, source) {
   );
   for (const prop of mapping.usedProps)
     assert(props.includes(prop), `Invented prop: ${prop}`);
-  // A disabled Figma poster must not become a clickable available project.
-  if (mapping.designProperties.Cover)
-    assert.equal(
-      mapping.variants.find((v) => v.name === 'Cover=Unavailable')?.status,
-      'unsupported',
-      'Unavailable has no safe real API',
+  if (mapping.code.proposedInThisPR) {
+    assert.match(
+      mapping.code.baseCommit,
+      /^[a-f0-9]{40}$/,
+      'Missing accepted base version',
     );
+    assert.match(
+      mapping.code.mainBlob,
+      /^[a-f0-9]{40}$/,
+      'Missing accepted base blob',
+    );
+    assert.equal(
+      mapping.code.inAcceptedMain,
+      false,
+      'Do not label a same-PR extension as already in main',
+    );
+  }
+}
+
+export function validateVariantEvidence(
+  mapping,
+  exampleNames,
+  registeredTests,
+) {
+  assert.deepEqual(
+    exampleNames.toSorted(),
+    mapping.variants.map((v) => v.name).sort(),
+    'Typed example variant coverage mismatch',
+  );
+  for (const variant of mapping.variants) {
+    assert(variant.exercise?.length > 0, 'Missing variant exercise');
+    assert(variant.evidence?.length > 0, 'Missing variant test evidence');
+    for (const proof of variant.evidence)
+      assert(
+        registeredTests.get(proof.path)?.includes(proof.test),
+        `Missing enabled Electron test: ${proof.path} / ${proof.test}`,
+      );
+  }
+}
+
+function registeredTestNames(source) {
+  const file = ts.createSourceFile(
+    'test.ts',
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  const names = [];
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'test' &&
+      ts.isStringLiteral(node.arguments[0])
+    )
+      names.push(node.arguments[0].text);
+    ts.forEachChild(node, visit);
+  };
+  visit(file);
+  return names;
+}
+
+function sourceBlob(source) {
+  const normalized = source.replaceAll('\r\n', '\n');
+  return createHash('sha1')
+    .update(`blob ${Buffer.byteLength(normalized)}\0`)
+    .update(normalized)
+    .digest('hex');
 }
 
 export async function checkMappings({ requireComplete = false } = {}) {
@@ -140,6 +201,50 @@ export async function checkMappings({ requireComplete = false } = {}) {
     s0.components.map((m) => m.ownerId).sort(),
     'Three pilot inventory mismatch',
   );
+  const exampleFile = path.join(root, index.examples.path);
+  const configFile = path.join(root, 'apps/desktop/design/tsconfig.json');
+  const config = ts.readConfigFile(configFile, ts.sys.readFile);
+  const parsed = ts.parseJsonConfigFileContent(
+    config.config,
+    ts.sys,
+    path.dirname(configFile),
+  );
+  const program = ts.createProgram(parsed.fileNames, parsed.options);
+  const diagnostics = ts.getPreEmitDiagnostics(program);
+  assert.equal(
+    diagnostics.length,
+    0,
+    diagnostics
+      .map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n'))
+      .join('\n'),
+  );
+  const checker = program.getTypeChecker();
+  const examples = program.getSourceFile(exampleFile);
+  assert(examples, 'Typed mapping examples are not compiled');
+  const exports = checker.getExportsOfModule(
+    checker.getSymbolAtLocation(examples),
+  );
+  const playwright = await readFile(
+    path.join(root, 'tests/e2e/playwright.config.ts'),
+    'utf8',
+  );
+  const registeredTests = new Map();
+  for (const file of index.electronTests) {
+    assert(
+      playwright.includes(`'${path.basename(file)}'`),
+      `Electron evidence is not in testMatch: ${file}`,
+    );
+    registeredTests.set(
+      file,
+      registeredTestNames(await readFile(path.join(root, file), 'utf8')),
+    );
+  }
+  for (const [file, blob] of Object.entries(index.evidenceFiles))
+    assert.equal(
+      sourceBlob(await readFile(path.join(root, file), 'utf8')),
+      blob,
+      `Mapping evidence drift: ${file}`,
+    );
   for (const mapping of index.components) {
     let source = null;
     try {
@@ -152,6 +257,16 @@ export async function checkMappings({ requireComplete = false } = {}) {
       s0.components.find((c) => c.ownerId === mapping.designNode),
       source,
     );
+    const symbol = exports.find((s) => s.name === mapping.examplesExport);
+    assert(symbol, `Missing typed examples: ${mapping.examplesExport}`);
+    const signature = checker
+      .getTypeOfSymbolAtLocation(symbol, examples)
+      .getCallSignatures()[0];
+    const names = checker
+      .getReturnTypeOfSignature(signature)
+      .getProperties()
+      .map((p) => p.name);
+    validateVariantEvidence(mapping, names, registeredTests);
   }
   const blocked = index.components.filter((c) => c.status !== 'mapped');
   assert.equal(
@@ -166,7 +281,7 @@ export async function checkMappings({ requireComplete = false } = {}) {
     assert.equal(
       blocked.length,
       0,
-      'S1 acceptance BLOCKED: missing accepted component APIs/variants; do not close #35',
+      'S1 acceptance BLOCKED: missing component mapping/variant evidence; do not close #35',
     );
 }
 

@@ -1,6 +1,6 @@
 # S1 设计同步 · #35
 
-本 PR 完成 token 生产管线和映射证据校验，**不是 #35 全部验收通过**。初始基线为 main `d5a2f87`；合并前已同步 main `fd26d06`（含 #13 / PR #16），重新固定三个导出的 accepted commit/blob。
+#39 已合入 token 管线；本次基于 main `d11dede` 补齐三组件轻量映射与资产校验。完整处理八个变体，有意保留的差异与验收方式见 [映射验收](sync/mapping-acceptance.md)。
 
 ## 唯一生产输入
 
@@ -8,7 +8,7 @@
 - [生成 CSS](../apps/desktop/src/renderer/styles/tokens.css)：Style Dictionary 5.7.1 的标准 CSS transform/format，保留语义引用。只运行 `pnpm tokens:build`，禁止手改。
 - [逐项差异](sync/token-diff.md)和 [101 项决定/版本/哈希](sync/evidence.json)：颜色、字体、几何、别名、F9 补充值、原生 modes 和历史材料的处理依据。
 
-本次仅两项配色提案：工具底色 `#eef1f3 → #eeedea`、次级文字 `#646e72 → #64696f`；配套对比度测试防止只换背景而降低可读性。24 个旧变量名全部保留；字体栈和相对尺寸不变。尚未合并的输入是提案，不是已发布生产版本。
+本次仅两项配色提案：工具底色 `#eef1f3 → #eeedea`、次级文字 `#646e72 → #64696f`；配套对比度测试防止只换背景而降低可读性。24 个旧变量名全部保留；字体栈和相对尺寸不变。#39 已将这对颜色合入 main。
 
 ## 显式导出 → PR → 回读
 
@@ -20,19 +20,23 @@
 
 Tokens Studio Git Sync 仍未验证；当前使用 S0 选定的明确文件导出路线，不需要插件 PAT、购买套餐、公开接收器或后台监听。未执行 Figma 回灌、Code Connect 发布、团队库发布、Webhook 或 Dev Resources 写入。
 
-## 三组件索引与真实阻塞
+## 三组件索引与验收
 
-[component-mappings.json](sync/component-mappings.json) 是 S0 选定的轻量索引，**不是官方 Code Connect 发布**。Agent 可从节点定位真实导出、固定 commit/blob、props、契约与测试文件；八个变体全部有处理决定。
+[component-mappings.json](sync/component-mappings.json) 是 S0 选定的轻量索引，**不是官方 Code Connect 发布**。它包含三个真实导出、八个变体、可编译的组合示例、源码 blob 和实际 Electron 验收用例。
 
-| 设计组件                   | 已核对的代码                             | 当前结果                                                                                                                    |
-| -------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Workspace Poster `921:706` | main 的 `ProjectPoster(project, onOpen)` | Code/Map/Doc 保留 seeded-gradient 差异；Unavailable 无可用状态/禁用 API，禁止生成可点击卡片。部分对应，未完成全部变体支持。 |
-| PanelTab `921:648`         | main 的 `LocalTabs`                      | 已进入 main，但职责不等价；不得虚构 active/onClose/停靠 props。等待已接受的真实停靠组合 API或另行审阅替换试点。             |
-| SessionTab `921:632`       | main 的 `SessionTabStrip`                | 已核对列表组合层的 state/dispatch；单 Tab 的视觉/组合映射仍待验收。关闭 Tab 不能等同停止 Run。                              |
+- Workspace Poster：Code/Map/Doc 明确保留既有渐变封面；Unavailable 通过真实 `unavailableReason` 禁用卡片、展示原因，成功重新扫描后恢复。
+- PanelTab：映射到已有 `DockSurface` 的面板标题组合；Active/Inactive 使用焦点高亮，保留并排布局与现有菜单/拖动行为，不再误映射为 LocalTabs。
+- SessionTab：映射到 `SessionTabStrip` 的单会话条目，使用真实 state/dispatch；关闭标签保留会话、草稿和后台 Run。
 
-因此 `pnpm design:acceptance` **预期失败**并列出 S1 阻塞；不要关闭 #35 或父入口 #33。`pnpm design:check` 仅证明当前管线和诚实的索引证据有效，明确输出 `3/3 pilots still incomplete`，不声称三组件映射验收通过。
+完整差异、版本边界和回退方式见 [mapping-acceptance.md](sync/mapping-acceptance.md)。新增的卡片属性作为本次源码扩展审阅，索引不会将它虚称为基线 main 中已有属性。
 
-PR #16 已合并，真实导出和 props 已重新核对；Unavailable 与 PanelTab 职责缺口仍未解决，SessionTab 也尚无单 Tab 的视觉/组合验收。后续须更新索引、映射测试和完整验收门槛；不能将进入 main 等同于设计映射完成。Code Connect 权限若变化，需另行实测发布及回读，不能借此索引推导官方成功。
+`pnpm design:check` 检查静态证据与正反向用例；`pnpm design:acceptance` 必须运行完整 `pnpm check`（含真实 Electron）后再确认三个映射完成。是否完成交付以对应提交的 CI 和合并记录为准。#33 是长期入口，不因本票自动关闭。
+
+## 历史资产与当前装饰预算
+
+`pnpm design:assets` 以只读方式校验 14 份历史源素材、12 份运行时副本、2 份字体及冻结历史材料的哈希，拒绝非批准消费者、保留素材进入运行时和预算漂移。不会重建 QA/ZIP，也不依赖作者的 home 目录。
+
+[asset-policy.json](sync/asset-policy.json) 显式适配已接受的单工作区：会话使用十一种固定主题，organizing 资产保留但当前 App 没有 onboarding 位置。旧的三种布局池保留在历史政策中，不要求当前产品恢复布局切换。真实 Electron 校验一处插画上限、88/64/48px 尺寸、至少 24px 文字间距、380px 容器隐藏、重启稳定性、消息/错误/任务状态隐藏。
 
 ## 校验边界
 

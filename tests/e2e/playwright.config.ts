@@ -4,6 +4,8 @@ export default defineConfig({
   testDir: '.',
   testMatch: [
     'pioneer.e2e.spec.ts',
+    'design-mappings.e2e.spec.ts',
+    'design-decoration.e2e.spec.ts',
     'tab-strip.e2e.spec.ts',
     'catalog-state.e2e.spec.ts',
     'm3-intent.e2e.spec.ts',

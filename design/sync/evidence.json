@@ -1588,7 +1588,7 @@
     }
   ],
   "typographyDecision": "Preserve runtime Inter, Noto Sans SC, system-ui, sans-serif and unitless line-height 1.5 as DTCG. Native text styles remain snapshot metadata; do not infer installed fonts or collapse style/weight/lineHeight into FLOAT.",
-  "legacyToolingDecision": "Deprecated as a production generator: historical build-local.py and validate-kit.py rewrite CSS, QA and ZIP and assume an unavailable home-directory image store. Do not run. Historical evidence remains pinned to historicalCommit. Assets are now inherited from accepted PR #16; this design pipeline does not rewrite them or claim their budget validation.",
+  "legacyToolingDecision": "Historical build-local.py and validate-kit.py stay deprecated: they rewrite CSS, QA and ZIP and require an author home image store. Pure hash/catalog checks now run in tools/design-assets.mjs; runtime budgets use the current Electron suite, with no asset rewrites.",
   "files": {
     "docs/research/design-sync-s0/native-variables.json": "506329556481e7705d6cb960cbdc3082ddd4a21d5d43cb6a5ff42f59a97e8a32",
     "docs/research/design-sync-s0/design-snapshot.json": "a6b28d7cb42a1c384d0b381aeee81d91bbbba81717950319f9a296d95c6619aa",
@@ -1604,6 +1604,6 @@
     "docs/design/hazel-v3/provenance.json": "fc7270f96ca80ccc124f6daee17f04d1725651994e3db231a18952cd24a49e39",
     "docs/design/hazel-v3/Pioneer-Hazel-v3-assets.zip": "5d9d8bbc7b30708200dcb5127af407f55df31196df76c1e4a1fe1f2bb8a5ee77"
   },
-  "integrationCommit": "fd26d06344163a112570813dd6a1af985771e3a5",
-  "integrationNote": "PR #16 is merged. Component export/props/blob evidence is re-pinned in component-mappings.json. Token decisions retain the original baseCommit comparison; inherited assets and font declarations are unchanged against integrationCommit."
+  "integrationCommit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
+  "integrationNote": "PR #39 delivered the token pipeline. Current follow-up completes lightweight component dispositions and adapts historical asset checks to the accepted single workspace; see mapping-acceptance.md and asset-policy.json. Token comparison remains pinned to baseCommit."
 }
