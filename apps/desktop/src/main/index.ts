@@ -20,6 +20,7 @@ import {
   RUN_IPC_CHANNELS,
   type RunEventBatch,
 } from '../shared/contracts/run-ipc';
+import { RUN_LIMITS } from '../shared/contracts/pioneer-run';
 import { assembleRunHost, type AssembledRunHost } from './run-host';
 import { registerRunIpc } from './run-ipc';
 import { probePiRuntime } from './harness/pi-adapter';
@@ -74,11 +75,31 @@ const appLifecycle = createAppWindowCoordinator({
 app.on('second-instance', () => {
   appLifecycle.requestReopen();
 });
+let shutdownSettled = false;
 app.on('before-quit', (event) => {
   if (!ownsProfile || appLifecycle.allowFinalQuit()) {
-    // Bounded stop attempt; anything unconverged becomes a host_restarted
-    // tombstone at next boot instead of being replayed.
-    void runHost?.manager.shutdown();
+    if (shutdownSettled) return;
+    // Bounded stop attempt: hold the quit for the harness grace window so the
+    // run layer can converge and journal its terminals. Unconverged runs become
+    // host_restarted tombstones at next boot instead of being replayed.
+    event.preventDefault();
+    void (async () => {
+      const host = runHost;
+      try {
+        await Promise.race([
+          host === null
+            ? Promise.resolve()
+            : host.manager.shutdown().catch(() => undefined),
+          new Promise<void>((resolve) => {
+            setTimeout(resolve, RUN_LIMITS.stopGraceMs + 1_000).unref();
+          }),
+        ]);
+      } catch {
+        // Quitting matters more than a clean stop; the journal decides next boot.
+      }
+      shutdownSettled = true;
+      app.quit();
+    })();
     return;
   }
   event.preventDefault();
@@ -134,16 +155,32 @@ const openMainWindow = (service: CatalogService): void => {
       if (isMainFrame && !isInPlace) {
         closeCoordinator.disconnect();
         closeBarrier.invalidate();
+        // Contract §1: a navigation rebuilds the window binding. Runs from the
+        // previous document lose their window and are stopped instead of keep
+        // running behind a dead renderer.
+        runHost?.manager.abandonWindow(boundWebContentsId);
+        windowEpochCounter += 1;
+        activeWindowBinding = {
+          webContentsId: boundWebContentsId,
+          epoch: windowEpochCounter,
+        };
       }
     },
   );
   trustedWindow.webContents.on('render-process-gone', () => {
     closeCoordinator.disconnect();
     closeBarrier.invalidate();
+    runHost?.manager.abandonWindow(boundWebContentsId);
+    windowEpochCounter += 1;
+    activeWindowBinding = {
+      webContentsId: boundWebContentsId,
+      epoch: windowEpochCounter,
+    };
   });
   trustedWindow.once('closed', () => {
     closeCoordinator.disconnect();
     closeBarrier.invalidate();
+    runHost?.manager.abandonWindow(boundWebContentsId);
     if (activeWindowBinding?.webContentsId === boundWebContentsId) {
       activeWindowBinding = null;
     }
@@ -236,7 +273,7 @@ const openMainWindow = (service: CatalogService): void => {
           ? MAIN_WINDOW_WEBPACK_ENTRY
           : new URL(MAIN_WINDOW_WEBPACK_ENTRY).origin,
       manager: runHost.manager,
-      windowEpoch: windowEpochCounter,
+      windowEpoch: () => activeWindowBinding?.epoch ?? windowEpochCounter,
     });
   }
 };

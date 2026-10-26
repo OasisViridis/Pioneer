@@ -4,7 +4,10 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { RUN_LIMITS } from '../../apps/desktop/src/shared/contracts/pioneer-run';
+import {
+  RUN_LIMITS,
+  type RunEvent,
+} from '../../apps/desktop/src/shared/contracts/pioneer-run';
 import type { RunEventBatch } from '../../apps/desktop/src/shared/contracts/run-ipc';
 import {
   RunJournal,
@@ -14,7 +17,10 @@ import {
   RunManager,
   type RunSenderPort,
 } from '../../apps/desktop/src/main/harness/run-manager';
-import type { HarnessAdapterFactory } from '../../apps/desktop/src/main/harness/adapter-seam';
+import type {
+  AdapterOutcome,
+  HarnessAdapterFactory,
+} from '../../apps/desktop/src/main/harness/adapter-seam';
 import { createControlledAdapterFactory } from '../../apps/desktop/src/main/harness/controlled-adapter';
 
 const webContentsId = 7;
@@ -431,19 +437,32 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
     });
   });
 
-  it('rejects oversize model text with a protocol failure', async () => {
-    const { manager } = await createManager({
-      steps: [
-        { action: 'text', text: 'x'.repeat(4_097) },
-        { action: 'complete' },
-      ],
+  it('converges oversize model text to OUTPUT_LIMIT (contract §5)', async () => {
+    const oversizeFactory: HarnessAdapterFactory = (_context, emit) => ({
+      start: () => {
+        // Main must still guard against an adapter that publishes one chunk
+        // above the wire budget, even though adapters chunk defensively.
+        emit({ type: 'text.delta', text: 'x'.repeat(4_097) });
+        return new Promise<AdapterOutcome>((resolve) => {
+          setTimeout(() => {
+            resolve({ status: 'aborted' });
+          }, 50);
+        });
+      },
+      requestStop: () => undefined,
+      quiescent: Promise.resolve(),
+      dispose: () => Promise.resolve(),
     });
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      { adapterFactory: oversizeFactory },
+    );
     const { runId } = await launchRun(manager);
     await waitFor(() => pageOf(manager, runId)?.status === 'failed');
     const events = pageOf(manager, runId)?.events ?? [];
     expect(events.at(-1)?.body).toEqual({
       type: 'run.failed',
-      code: 'PROTOCOL_ERROR',
+      code: 'OUTPUT_LIMIT',
     });
   });
 
@@ -551,3 +570,227 @@ describe('P2 run event paging and acknowledged subscriptions (contract §5)', ()
     expect(gapped?.events).toEqual([]);
   });
 });
+
+async function authorizeGrant(
+  manager: RunManager,
+  revision = 1,
+): Promise<string> {
+  const reply = await manager.authorize({
+    sessionId: 'session:test',
+    projectId: 'project:test',
+    revision,
+    task: '读取 fixture 并回答。',
+    ...binding,
+  });
+  if (!reply.ok) throw new Error(`authorize failed: ${reply.code}`);
+  return reply.authorization.grantId;
+}
+
+function readAllEvents(manager: RunManager, runId: string): RunEvent[] {
+  const collected: RunEvent[] = [];
+  let afterSeq = 0;
+  for (;;) {
+    const page = pageOf(manager, runId, afterSeq);
+    if (page === null) break;
+    collected.push(...page.events);
+    if (!page.hasMore) break;
+    afterSeq = page.nextAfterSeq;
+  }
+  return collected;
+}
+
+describe('P2 run manager review hardening', () => {
+  it('admits exactly one run when two starts race on the same grant', async () => {
+    const { manager } = await createManager({
+      steps: [{ action: 'wait', ms: 150 }, { action: 'complete' }],
+    });
+    const grantId = await authorizeGrant(manager);
+    const base = {
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      expectedRevision: 1,
+      grantId,
+    };
+    const [first, second] = await Promise.all([
+      manager.start({ ...base, requestId: 'request:race-a' }, binding),
+      manager.start({ ...base, requestId: 'request:race-b' }, binding),
+    ]);
+    const codes = [first, second]
+      .map((reply) => (reply.ok ? 'OK' : reply.code))
+      .sort();
+    expect(codes).toEqual(['AUTHORIZATION_REQUIRED', 'OK']);
+
+    const winner = first.ok ? first : second;
+    const runId = winner.ok ? winner.runId : '';
+    // While that run is active no second session-level run can be admitted.
+    const spareGrant = await authorizeGrant(manager);
+    const third = await manager.start(
+      { ...base, grantId: spareGrant, requestId: 'request:race-c' },
+      binding,
+    );
+    expect(third).toEqual({ ok: false, code: 'RUN_ACTIVE' });
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+  });
+
+  it('refuses a grant older than the session revision (contract §1)', async () => {
+    const { manager } = await createManager({
+      steps: [{ action: 'complete' }],
+    });
+    const staleGrant = await authorizeGrant(manager, 1);
+    await authorizeGrant(manager, 2);
+    const started = await manager.start(
+      {
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:stale-grant',
+        grantId: staleGrant,
+      },
+      binding,
+    );
+    expect(started).toEqual({ ok: false, code: 'STALE_REVISION' });
+  });
+
+  it('stops the run when the tool call budget is exhausted (contract §5)', async () => {
+    const steps = Array.from({ length: RUN_LIMITS.toolCalls + 1 }, () => ({
+      action: 'tool',
+      request: { tool: 'list_directory', arguments: { path: '.' } },
+    }));
+    const { manager } = await createManager({ steps } as never);
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'failed');
+    const events = readAllEvents(manager, runId);
+    expect(events.at(-1)?.body).toEqual({
+      type: 'run.failed',
+      code: 'TOOL_FAILED',
+    });
+    const requested = events
+      .filter((event) => event.body.type === 'tool.requested')
+      .map((event) =>
+        event.body.type === 'tool.requested' ? event.body.callId : '',
+      );
+    const results = events
+      .filter((event) => event.body.type === 'tool.result')
+      .map((event) =>
+        event.body.type === 'tool.result' ? event.body.callId : '',
+      );
+    expect(requested).toHaveLength(RUN_LIMITS.toolCalls + 1);
+    expect(results).toEqual(requested);
+  });
+
+  it('rejects reads and stops from a foreign identity (contract §3)', async () => {
+    const { manager } = await createManager({
+      steps: [{ action: 'complete' }],
+    });
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+    const identity = {
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      afterSeq: 0,
+      ...binding,
+    };
+    expect(
+      manager.getRun({ ...identity, sessionId: 'session:other' }),
+    ).toBeNull();
+    expect(
+      manager.getRun({ ...identity, projectId: 'project:other' }),
+    ).toBeNull();
+    expect(manager.getRun({ ...identity, revision: 2 })).toBeNull();
+    expect(manager.subscribe({ ...identity, sessionId: 'session:other' })).toBe(
+      false,
+    );
+    expect(manager.stop({ ...identity, sessionId: 'session:other' })).toEqual({
+      ok: false,
+      code: 'BINDING_MISMATCH',
+    });
+  });
+
+  it('never lets an ACK skip events main has not published', async () => {
+    const { manager, sender } = await createManager({
+      steps: [
+        { action: 'wait', ms: 120 },
+        { action: 'text', text: '第一段' },
+        { action: 'text', text: '第二段' },
+        { action: 'complete' },
+      ],
+    });
+    const { runId } = await launchRun(manager);
+    const subscribed = manager.subscribe({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      afterSeq: 0,
+      ...binding,
+    });
+    expect(subscribed).toBe(true);
+    await waitFor(() => sender.batches.length > 0);
+    const publishedByFirstBatch = sender.batches[0]?.page.lastSeq ?? 0;
+    manager.acknowledge({
+      runId,
+      webContentsId,
+      afterSeq: 9_999,
+    });
+    await waitFor(() =>
+      sender.batches.some((batch) =>
+        batch.page.events.some((event) => event.seq > publishedByFirstBatch),
+      ),
+    );
+    expect(
+      sender.batches.some((batch) =>
+        batch.page.events.some((event) => event.seq > publishedByFirstBatch),
+      ),
+    ).toBe(true);
+    manager.unsubscribe({ runId, webContentsId });
+  });
+
+  it('keeps the host_restarted tombstone reachable after a second boot', async () => {
+    const acceptLine = JSON.stringify({
+      kind: 'accept',
+      runId: 'run:second',
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      revision: 1,
+      taskDigest: 'deadbeef',
+      adapter: 'controlled',
+      windowEpoch: 1,
+      rootRevision: 0,
+      requestId: 'request:second',
+      at: new Date().toISOString(),
+    });
+    const store = memoryStore(`${acceptLine}\n`);
+    const boot = async (): Promise<RunManager> => {
+      const created = await createManager(
+        { steps: [{ action: 'complete' }] },
+        undefined,
+        store,
+      );
+      const restored = created.journal.restorePending();
+      for (const accept of restored.restarted) {
+        created.manager.restoreTombstone(accept);
+      }
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+      return created.manager;
+    };
+    const firstBoot = await boot();
+    expect(pageOfRun(firstBoot, 'run:second')?.status).toBe('unknown');
+    const secondBoot = await boot();
+    expect(pageOfRun(secondBoot, 'run:second')?.status).toBe('unknown');
+  });
+});
+
+function pageOfRun(manager: RunManager, runId: string) {
+  return manager.getRun({
+    sessionId: 'session:test',
+    projectId: 'project:test',
+    runId,
+    revision: 1,
+    afterSeq: 0,
+    ...binding,
+  });
+}

@@ -57,3 +57,41 @@
 | 适配器通道断连 | `unknown(adapter_disconnected)` | 走停止路径；宽限内收敛 `stopped`，否则 `failed(ADAPTER_DISCONNECTED)` |
 | 崩溃/重启恢复 | unknown 占位等待确认 | `run.unknown(host_restarted)` 墓碑：不占资源、不等待、不自动重跑 |
 | 用户可见结果 | 含「结果未确认」活状态 | 仅五种：运行中/正在停止/已停止/已完成/失败（附固定错误码） |
+
+## 评审修复记录（2026-10-26）
+
+PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补齐的运行层缺口。修复前基线 `395df15`，修复内容一个提交（见本记录所在提交），分支 `fix-pr16-review`（自 `codex/issue13-readonly-harness` 头）。
+
+| 审查缺口 | 修复 |
+| --- | --- |
+| admission 不串行：`start()` 在 `await resolveProject` 之后才占位，并发可重复消费 grant、突破容量 | 项目解析移到准入段之前；授权消费、容量检查、run 预留全部在同步段完成；新增"同 grant 并发 start 只受理一个"的合同测试 |
+| `STALE_REVISION` 只在 `authorize` 检查 | `start` 复核 `sessionLastRevision`，旧 grant 在修订推进后拒绝 |
+| `quiescent` 恒为已完成（受控适配器构造期 resolve、Pi 适配器 `Promise.resolve()`） | 两者均改为构造期 deferred：仅在 `start()` 后、运行 promise 结算且无在途工具时 resolve，从不 reject；新增离线 Pi 假内核测试 |
+| `RUN_LIMITS` 声明必须执行但未执行：`toolCalls`、工具并发、单事件 16 KiB | 工具调用预算（含拒绝）超限即配对被拒结果并 `failed(TOOL_FAILED)`；工具执行串行化；超 16 KiB 事件丢弃并 `failed(PROTOCOL_ERROR)` |
+| 停止时在途工具留下未配对 `tool.requested` | `terminate()` 先为在途 callId 补 `cancelled` 结果，再发终态 |
+| 超长 chunk 记错码 | 超 4 KiB chunk 归一 `OUTPUT_LIMIT`；两个适配器按 UTF-8 字节边界切分 |
+| `read_file` 整文件读入（大文件可撑爆主进程） | 改为句柄有界读（64 KiB+1），fstat 前后身份复检，非普通文件/硬链接拒绝 |
+| list/search 只预检起始路径 | 新增 `recheckEntry`（lstat + realpath 包含性 + nlink）逐条复检；list 在 200 项外提前停止 |
+| renderer 分页丢事件（游标取 `lastSeq`） | 游标改用 `nextAfterSeq` 并回填初始页；主进程 ACK 钳到已发布 seq |
+| 二次重启丢 `host_restarted` 墓碑 | `restorePending` 返回所有未终止 accept，仅对未标记者追加 tombstone |
+| 关窗/导航/渲染进程崩溃不停止运行 | 新增 `RunManager.abandonWindow`；导航、渲染进程崩溃、窗口关闭时换 epoch 并停止该窗口的运行 |
+| `before-quit` 不等 shutdown | 退出前先等有界停止（宽限 +1s 上限）再退出 |
+| GLOSSARY 与修订后停止语义冲突 | 术语改为「正常停止收敛后落终态；宽限到期强制结束记 `STOP_TIMEOUT`」 |
+
+### 门禁记录
+
+| 项 | 命令 | 结果 |
+| --- | --- | --- |
+| 完整门禁 | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`） | 退出码 0：格式 / lint / 类型、Contract **361/361**（39 文件，较修复前 +22）、Prototype **210/210**、Real E2E **24/24**（59.8s，fixture 前后哈希一致）、package smoke |
+| 仓库规范化 | `pnpm verify:repository` | 6/6 |
+| 定向套件 | `vitest run` run-manager（19）/ controlled-adapter（12）/ pi-adapter-tools（2）/ read-only-tools-exec（13）/ run-view（2） | 全绿 |
+
+**环境注意**：本机 DSH 会话会继承 `ELECTRON_RUN_AS_NODE=1`，此时 Electron 按 Node 解释并拒绝 `--remote-debugging-port`，E2E 全红；这不是代码回归，跑 E2E 或 `pnpm check` 前需清除该变量（CI 无此变量）。
+
+### 仍未完成（不在本次修复范围）
+
+- **外发材料清单（egress manifest）与授权撤销模型**：合同 §1/§4 要求按材料清单授权、材料变更即撤销，但"用户如何选定可外发材料"属产品决策，代码仍无执行者；A05/A06 的该子项不能算 PASS。
+- **`ADAPTER_DISCONNECTED` 无生产者**：上表第 3 行的断连分支依赖适配器通道信号，当前两个适配器都没有该信号，仍属未实现。
+- **`modelOutputTokens` 未下发 Pi SDK**：适配器未暴露 maxTokens 入口，usage 仍按合同记 null。
+- **A08 干净检出复建仍停在 `92824a4`**：本次修复只在当前 worktree 跑了完整门禁，最终合并前应在修复提交上复跑 A08。
+- **P1 资产仍与 P2 同 PR**（463 文件、+75,619 行）：拆分属人工决策。

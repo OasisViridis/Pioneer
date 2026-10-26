@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 
+import { RUN_LIMITS } from '../../shared/contracts/pioneer-run';
 import { ReadOnlyToolRequestSchema } from '../../shared/contracts/read-only-tools';
 import type {
   AdapterOutcome,
@@ -67,6 +68,33 @@ export async function loadControlledScript(
   return ControlledScriptSchema.parse(raw);
 }
 
+const textEncoder = new TextEncoder();
+
+/**
+ * Split text into ordered chunks whose UTF-8 byte length stays within the
+ * protocol per-chunk budget. Boundaries only ever fall between code points, so
+ * a multi-byte character is never halved. Empty input yields no chunks.
+ */
+function splitTextChunks(text: string, maxBytes: number): string[] {
+  if (text.length === 0) return [];
+  if (textEncoder.encode(text).byteLength <= maxBytes) return [text];
+  const chunks: string[] = [];
+  let current = '';
+  let currentBytes = 0;
+  for (const character of text) {
+    const characterBytes = textEncoder.encode(character).byteLength;
+    if (currentBytes > 0 && currentBytes + characterBytes > maxBytes) {
+      chunks.push(current);
+      current = '';
+      currentBytes = 0;
+    }
+    current += character;
+    currentBytes += characterBytes;
+  }
+  if (currentBytes > 0) chunks.push(current);
+  return chunks;
+}
+
 function abortableDelay(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
     if (signal.aborted) {
@@ -106,6 +134,15 @@ export function createControlledAdapterFactory(
     let startRun: Promise<AdapterOutcome> | null = null;
     const pending = new Set<Promise<unknown>>();
 
+    // Quiescence is a positive claim, not a constructor default: it may only
+    // settle after start() ran, the run promise settled (fulfilled or rejected —
+    // a rejected run still drains), and every tracked tool/wait promise is
+    // gone. It never rejects; main treats a rejection as "not quiet".
+    let resolveQuiescent: (() => void) | null = null;
+    const quiescent = new Promise<void>((resolve) => {
+      resolveQuiescent = resolve;
+    });
+
     // Stop/abort can arrive inside any awaited step; read the flags through
     // functions so control-flow analysis cannot narrow them to `false`.
     const isAborted = (signal: AbortSignal): boolean => signal.aborted;
@@ -126,7 +163,12 @@ export function createControlledAdapterFactory(
         try {
           switch (step.action) {
             case 'text':
-              emit({ type: 'text.delta', text: step.text });
+              for (const chunk of splitTextChunks(
+                step.text,
+                RUN_LIMITS.textChunkBytes,
+              )) {
+                emit({ type: 'text.delta', text: chunk });
+              }
               break;
             case 'tool':
               emit({ type: 'tool.request', request: step.request });
@@ -152,19 +194,16 @@ export function createControlledAdapterFactory(
       return { status: 'success', usage: noUsage };
     };
 
-    const settleQuiet = async (): Promise<void> => {
-      for (;;) {
-        if (startRun !== null) {
-          try {
-            await startRun;
-          } catch {
-            // A rejected run never proves quiescence; tracked work still drains.
-          }
-        }
-        if (pending.size === 0) return;
-        await new Promise((resolve) => {
-          setTimeout(resolve, 10);
-        });
+    const settleQuiet = async (run: Promise<AdapterOutcome>): Promise<void> => {
+      try {
+        await run;
+      } catch {
+        // A rejected run still drains; rejection alone proves nothing.
+      }
+      // Drain in batches until nothing is tracked, including work a tool
+      // continuation added while the previous batch was settling.
+      while (pending.size > 0) {
+        await Promise.allSettled([...pending]);
       }
     };
 
@@ -172,13 +211,22 @@ export function createControlledAdapterFactory(
       start: () => {
         if (startRun !== null)
           return Promise.reject(new Error('adapter already started'));
-        startRun = runScript();
-        return startRun;
+        const run = runScript();
+        startRun = run;
+        void settleQuiet(run).then(
+          () => {
+            resolveQuiescent?.();
+          },
+          () => {
+            resolveQuiescent?.();
+          },
+        );
+        return run;
       },
       requestStop: () => {
         stopped = true;
       },
-      quiescent: settleQuiet(),
+      quiescent,
       dispose: async () => {
         stopped = true;
         await Promise.allSettled([...pending]);

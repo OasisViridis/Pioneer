@@ -25,7 +25,8 @@ export interface RunIpcDependencies {
   mainWindow: { webContents: { id: number } };
   expectedRendererUrl: string;
   manager: RunManager;
-  windowEpoch: number;
+  /** Current epoch of the bound window; bumps on navigation/reload (§1). */
+  windowEpoch: () => number;
 }
 
 type RunIpcEvent = IpcInvokeEventLike & {
@@ -40,7 +41,7 @@ type RunIpcEvent = IpcInvokeEventLike & {
 export function registerRunIpc(dependencies: RunIpcDependencies): void {
   const binding = (event: RunIpcEvent) => ({
     webContentsId: event.sender.id,
-    windowEpoch: dependencies.windowEpoch,
+    windowEpoch: dependencies.windowEpoch(),
   });
 
   const guard = (

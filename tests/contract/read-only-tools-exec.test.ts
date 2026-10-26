@@ -1,4 +1,13 @@
-import { mkdtemp, mkdir, realpath, symlink, writeFile } from 'node:fs/promises';
+import {
+  link,
+  mkdtemp,
+  mkdir,
+  open,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -136,5 +145,142 @@ describe('P2 read-only tool executor budgets and rechecks (contract §5)', () =>
       never,
     );
     expect(absolute.status).toBe('rejected');
+  });
+
+  it('reads only the bounded prefix of a file over 1 MiB', async () => {
+    await writeFile(
+      join(root, 'oversized.txt'),
+      `${'a'.repeat(1_200_000)}TAIL`,
+      'utf-8',
+    );
+    const outcome = await executeReadOnlyTool(
+      root,
+      { tool: 'read_file', arguments: { path: 'oversized.txt' } },
+      never,
+    );
+    expect(outcome.status).toBe('succeeded');
+    if (outcome.status !== 'succeeded') return;
+    expect(outcome.truncated).toBe(true);
+    // Exactly the 64 KiB budget decoded and projected to the 4 KiB wire cap.
+    expect(outcome.text).toBe('a'.repeat(4_096));
+  });
+
+  it('never materializes a 512 MiB sparse project file', async () => {
+    const huge = join(root, 'huge.log');
+    const handle = await open(huge, 'w');
+    try {
+      await handle.write(Buffer.from('a'.repeat(16_384)), 0, 16_384, 0);
+      await handle.truncate(512 * 1024 * 1024);
+    } finally {
+      await handle.close();
+    }
+    try {
+      const outcome = await executeReadOnlyTool(
+        root,
+        { tool: 'read_file', arguments: { path: 'huge.log' } },
+        never,
+      );
+      expect(outcome.status).toBe('succeeded');
+      if (outcome.status !== 'succeeded') return;
+      expect(outcome.truncated).toBe(true);
+      expect(outcome.text).toBe('a'.repeat(4_096));
+    } finally {
+      await rm(huge, { force: true });
+    }
+  });
+
+  it('searches the bounded prefix of a file over the per-file budget', async () => {
+    const dir = join(root, 'big-search');
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      join(dir, 'big.txt'),
+      `needle ${'x'.repeat(70_000)}`,
+      'utf-8',
+    );
+    const outcome = await executeReadOnlyTool(
+      root,
+      {
+        tool: 'search_in_files',
+        arguments: { path: 'big-search', query: 'needle' },
+      },
+      never,
+    );
+    expect(outcome.status).toBe('succeeded');
+    if (outcome.status !== 'succeeded') return;
+    expect(outcome.truncated).toBe(true);
+    expect(outcome.text.startsWith('big-search/big.txt:1: needle ')).toBe(true);
+  });
+
+  it('does not publish a symlinked file inside a listed directory', async () => {
+    const links = join(root, 'links');
+    await mkdir(links, { recursive: true });
+    await writeFile(join(links, 'target.txt'), 'visible', 'utf-8');
+    await symlink(join(links, 'target.txt'), join(links, 'alias.txt'));
+    const outcome = await executeReadOnlyTool(
+      root,
+      { tool: 'list_directory', arguments: { path: 'links' } },
+      never,
+    );
+    expect(outcome).toEqual({
+      status: 'succeeded',
+      text: 'target.txt',
+      truncated: false,
+    });
+  });
+
+  it('does not traverse a nested symlinked directory', async () => {
+    const outside = await realpath(
+      await mkdtemp(join(tmpdir(), 'pioneer-outside-')),
+    );
+    await writeFile(join(outside, 'escape.txt'), 'needle outside', 'utf-8');
+    const nest = join(root, 'nest');
+    await mkdir(nest, { recursive: true });
+    await symlink(
+      outside,
+      join(nest, 'jump'),
+      process.platform === 'win32' ? 'junction' : 'dir',
+    );
+    const outcome = await executeReadOnlyTool(
+      root,
+      { tool: 'search_in_files', arguments: { path: 'nest', query: 'needle' } },
+      never,
+    );
+    expect(outcome).toEqual({
+      status: 'succeeded',
+      text: '',
+      truncated: false,
+    });
+  });
+
+  it('skips hard-linked files with more than one name', async () => {
+    const hard = join(root, 'hard');
+    await mkdir(hard, { recursive: true });
+    await writeFile(join(hard, 'donor.txt'), 'needle hard', 'utf-8');
+    await link(join(hard, 'donor.txt'), join(hard, 'copy.txt'));
+
+    const listing = await executeReadOnlyTool(
+      root,
+      { tool: 'list_directory', arguments: { path: 'hard' } },
+      never,
+    );
+    expect(listing).toEqual({
+      status: 'succeeded',
+      text: '',
+      truncated: false,
+    });
+
+    const direct = await executeReadOnlyTool(
+      root,
+      { tool: 'read_file', arguments: { path: 'hard/donor.txt' } },
+      never,
+    );
+    expect(direct).toEqual({ status: 'rejected', code: 'LINK_NOT_ALLOWED' });
+
+    const search = await executeReadOnlyTool(
+      root,
+      { tool: 'search_in_files', arguments: { path: 'hard', query: 'needle' } },
+      never,
+    );
+    expect(search).toEqual({ status: 'succeeded', text: '', truncated: false });
   });
 });

@@ -1,3 +1,4 @@
+import { RUN_LIMITS } from '../../shared/contracts/pioneer-run';
 import type { AdapterOutcome, HarnessAdapterFactory } from './adapter-seam';
 
 /**
@@ -159,6 +160,36 @@ interface TypeBoxLike {
   String: (options?: unknown) => unknown;
 }
 
+/** Counts a tool execution as in-flight before it starts and after it drains. */
+type TrackTool = <T>(execute: () => Promise<T>) => Promise<T>;
+
+const textEncoder = new TextEncoder();
+
+/**
+ * Split text into ordered chunks whose UTF-8 byte length stays within the
+ * protocol per-chunk budget. Boundaries only ever fall between code points, so
+ * a multi-byte character is never halved. Empty input yields no chunks.
+ */
+function splitTextChunks(text: string, maxBytes: number): string[] {
+  if (text.length === 0) return [];
+  if (textEncoder.encode(text).byteLength <= maxBytes) return [text];
+  const chunks: string[] = [];
+  let current = '';
+  let currentBytes = 0;
+  for (const character of text) {
+    const characterBytes = textEncoder.encode(character).byteLength;
+    if (currentBytes > 0 && currentBytes + characterBytes > maxBytes) {
+      chunks.push(current);
+      current = '';
+      currentBytes = 0;
+    }
+    current += character;
+    currentBytes += characterBytes;
+  }
+  if (currentBytes > 0) chunks.push(current);
+  return chunks;
+}
+
 /**
  * Bridges the three read-only tools to Pi's AgentTool shape. Execution goes
  * through the harness executor port (main's wrapped executor), so every call
@@ -168,6 +199,7 @@ interface TypeBoxLike {
 function buildReadOnlyTools(
   type: TypeBoxLike,
   context: Parameters<HarnessAdapterFactory>[0],
+  trackTool: TrackTool,
 ): unknown[] {
   const outcomeToResult = (
     outcome: Awaited<ReturnType<typeof context.tools.execute>>,
@@ -203,18 +235,25 @@ function buildReadOnlyTools(
     ): Promise<Record<string, unknown>> => {
       if (name === 'search_in_files') {
         return outcomeToResult(
-          await context.tools.execute({
-            tool: 'search_in_files',
-            arguments: { path: params.path ?? '.', query: params.query ?? '' },
-          }),
+          await trackTool(() =>
+            context.tools.execute({
+              tool: 'search_in_files',
+              arguments: {
+                path: params.path ?? '.',
+                query: params.query ?? '',
+              },
+            }),
+          ),
           name,
         );
       }
       return outcomeToResult(
-        await context.tools.execute({
-          tool: name as 'read_file' | 'list_directory',
-          arguments: { path: params.path ?? '.' },
-        }),
+        await trackTool(() =>
+          context.tools.execute({
+            tool: name as 'read_file' | 'list_directory',
+            arguments: { path: params.path ?? '.' },
+          }),
+        ),
         name,
       );
     },
@@ -238,6 +277,37 @@ export function createPiAdapterFactory(
   return (context, emit) => {
     let stopped = false;
     let release: (() => void) | null = null;
+
+    // Prompt/agent-loop resolution alone does not prove quiescence: the stream
+    // may still be closing and tool callbacks may still be in flight. The
+    // deferred below only settles once the loop ended *and* no tool execution
+    // is in flight. It never rejects; main treats a rejection as "not quiet".
+    let inFlightTools = 0;
+    let loopEnded = false;
+    let settled = false;
+    let resolveQuiescent: (() => void) | null = null;
+    const quiescent = new Promise<void>((resolve) => {
+      resolveQuiescent = resolve;
+    });
+
+    const settleIfQuiet = (): void => {
+      if (settled || !loopEnded || inFlightTools > 0) return;
+      settled = true;
+      resolveQuiescent?.();
+    };
+
+    const trackTool: TrackTool = async <T>(
+      execute: () => Promise<T>,
+    ): Promise<T> => {
+      inFlightTools += 1;
+      try {
+        return await execute();
+      } finally {
+        inFlightTools -= 1;
+        settleIfQuiet();
+      }
+    };
+
     return {
       start: async (): Promise<AdapterOutcome> => {
         try {
@@ -279,6 +349,7 @@ export function createPiAdapterFactory(
               tools: buildReadOnlyTools(
                 ai.Type as unknown as TypeBoxLike,
                 context,
+                trackTool,
               ) as never,
               systemPrompt:
                 '你是 Pioneer 桌面应用内的只读任务助手。你只能通过三个只读工具查看项目文件：read_file、list_directory、search_in_files。回答文件相关问题时优先调用工具获取真实内容；禁止声称访问过未读取的文件。',
@@ -295,7 +366,12 @@ export function createPiAdapterFactory(
             if (message.role !== 'assistant') continue;
             for (const block of message.content) {
               if (block.type === 'text' && block.text.trim().length > 0) {
-                emit({ type: 'text.delta', text: block.text.slice(0, 4096) });
+                for (const chunk of splitTextChunks(
+                  block.text,
+                  RUN_LIMITS.textChunkBytes,
+                )) {
+                  emit({ type: 'text.delta', text: chunk });
+                }
               }
             }
           }
@@ -308,13 +384,16 @@ export function createPiAdapterFactory(
             return { status: 'aborted' };
           }
           return { status: 'failure', code: 'MODEL_FAILED' };
+        } finally {
+          loopEnded = true;
+          settleIfQuiet();
         }
       },
       requestStop: () => {
         stopped = true;
         release?.();
       },
-      quiescent: Promise.resolve(),
+      quiescent,
       dispose: () => {
         stopped = true;
         release?.();

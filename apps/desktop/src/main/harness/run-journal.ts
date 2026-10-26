@@ -107,9 +107,13 @@ export class RunJournal {
     return { journal, outcome: { ok: true } };
   }
 
-  /** Accepted runs without a committed terminal become host_restarted tombstones. */
+  /**
+   * Accepted runs without a committed terminal become host_restarted
+   * tombstones. Already-marked runs are returned as well: the in-memory
+   * tombstone has to be rebuilt on every boot, not just the first boot after a
+   * crash, otherwise a second restart makes the run unreachable again.
+   */
   restorePending(): { restarted: RunJournalAccept[] } {
-    const restarted: RunJournalAccept[] = [];
     const terminalIds = new Set(
       this.records
         .filter(
@@ -125,24 +129,22 @@ export class RunJournal {
         )
         .map((record) => record.runId),
     );
-    for (const record of this.records) {
-      if (
-        record.kind === 'accept' &&
-        !terminalIds.has(record.runId) &&
-        !alreadyMarked.has(record.runId)
-      ) {
-        restarted.push(record);
-      }
-    }
+    const restarted = this.records.filter(
+      (record): record is RunJournalAccept =>
+        record.kind === 'accept' && !terminalIds.has(record.runId),
+    );
+    let added = 0;
     for (const accept of restarted) {
+      if (alreadyMarked.has(accept.runId)) continue;
       this.records.push({
         kind: 'tombstone',
         runId: accept.runId,
         reason: 'host_restarted',
         at: new Date().toISOString(),
       });
+      added += 1;
     }
-    if (restarted.length > 0) void this.persist();
+    if (added > 0) void this.persist();
     return { restarted };
   }
 

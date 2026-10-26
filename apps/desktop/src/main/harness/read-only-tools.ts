@@ -1,4 +1,5 @@
-import { lstat, readdir, readFile } from 'node:fs/promises';
+import type { Stats } from 'node:fs';
+import { lstat, open, readdir, realpath } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 
 import {
@@ -14,8 +15,9 @@ import { isSensitiveEntryName } from './read-only-tool-policy';
  * Executes the three read-only tools against main's project root with the
  * run contract §5 budgets: read_file 64 KiB, list_directory 200 entries,
  * search literal/depth16/1000 files/64 KiB per file/4 MiB total/100 hits.
- * Every path is rechecked through the #11 preflight before and after IO;
- * a changed identity suppresses the result instead of publishing stale data.
+ * Files are read through one bounded read-only handle, and every entry a list
+ * or walk would publish is rechecked at the point of use; a changed identity
+ * suppresses the result instead of publishing stale data.
  */
 
 export const TOOL_BUDGETS = Object.freeze({
@@ -66,13 +68,68 @@ interface EntryIdentity {
   ino: number;
 }
 
-async function entryIdentity(absolutePath: string): Promise<EntryIdentity> {
-  const stats = await lstat(absolutePath);
-  return { size: stats.size, mtimeMs: stats.mtimeMs, ino: stats.ino };
-}
-
 function sameIdentity(a: EntryIdentity, b: EntryIdentity): boolean {
   return a.size === b.size && a.mtimeMs === b.mtimeMs && a.ino === b.ino;
+}
+
+interface BoundedRead {
+  before: Stats;
+  after: Stats;
+  buffer: Buffer;
+  bytesRead: number;
+}
+
+/**
+ * Reads at most `capacity` bytes through one read-only handle so a huge file
+ * is never materialized. Callers use the handle metadata to detect truncation.
+ */
+async function readBoundedFile(
+  absolutePath: string,
+  capacity: number,
+): Promise<BoundedRead> {
+  const handle = await open(absolutePath, 'r');
+  try {
+    const before = await handle.stat();
+    const buffer = Buffer.allocUnsafe(capacity);
+    let bytesRead = 0;
+    while (bytesRead < buffer.length) {
+      const chunk = await handle.read(
+        buffer,
+        bytesRead,
+        buffer.length - bytesRead,
+        bytesRead,
+      );
+      if (chunk.bytesRead === 0) break;
+      bytesRead += chunk.bytesRead;
+    }
+    const after = await handle.stat();
+    return { before, after, buffer, bytesRead };
+  } finally {
+    await handle.close();
+  }
+}
+
+type EntryKind = 'file' | 'directory';
+
+/**
+ * Rechecks one traversal entry at the point of use. Any failure is a silent
+ * skip, matching the sensitive-name filter: links, aliases resolving outside
+ * the root, hard-linked files and non-regular entries are never published.
+ */
+async function recheckEntry(
+  root: string,
+  absolutePath: string,
+): Promise<EntryKind | null> {
+  try {
+    const stats = await lstat(absolutePath);
+    if (stats.isSymbolicLink()) return null;
+    if (!isPathInsideRoot(root, await realpath(absolutePath))) return null;
+    if (stats.isDirectory()) return 'directory';
+    if (stats.isFile() && stats.nlink === 1) return 'file';
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export async function executeReadOnlyTool(
@@ -109,19 +166,26 @@ async function readTextFile(
   absolutePath: string,
   signal: AbortSignal,
 ): Promise<ToolOutcome> {
-  const before = await entryIdentity(absolutePath);
-  const buffer = await readFile(absolutePath, { signal });
+  const read = await readBoundedFile(
+    absolutePath,
+    TOOL_BUDGETS.readFileBytes + 1,
+  );
   if (signal.aborted) return { status: 'cancelled', code: 'CANCELLED' };
-  const after = await entryIdentity(absolutePath);
-  if (!sameIdentity(before, after))
+  if (!sameIdentity(read.before, read.after))
     return { status: 'failed', code: 'TOOL_FAILED' };
+  if (!read.before.isFile())
+    return { status: 'rejected', code: 'PATH_TYPE_NOT_ALLOWED' };
+  if (read.before.nlink !== 1)
+    return { status: 'rejected', code: 'LINK_NOT_ALLOWED' };
   const rootStat = await lstat(root);
   if (!rootStat.isDirectory() || !isPathInsideRoot(root, absolutePath))
     return { status: 'failed', code: 'TOOL_FAILED' };
-  if (isBinaryContent(buffer))
+  const truncatedByBudget =
+    read.bytesRead > TOOL_BUDGETS.readFileBytes ||
+    read.before.size > TOOL_BUDGETS.readFileBytes;
+  const bounded = read.buffer.subarray(0, read.bytesRead);
+  if (isBinaryContent(bounded))
     return { status: 'rejected', code: 'PATH_TYPE_NOT_ALLOWED' };
-  const bounded = buffer.subarray(0, TOOL_BUDGETS.readFileBytes + 1);
-  const truncatedByBudget = bounded.length > TOOL_BUDGETS.readFileBytes;
   const decoded = decoder.decode(
     truncatedByBudget
       ? bounded.subarray(0, TOOL_BUDGETS.readFileBytes)
@@ -140,14 +204,19 @@ async function listDirectory(
   absolutePath: string,
   signal: AbortSignal,
 ): Promise<ToolOutcome> {
-  const entries = await readdir(absolutePath, { withFileTypes: true });
+  const entries = await readdir(absolutePath);
   if (signal.aborted) return { status: 'cancelled', code: 'CANCELLED' };
   const names: string[] = [];
   let truncated = false;
-  for (const entry of entries) {
-    if (isSensitiveEntryName(entry.name)) continue;
-    if (entry.isSymbolicLink()) continue;
-    names.push(entry.isDirectory() ? `${entry.name}/` : entry.name);
+  for (const name of entries) {
+    if (names.length > TOOL_BUDGETS.listEntries) {
+      truncated = true;
+      break;
+    }
+    if (isSensitiveEntryName(name)) continue;
+    const checked = await recheckEntry(root, join(absolutePath, name));
+    if (checked === null) continue;
+    names.push(checked === 'directory' ? `${name}/` : name);
   }
   names.sort((a, b) => a.localeCompare(b));
   if (names.length > TOOL_BUDGETS.listEntries) {
@@ -192,22 +261,28 @@ async function searchInFiles(
       truncated = true;
       return;
     }
-    let stats;
+    if ((await recheckEntry(root, absolutePath)) !== 'file') return;
+    let read: BoundedRead;
     try {
-      stats = await lstat(absolutePath);
+      read = await readBoundedFile(absolutePath, TOOL_BUDGETS.searchFileBytes);
     } catch {
       return;
     }
-    if (stats.isSymbolicLink() || !stats.isFile() || stats.nlink !== 1) return;
-    if (stats.size > TOOL_BUDGETS.searchFileBytes) {
+    if (signal.aborted) throw new Error('ABORTED');
+    budget.totalBytes += read.bytesRead;
+    // A bounded prefix still gets published only while the handle identity is
+    // stable; a swap while reading suppresses this file instead of its bytes.
+    if (
+      read.before.size > TOOL_BUDGETS.searchFileBytes ||
+      read.after.size > TOOL_BUDGETS.searchFileBytes
+    )
       truncated = true;
-      return;
-    }
-    budget.files++;
-    const content = await readFile(absolutePath, { signal });
-    budget.totalBytes += content.length;
-    if (isBinaryContent(content)) return;
-    const text = decoder.decode(content);
+    if (!sameIdentity(read.before, read.after)) return;
+    if (!read.before.isFile() || read.before.nlink !== 1) return;
+    budget.files += 1;
+    const prefix = read.buffer.subarray(0, read.bytesRead);
+    if (isBinaryContent(prefix)) return;
+    const text = decoder.decode(prefix);
     let lineNumber = 0;
     for (const line of text.split('\n')) {
       lineNumber++;
@@ -230,9 +305,10 @@ async function searchInFiles(
       truncated = true;
       return;
     }
-    const entries = await readdir(directory, { withFileTypes: true });
+    if ((await recheckEntry(root, directory)) !== 'directory') return;
+    const entries = await readdir(directory);
     if (signal.aborted) return;
-    for (const entry of entries) {
+    for (const name of entries) {
       if (
         budget.hits >= TOOL_BUDGETS.searchHits ||
         budget.files >= TOOL_BUDGETS.searchFiles ||
@@ -241,17 +317,18 @@ async function searchInFiles(
         truncated = true;
         return;
       }
-      if (isSensitiveEntryName(entry.name)) continue;
-      if (entry.isSymbolicLink()) continue;
-      const child = join(directory, entry.name);
-      if (!isPathInsideRoot(root, child)) continue;
-      if (entry.isDirectory()) await walk(child, depth + 1);
-      else if (entry.isFile()) await searchFile(child);
+      if (isSensitiveEntryName(name)) continue;
+      const child = join(directory, name);
+      const checked = await recheckEntry(root, child);
+      if (checked === null) continue;
+      if (checked === 'directory') await walk(child, depth + 1);
+      else await searchFile(child);
     }
   };
 
-  const start = await lstat(startPath);
-  if (start.isDirectory()) await walk(startPath, 0);
+  const start = await recheckEntry(root, startPath);
+  if (start === null) return { status: 'failed', code: 'TOOL_FAILED' };
+  if (start === 'directory') await walk(startPath, 0);
   else await searchFile(startPath);
 
   const after = await lstat(root);

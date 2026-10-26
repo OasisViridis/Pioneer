@@ -112,6 +112,10 @@ interface ActiveRun {
   eventBytes: number;
   outputBytes: number;
   toolCalls: number;
+  /** Serializes tool execution so at most one call is in flight (contract §5). */
+  toolChain: Promise<void>;
+  /** callIds published without their matching tool.result yet. */
+  pendingToolCalls: Set<string>;
   terminalEmitted: boolean;
   preStartMessages: AdapterMessage[];
   grant: GrantRecord;
@@ -216,6 +220,8 @@ export class RunManager {
       return { ok: false, code: 'JOURNAL_UNAVAILABLE' };
     if (!this.dependencies.adapterAvailable)
       return { ok: false, code: 'AUTHORIZATION_REQUIRED' };
+    if (bytesOf(request.task) > this.limits.inputBytes)
+      return { ok: false, code: 'INVALID_REQUEST' };
     const project = await this.dependencies.resolveProject(request.projectId);
     if (project === null) return { ok: false, code: 'INVALID_REQUEST' };
     const epoch = this.dependencies.windowBindings.epochFor(
@@ -244,6 +250,7 @@ export class RunManager {
       revoked: false,
     };
     this.grants.set(grantId, grant);
+    this.pruneGrants();
     this.sessionLastRevision.set(request.sessionId, request.revision);
     return {
       ok: true,
@@ -285,6 +292,13 @@ export class RunManager {
       return { ok: false, code: 'REQUEST_CONFLICT' };
     }
 
+    // The project lookup awaits main state, so it runs before the admission
+    // section. Everything below must stay synchronous: with an await inside the
+    // section two concurrent starts can both observe an idle session and an
+    // unconsumed grant.
+    const project = await this.dependencies.resolveProject(request.projectId);
+    if (project === null) return { ok: false, code: 'INVALID_REQUEST' };
+
     const grant = this.grants.get(request.grantId);
     if (
       grant === undefined ||
@@ -301,9 +315,17 @@ export class RunManager {
       grant.windowEpoch !== context.windowEpoch
     )
       return { ok: false, code: 'AUTHORIZATION_REQUIRED' };
+    if (
+      request.expectedRevision <
+      (this.sessionLastRevision.get(request.sessionId) ?? 0)
+    )
+      return { ok: false, code: 'STALE_REVISION' };
     const task = grant.task;
 
-    if (this.activeRunForSession(request.sessionId) !== null)
+    if (
+      this.activeRunCountForSession(request.sessionId) >=
+      this.limits.activePerSession
+    )
       return { ok: false, code: 'RUN_ACTIVE' };
     if (
       this.activeRunsForWindow(context.webContentsId).length >=
@@ -314,8 +336,6 @@ export class RunManager {
       return { ok: false, code: 'CAPACITY_EXCEEDED' };
 
     const runId = this.randomId('run');
-    const project = await this.dependencies.resolveProject(request.projectId);
-    if (project === null) return { ok: false, code: 'INVALID_REQUEST' };
 
     const run: ActiveRun = {
       identity: {
@@ -335,6 +355,8 @@ export class RunManager {
       eventBytes: 0,
       outputBytes: 0,
       toolCalls: 0,
+      toolChain: Promise.resolve(),
+      pendingToolCalls: new Set<string>(),
       terminalEmitted: false,
       preStartMessages: [],
       grant,
@@ -354,6 +376,13 @@ export class RunManager {
     this.indexRun(run);
     grant.consumed = true;
     this.requestIndex.set(request.requestId, runId);
+    // Bounded idempotency history: the payload map keeps the replay answer,
+    // this map only needs to survive long enough to find it.
+    while (this.requestIndex.size > 512) {
+      const oldest = this.requestIndex.keys().next().value;
+      if (oldest === undefined) break;
+      this.requestIndex.delete(oldest);
+    }
     // The accepted event is buffered before any await so a stop racing the
     // journal write can never precede run.accepted in the sequence.
     this.emit(run, { type: 'run.accepted' }, 'host');
@@ -494,7 +523,7 @@ export class RunManager {
     switch (message.type) {
       case 'text.delta': {
         if (bytesOf(message.text) > this.limits.textChunkBytes) {
-          run.pendingFailure = 'PROTOCOL_ERROR';
+          run.pendingFailure = 'OUTPUT_LIMIT';
           this.requestStop(run, 'host_failure');
           return;
         }
@@ -532,26 +561,64 @@ export class RunManager {
     project: ProjectBinding,
     request: ReadOnlyToolRequest,
   ): Promise<ToolOutcome> {
-    if (this.isTerminal(run) || run.stopRequestedAt !== null)
-      return { status: 'cancelled', code: 'CANCELLED' };
-    run.toolCalls += 1;
-    const callId = `call:${String(run.toolCalls)}`;
-    this.emit(
-      run,
-      { type: 'tool.requested', callId, tool: request.tool },
-      'tool',
-    );
-    const outcome = await executeReadOnlyTool(
-      project.root,
-      request,
-      run.abort.signal,
-    );
-    if (this.isTerminal(run)) return { status: 'cancelled', code: 'CANCELLED' };
-    if (outcome.status === 'succeeded') {
-      run.outputBytes += bytesOf(outcome.text);
+    // Contract §5: at most one tool call in flight per run. The chain tail is
+    // the mutex; it is bounded by the call budget enforced below.
+    const previous = run.toolChain;
+    let release: () => void = () => undefined;
+    run.toolChain = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await previous;
+    try {
+      if (this.isTerminal(run) || run.stopRequestedAt !== null)
+        return { status: 'cancelled', code: 'CANCELLED' };
+      run.toolCalls += 1;
+      const callId = `call:${String(run.toolCalls)}`;
+      if (run.toolCalls > this.limits.toolCalls) {
+        // Rejections count against the budget. The over-budget call is still
+        // paired on the wire, then the run stops instead of looping forever.
+        this.emit(
+          run,
+          { type: 'tool.requested', callId, tool: request.tool },
+          'tool',
+        );
+        this.emit(
+          run,
+          {
+            type: 'tool.result',
+            callId,
+            result: { status: 'rejected', code: 'BUDGET_EXCEEDED' },
+          },
+          'tool',
+        );
+        run.pendingFailure = 'TOOL_FAILED';
+        this.requestStop(run, 'host_failure');
+        return { status: 'rejected', code: 'BUDGET_EXCEEDED' };
+      }
+      this.emit(
+        run,
+        { type: 'tool.requested', callId, tool: request.tool },
+        'tool',
+      );
+      run.pendingToolCalls.add(callId);
+      const outcome = await executeReadOnlyTool(
+        project.root,
+        request,
+        run.abort.signal,
+      );
+      run.pendingToolCalls.delete(callId);
+      // terminate() already published the cancelled pair for a run that ended
+      // while this call was in flight.
+      if (this.isTerminal(run))
+        return { status: 'cancelled', code: 'CANCELLED' };
+      if (outcome.status === 'succeeded') {
+        run.outputBytes += bytesOf(outcome.text);
+      }
+      this.emit(run, { type: 'tool.result', callId, result: outcome }, 'tool');
+      return outcome;
+    } finally {
+      release();
     }
-    this.emit(run, { type: 'tool.result', callId, result: outcome }, 'tool');
-    return outcome;
   }
 
   requestStop(
@@ -595,10 +662,17 @@ export class RunManager {
     | { ok: true; status: RunStatus }
     | { ok: false; code: 'RUN_NOT_FOUND' | 'BINDING_MISMATCH' } {
     const run = this.runs.get(input.runId);
-    if (run === undefined)
-      return this.tombstones.has(input.runId)
-        ? { ok: true, status: 'unknown' }
-        : { ok: false, code: 'RUN_NOT_FOUND' };
+    if (run === undefined) {
+      const tomb = this.tombstones.get(input.runId);
+      if (tomb === undefined) return { ok: false, code: 'RUN_NOT_FOUND' };
+      if (
+        tomb.identity.sessionId !== input.sessionId ||
+        tomb.identity.projectId !== input.projectId ||
+        tomb.identity.revision !== input.revision
+      )
+        return { ok: false, code: 'BINDING_MISMATCH' };
+      return { ok: true, status: 'unknown' };
+    }
     if (
       run.webContentsId !== input.webContentsId ||
       run.windowEpoch !== input.windowEpoch ||
@@ -625,6 +699,12 @@ export class RunManager {
     if (run === undefined) {
       const tomb = this.tombstones.get(input.runId);
       if (tomb === undefined) return null;
+      if (
+        tomb.identity.sessionId !== input.sessionId ||
+        tomb.identity.projectId !== input.projectId ||
+        tomb.identity.revision !== input.revision
+      )
+        return null;
       return {
         identity: tomb.identity,
         status: 'unknown',
@@ -638,7 +718,10 @@ export class RunManager {
     }
     if (
       run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch
+      run.windowEpoch !== input.windowEpoch ||
+      run.identity.sessionId !== input.sessionId ||
+      run.identity.projectId !== input.projectId ||
+      run.identity.revision !== input.revision
     )
       return null;
     return this.buildPage(run, input.afterSeq);
@@ -676,7 +759,10 @@ export class RunManager {
     if (run === undefined) return false;
     if (
       run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch
+      run.windowEpoch !== input.windowEpoch ||
+      run.identity.sessionId !== input.sessionId ||
+      run.identity.projectId !== input.projectId ||
+      run.identity.revision !== input.revision
     )
       return false;
     run.subscribers.set(input.webContentsId, {
@@ -702,7 +788,13 @@ export class RunManager {
     if (subscriber === undefined) return;
     subscriber.lastActivityAt = this.now();
     subscriber.awaitingBatch = false;
-    subscriber.ackedSeq = Math.max(subscriber.ackedSeq, input.afterSeq);
+    // ACKs are a cursor, never a promise: clamp to what main actually published
+    // so a renderer cannot skip the undelivered tail.
+    const publishedSeq = run.events.at(-1)?.seq ?? 0;
+    subscriber.ackedSeq = Math.min(
+      Math.max(subscriber.ackedSeq, input.afterSeq),
+      publishedSeq,
+    );
     this.flushSubscribers(run);
   }
 
@@ -752,8 +844,16 @@ export class RunManager {
       adapter: run.adapterKind,
       body,
     };
+    const size = bytesOf(JSON.stringify(event));
+    if (size > this.limits.eventBytes) {
+      // Contract §5: a wire event has its own 16 KiB ceiling. The offending
+      // event is dropped and the run converges to a fixed code.
+      run.pendingFailure = 'PROTOCOL_ERROR';
+      this.requestStop(run, 'host_failure');
+      return;
+    }
     run.events.push(event);
-    run.eventBytes += bytesOf(JSON.stringify(event));
+    run.eventBytes += size;
     while (
       run.events.length > this.limits.retainedEvents ||
       run.eventBytes > this.limits.retainedBytes
@@ -773,6 +873,21 @@ export class RunManager {
     if (this.isTerminal(run)) return;
     if (run.deadlineTimer !== null) clearTimeout(run.deadlineTimer);
     if (run.stopTimer !== null) clearTimeout(run.stopTimer);
+    // Contract §4: a stop can land while a tool is in flight. Every published
+    // tool.requested gets exactly one result before the terminal event; the
+    // late real result is dropped instead of rewriting history.
+    for (const callId of run.pendingToolCalls) {
+      this.emit(
+        run,
+        {
+          type: 'tool.result',
+          callId,
+          result: { status: 'cancelled', code: 'CANCELLED' },
+        },
+        'tool',
+      );
+    }
+    run.pendingToolCalls.clear();
     run.status = status;
     run.terminalAt = this.now();
     if (status === 'completed') {
@@ -817,6 +932,7 @@ export class RunManager {
     // Terminal runs stay readable for the retention window, then are dropped.
     const retention = setTimeout(() => {
       this.runs.delete(run.identity.runId);
+      this.grants.delete(run.grant.grantId);
       this.unindexRun(run);
     }, this.limits.terminalRetentionMs);
     retention.unref();
@@ -866,12 +982,35 @@ export class RunManager {
     );
   }
 
-  private activeRunForSession(sessionId: string): ActiveRun | null {
+  private activeRunCountForSession(sessionId: string): number {
+    let count = 0;
     for (const runId of this.runsBySession.get(sessionId) ?? []) {
       const run = this.runs.get(runId);
-      if (run && !this.isTerminal(run)) return run;
+      if (run && !this.isTerminal(run)) count += 1;
     }
-    return null;
+    return count;
+  }
+
+  /** Window closed, navigated away, or its renderer died (contract §4). */
+  abandonWindow(webContentsId: number): void {
+    for (const runId of [
+      ...(this.runsByWindow.get(String(webContentsId)) ?? []),
+    ]) {
+      const run = this.runs.get(runId);
+      if (run === undefined || this.isTerminal(run)) continue;
+      this.requestStop(run, 'window_closed');
+    }
+  }
+
+  /** Keeps the grant table bounded; a consumed/expired grant is never reusable. */
+  private pruneGrants(): void {
+    if (this.grants.size <= 64) return;
+    const now = this.now();
+    for (const [grantId, record] of this.grants) {
+      if (this.grants.size <= 64) break;
+      if (record.consumed || record.revoked || record.expiresAt <= now)
+        this.grants.delete(grantId);
+    }
   }
 
   private activeRunsForWindow(webContentsId: number): ActiveRun[] {

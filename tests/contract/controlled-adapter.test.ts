@@ -4,10 +4,14 @@ import {
   createControlledAdapterFactory,
   ControlledScriptSchema,
 } from '../../apps/desktop/src/main/harness/controlled-adapter';
+import { RUN_LIMITS } from '../../apps/desktop/src/shared/contracts/pioneer-run';
 import type {
   AdapterMessage,
   HarnessContext,
 } from '../../apps/desktop/src/main/harness/adapter-seam';
+
+const textEncoder = new TextEncoder();
+const bytesOf = (value: string): number => textEncoder.encode(value).byteLength;
 
 function context(): HarnessContext {
   return {
@@ -122,4 +126,127 @@ describe('P2 controlled adapter (test-only model stand-in)', () => {
     await handle.start();
     await expect(handle.start()).rejects.toThrow('already started');
   });
+
+  it('never claims quiescence before start() ran', async () => {
+    const handle = createControlledAdapterFactory({
+      steps: [{ action: 'complete' }],
+    })(context(), () => undefined);
+    let quiet = false;
+    void handle.quiescent.then(() => {
+      quiet = true;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    expect(quiet).toBe(false);
+    await handle.start();
+    await expect(handle.quiescent).resolves.toBeUndefined();
+    expect(quiet).toBe(true);
+    await handle.dispose();
+  });
+
+  it('holds quiescence until the run and its tracked work drained', async () => {
+    const handle = createControlledAdapterFactory({
+      steps: [{ action: 'wait', ms: 60 }, { action: 'complete' }],
+    })(context(), () => undefined);
+    let quiet = false;
+    void handle.quiescent.then(() => {
+      quiet = true;
+    });
+    const started = handle.start();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(quiet).toBe(false);
+    await started;
+    await handle.quiescent;
+    expect(quiet).toBe(true);
+  });
+
+  it('resolves quiescence (never rejects) after a rejected tool drains', async () => {
+    const failingContext: HarnessContext = {
+      ...context(),
+      tools: {
+        execute: () => Promise.reject(new Error('executor failed')),
+      },
+    };
+    const handle = createControlledAdapterFactory({
+      steps: [
+        {
+          action: 'tool',
+          request: { tool: 'read_file', arguments: { path: 'a.txt' } },
+        },
+        { action: 'complete' },
+      ],
+    })(failingContext, () => undefined);
+    await expect(handle.start()).resolves.toEqual({
+      status: 'failure',
+      code: 'MODEL_FAILED',
+    });
+    await expect(handle.quiescent).resolves.toBeUndefined();
+    await handle.dispose();
+  });
+
+  it('chunks CJK text on UTF-8 boundaries within the 4 KiB budget', async () => {
+    const text = '满'.repeat(2000); // 6000 bytes, all three-byte characters
+    const messages: AdapterMessage[] = [];
+    const handle = createControlledAdapterFactory({
+      steps: [{ action: 'text', text }, { action: 'complete' }],
+    })(context(), (message) => {
+      messages.push(message);
+    });
+    await handle.start();
+    await handle.quiescent;
+    const chunks = textChunks(messages);
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.join('')).toBe(text);
+    for (const chunk of chunks) {
+      expect(chunk.length).toBeGreaterThan(0);
+      expect(bytesOf(chunk)).toBeLessThanOrEqual(RUN_LIMITS.textChunkBytes);
+      expect(utf8RoundTrip(chunk)).toBe(chunk);
+    }
+  });
+
+  it('keeps astral characters whole when chunking', async () => {
+    const text = '🐟'.repeat(2048); // 8192 bytes, 4096 UTF-16 code units
+    const messages: AdapterMessage[] = [];
+    const handle = createControlledAdapterFactory({
+      steps: [{ action: 'text', text }, { action: 'complete' }],
+    })(context(), (message) => {
+      messages.push(message);
+    });
+    await handle.start();
+    await handle.quiescent;
+    const chunks = textChunks(messages);
+    expect(chunks.length).toBe(2);
+    expect(chunks.join('')).toBe(text);
+    for (const chunk of chunks) {
+      expect(bytesOf(chunk)).toBeLessThanOrEqual(RUN_LIMITS.textChunkBytes);
+      expect(utf8RoundTrip(chunk)).toBe(chunk);
+    }
+  });
+
+  it('leaves an in-budget reply as a single chunk', async () => {
+    const text = 'a'.repeat(4096);
+    const messages: AdapterMessage[] = [];
+    const handle = createControlledAdapterFactory({
+      steps: [{ action: 'text', text }, { action: 'complete' }],
+    })(context(), (message) => {
+      messages.push(message);
+    });
+    await handle.start();
+    await handle.quiescent;
+    expect(textChunks(messages)).toEqual([text]);
+  });
 });
+
+function textChunks(messages: AdapterMessage[]): string[] {
+  const chunks: string[] = [];
+  for (const message of messages) {
+    if (message.type === 'text.delta') chunks.push(message.text);
+  }
+  return chunks;
+}
+
+/** Round-trips through strict UTF-8; a cut character would not survive. */
+function utf8RoundTrip(value: string): string {
+  return new TextDecoder('utf-8', { fatal: true }).decode(
+    textEncoder.encode(value),
+  );
+}

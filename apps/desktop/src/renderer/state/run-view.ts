@@ -277,7 +277,7 @@ export class RunViewStore {
       status,
       phase: terminal ? 'terminal' : this.get(sessionId).phase,
     });
-    this.lastSeqByRun.set(identity.runId, batch.page.lastSeq);
+    this.advanceCursor(identity.runId, batch.page.nextAfterSeq);
     await this.port.acknowledgeRunPage({
       sessionId: identity.sessionId,
       projectId: identity.projectId,
@@ -285,6 +285,16 @@ export class RunViewStore {
       revision: identity.revision,
       afterSeq: batch.page.nextAfterSeq,
     });
+  }
+
+  /**
+   * Track what main actually delivered, not its newest seq: a partly filled
+   * page (hasMore) must leave the cursor at `nextAfterSeq`, otherwise the
+   * follow-up page is filtered out as already seen.
+   */
+  private advanceCursor(runId: string, nextAfterSeq: number): void {
+    const current = this.lastSeqByRun.get(runId) ?? 0;
+    this.lastSeqByRun.set(runId, Math.max(current, nextAfterSeq));
   }
 
   private applyEvents(sessionId: string, events: RunEvent[]): void {
@@ -381,6 +391,7 @@ export class RunViewStore {
       });
       if (page !== null) {
         this.applyEvents(input.sessionId, page.events);
+        this.advanceCursor(started.runId, page.nextAfterSeq);
         this.update(input.sessionId, { status: page.status });
       }
     } finally {
@@ -396,7 +407,8 @@ export class RunViewStore {
     const state = this.get(input.sessionId);
     if (state.runId === null) return;
     if (state.phase !== 'active') return;
-    this.update(input.sessionId, { phase: 'stopping' });
+    const priorPhase = state.phase;
+    this.update(input.sessionId, { phase: 'stopping', admissionCode: null });
     const reply = await this.port.stopRun({
       sessionId: input.sessionId,
       projectId: input.projectId,
@@ -419,6 +431,13 @@ export class RunViewStore {
       } else {
         this.update(input.sessionId, { status: reply.status });
       }
+    } else {
+      // Main rejected the stop, so the run is still live: leaving the view on
+      // 'stopping' would latch the stop button disabled forever.
+      this.update(input.sessionId, {
+        phase: priorPhase,
+        admissionCode: reply.code,
+      });
     }
   }
 
