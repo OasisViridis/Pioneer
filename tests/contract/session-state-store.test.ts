@@ -305,6 +305,64 @@ describe('session state store', () => {
 });
 
 describe('session state migration', () => {
+  it('loads v4 records without intentState and never rewrites the source merely by reading', async () => {
+    const userDataPath = await createUserDataDirectory();
+    const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
+    const existing = JSON.parse(JSON.stringify(record())) as {
+      version: number;
+      state: { sessions: Array<Record<string, unknown>> };
+    };
+    const session = existing.state.sessions[0];
+    if (!session) throw new Error('Expected session fixture');
+    delete session.intentState;
+    session.draft = '2026-10-24 的草稿';
+    session.messages = ['原来的消息'];
+    const original = JSON.stringify(existing);
+    await writeFile(statePath, original, 'utf8');
+
+    const store = createSessionStateStore(userDataPath);
+    const loaded = await store.load();
+    expect(loaded?.sessions[0]?.draft).toBe('2026-10-24 的草稿');
+    expect(loaded?.sessions[0]?.messages).toEqual(['原来的消息']);
+    expect(loaded?.sessions[0]?.intentState).toEqual(
+      initialIntentWorkspaceState(),
+    );
+    expect(await readFile(statePath, 'utf8')).toBe(original);
+    if (!loaded) throw new Error('Expected restored state');
+    await store.save(loaded);
+    expect(
+      SessionStateRecordSchema.parse(
+        JSON.parse(await readFile(statePath, 'utf8')),
+      ).version,
+    ).toBe(4);
+  });
+
+  it('ignores invalid legacy intent metadata without hiding unrelated record corruption', async () => {
+    const userDataPath = await createUserDataDirectory();
+    const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
+    const existing = JSON.parse(JSON.stringify(record())) as {
+      state: { sessions: Array<Record<string, unknown>> };
+    };
+    const session = existing.state.sessions[0];
+    if (!session) throw new Error('Expected session fixture');
+    session.intentState = { phase: 'review', intent: null };
+    const bytes = JSON.stringify(existing);
+    await writeFile(statePath, bytes, 'utf8');
+
+    const store = createSessionStateStore(userDataPath);
+    const loaded = await store.load();
+    expect(loaded?.sessions[0]?.intentState).toEqual(
+      initialIntentWorkspaceState(),
+    );
+    expect(await readFile(statePath, 'utf8')).toBe(bytes);
+
+    session.dock = { ...createDockLayout('focus'), ratio: 1 };
+    await writeFile(statePath, JSON.stringify(existing), 'utf8');
+    await expect(store.load()).rejects.toMatchObject({
+      code: 'INVALID_STATE',
+    });
+  });
+
   it('loads v3 without rewriting bytes and retains dormant layouts through v4 save and restart', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);

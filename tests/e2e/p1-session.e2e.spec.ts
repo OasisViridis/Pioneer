@@ -51,7 +51,7 @@ async function createSession(page: Page, title: string) {
   await page.getByRole('button', { name: '保存名称', exact: true }).click();
 }
 
-test('creates independent sessions, reopens a closed tab and restores draft, intent and layout after Electron restart', async ({}, info) => {
+test('creates independent sessions, reopens a closed tab and restores draft, messages and layout after Electron restart', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);
   const userData = info.outputPath('user-data');
   await mkdir(userData, { recursive: true });
@@ -64,14 +64,11 @@ test('creates independent sessions, reopens a closed tab and restores draft, int
       .fill('修复缓存键冲突，并补充并发请求测试');
     await page.getByText('模块', { exact: true }).click();
     await page.getByRole('button', { name: '+ 上下文', exact: true }).click();
-    await page.getByRole('button', { name: '澄清任务', exact: true }).click();
+    await page.getByRole('button', { name: '保存到会话', exact: true }).click();
+    await expect(page.locator('.message-list li')).toHaveCount(1);
     await page
-      .getByRole('textbox', { name: '任务说明', exact: true })
-      .fill('先定位缓存键构建逻辑，不修改文件');
-    await page
-      .getByRole('button', { name: '生成意图摘要', exact: true })
-      .click();
-    await expect(page.getByText('REV 1', { exact: true })).toBeVisible();
+      .getByRole('textbox', { name: '给 Agent 的消息', exact: true })
+      .fill('修复缓存键冲突，并补充并发请求测试');
     await page.getByText('模块', { exact: true }).click();
     await page.getByRole('button', { name: '+ 产物', exact: true }).click();
     await page.getByRole('tab', { name: '文件清单', exact: true }).click();
@@ -84,9 +81,8 @@ test('creates independent sessions, reopens a closed tab and restores draft, int
       .fill('增加符号链接逃逸的拒绝用例');
     await page.getByRole('button', { name: '保存到会话', exact: true }).click();
     await expect(page.locator('.message-list li')).toHaveCount(1);
-    await expect(
-      page.getByRole('heading', { name: '意图摘要', exact: true }),
-    ).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '澄清任务' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: '意图摘要' })).toHaveCount(0);
     await page
       .getByRole('textbox', { name: '给 Agent 的消息', exact: true })
       .fill('增加符号链接逃逸的拒绝用例');
@@ -105,7 +101,10 @@ test('creates independent sessions, reopens a closed tab and restores draft, int
       .getByRole('button', { name: '打开会话 修复请求缓存', exact: true })
       .click();
     await expect(page.locator('[data-panel-id="context"]')).toBeVisible();
-    await expect(page.getByText('REV 1', { exact: true })).toBeVisible();
+    await expect(page.locator('.message-list li')).toHaveCount(1);
+    await expect(
+      page.locator('.message-list').getByText('修复缓存键冲突，并补充并发请求测试'),
+    ).toBeVisible();
     await expect(
       page.getByRole('tab', { name: '文件清单', exact: true }),
     ).toHaveAttribute('aria-selected', 'true');
@@ -126,7 +125,10 @@ test('creates independent sessions, reopens a closed tab and restores draft, int
       page.getByRole('textbox', { name: '给 Agent 的消息', exact: true }),
     ).toHaveValue('修复缓存键冲突，并补充并发请求测试');
     await expect(page.locator('[data-panel-id="context"]')).toBeVisible();
-    await expect(page.getByText('REV 1', { exact: true })).toBeVisible();
+    await expect(page.locator('.message-list li')).toHaveCount(1);
+    await expect(
+      page.locator('.message-list').getByText('修复缓存键冲突，并补充并发请求测试'),
+    ).toBeVisible();
     await expect(
       page.getByRole('tab', { name: '文件清单', exact: true }),
     ).toHaveAttribute('aria-selected', 'true');
@@ -256,57 +258,81 @@ test('persists a moved panel and keyboard-resized single layout without changing
   }
 });
 
-test('restores an initialized revised intent after restart without enabling execution', async ({}, info) => {
+test('opens old v4 records with or without intentState without rewriting drafts, messages or dock', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);
   const userData = info.outputPath('user-data');
   await mkdir(userData, { recursive: true });
+  const file = path.join(userData, 'pioneer-session-state.json');
   let app = await launch(userData);
   try {
     let page = await app.firstWindow();
-    await createSession(page, '定位请求取消问题');
-    await page.getByRole('button', { name: '澄清任务', exact: true }).click();
+    await createSession(page, '旧记录兼容');
     await page
-      .getByRole('textbox', { name: '任务说明', exact: true })
-      .fill('定位取消请求后缓存未释放的问题');
+      .getByRole('textbox', { name: '给 Agent 的消息', exact: true })
+      .fill('保存的历史消息');
+    await page.getByRole('button', { name: '保存到会话' }).click();
     await page
-      .getByRole('button', { name: '生成意图摘要', exact: true })
-      .click();
-    await page.getByRole('button', { name: '返回修改', exact: true }).click();
-    await page
-      .getByRole('textbox', { name: '任务说明', exact: true })
-      .fill('定位取消请求后缓存未释放的问题，仅做只读分析');
-    await page
-      .getByRole('button', { name: '生成意图摘要', exact: true })
-      .click();
-    await page.getByRole('button', { name: '确认摘要', exact: true }).click();
-    await page
-      .getByRole('button', { name: '初始化运行会话', exact: true })
-      .click();
+      .getByRole('textbox', { name: '给 Agent 的消息', exact: true })
+      .fill('保留的历史草稿');
+    await page.getByText('模块', { exact: true }).click();
+    await page.getByRole('button', { name: '+ 上下文', exact: true }).click();
     await expect(page.locator('.save-status')).toHaveText('已保存到本机');
     await app.close();
+
+    const record = JSON.parse(await readFile(file, 'utf8')) as {
+      version: number;
+      state: { sessions: Array<{ intentState?: unknown }> };
+    };
+    const oldSession = record.state.sessions[0];
+    if (!oldSession) throw new Error('Expected persisted session');
+    oldSession.intentState = {
+      phase: 'compose',
+      draftInstruction: '2026-10-24 的旧意图草稿',
+      intent: null,
+      runtime: null,
+      error: null,
+    };
+    const legacyBytes = JSON.stringify(record);
+    await writeFile(file, legacyBytes, 'utf8');
+
     app = await launch(userData);
     page = await app.firstWindow();
     await expect(
-      page.getByRole('heading', { name: '运行会话已初始化', exact: true }),
+      page.getByRole('textbox', { name: '给 Agent 的消息' }),
+    ).toHaveValue('保留的历史草稿');
+    await expect(page.locator('.message-list li')).toHaveCount(1);
+    await expect(
+      page.locator('.message-list').getByText('保存的历史消息'),
     ).toBeVisible();
-    await expect(page.getByText('REV 2', { exact: true })).toBeVisible();
-    const saved = await page.evaluate(() =>
-      (window as RendererWindow).pioneer.loadSessionState(),
+    await expect(page.locator('[data-panel-id="context"]')).toBeVisible();
+    await expect(page.getByRole('button', { name: '澄清任务' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: '意图摘要' })).toHaveCount(0);
+    expect(await readFile(file, 'utf8')).toBe(legacyBytes);
+    await app.close();
+
+    delete oldSession.intentState;
+    const withoutIntentBytes = JSON.stringify(record);
+    await writeFile(file, withoutIntentBytes, 'utf8');
+    app = await launch(userData);
+    page = await app.firstWindow();
+    await expect(
+      page.getByRole('textbox', { name: '给 Agent 的消息' }),
+    ).toHaveValue('保留的历史草稿');
+    await expect(page.locator('.message-list li')).toHaveCount(1);
+    await expect(page.locator('[data-panel-id="context"]')).toBeVisible();
+    expect(await readFile(file, 'utf8')).toBe(withoutIntentBytes);
+
+    await page
+      .getByRole('textbox', { name: '给 Agent 的消息' })
+      .fill('新修改的草稿');
+    await expect(page.locator('.save-status')).toHaveText('已保存到本机');
+    const saved = SessionStateRecordSchema.parse(
+      JSON.parse(await readFile(file, 'utf8')),
     );
-    const session = saved?.sessions[0];
-    if (!session) throw new Error('Expected restored session');
-    expect(session.intentState.intent).toMatchObject({
-      id: `intent:${session.id}`,
-      revision: 2,
-    });
-    expect(session.intentState.runtime?.session.capabilities).toEqual({
-      modelAccess: false,
-      toolExecution: false,
-      fileMutation: false,
-    });
-    expect(session.intentState.runtime?.session.approvedIntent).toEqual(
-      session.intentState.intent,
-    );
+    expect(saved.version).toBe(4);
+    expect(saved.state.sessions[0]?.draft).toBe('新修改的草稿');
+    expect(saved.state.sessions[0]?.messages).toEqual(['保存的历史消息']);
+    expect(saved.state.sessions[0]?.dock.hidden).not.toContain('context');
   } finally {
     await app.close();
     expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(before);
