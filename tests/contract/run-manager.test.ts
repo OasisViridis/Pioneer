@@ -1111,4 +1111,80 @@ describe('P2 run manager edge hardening', () => {
     );
     manager.unsubscribe({ runId, webContentsId });
   });
+
+  it('does not let a stale ACK release the next batch', async () => {
+    const script = {
+      steps: Array.from({ length: 40 }, (_, index) => ({
+        action: 'text',
+        text: `chunk-${String(index)}`,
+      })) as never,
+    };
+    const { manager, sender } = await createManager(script);
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+    expect(
+      manager.subscribe({
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        runId,
+        revision: 1,
+        afterSeq: 0,
+        ...binding,
+      }),
+    ).toBe(true);
+    await waitFor(() => sender.batches.length === 1);
+    const first = sender.batches[0]?.page.nextAfterSeq ?? 0;
+    manager.acknowledge({ runId, webContentsId, afterSeq: first });
+    await waitFor(() => sender.batches.length === 2);
+    const second = sender.batches[1]?.page.nextAfterSeq ?? 0;
+    // Stale ACK for the first page must not put two batches in flight.
+    manager.acknowledge({ runId, webContentsId, afterSeq: first });
+    await new Promise((resolve) => {
+      setTimeout(resolve, 40);
+    });
+    expect(sender.batches).toHaveLength(2);
+    manager.acknowledge({ runId, webContentsId, afterSeq: second });
+    manager.unsubscribe({ runId, webContentsId });
+  });
+
+  it('still replays an accepted request after the journal turns unhealthy', async () => {
+    let broken = false;
+    const base = memoryStore();
+    const store = {
+      ...base,
+      save: (value: string) =>
+        broken ? Promise.reject(new Error('journal broken')) : base.save(value),
+    };
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      undefined,
+      store,
+    );
+    const first = await launchRun(manager, { requestId: 'request:replay' });
+    await waitFor(() => pageOf(manager, first.runId)?.status === 'completed');
+    broken = true;
+    const replayed = await manager.start(
+      {
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:replay',
+        grantId: first.request.grantId,
+      },
+      binding,
+    );
+    expect(replayed).toEqual({ ok: true, runId: first.runId });
+    const freshGrant = await authorizeGrant(manager);
+    const refused = await manager.start(
+      {
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:new',
+        grantId: freshGrant,
+      },
+      binding,
+    );
+    expect(refused).toEqual({ ok: false, code: 'JOURNAL_UNAVAILABLE' });
+  });
 });

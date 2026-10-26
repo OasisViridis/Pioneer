@@ -311,8 +311,6 @@ export class RunManager {
     request: RunStartRequest,
     context: { webContentsId: number; windowEpoch: number },
   ): Promise<{ ok: true; runId: string } | { ok: false; code: AdmissionCode }> {
-    if (!this.dependencies.journal.isAvailable())
-      return { ok: false, code: 'JOURNAL_UNAVAILABLE' };
     const payload = JSON.stringify({
       sessionId: request.sessionId,
       projectId: request.projectId,
@@ -322,8 +320,13 @@ export class RunManager {
       webContentsId: context.webContentsId,
       windowEpoch: context.windowEpoch,
     });
+    // Replay first: an already accepted requestId must still answer with its
+    // run even after the journal turned unhealthy (contract §1).
     const replayed = await this.replay(request.requestId, payload);
     if (replayed !== null) return replayed;
+
+    if (!this.dependencies.journal.isAvailable())
+      return { ok: false, code: 'JOURNAL_UNAVAILABLE' };
 
     // The project lookup awaits main state, so it runs before the admission
     // section. Everything below must stay synchronous: with an await inside the
@@ -861,10 +864,7 @@ export class RunManager {
       return false;
     // A stale cursor past the newest seq must still receive future events
     // instead of waiting for a page that can never exist.
-    const startSeq = Math.min(
-      input.afterSeq,
-      run.events.at(-1)?.seq ?? input.afterSeq,
-    );
+    const startSeq = Math.min(input.afterSeq, run.events.at(-1)?.seq ?? 0);
     run.subscribers.set(input.webContentsId, {
       webContentsId: input.webContentsId,
       windowEpoch: input.windowEpoch,
@@ -888,7 +888,11 @@ export class RunManager {
     const subscriber = run.subscribers.get(input.webContentsId);
     if (subscriber === undefined) return;
     subscriber.lastActivityAt = this.now();
-    subscriber.awaitingBatch = false;
+    // Only an ACK for the batch that is actually outstanding may release the
+    // next batch; a stale or duplicated ACK must not exceed one unacked batch.
+    if (input.afterSeq >= subscriber.deliveredSeq) {
+      subscriber.awaitingBatch = false;
+    }
     // ACKs are a cursor, never a promise: clamp to the last seq actually sent
     // to this subscriber. Clamping to the newest published seq would let an
     // over-claiming ACK skip the pages still queued for delivery.
