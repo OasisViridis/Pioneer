@@ -109,8 +109,8 @@ test('S1 session and dock compositions preserve selection, focus and close seman
     const beta = page.getByRole('tab', { name: 'beta-notes', exact: true });
     await expect(alpha).toHaveAttribute('aria-selected', 'false');
     await expect(beta).toHaveAttribute('aria-selected', 'true');
-    await expect(alpha).toHaveCSS('color', 'rgb(215, 227, 218)');
-    await expect(beta).toHaveCSS('color', 'rgb(51, 60, 80)');
+    await expect(alpha).toHaveCSS('color', 'rgb(44, 53, 71)');
+    await expect(beta).toHaveCSS('color', 'rgb(44, 53, 71)');
     await expect(beta).toHaveCSS('background-color', 'rgb(249, 250, 247)');
     await expect(
       page.getByRole('button', { name: 'Close alpha-app', exact: true }),
