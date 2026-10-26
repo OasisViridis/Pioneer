@@ -341,8 +341,13 @@ export function createPiAdapterFactory(
             return { status: 'failure', code: 'MODEL_FAILED' };
           }
           const agent = new core.Agent({
+            // The per-request cap is the contract budget (RUN_LIMITS
+            // modelOutputTokens); the SDK default must never widen it.
             streamFn: (requestModel, requestContext, options) =>
-              models.streamSimple(requestModel, requestContext, options),
+              models.streamSimple(requestModel, requestContext, {
+                ...options,
+                maxTokens: RUN_LIMITS.modelOutputTokens,
+              }),
             identity: { attribution: null },
             initialState: {
               model,
