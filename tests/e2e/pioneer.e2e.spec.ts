@@ -72,6 +72,27 @@ test('opens fixture projects in unique MRU tabs without mutating the workspace',
     await expect(projectPosters).toHaveCount(3);
     await expect(page.getByText('not-a-project.txt')).toHaveCount(0);
 
+    // The exported color proposal reaches a real Electron renderer through
+    // the generated semantic alias; font and relative spacing stay compatible.
+    const html = page.locator('html');
+    await expect(html).toHaveCSS('color', 'rgb(44, 53, 71)');
+    await expect(html).toHaveCSS(
+      'font-family',
+      'Inter, "Noto Sans SC", system-ui, sans-serif',
+    );
+    const alphaPoster = page.getByRole('button', {
+      name: 'Open project alpha-app',
+    });
+    await alphaPoster.hover();
+    await expect(alphaPoster).toHaveCSS(
+      'background-color',
+      'rgb(238, 237, 234)',
+    );
+    await expect(alphaPoster.locator('.project-poster__body')).toHaveCSS(
+      'padding',
+      '16px',
+    );
+
     await page.getByRole('button', { name: 'Open project alpha-app' }).click();
     await expect(page.getByRole('tab', { name: 'alpha-app' })).toHaveCount(1);
 

@@ -1,0 +1,178 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
+import { root } from './design-tokens.mjs';
+
+export function validateMapping(mapping, design, source) {
+  assert(
+    ['partial', 'blocked', 'mapped'].includes(mapping.status),
+    'Invalid component mapping status',
+  );
+  assert.equal(mapping.designNode, design.ownerId, 'Design node mismatch');
+  assert.deepEqual(
+    mapping.designProperties,
+    design.properties,
+    'Design property/variant drift',
+  );
+  assert.deepEqual(
+    mapping.variants.map((v) => v.name).sort(),
+    design.variants.map((v) => v.name).sort(),
+    'Design variant coverage mismatch',
+  );
+  for (const variant of mapping.variants) {
+    assert(
+      ['preserved-difference', 'unsupported', 'blocked'].includes(
+        variant.status,
+      ),
+      `Unsupported mapping status: ${variant.status}`,
+    );
+    assert(
+      variant.reason?.length > 0,
+      'Every design variant needs a disposition',
+    );
+  }
+  if (
+    mapping.variants.some((v) => ['unsupported', 'blocked'].includes(v.status))
+  )
+    assert.notEqual(
+      mapping.status,
+      'mapped',
+      'Incomplete variants cannot be marked mapped',
+    );
+  if (!mapping.code.inAcceptedMain) {
+    assert.equal(
+      source,
+      null,
+      'Candidate code now exists: re-pin accepted version and review mapping',
+    );
+    assert.equal(
+      mapping.status,
+      'blocked',
+      'Unaccepted code cannot be marked mapped',
+    );
+    assert.equal(
+      mapping.example,
+      null,
+      'Do not generate usage for unaccepted code',
+    );
+    return;
+  }
+  assert(source !== null, `Missing real export: ${mapping.code.exportName}`);
+  const normalized = source.replaceAll('\r\n', '\n');
+  const blob = createHash('sha1')
+    .update(`blob ${Buffer.byteLength(normalized)}\0`)
+    .update(normalized)
+    .digest('hex');
+  assert.equal(
+    blob,
+    mapping.code.blob,
+    'Component source drift: review props/behavior and update version evidence',
+  );
+  const filename = path.join(root, mapping.code.path);
+  const host = ts.createCompilerHost({ jsx: ts.JsxEmit.Preserve });
+  const originalRead = host.readFile;
+  host.readFile = (file) => (file === filename ? source : originalRead(file));
+  const program = ts.createProgram(
+    [filename],
+    { jsx: ts.JsxEmit.Preserve, noResolve: true },
+    host,
+  );
+  const checker = program.getTypeChecker();
+  const sourceFile = program.getSourceFile(filename);
+  const exported = checker.getExportsOfModule(
+    checker.getSymbolAtLocation(sourceFile),
+  );
+  const symbol = exported.find((s) => s.name === mapping.code.exportName);
+  assert(symbol, `Missing real export: ${mapping.code.exportName}`);
+  const signature = checker
+    .getTypeOfSymbolAtLocation(symbol, sourceFile)
+    .getCallSignatures()[0];
+  assert(signature?.parameters[0], 'Expected a real React props parameter');
+  const props = checker
+    .getTypeOfSymbolAtLocation(signature.parameters[0], sourceFile)
+    .getProperties()
+    .map((p) => p.name)
+    .sort();
+  assert.deepEqual(
+    Object.keys(mapping.code.props).sort(),
+    props,
+    'Real React props mismatch',
+  );
+  for (const prop of mapping.usedProps)
+    assert(props.includes(prop), `Invented prop: ${prop}`);
+  // A disabled Figma poster must not become a clickable available project.
+  assert.equal(
+    mapping.variants.find((v) => v.name === 'Cover=Unavailable')?.status,
+    'unsupported',
+    'Unavailable has no safe real API',
+  );
+}
+
+export async function checkMappings({ requireComplete = false } = {}) {
+  const index = JSON.parse(
+    await readFile(
+      path.join(root, 'design/sync/component-mappings.json'),
+      'utf8',
+    ),
+  );
+  const s0 = JSON.parse(
+    await readFile(
+      path.join(root, 'docs/research/design-sync-s0/component-index.json'),
+      'utf8',
+    ),
+  );
+  assert.equal(
+    index.route,
+    'lightweight-index',
+    'S0 fallback route must be explicit',
+  );
+  assert.equal(
+    index.officialCodeConnectPublished,
+    false,
+    'No official publication evidence',
+  );
+  assert.deepEqual(
+    index.components.map((m) => m.designNode).sort(),
+    s0.components.map((m) => m.ownerId).sort(),
+    'Three pilot inventory mismatch',
+  );
+  for (const mapping of index.components) {
+    let source = null;
+    try {
+      source = await readFile(path.join(root, mapping.code.path), 'utf8');
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
+    validateMapping(
+      mapping,
+      s0.components.find((c) => c.ownerId === mapping.designNode),
+      source,
+    );
+  }
+  const blocked = index.components.filter((c) => c.status !== 'mapped');
+  assert.equal(
+    index.complete,
+    blocked.length === 0,
+    'Index completion flag disagrees with component evidence',
+  );
+  console.log(
+    `Mapping evidence valid; ${blocked.length}/3 pilots still incomplete (see design/sync/component-mappings.json)`,
+  );
+  if (requireComplete)
+    assert.equal(
+      blocked.length,
+      0,
+      'S1 acceptance BLOCKED: missing accepted component APIs/variants; do not close #35',
+    );
+}
+
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+)
+  await checkMappings({
+    requireComplete: process.argv.includes('--require-complete'),
+  });
