@@ -508,3 +508,83 @@ describe('session state migration', () => {
     }
   });
 });
+
+describe('session state without the intent card (#41 stage 1)', () => {
+  function stateWithStoredIntent(): SessionWorkspaceState {
+    const state = stateWith();
+    const session = firstSession(state);
+    return {
+      ...state,
+      sessions: [
+        {
+          ...session,
+          draft: '继续定位缓存键冲突',
+          messages: ['读取缓存模块'],
+          intentState: {
+            phase: 'ready',
+            draftInstruction: '定位缓存键冲突',
+            intent: {
+              id: `intent:${session.id}`,
+              projectId: session.project.id,
+              revision: 3,
+              instruction: '定位缓存键冲突，不修改文件',
+              steps: [{ id: 'step:1', summary: '读取缓存模块' }],
+              status: 'ready',
+            },
+            runtime: null,
+            error: null,
+          },
+        },
+      ],
+    };
+  }
+
+  it('ignores a stored intent state and leaves the file untouched until a save', async () => {
+    const userDataPath = await createUserDataDirectory();
+    const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
+    const bytes = JSON.stringify({
+      version: SESSION_STATE_VERSION,
+      state: stateWithStoredIntent(),
+    });
+    await writeFile(statePath, bytes, 'utf8');
+
+    const loaded = await createSessionStateStore(userDataPath).load();
+    const session = loaded?.sessions[0];
+    expect(session?.draft).toBe('继续定位缓存键冲突');
+    expect(session?.messages).toEqual(['读取缓存模块']);
+    expect(session?.intentState).toEqual(initialIntentWorkspaceState());
+    expect(await readFile(statePath, 'utf8')).toBe(bytes);
+  });
+
+  it('loads a v4 record whose session omits intentState', async () => {
+    const userDataPath = await createUserDataDirectory();
+    const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
+    const state = stateWith();
+    const session = firstSession(state);
+    const withoutIntentState = {
+      id: session.id,
+      project: session.project,
+      title: session.title,
+      customTitle: session.customTitle,
+      lastActivityAt: session.lastActivityAt,
+      draft: '缺字段也要能打开',
+      messages: ['读取缓存模块'],
+      dock: session.dock,
+      savedDock: session.savedDock,
+      layoutHistory: session.layoutHistory,
+      outputTab: session.outputTab,
+    };
+    const bytes = JSON.stringify({
+      version: SESSION_STATE_VERSION,
+      state: { ...state, sessions: [withoutIntentState] },
+    });
+    await writeFile(statePath, bytes, 'utf8');
+
+    const loaded = await createSessionStateStore(userDataPath).load();
+    const restored = loaded?.sessions[0];
+    expect(restored?.draft).toBe('缺字段也要能打开');
+    expect(restored?.messages).toEqual(['读取缓存模块']);
+    expect(restored?.intentState).toEqual(initialIntentWorkspaceState());
+    expect(await readFile(statePath, 'utf8')).toBe(bytes);
+  });
+});
