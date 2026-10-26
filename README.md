@@ -3,7 +3,7 @@
 > **基于TypeScript的模块化智能体交互系统设计与实现**  
 > 毕业设计课题（2026-10-08 按导师意见确认）。Pioneer 是这个课题的工程实现：用桌面界面组织本地项目、会话和 Agent 的运行状态，项目用海报墙浏览，会话用标签页隔离，执行过程摊在按需打开的停靠面板里。
 
-[交互原型](https://nix-medley-14707825.figma.site/) · [Figma 设计稿](https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=925-3) · [apps/desktop 桌面工程源码](apps/desktop/) · [课题定位](选题收敛说明.md)
+[Figma 交互原型](https://nix-medley-14707825.figma.site/)（可直接打开） · [Figma 设计稿](https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=925-3)（编辑源，需 Figma 账号） · [apps/desktop 桌面工程源码](apps/desktop/) · [课题定位](选题收敛说明.md)
 
 ## 这个项目在做什么
 
