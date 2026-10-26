@@ -77,6 +77,7 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 | 关窗/导航/渲染进程崩溃不停止运行 | 新增 `RunManager.abandonWindow`；导航、渲染进程崩溃、窗口关闭时换 epoch 并停止该窗口的运行 |
 | `before-quit` 不等 shutdown | 退出前先等有界停止（宽限 +1s 上限）再退出 |
 | GLOSSARY 与修订后停止语义冲突 | 术语改为「正常停止收敛后落终态；宽限到期强制结束记 `STOP_TIMEOUT`」 |
+| `modelOutputTokens` 只在合同里声明 | 适配器把 `RUN_LIMITS.modelOutputTokens` 作为每次请求的 `maxTokens` 下发给 Pi `streamSimple`，SDK 默认值不得放宽预算 |
 
 ### 门禁记录
 
@@ -92,6 +93,6 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 
 - **外发材料清单（egress manifest）与授权撤销模型**：合同 §1/§4 要求按材料清单授权、材料变更即撤销，但"用户如何选定可外发材料"属产品决策，代码仍无执行者；A05/A06 的该子项不能算 PASS。
 - **`ADAPTER_DISCONNECTED` 无生产者**：上表第 3 行的断连分支依赖适配器通道信号，当前两个适配器都没有该信号，仍属未实现。
-- **`modelOutputTokens` 未下发 Pi SDK**：适配器未暴露 maxTokens 入口，usage 仍按合同记 null。
-- **A08 干净检出复建仍停在 `92824a4`**：本次修复只在当前 worktree 跑了完整门禁，最终合并前应在修复提交上复跑 A08。
+- **`modelOutputTokens` 已改为下发**：见上表，剩余风险只是 SDK 是否真正截断，需真实 Provider 运行观察 usage（A09 记录仍按合同记 null）。
+- **A08 已在修复提交上复跑**：`3bbb21b` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` 退出码 0（独立于开发 worktree）。
 - **P1 资产仍与 P2 同 PR**（463 文件、+75,619 行）：拆分属人工决策。
