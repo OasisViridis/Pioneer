@@ -1038,11 +1038,12 @@ export class RunManager {
     } finally {
       run.publishHeld = false;
       try {
+        // deliverBatches already drops a subscriber whose send throws; this
+        // layer only guarantees the slot release if delivery itself fails.
         this.deliverBatches(run);
-      } catch {
-        // A throwing sender must not skip the slot release below.
+      } finally {
+        this.releaseSlot(run);
       }
-      this.releaseSlot(run);
     }
   }
 

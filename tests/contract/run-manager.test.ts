@@ -1201,4 +1201,36 @@ describe('P2 run manager edge hardening', () => {
     );
     expect(refused).toEqual({ ok: false, code: 'JOURNAL_UNAVAILABLE' });
   });
+
+  it('drops a subscriber whose send throws without breaking the run', async () => {
+    let sends = 0;
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      {
+        sender: {
+          send: () => {
+            sends += 1;
+            throw new Error('window is gone');
+          },
+        },
+      },
+    );
+    const { runId } = await launchRun(manager);
+    manager.subscribe({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      afterSeq: 0,
+      ...binding,
+    });
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed', 3_000);
+    // The failed delivery is dropped, the flush timer survives, and the run
+    // still reaches its terminal state.
+    expect(sends).toBeGreaterThan(0);
+    expect(readAllEvents(manager, runId).at(-1)?.body).toEqual({
+      type: 'run.completed',
+      usage: { inputTokens: null, outputTokens: null },
+    });
+  });
 });
