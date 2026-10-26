@@ -60,7 +60,7 @@
 
 ## 评审修复记录（2026-10-26）
 
-PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补齐的运行层缺口。修复前基线 `395df15`，分支 `fix-pr16-review`（自 `codex/issue13-readonly-harness` 头）。修复按复审轮次提交：`3bbb21b`/`0196478`/`de0e0f1`（第一轮）、`8328bdc`（第二轮）、`97594a2`（第三轮）、`8ecb5ef`（第四轮）、`956a55f`（第五轮）；每轮的门禁与证据见下。
+PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补齐的运行层缺口。修复前基线 `395df15`，分支 `fix-pr16-review`（自 `codex/issue13-readonly-harness` 头）。修复按复审轮次提交：第一轮 `3bbb21b` + `0196478` + `de0e0f1`；第二轮 `8328bdc` + `cfff311`；第三轮 `97594a2` + `08665fb`；第四轮 `8ecb5ef` + `69884bb`；第五轮 `a6ff9e5` + `956a55f` + `fcebcb2`；第六轮 `321d82e`。每轮的门禁与证据见下。
 
 | 审查缺口 | 修复 |
 | --- | --- |
@@ -128,28 +128,41 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 
 新增测试：终态写失败后的收敛与释放、用户停止不被越限升级、过期游标仍能收到后续事件、202 项目录仍按预算截断。`run-manager` 定向套件 29 项。
 
-### 第五次复审修复（`956a55f`，2026-10-26）
+### 第五次复审修复（`a6ff9e5` 代码 + `956a55f` 清理，2026-10-26）
 
-对第四轮修复再做复审后补的收尾：
+对第四轮修复再做复审后补的收尾（`a6ff9e5` 为行为修复，`956a55f` 为命名/释放路径清理）：
+
+| 复审缺口 | 修复 | 提交 |
+| --- | --- | --- |
+| 旧/重复 ACK 也会清除 `awaitingBatch`，可能同时存在两批未确认 | 只有 `afterSeq >= deliveredSeq` 的 ACK 才释放下一批（§5「只允许一批未确认」） | `a6ff9e5` |
+| journal 转为不健康后，已被接受的 requestId 重放被 `JOURNAL_UNAVAILABLE` 挡掉 | `start` 先做 replay 再检查 journal 可用性；只有真正的新请求被拒 | `a6ff9e5` |
+| 空 run 的过期游标会原样回显 | 钳到 0，后续事件仍能送达 | `a6ff9e5` |
+| `terminate` 的 `finally` 里 `sender.send` 抛错会跳过槽位释放，`driveRun` 还会产生未处理拒绝 | 投递加 `try/catch`，槽位释放仍在 `finally`；`driveRun` 的分离 promise 补 `catch` | `a6ff9e5` |
+| `shutdown` 自成一套 `terminate`+`dispose`，`terminate` 抛错照样跳过释放 | 复用 `terminateAndRelease` | `956a55f` |
+| `terminateConverged` 是 GLOSSARY「收敛/Quiescent」之外的第三种拼法 | 改名 `terminateAndRelease`，描述它真正的额外职责（释放） | `956a55f` |
+| `exhaustToolBudget` 只是一行转发 | 删除，两条预算路径直接 `failWith(run, 'TOOL_FAILED')` | `956a55f` |
+
+新增测试：旧 ACK 不释放下一批；journal 失效后仍能重放已接受请求（先让一次 accept 写失败把 journal 转不健康，再重放）。`run-manager` 定向套件 31 项。
+
+### 第六次复审修复（`321d82e`，2026-10-26）
 
 | 复审缺口 | 修复 |
 | --- | --- |
-| 旧/重复 ACK 也会清除 `awaitingBatch`，可能同时存在两批未确认 | 只有 `afterSeq >= deliveredSeq` 的 ACK 才释放下一批（§5「只允许一批未确认」） |
-| journal 转为不健康后，已被接受的 requestId 重放被 `JOURNAL_UNAVAILABLE` 挡掉 | `start` 先做 replay 再检查 journal 可用性；只有真正的新请求被拒 |
-| 空 run 的过期游标会原样回显 | 钳到 0，后续事件仍能送达 |
-| `terminate` 的 `finally` 里 `sender.send` 抛错会跳过槽位释放，`driveRun` 还会产生未处理拒绝 | 投递加 `try/catch`，槽位释放仍在 `finally`；`driveRun` 的分离 promise 补 `catch` |
-| `shutdown` 自成一套 `terminate`+`dispose`，`terminate` 抛错照样跳过释放 | 复用 `terminateAndRelease` |
-| `terminateConverged` 是 GLOSSARY「收敛/Quiescent」之外的第三种拼法 | 改名 `terminateAndRelease`，描述它真正的额外职责（释放） |
-| `exhaustToolBudget` 只是一行转发 | 删除，两条预算路径直接 `failWith(run, 'TOOL_FAILED')` |
+| 上一轮的重放测试在修复前后都通过（`broken` 只影响 `store.save`，journal 仍健康），证据过度声称 | 测试改为先让一次真实的 accept 写入失败翻转 journal 健康位，再重放已接受请求；修复前会返回 `JOURNAL_UNAVAILABLE` |
+| `forceEnd` 仍手写 `terminate`+`dispose`，是最后一条重复释放路径 | 复用 `terminateAndRelease` |
+| 正常 flush 定时器里的 `sender.send` 抛错无人接住，会整进程崩 | `deliverBatches` 对每个订阅者 `try/catch`，抛错即丢弃该订阅者 |
+| 三处测试各自手写 journal store 的 `save` 覆盖 | 抽 `hookedStore` 辅助函数 |
 
-新增测试：旧 ACK 不释放下一批、journal 失效后仍能重放已接受请求。`run-manager` 定向套件 31 项。
+`run-manager` 定向套件 31 项（其中重放用例现在具备区分力）。
 
 ### 门禁记录
 
 | 项 | 命令 | 结果 |
 | --- | --- | --- |
-| 完整门禁（第五轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `956a55f` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **374/374**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
-| A08 干净检出（第五轮） | `956a55f` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
+| 完整门禁（第六轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `321d82e` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **374/374**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
+| A08 干净检出（第六轮） | `321d82e` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
+| 完整门禁（第五轮） | `pnpm check`，提交 `956a55f` | 退出码 0（2026-10-26）：Contract **374/374**、Prototype **210/210**、Real E2E **24/24**、package smoke |
+| A08 干净检出（第五轮） | `956a55f` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26） |
 | 完整门禁（第四轮） | `pnpm check`，提交 `8ecb5ef` | 退出码 0（2026-10-26）：Contract **372/372**、Prototype **210/210**、Real E2E **24/24**、package smoke |
 | A08 干净检出（第四轮） | `8ecb5ef` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26） |
 | 完整门禁（第三轮） | `pnpm check`，提交 `97594a2` | 退出码 0（2026-10-26）：Contract **369/369**、Prototype **210/210**、Real E2E **24/24**、package smoke |
