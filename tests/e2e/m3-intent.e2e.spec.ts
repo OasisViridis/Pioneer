@@ -93,7 +93,7 @@ test('moves an approved READY intent into an initialized runtime session without
       page.getByText('文件写入：关闭', { exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByText('运行器尚未连接', { exact: true }),
+      page.getByText('运行器默认不启动', { exact: true }),
     ).toBeVisible();
     await expect(page.locator('.save-status')).toHaveText('已保存到本机');
     const saved = await page.evaluate(() =>
