@@ -7,3 +7,8 @@ minimumReleaseAgeExclude:
   - '@vitest/spy@5.0.0'
   - 'electron@44.2.0'
   - 'vitest@5.0.0'
+allowBuilds:
+  '@google/genai': false
+  protobufjs: false
+patchedDependencies:
+  extract-zip@2.0.1: patches/extract-zip@2.0.1.patch

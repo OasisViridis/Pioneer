@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-01",
+  "tool": "built-in image_gen.imagegen",
+  "intent": "generate from references; no existing image overwritten",
+  "transparentBackground": true,
+  "items": [
+    {
+      "file": "greendou-reading.png",
+      "references": [
+        "D:\\Project\\GitProject\\Pioneer\\docs\\design\\hazel-v3\\assets\\jelly-companion.png"
+      ],
+      "prompt": "Use case: illustration-story. Asset type: a single transparent PNG decorative illustration for a quiet desktop application, used at 88px or 64px, not a UI screenshot. Input image 1 is the exact character and painterly style reference, not an edit target. Preserve the mint-green translucent jelly rabbit: two rounded upright ears, squat scalloped pudding body, navy oval eyes and tiny smile, cream dollop with one muted red cherry centered between ears. Soft tactile gouache brushwork, muted colors, sparse highlights, same proportions and visual softness. Square composition, single centered subject occupying about 75% of canvas, ample transparent margin, all parts fully visible. Genuine alpha transparency, no background, no cast shadow slab, no text, no watermarks, no badges, no sparkle field, no gradients behind subject, no neon, no glossy 3D, no human character. New pose: the jelly is quietly reading one small open navy book with cream pages in front of its lower body; two minimal jelly nub hands hold the book. Eyes remain visible above the book; book has no writing, no symbols. Calm curious expression, ears upright. Book should not cover the jelly silhouette or cherry. Only the character and book."
+    },
+    {
+      "file": "greendou-organizing.png",
+      "references": [
+        "D:\\Project\\GitProject\\Pioneer\\docs\\design\\hazel-v3\\assets\\jelly-companion.png"
+      ],
+      "prompt": "Use case: illustration-story. Asset type: a single transparent PNG decorative illustration for a quiet desktop application, used at 88px or 64px, not a UI screenshot. Input image 1 is the exact character and painterly style reference, not an edit target. Preserve the mint-green translucent jelly rabbit: two rounded upright ears, squat scalloped pudding body, navy oval eyes and tiny smile, cream dollop with one muted red cherry centered between ears. Soft tactile gouache brushwork, muted colors, sparse highlights, same proportions and visual softness. Square composition, single centered subject occupying about 75% of canvas, ample transparent margin, all parts fully visible. Genuine alpha transparency, no background, no cast shadow slab, no text, no watermarks, no badges, no sparkle field, no gradients behind subject, no neon, no glossy 3D, no human character. New pose: the jelly quietly holds one small warm-cream folder with just two cream sheets tucked inside at the lower right of the body, supported by one minimal jelly nub hand. Gentle attentive smile. Folder is plain, no labels, no checkmarks, no status symbols. Body, both ears, eyes and cherry clearly visible. Only character and one folder; no surrounding scattered paper."
+    },
+    {
+      "file": "greendou-listening.png",
+      "references": [
+        "D:\\Project\\GitProject\\Pioneer\\docs\\design\\hazel-v3\\assets\\jelly-companion.png"
+      ],
+      "prompt": "Use case: illustration-story. Asset type: a single transparent PNG decorative illustration for a quiet desktop application, used at 88px or 64px, not a UI screenshot. Input image 1 is the exact character and painterly style reference, not an edit target. Preserve the mint-green translucent jelly rabbit: two rounded upright ears, squat scalloped pudding body, navy oval eyes and tiny smile, cream dollop with one muted red cherry centered between ears. Soft tactile gouache brushwork, muted colors, sparse highlights, same proportions and visual softness. Square composition, single centered subject occupying about 75% of canvas, ample transparent margin, all parts fully visible. Genuine alpha transparency, no background, no cast shadow slab, no text, no watermarks, no badges, no sparkle field, no gradients behind subject, no neon, no glossy 3D, no human character. New pose: the jelly gently tilts its complete head/body about 8 degrees toward viewer's left as if keeping someone company. Ears lean together with the body, same cream dollop and single cherry, same two navy oval eyes and small closed smile. One tiny jelly nub arm rests against the scalloped side, very restrained gesture. No props, no headphones, no speech bubbles, no hearts. It must be visibly distinct from the straight-on reference while keeping the exact character identity."
+    },
+    {
+      "file": "cherry-bookmark.png",
+      "references": [
+        "D:\\Project\\GitProject\\Pioneer\\docs\\design\\hazel-v3\\assets\\uniform-ribbon.png",
+        "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-10.png"
+      ],
+      "prompt": "Use case: illustration-story. Asset type: single transparent decorative PNG for an application's quiet about/reading empty state at 48px. Input image 1 references muted navy fabric and silver stripes / painterly texture; image 2 references Hazel's cherry accents only, not the human character or background. Create one simple navy cloth bookmark with a broad ribbon strip, two narrow cream/silver edge lines, gently folded top, small muted red cherry attached near the fold with a short stem, subtle champagne clasp. Restrained soft gouache texture, handmade object, not an icon, no text. Whole object centered, square canvas, about 75% height, broad enough silhouette to read at 48px. Genuine transparent alpha background. No book, no person, no wallpaper, no extra floating objects, no lettering, no watermark, no glossy 3D."
+    },
+    {
+      "file": "paper-butterfly.png",
+      "references": [
+        "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-10.png",
+        "D:\\Project\\GitProject\\Pioneer\\docs\\design\\hazel-v3\\assets\\uniform-ribbon.png"
+      ],
+      "prompt": "Use case: illustration-story. Asset type: one transparent PNG decorative accessory for a quiet desktop application's about area at 48px. Input image 1 is a motif reference: the small white butterfly at bottom left; do not recreate the person or dotted background. Input image 2 references the existing soft painterly illustration material only. Create one cream-white paper butterfly with four softly rounded folded paper wings and a tiny muted champagne center, pale silver crease shadows, no hard dark outline. Minimal tactile gouache brushwork consistent with the existing Hazel asset family. Whole butterfly centered in a square canvas, wings about 75% width, three-quarter gentle perspective, asymmetric enough to feel hand-folded. Genuine transparent background, no cast shadow slab, no extra butterflies, no sparkles, no flowers, no text, no watermark, no human, not an approval/status icon."
+    },
+    {
+      "file": "jelly-ribbon-charm.png",
+      "references": [
+        "D:\\Project\\GitProject\\Pioneer\\docs\\design\\hazel-v3\\assets\\jelly-companion.png",
+        "D:\\Project\\GitProject\\Pioneer\\docs\\design\\hazel-v3\\assets\\uniform-ribbon.png"
+      ],
+      "prompt": "Use case: illustration-story. Asset type: one transparent PNG decorative charm for an application's about/reference area at 48px. Input image 1 is the mint rabbit jelly character reference; image 2 is the navy/silver fabric reference. Create a single small mint rabbit-jelly charm with two round ears and scalloped base, simple navy oval eyes and small smile, cream dollop and muted red cherry; a tiny restrained navy bow with two cream stripe accents sits below the charm, connected by a short champagne ring. Render as soft painterly gouache, not shiny photoreal metal or glossy 3D. Keep a simple compact silhouette and few details, centered square canvas about 75% height, all parts visible. Genuine alpha transparency, no background, no keychain text, no logo, no status badge, no other ornaments, no shadow slab, no watermark."
+    }
+  ]
+}

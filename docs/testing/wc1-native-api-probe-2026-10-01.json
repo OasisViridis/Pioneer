@@ -1,0 +1,172 @@
+{
+  "kind": "WC1-isolated-real-Electron-API-probe",
+  "capturedAt": "2026-10-01T02:35:08.189Z",
+  "electron": "44.2.0",
+  "windowsVersion": "10.0.26200",
+  "displays": [
+    {
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 2560,
+        "height": 1440
+      },
+      "workArea": {
+        "x": 0,
+        "y": 36,
+        "width": 2560,
+        "height": 1404
+      },
+      "scaleFactor": 1
+    },
+    {
+      "bounds": {
+        "x": -1080,
+        "y": 139,
+        "width": 1080,
+        "height": 1920
+      },
+      "workArea": {
+        "x": -1080,
+        "y": 139,
+        "width": 1080,
+        "height": 1920
+      },
+      "scaleFactor": 1
+    }
+  ],
+  "results": [
+    {
+      "candidate": "default-native-frame",
+      "options": {},
+      "securePreferences": {
+        "contextIsolation": true,
+        "nodeIntegration": false,
+        "sandbox": true
+      },
+      "minimized": true,
+      "maximized": true,
+      "fullscreen": true,
+      "resizable": true,
+      "programmaticResize": [
+        820,
+        620
+      ],
+      "before": {
+        "x": 80,
+        "y": 80,
+        "width": 800,
+        "height": 600
+      },
+      "after": {
+        "x": 80,
+        "y": 80,
+        "width": 800,
+        "height": 600
+      },
+      "afterNormal": {
+        "x": 80,
+        "y": 80,
+        "width": 800,
+        "height": 600
+      },
+      "nativeHandleBytes": 8
+    },
+    {
+      "candidate": "hidden-no-overlay",
+      "options": {
+        "titleBarStyle": "hidden",
+        "titleBarOverlay": false,
+        "thickFrame": true
+      },
+      "securePreferences": {
+        "contextIsolation": true,
+        "nodeIntegration": false,
+        "sandbox": true
+      },
+      "minimized": true,
+      "maximized": true,
+      "fullscreen": true,
+      "resizable": true,
+      "programmaticResize": [
+        820,
+        620
+      ],
+      "before": {
+        "x": 80,
+        "y": 80,
+        "width": 800,
+        "height": 600
+      },
+      "after": {
+        "x": 80,
+        "y": 80,
+        "width": 800,
+        "height": 600
+      },
+      "afterNormal": {
+        "x": 80,
+        "y": 80,
+        "width": 800,
+        "height": 600
+      },
+      "nativeHandleBytes": 8
+    },
+    {
+      "candidate": "frameless-thick-frame",
+      "options": {
+        "frame": false,
+        "thickFrame": true
+      },
+      "securePreferences": {
+        "contextIsolation": true,
+        "nodeIntegration": false,
+        "sandbox": true
+      },
+      "minimized": true,
+      "maximized": true,
+      "fullscreen": true,
+      "resizable": true,
+      "programmaticResize": [
+        820,
+        620
+      ],
+      "before": {
+        "x": 80,
+        "y": 80,
+        "width": 800,
+        "height": 600
+      },
+      "after": {
+        "x": 80,
+        "y": 80,
+        "width": 800,
+        "height": 600
+      },
+      "afterNormal": {
+        "x": 80,
+        "y": 80,
+        "width": 800,
+        "height": 600
+      },
+      "nativeHandleBytes": 8
+    }
+  ],
+  "proven": [
+    "Real BrowserWindow construction on Windows",
+    "Programmatic native minimize/restore/maximize/fullscreen events and state",
+    "Bounds readback"
+  ],
+  "pendingManual": [
+    "Alt+Space actual Windows system menu",
+    "Mouse edge resize and titlebar dragging",
+    "Win+arrows, Snap and hover flyout",
+    "Taskbar and notification area interaction",
+    "Mixed DPI, multiple monitors and system-session ending"
+  ],
+  "warning": "API flags and programmatic bounds are not shell-interaction acceptance. No production configuration selected as fully validated.",
+  "sources": [
+    "https://www.electronjs.org/docs/latest/tutorial/custom-title-bar",
+    "https://www.electronjs.org/docs/latest/api/browser-window"
+  ]
+}

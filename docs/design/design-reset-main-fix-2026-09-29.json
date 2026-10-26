@@ -1,0 +1,40 @@
+{
+  "mutatedNodeIds": [
+    "733:1593",
+    "733:1600",
+    "733:1606",
+    "733:1620",
+    "733:1682",
+    "733:1691"
+  ],
+  "audit": [
+    {
+      "screenId": "L00",
+      "nodeId": "733:1584",
+      "potentialOverflows": [],
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "L01",
+      "nodeId": "733:1587",
+      "potentialOverflows": [],
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "S01",
+      "nodeId": "733:1709",
+      "potentialOverflows": [],
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "screenId": "S02",
+      "nodeId": "733:1712",
+      "potentialOverflows": [],
+      "width": 1440,
+      "height": 900
+    }
+  ]
+}

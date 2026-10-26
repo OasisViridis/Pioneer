@@ -1,0 +1,899 @@
+{
+  "title": "Pioneer workbench Figma canvas layout",
+  "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+  "pageId": "299:725",
+  "pageName": "workbench",
+  "date": "2026-09-28",
+  "method": "Only direct-child FRAME x/y coordinates; no renaming, reparenting, resizing, inner edits, or deletion.",
+  "before": [
+    {
+      "id": "299:726",
+      "name": "Workbench · 设计原则与变量",
+      "type": "FRAME",
+      "x": 200,
+      "y": 120,
+      "width": 3400,
+      "height": 480
+    },
+    {
+      "id": "299:727",
+      "name": "Workbench · 组件",
+      "type": "FRAME",
+      "x": 3800,
+      "y": 120,
+      "width": 1800,
+      "height": 1030
+    },
+    {
+      "id": "299:728",
+      "name": "W02 · 专注会话",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "299:729",
+      "name": "W05 · 审阅改动",
+      "type": "FRAME",
+      "x": 200,
+      "y": 3200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "318:848",
+      "name": "W01 · 工作区库",
+      "type": "FRAME",
+      "x": 200,
+      "y": 800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "324:885",
+      "name": "W03 · 执行批准",
+      "type": "FRAME",
+      "x": 200,
+      "y": 2000,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "326:930",
+      "name": "W04 · 执行与记录",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 2000,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "343:973",
+      "name": "W06 · 产物与交付",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 3200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "349:1022",
+      "name": "W07 · 自定义布局",
+      "type": "FRAME",
+      "x": 200,
+      "y": 4400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "351:1079",
+      "name": "W07b · 布局已保存",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 4400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "352:1136",
+      "name": "W08 · 整理参考素材",
+      "type": "FRAME",
+      "x": 200,
+      "y": 5600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "355:1185",
+      "name": "W07c · 收起会话面板",
+      "type": "FRAME",
+      "x": 200,
+      "y": 6800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "362:1250",
+      "name": "W09 · 审阅开题讲稿",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 5600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "365:1325",
+      "name": "W10 · 会话转入后台",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 6800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1359",
+      "name": "Overlay · O01 · 会话面板菜单",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 120,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1360",
+      "name": "Overlay · O02 · 上下文检查器",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 1320,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1361",
+      "name": "Overlay · O03 · 能力与运行环境",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 2520,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1362",
+      "name": "Overlay · O05 · 关闭运行中会话",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 3720,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1363",
+      "name": "Overlay · O04 · 全部会话",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 120,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1364",
+      "name": "Overlay · O04b · 后台与最近关闭",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 1320,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1365",
+      "name": "Overlay · O04c · 暂无最近关闭",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 2520,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1366",
+      "name": "Overlay · O04d · 会话列表（关闭后）",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 3720,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "395:1359",
+      "name": "W11 · 新会话草稿",
+      "type": "FRAME",
+      "x": 200,
+      "y": 8000,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "398:1429",
+      "name": "W11b · 草稿已保存",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 8000,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "399:1481",
+      "name": "W12 · 新会话首次回复",
+      "type": "FRAME",
+      "x": 200,
+      "y": 9200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "401:1531",
+      "name": "Overlay · O06 · 新会话工作区",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 4920,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "403:1536",
+      "name": "W13 · 草稿已保留",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 9200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "403:1703",
+      "name": "Overlay · O07 · 关闭草稿",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 4920,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "405:1576",
+      "name": "E01 · 本次操作未批准",
+      "type": "FRAME",
+      "x": 200,
+      "y": 10400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "405:1659",
+      "name": "E02 · 任务已停止",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 10400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "411:1666",
+      "name": "E02a · 正在停止",
+      "type": "FRAME",
+      "x": 200,
+      "y": 11600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "411:1744",
+      "name": "E03 · 连接中断 · 状态待核对",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 11600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "413:1754",
+      "name": "Overlay · O08 · 恢复前核对",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 6120,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "413:1775",
+      "name": "E04 · 已核对 · 等待测试确认",
+      "type": "FRAME",
+      "x": 200,
+      "y": 12800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "415:1805",
+      "name": "Overlay · O09 · 单次测试确认",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 6120,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "415:1816",
+      "name": "E05 · 仅重新运行测试",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 12800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "415:1894",
+      "name": "E06 · 测试未通过",
+      "type": "FRAME",
+      "x": 200,
+      "y": 14000,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "423:1896",
+      "name": "Overlay · O10 · 失败修复思路",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 7320,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "441:1897",
+      "name": "Overlay · O11 · 开题讲稿提纲",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 7320,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "466:1899",
+      "name": "Overlay · O12 · 会话上下文",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 8520,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "468:1897",
+      "name": "W14 · 紧凑窗口 · 1280×800",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 14000,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "469:1941",
+      "name": "S01 · 交互规范与交付边界",
+      "type": "FRAME",
+      "x": 3800,
+      "y": 1400,
+      "width": 1800,
+      "height": 873
+    },
+    {
+      "id": "642:2587",
+      "name": "P08 · 基础控件规范",
+      "type": "FRAME",
+      "x": 3800,
+      "y": 2600,
+      "width": 2000,
+      "height": 1415
+    },
+    {
+      "id": "659:2614",
+      "name": "P09 · 复合组件规范",
+      "type": "FRAME",
+      "x": 6000,
+      "y": 2600,
+      "width": 2000,
+      "height": 2566
+    },
+    {
+      "id": "686:2824",
+      "name": "P10 · 窄桌面布局规范",
+      "type": "FRAME",
+      "x": 6000,
+      "y": 5500,
+      "width": 2960,
+      "height": 3380
+    },
+    {
+      "id": "696:3338",
+      "name": "R01 · Claude × Hazel · 参考融合规范",
+      "type": "FRAME",
+      "x": 12040,
+      "y": 120,
+      "width": 1840,
+      "height": 1121
+    },
+    {
+      "id": "701:3338",
+      "name": "R02 · Claude Desktop × Hazel · 产品规范",
+      "type": "FRAME",
+      "x": 14060,
+      "y": 120,
+      "width": 1840,
+      "height": 1183
+    }
+  ],
+  "after": [
+    {
+      "id": "299:726",
+      "name": "Workbench · 设计原则与变量",
+      "type": "FRAME",
+      "x": 200,
+      "y": 200,
+      "width": 3400,
+      "height": 480
+    },
+    {
+      "id": "299:727",
+      "name": "Workbench · 组件",
+      "type": "FRAME",
+      "x": 200,
+      "y": 900,
+      "width": 1800,
+      "height": 1030
+    },
+    {
+      "id": "299:728",
+      "name": "W02 · 专注会话",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 6200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "299:729",
+      "name": "W05 · 审阅改动",
+      "type": "FRAME",
+      "x": 200,
+      "y": 7400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "318:848",
+      "name": "W01 · 工作区库",
+      "type": "FRAME",
+      "x": 200,
+      "y": 6200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "324:885",
+      "name": "W03 · 执行批准",
+      "type": "FRAME",
+      "x": 3800,
+      "y": 6200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "326:930",
+      "name": "W04 · 执行与记录",
+      "type": "FRAME",
+      "x": 5600,
+      "y": 6200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "343:973",
+      "name": "W06 · 产物与交付",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 7400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "349:1022",
+      "name": "W07 · 自定义布局",
+      "type": "FRAME",
+      "x": 3800,
+      "y": 7400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "351:1079",
+      "name": "W07b · 布局已保存",
+      "type": "FRAME",
+      "x": 5600,
+      "y": 7400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "352:1136",
+      "name": "W08 · 整理参考素材",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 8600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "355:1185",
+      "name": "W07c · 收起会话面板",
+      "type": "FRAME",
+      "x": 200,
+      "y": 8600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "362:1250",
+      "name": "W09 · 审阅开题讲稿",
+      "type": "FRAME",
+      "x": 3800,
+      "y": 8600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "365:1325",
+      "name": "W10 · 会话转入后台",
+      "type": "FRAME",
+      "x": 5600,
+      "y": 8600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1359",
+      "name": "Overlay · O01 · 会话面板菜单",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1360",
+      "name": "Overlay · O02 · 上下文检查器",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1361",
+      "name": "Overlay · O03 · 能力与运行环境",
+      "type": "FRAME",
+      "x": 12000,
+      "y": 200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1362",
+      "name": "Overlay · O05 · 关闭运行中会话",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 2600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1363",
+      "name": "Overlay · O04 · 全部会话",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 1400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1364",
+      "name": "Overlay · O04b · 后台与最近关闭",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 1400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1365",
+      "name": "Overlay · O04c · 暂无最近关闭",
+      "type": "FRAME",
+      "x": 12000,
+      "y": 1400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "390:1366",
+      "name": "Overlay · O04d · 会话列表（关闭后）",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 2600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "395:1359",
+      "name": "W11 · 新会话草稿",
+      "type": "FRAME",
+      "x": 200,
+      "y": 9800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "398:1429",
+      "name": "W11b · 草稿已保存",
+      "type": "FRAME",
+      "x": 2000,
+      "y": 9800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "399:1481",
+      "name": "W12 · 新会话首次回复",
+      "type": "FRAME",
+      "x": 3800,
+      "y": 9800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "401:1531",
+      "name": "Overlay · O06 · 新会话工作区",
+      "type": "FRAME",
+      "x": 12000,
+      "y": 2600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "403:1536",
+      "name": "W13 · 草稿已保留",
+      "type": "FRAME",
+      "x": 5600,
+      "y": 9800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "403:1703",
+      "name": "Overlay · O07 · 关闭草稿",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 3800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "405:1576",
+      "name": "E01 · 本次操作未批准",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 6200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "405:1659",
+      "name": "E02 · 任务已停止",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 6200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "411:1666",
+      "name": "E02a · 正在停止",
+      "type": "FRAME",
+      "x": 12000,
+      "y": 6200,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "411:1744",
+      "name": "E03 · 连接中断 · 状态待核对",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 7400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "413:1754",
+      "name": "Overlay · O08 · 恢复前核对",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 3800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "413:1775",
+      "name": "E04 · 已核对 · 等待测试确认",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 7400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "415:1805",
+      "name": "Overlay · O09 · 单次测试确认",
+      "type": "FRAME",
+      "x": 12000,
+      "y": 3800,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "415:1816",
+      "name": "E05 · 仅重新运行测试",
+      "type": "FRAME",
+      "x": 12000,
+      "y": 7400,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "415:1894",
+      "name": "E06 · 测试未通过",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 8600,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "423:1896",
+      "name": "Overlay · O10 · 失败修复思路",
+      "type": "FRAME",
+      "x": 8400,
+      "y": 5000,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "441:1897",
+      "name": "Overlay · O11 · 开题讲稿提纲",
+      "type": "FRAME",
+      "x": 10200,
+      "y": 5000,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "466:1899",
+      "name": "Overlay · O12 · 会话上下文",
+      "type": "FRAME",
+      "x": 12000,
+      "y": 5000,
+      "width": 1600,
+      "height": 1000
+    },
+    {
+      "id": "468:1897",
+      "name": "W14 · 紧凑窗口 · 1280×800",
+      "type": "FRAME",
+      "x": 200,
+      "y": 11000,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "469:1941",
+      "name": "S01 · 交互规范与交付边界",
+      "type": "FRAME",
+      "x": 2200,
+      "y": 900,
+      "width": 1800,
+      "height": 873
+    },
+    {
+      "id": "642:2587",
+      "name": "P08 · 基础控件规范",
+      "type": "FRAME",
+      "x": 200,
+      "y": 2300,
+      "width": 2000,
+      "height": 1415
+    },
+    {
+      "id": "659:2614",
+      "name": "P09 · 复合组件规范",
+      "type": "FRAME",
+      "x": 2400,
+      "y": 2300,
+      "width": 2000,
+      "height": 2566
+    },
+    {
+      "id": "686:2824",
+      "name": "P10 · 窄桌面布局规范",
+      "type": "FRAME",
+      "x": 4600,
+      "y": 2300,
+      "width": 2960,
+      "height": 3380
+    },
+    {
+      "id": "696:3338",
+      "name": "R01 · Claude × Hazel · 参考融合规范",
+      "type": "FRAME",
+      "x": 4200,
+      "y": 900,
+      "width": 1840,
+      "height": 1121
+    },
+    {
+      "id": "701:3338",
+      "name": "R02 · Claude Desktop × Hazel · 产品规范",
+      "type": "FRAME",
+      "x": 6240,
+      "y": 900,
+      "width": 1840,
+      "height": 1183
+    }
+  ],
+  "checks": {
+    "rootCount": 47,
+    "beforeBounds": {
+      "left": 200,
+      "top": 120,
+      "right": 15900,
+      "bottom": 15000
+    },
+    "afterBounds": {
+      "left": 200,
+      "top": 200,
+      "right": 13600,
+      "bottom": 11800
+    },
+    "beforeOverlaps": [
+      [
+        "Overlay · O06 · 新会话工作区",
+        "P10 · 窄桌面布局规范"
+      ],
+      [
+        "Overlay · O08 · 恢复前核对",
+        "P10 · 窄桌面布局规范"
+      ],
+      [
+        "Overlay · O10 · 失败修复思路",
+        "P10 · 窄桌面布局规范"
+      ],
+      [
+        "Overlay · O12 · 会话上下文",
+        "P10 · 窄桌面布局规范"
+      ]
+    ],
+    "afterOverlaps": []
+  },
+  "verification": {
+    "liveFigmaRootCount": 47,
+    "positionNameSizeParentDrift": 0,
+    "liveFigmaRootOverlaps": 0,
+    "screenshotReviewed": true,
+    "prototypeInteractionsChecked": false
+  }
+}

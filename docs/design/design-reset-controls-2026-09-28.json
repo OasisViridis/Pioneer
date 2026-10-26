@@ -1,0 +1,875 @@
+{
+  "pageId": "717:1575",
+  "createdNodeIds": [
+    "720:1574",
+    "720:1575",
+    "720:1576",
+    "720:1577",
+    "720:1578",
+    "720:1579",
+    "720:1580",
+    "720:1581",
+    "720:1582",
+    "720:1583",
+    "720:1608",
+    "720:1584",
+    "720:1609",
+    "720:1610",
+    "720:1585",
+    "720:1611",
+    "720:1612",
+    "720:1586",
+    "720:1613",
+    "720:1614",
+    "720:1587",
+    "720:1615",
+    "720:1616",
+    "720:1588",
+    "720:1617",
+    "720:1618",
+    "720:1589",
+    "720:1619",
+    "720:1620",
+    "720:1621",
+    "720:1590",
+    "720:1622",
+    "720:1623",
+    "720:1591",
+    "720:1624",
+    "720:1625",
+    "720:1592",
+    "720:1626",
+    "720:1627",
+    "720:1593",
+    "720:1628",
+    "720:1629",
+    "720:1594",
+    "720:1630",
+    "720:1631",
+    "720:1595",
+    "720:1632",
+    "720:1633",
+    "720:1634",
+    "720:1596",
+    "720:1635",
+    "720:1636",
+    "720:1597",
+    "720:1637",
+    "720:1638",
+    "720:1598",
+    "720:1639",
+    "720:1640",
+    "720:1599",
+    "720:1641",
+    "720:1642",
+    "720:1600",
+    "720:1643",
+    "720:1644",
+    "720:1601",
+    "720:1645",
+    "720:1646",
+    "720:1647",
+    "720:1602",
+    "720:1648",
+    "720:1649",
+    "720:1603",
+    "720:1650",
+    "720:1651",
+    "720:1604",
+    "720:1652",
+    "720:1653",
+    "720:1605",
+    "720:1654",
+    "720:1655",
+    "720:1606",
+    "720:1656",
+    "720:1657",
+    "720:1607",
+    "720:1658",
+    "720:1659",
+    "720:1660",
+    "720:1661",
+    "720:1662",
+    "720:1663",
+    "720:1664",
+    "720:1670",
+    "720:1665",
+    "720:1671",
+    "720:1672",
+    "720:1673",
+    "720:1674",
+    "720:1666",
+    "720:1675",
+    "720:1676",
+    "720:1677",
+    "720:1678",
+    "720:1667",
+    "720:1679",
+    "720:1680",
+    "720:1681",
+    "720:1682",
+    "720:1668",
+    "720:1683",
+    "720:1684",
+    "720:1685",
+    "720:1686",
+    "720:1669",
+    "720:1687",
+    "720:1688",
+    "720:1689",
+    "720:1690",
+    "720:1691",
+    "720:1692",
+    "720:1693",
+    "720:1700",
+    "720:1694",
+    "720:1701",
+    "720:1695",
+    "720:1702",
+    "720:1696",
+    "720:1703",
+    "720:1697",
+    "720:1704",
+    "720:1698",
+    "720:1705",
+    "720:1699",
+    "720:1706"
+  ],
+  "sets": [
+    {
+      "id": "720:1608",
+      "name": "Pioneer v2 / Button",
+      "variants": [
+        {
+          "id": "720:1584",
+          "name": "Style=Primary, State=Default",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1610",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1585",
+          "name": "Style=Primary, State=Hover",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1612",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1586",
+          "name": "Style=Primary, State=Pressed",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1614",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1587",
+          "name": "Style=Primary, State=Focus",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1616",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1588",
+          "name": "Style=Primary, State=Disabled",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1618",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1589",
+          "name": "Style=Primary, State=Loading",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1620",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "720:1621",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1590",
+          "name": "Style=Secondary, State=Default",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1623",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1591",
+          "name": "Style=Secondary, State=Hover",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1625",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1592",
+          "name": "Style=Secondary, State=Pressed",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1627",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1593",
+          "name": "Style=Secondary, State=Focus",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1629",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1594",
+          "name": "Style=Secondary, State=Disabled",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1631",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1595",
+          "name": "Style=Secondary, State=Loading",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1633",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "720:1634",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1596",
+          "name": "Style=Quiet, State=Default",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1636",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1597",
+          "name": "Style=Quiet, State=Hover",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1638",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1598",
+          "name": "Style=Quiet, State=Pressed",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1640",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1599",
+          "name": "Style=Quiet, State=Focus",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1642",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1600",
+          "name": "Style=Quiet, State=Disabled",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1644",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1601",
+          "name": "Style=Quiet, State=Loading",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1646",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "720:1647",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1602",
+          "name": "Style=Danger, State=Default",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1649",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1603",
+          "name": "Style=Danger, State=Hover",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1651",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1604",
+          "name": "Style=Danger, State=Pressed",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1653",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1605",
+          "name": "Style=Danger, State=Focus",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1655",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1606",
+          "name": "Style=Danger, State=Disabled",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1657",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1607",
+          "name": "Style=Danger, State=Loading",
+          "width": 148,
+          "height": 44,
+          "autoLayout": "HORIZONTAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1659",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "720:1660",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "Label#720:0": {
+          "type": "TEXT",
+          "defaultValue": "保存到会话"
+        },
+        "Style": {
+          "type": "VARIANT",
+          "defaultValue": "Primary",
+          "variantOptions": [
+            "Primary",
+            "Secondary",
+            "Quiet",
+            "Danger"
+          ]
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Hover",
+            "Pressed",
+            "Focus",
+            "Disabled",
+            "Loading"
+          ]
+        }
+      }
+    },
+    {
+      "id": "720:1670",
+      "name": "Pioneer v2 / Field",
+      "variants": [
+        {
+          "id": "720:1665",
+          "name": "State=Default",
+          "width": 328,
+          "height": 98,
+          "autoLayout": "VERTICAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1671",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "720:1673",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "720:1674",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            }
+          ]
+        },
+        {
+          "id": "720:1666",
+          "name": "State=Focus",
+          "width": 328,
+          "height": 98,
+          "autoLayout": "VERTICAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1675",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "720:1677",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "720:1678",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            }
+          ]
+        },
+        {
+          "id": "720:1667",
+          "name": "State=Disabled",
+          "width": 328,
+          "height": 98,
+          "autoLayout": "VERTICAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1679",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "720:1681",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "720:1682",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            }
+          ]
+        },
+        {
+          "id": "720:1668",
+          "name": "State=Error",
+          "width": 328,
+          "height": 98,
+          "autoLayout": "VERTICAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1683",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "720:1685",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "720:1686",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            }
+          ]
+        },
+        {
+          "id": "720:1669",
+          "name": "State=Loading",
+          "width": 328,
+          "height": 98,
+          "autoLayout": "VERTICAL",
+          "fill": [],
+          "textStyles": [
+            {
+              "id": "720:1687",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            },
+            {
+              "id": "720:1689",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            },
+            {
+              "id": "720:1690",
+              "size": 14,
+              "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "Label#720:25": {
+          "type": "TEXT",
+          "defaultValue": "工作区名称"
+        },
+        "Value#720:31": {
+          "type": "TEXT",
+          "defaultValue": "Pioneer"
+        },
+        "Helper#720:37": {
+          "type": "TEXT",
+          "defaultValue": "仅修改本机显示名称"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Default",
+          "variantOptions": [
+            "Default",
+            "Focus",
+            "Disabled",
+            "Error",
+            "Loading"
+          ]
+        }
+      }
+    },
+    {
+      "id": "720:1700",
+      "name": "Pioneer v2 / Status",
+      "variants": [
+        {
+          "id": "720:1694",
+          "name": "Tone=Neutral",
+          "width": 320,
+          "height": 40,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1615"
+          ],
+          "textStyles": [
+            {
+              "id": "720:1701",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1695",
+          "name": "Tone=Info",
+          "width": 320,
+          "height": 40,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1632"
+          ],
+          "textStyles": [
+            {
+              "id": "720:1702",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1696",
+          "name": "Tone=Wait",
+          "width": 320,
+          "height": 40,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1624"
+          ],
+          "textStyles": [
+            {
+              "id": "720:1703",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1697",
+          "name": "Tone=Success",
+          "width": 320,
+          "height": 40,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1627"
+          ],
+          "textStyles": [
+            {
+              "id": "720:1704",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1698",
+          "name": "Tone=Error",
+          "width": 320,
+          "height": 40,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1629"
+          ],
+          "textStyles": [
+            {
+              "id": "720:1705",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        },
+        {
+          "id": "720:1699",
+          "name": "Tone=Unknown",
+          "width": 320,
+          "height": 40,
+          "autoLayout": "HORIZONTAL",
+          "fill": [
+            "VariableID:716:1624"
+          ],
+          "textStyles": [
+            {
+              "id": "720:1706",
+              "size": 14,
+              "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "Text#720:43": {
+          "type": "TEXT",
+          "defaultValue": "仅保存在本机"
+        },
+        "Tone": {
+          "type": "VARIANT",
+          "defaultValue": "Neutral",
+          "variantOptions": [
+            "Neutral",
+            "Info",
+            "Wait",
+            "Success",
+            "Error",
+            "Unknown"
+          ]
+        }
+      }
+    }
+  ],
+  "props": {
+    "Button": {
+      "Label": "Label#720:0"
+    },
+    "Field": {
+      "Label": "Label#720:25",
+      "Value": "Value#720:31",
+      "Helper": "Helper#720:37"
+    },
+    "Status": {
+      "Text": "Text#720:43"
+    }
+  },
+  "boards": [
+    {
+      "id": "720:1574",
+      "name": "01 · 操作按钮",
+      "x": 200,
+      "y": 200,
+      "width": 1200,
+      "height": 578
+    },
+    {
+      "id": "720:1662",
+      "name": "02 · 输入字段",
+      "x": 200,
+      "y": 938,
+      "width": 1200,
+      "height": 462
+    },
+    {
+      "id": "720:1691",
+      "name": "03 · 状态短句",
+      "x": 200,
+      "y": 1560,
+      "width": 1200,
+      "height": 346
+    }
+  ]
+}

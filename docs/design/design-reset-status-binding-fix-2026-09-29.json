@@ -1,0 +1,95 @@
+{
+  "mutatedNodeIds": [
+    "720:1700",
+    "720:1701",
+    "720:1702",
+    "720:1703",
+    "720:1704",
+    "720:1705",
+    "720:1706"
+  ],
+  "keys": {
+    "Neutral": "Text#720:43",
+    "Info": "Info text#749:0",
+    "Wait": "Wait text#749:7",
+    "Success": "Success text#749:14",
+    "Error": "Error text#749:21",
+    "Unknown": "Unknown text#749:28"
+  },
+  "properties": {
+    "Text#720:43": {
+      "type": "TEXT",
+      "defaultValue": "仅保存在本机"
+    },
+    "Info text#749:0": {
+      "type": "TEXT",
+      "defaultValue": "运行器尚未接入"
+    },
+    "Wait text#749:7": {
+      "type": "TEXT",
+      "defaultValue": "等待你的决定"
+    },
+    "Success text#749:14": {
+      "type": "TEXT",
+      "defaultValue": "已保存到本机"
+    },
+    "Error text#749:21": {
+      "type": "TEXT",
+      "defaultValue": "保存失败，草稿仍保留"
+    },
+    "Unknown text#749:28": {
+      "type": "TEXT",
+      "defaultValue": "连接中断，结果未知"
+    },
+    "Tone": {
+      "type": "VARIANT",
+      "defaultValue": "Neutral",
+      "variantOptions": [
+        "Neutral",
+        "Info",
+        "Wait",
+        "Success",
+        "Error",
+        "Unknown"
+      ]
+    }
+  },
+  "defaults": [
+    {
+      "id": "720:1694",
+      "text": [
+        "仅保存在本机"
+      ]
+    },
+    {
+      "id": "720:1695",
+      "text": [
+        "运行器尚未接入"
+      ]
+    },
+    {
+      "id": "720:1696",
+      "text": [
+        "等待你的决定"
+      ]
+    },
+    {
+      "id": "720:1697",
+      "text": [
+        "已保存到本机"
+      ]
+    },
+    {
+      "id": "720:1698",
+      "text": [
+        "保存失败，草稿仍保留"
+      ]
+    },
+    {
+      "id": "720:1699",
+      "text": [
+        "连接中断，结果未知"
+      ]
+    }
+  ]
+}

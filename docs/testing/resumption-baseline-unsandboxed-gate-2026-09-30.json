@@ -1,0 +1,11 @@
+{
+  "command": "pnpm check",
+  "startedAt": "2026-09-30T09:41:35.4265126+00:00",
+  "endedAt": "2026-09-30T09:43:22.9971290+00:00",
+  "exitCode": 0,
+  "candidateManifest": "docs/testing/resumption-candidate-2026-09-30.json",
+  "node": "24.17.0",
+  "pnpm": "11.19.0",
+  "execution": "outside agent filesystem sandbox; application sandbox/contextIsolation/CSP unchanged",
+  "log": "tests/resumption-baseline-unsandboxed-2026-09-30.log"
+}

@@ -1,0 +1,97 @@
+[
+  {
+    "name": "dock-drag.dom.txt",
+    "bytes": 7281,
+    "sha256": "71788042158e6cee526fac1d1084d648f076a2127d2f527e01b398b2e6e2bc0a"
+  },
+  {
+    "name": "dock-drag.jpg",
+    "bytes": 83604,
+    "sha256": "41c9899364d2e340bd2618cb6043b67953959284e588dd5ec16eb49de48d3cc1"
+  },
+  {
+    "name": "final-workspace-clean.jpg",
+    "bytes": 95044,
+    "sha256": "b181f7cb5ec7f6a66a343ed926906f15cae300ec4f35e476570c01b070b68ec3"
+  },
+  {
+    "name": "final-workspace.dom.txt",
+    "bytes": 7503,
+    "sha256": "ae013ff112080b13d979db0bfbfcc7096615504b8365e5f91613404f0ae0e314"
+  },
+  {
+    "name": "final-workspace.jpg",
+    "bytes": 100148,
+    "sha256": "0d26f0588ac3278365202408edf335367ca207b26ff22b00ea2e794c746be4b7"
+  },
+  {
+    "name": "font-rendering.json",
+    "bytes": 390,
+    "sha256": "658b755cd2f5421a70065a2173e393234ff1ad54a4adee89765466108dec87be"
+  },
+  {
+    "name": "library.jpg",
+    "bytes": 61262,
+    "sha256": "4fc17a2a320d2df2a969f226192f9719e9e8380b9b0c46cf027ebd5f5acb85ac"
+  },
+  {
+    "name": "make-download-location.jpg",
+    "bytes": 122553,
+    "sha256": "d6db7576007027321d47cbdaf18c82012bab017a2790c3057745cf44f8f5b1f3"
+  },
+  {
+    "name": "mock-permission.dom.txt",
+    "bytes": 4007,
+    "sha256": "1c5b5fc1a534d28f261bda7bae494698b0a9cbe3bb9ff364723e8a6b4e90581b"
+  },
+  {
+    "name": "mock-permission.jpg",
+    "bytes": 54519,
+    "sha256": "8475e6786dc23b8e4e264ccde653c7c425ee919762af664c395adfa03ace9e7b"
+  },
+  {
+    "name": "new-conversation.jpg",
+    "bytes": 46935,
+    "sha256": "7edbbcbd8b552dbd80062b6e85d434c759f2a6d4ab5e917cf912808eb2695a92"
+  },
+  {
+    "name": "report-evidence.dom.txt",
+    "bytes": 7065,
+    "sha256": "679663c1a34f5d687c0dc3f9de83e3b64cc632ba1594772b0bdbc7ba0435de50"
+  },
+  {
+    "name": "report-evidence.jpg",
+    "bytes": 89231,
+    "sha256": "0b264be75396f03a07d4b45de7aba5c680ac4ba0d0319fd26a201b0092fc6868"
+  },
+  {
+    "name": "source-reference-manifest.json",
+    "bytes": 15493,
+    "sha256": "543946b33a54b6bf965aa1e055ea77edee8d62d923d3c9d3bac863d941f9773d"
+  },
+  {
+    "name": "tile-entries.dom.txt",
+    "bytes": 6205,
+    "sha256": "c4673fa51206ba8f38ce73309bb08d80a4b1f46e8d3afcea80eb90709e98c71f"
+  },
+  {
+    "name": "width-640-preview.jpg",
+    "bytes": 48544,
+    "sha256": "62278a8109366bdb7045d238b5e6afe9424536cb994ea4b649c4c3c22797bfef"
+  },
+  {
+    "name": "width-640.dom.txt",
+    "bytes": 4015,
+    "sha256": "316378c04df5aada12955c1f8b0da2938f068fc622152736009aacb64462ded2"
+  },
+  {
+    "name": "width-640.jpg",
+    "bytes": 45552,
+    "sha256": "99db0f442715780f4fd150e2f8e1addd2762ece068ecbe0400461540febb2403"
+  },
+  {
+    "name": "width-800.jpg",
+    "bytes": 47078,
+    "sha256": "3dd4ba9fc7d602a823f6404b0ca36a8ab92f05a83f8eb17ca878497cff3c510f"
+  }
+]

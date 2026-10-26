@@ -1,0 +1,48 @@
+{
+  "gates": [
+    {
+      "startedAt": "2026-10-01T02:26:25.0405052Z",
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "finishedAt": "2026-10-01T02:26:27.2071305Z"
+    },
+    {
+      "startedAt": "2026-10-01T02:26:27.2142049Z",
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "finishedAt": "2026-10-01T02:26:36.4400118Z"
+    },
+    {
+      "startedAt": "2026-10-01T02:26:36.4418357Z",
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "finishedAt": "2026-10-01T02:26:39.7816536Z"
+    },
+    {
+      "startedAt": "2026-10-01T02:26:39.7826531Z",
+      "command": "pnpm test:contract",
+      "exitCode": 0,
+      "finishedAt": "2026-10-01T02:26:44.8099187Z"
+    },
+    {
+      "startedAt": "2026-10-01T02:26:44.8108550Z",
+      "command": "pnpm test:prototype",
+      "exitCode": 0,
+      "finishedAt": "2026-10-01T02:26:45.8566478Z"
+    },
+    {
+      "startedAt": "2026-10-01T02:26:45.8575148Z",
+      "command": "pnpm package:smoke",
+      "exitCode": 0,
+      "finishedAt": "2026-10-01T02:27:07.6730937Z"
+    }
+  ],
+  "nativeProbe": "not-executed-approval-review-service-limit",
+  "fullPnpmCheckPassed": false,
+  "allListedGatesPassed": true,
+  "startedAt": "2026-10-01T02:26:25.0291066Z",
+  "electronE2E": "not-executed",
+  "log": "tests/wc1-staged-offline-gates-2026-10-01.log",
+  "kind": "WC1-pre-wiring-offline-gates",
+  "finishedAt": "2026-10-01T02:27:07.6864458Z"
+}

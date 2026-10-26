@@ -1,0 +1,533 @@
+{
+  "date": "2026-10-01",
+  "scope": "v3.1 generated assets, new decorative components, affected static screens and usage specification",
+  "pass": true,
+  "visualReview": {
+    "pass": true,
+    "reviewedRenders": [
+      {
+        "label": "assets",
+        "file": "expansion-figma-assets.png"
+      },
+      {
+        "label": "rules",
+        "file": "expansion-figma-rules.png"
+      },
+      {
+        "label": "L00",
+        "file": "expansion-figma-L00.png"
+      },
+      {
+        "label": "W01",
+        "file": "expansion-figma-W01.png"
+      },
+      {
+        "label": "W02",
+        "file": "expansion-figma-W02.png"
+      },
+      {
+        "label": "R02",
+        "file": "expansion-figma-R02.png"
+      }
+    ],
+    "smallSizePreview": "expansion-small-size.png",
+    "notes": [
+      "Three pose identities and props recognizable at 64/88px; accessories visible at 48px.",
+      "No clipping or overlapped copy in affected screens; each app view contains at most one illustration.",
+      "Fixed literal newline escapes in source pattern copy; assets board render is post-fix.",
+      "Cream butterfly intentionally quiet; purely decorative, not a functional affordance."
+    ]
+  },
+  "runtimeIntegrated": false,
+  "screens": {
+    "pass": true,
+    "errors": [],
+    "screens": [
+      {
+        "id": "838:1277",
+        "nativeTypes": {
+          "FRAME": 23,
+          "VECTOR": 2,
+          "TEXT": 34,
+          "INSTANCE": 9
+        },
+        "images": [],
+        "fontFamilies": ["Noto Sans SC", "Noto Serif SC", "JetBrains Mono"],
+        "illustrationCount": 0,
+        "instance": null
+      },
+      {
+        "id": "838:1350",
+        "nativeTypes": {
+          "FRAME": 11,
+          "VECTOR": 2,
+          "TEXT": 9,
+          "INSTANCE": 5,
+          "RECTANGLE": 1
+        },
+        "images": [
+          {
+            "id": "I857:1472;856:1281",
+            "name": "Illustration / greendou-organizing.png",
+            "w": 88,
+            "h": 88,
+            "hash": "804567681a23b3b1f73d16114134d3c914e3213f"
+          }
+        ],
+        "fontFamilies": ["Noto Sans SC", "Noto Serif SC"],
+        "illustrationCount": 1,
+        "instance": {
+          "id": "857:1472",
+          "master": "856:1280",
+          "width": 88,
+          "height": 88,
+          "reactions": 0,
+          "parent": "838:1368",
+          "gap": 24
+        }
+      },
+      {
+        "id": "838:1379",
+        "nativeTypes": {
+          "FRAME": 29,
+          "VECTOR": 2,
+          "TEXT": 25,
+          "INSTANCE": 15,
+          "RECTANGLE": 1
+        },
+        "images": [
+          {
+            "id": "I857:1474;856:1285",
+            "name": "Illustration / greendou-listening.png",
+            "w": 88,
+            "h": 88,
+            "hash": "c1fa42150c9a3e8e18a9c944573c9c9aabade404"
+          }
+        ],
+        "fontFamilies": ["Noto Sans SC", "Noto Serif SC"],
+        "illustrationCount": 1,
+        "instance": {
+          "id": "857:1474",
+          "master": "856:1284",
+          "width": 88,
+          "height": 88,
+          "reactions": 0,
+          "parent": "838:1433",
+          "gap": 24
+        }
+      },
+      {
+        "id": "838:1455",
+        "nativeTypes": {
+          "FRAME": 30,
+          "VECTOR": 2,
+          "TEXT": 28,
+          "INSTANCE": 15,
+          "RECTANGLE": 1
+        },
+        "images": [
+          {
+            "id": "I857:1476;856:1277",
+            "name": "Illustration / greendou-reading.png",
+            "w": 88,
+            "h": 88,
+            "hash": "07eb833119df1c8a848f1fde0f8c5269dd89a363"
+          }
+        ],
+        "fontFamilies": ["Noto Sans SC", "Noto Serif SC"],
+        "illustrationCount": 1,
+        "instance": {
+          "id": "857:1476",
+          "master": "856:1276",
+          "width": 88,
+          "height": 88,
+          "reactions": 0,
+          "parent": "838:1506",
+          "gap": 24
+        }
+      },
+      {
+        "id": "838:1530",
+        "nativeTypes": {
+          "FRAME": 16,
+          "VECTOR": 2,
+          "TEXT": 15,
+          "INSTANCE": 4
+        },
+        "images": [],
+        "fontFamilies": ["Noto Sans SC", "Noto Serif SC"],
+        "illustrationCount": 0,
+        "instance": null
+      },
+      {
+        "id": "838:1569",
+        "nativeTypes": {
+          "FRAME": 23,
+          "VECTOR": 2,
+          "TEXT": 33,
+          "INSTANCE": 9
+        },
+        "images": [],
+        "fontFamilies": ["Noto Sans SC", "Noto Serif SC", "JetBrains Mono"],
+        "illustrationCount": 0,
+        "instance": null
+      },
+      {
+        "id": "838:1641",
+        "nativeTypes": {
+          "FRAME": 29,
+          "VECTOR": 2,
+          "TEXT": 25,
+          "INSTANCE": 15,
+          "RECTANGLE": 1
+        },
+        "images": [
+          {
+            "id": "I857:1478;856:1287",
+            "name": "Illustration / greendou-listening.png",
+            "w": 64,
+            "h": 64,
+            "hash": "c1fa42150c9a3e8e18a9c944573c9c9aabade404"
+          }
+        ],
+        "fontFamilies": ["Noto Sans SC", "Noto Serif SC"],
+        "illustrationCount": 1,
+        "instance": {
+          "id": "857:1478",
+          "master": "856:1286",
+          "width": 64,
+          "height": 64,
+          "reactions": 0,
+          "parent": "838:1692",
+          "gap": 24
+        }
+      }
+    ],
+    "flattenedFullUiImages": [],
+    "changedScreens": 4
+  },
+  "assets": {
+    "pass": true,
+    "errors": [],
+    "families": [
+      {
+        "id": "856:1288",
+        "name": "Pioneer v3 / Greendou Companion",
+        "count": 6,
+        "properties": {
+          "Pose": {
+            "type": "VARIANT",
+            "defaultValue": "Reading",
+            "variantOptions": ["Reading", "Organizing", "Listening"]
+          },
+          "Size": {
+            "type": "VARIANT",
+            "defaultValue": "88",
+            "variantOptions": ["88", "64"]
+          }
+        },
+        "variants": [
+          {
+            "id": "856:1276",
+            "name": "Pose=Reading, Size=88",
+            "w": 88,
+            "h": 88,
+            "imageNodes": [
+              {
+                "id": "856:1277",
+                "w": 88,
+                "h": 88,
+                "imageHash": "07eb833119df1c8a848f1fde0f8c5269dd89a363"
+              }
+            ],
+            "description": "Decorative only; not status, approval, task execution or a control. One per view. greendou-reading.png"
+          },
+          {
+            "id": "856:1278",
+            "name": "Pose=Reading, Size=64",
+            "w": 64,
+            "h": 64,
+            "imageNodes": [
+              {
+                "id": "856:1279",
+                "w": 64,
+                "h": 64,
+                "imageHash": "07eb833119df1c8a848f1fde0f8c5269dd89a363"
+              }
+            ],
+            "description": "Decorative only; not status, approval, task execution or a control. One per view. greendou-reading.png"
+          },
+          {
+            "id": "856:1280",
+            "name": "Pose=Organizing, Size=88",
+            "w": 88,
+            "h": 88,
+            "imageNodes": [
+              {
+                "id": "856:1281",
+                "w": 88,
+                "h": 88,
+                "imageHash": "804567681a23b3b1f73d16114134d3c914e3213f"
+              }
+            ],
+            "description": "Decorative only; not status, approval, task execution or a control. One per view. greendou-organizing.png"
+          },
+          {
+            "id": "856:1282",
+            "name": "Pose=Organizing, Size=64",
+            "w": 64,
+            "h": 64,
+            "imageNodes": [
+              {
+                "id": "856:1283",
+                "w": 64,
+                "h": 64,
+                "imageHash": "804567681a23b3b1f73d16114134d3c914e3213f"
+              }
+            ],
+            "description": "Decorative only; not status, approval, task execution or a control. One per view. greendou-organizing.png"
+          },
+          {
+            "id": "856:1284",
+            "name": "Pose=Listening, Size=88",
+            "w": 88,
+            "h": 88,
+            "imageNodes": [
+              {
+                "id": "856:1285",
+                "w": 88,
+                "h": 88,
+                "imageHash": "c1fa42150c9a3e8e18a9c944573c9c9aabade404"
+              }
+            ],
+            "description": "Decorative only; not status, approval, task execution or a control. One per view. greendou-listening.png"
+          },
+          {
+            "id": "856:1286",
+            "name": "Pose=Listening, Size=64",
+            "w": 64,
+            "h": 64,
+            "imageNodes": [
+              {
+                "id": "856:1287",
+                "w": 64,
+                "h": 64,
+                "imageHash": "c1fa42150c9a3e8e18a9c944573c9c9aabade404"
+              }
+            ],
+            "description": "Decorative only; not status, approval, task execution or a control. One per view. greendou-listening.png"
+          }
+        ]
+      },
+      {
+        "id": "856:1295",
+        "name": "Pioneer v3 / Hazel Accessory",
+        "count": 3,
+        "properties": {
+          "Motif": {
+            "type": "VARIANT",
+            "defaultValue": "Bookmark",
+            "variantOptions": ["Bookmark", "Butterfly", "Charm"]
+          },
+          "Size": {
+            "type": "VARIANT",
+            "defaultValue": "48",
+            "variantOptions": ["48"]
+          }
+        },
+        "variants": [
+          {
+            "id": "856:1289",
+            "name": "Motif=Bookmark, Size=48",
+            "w": 48,
+            "h": 48,
+            "imageNodes": [
+              {
+                "id": "856:1290",
+                "w": 48,
+                "h": 48,
+                "imageHash": "8f87e47794fd2a6f823ad48fc87b96dd2d764d91"
+              }
+            ],
+            "description": "Decorative only; not status, approval, task execution or a control. One per view. cherry-bookmark.png"
+          },
+          {
+            "id": "856:1291",
+            "name": "Motif=Butterfly, Size=48",
+            "w": 48,
+            "h": 48,
+            "imageNodes": [
+              {
+                "id": "856:1292",
+                "w": 48,
+                "h": 48,
+                "imageHash": "26204c0fd21fdece726b270e1e2c7e2e78a57e0e"
+              }
+            ],
+            "description": "Decorative only; not status, approval, task execution or a control. One per view. paper-butterfly.png"
+          },
+          {
+            "id": "856:1293",
+            "name": "Motif=Charm, Size=48",
+            "w": 48,
+            "h": 48,
+            "imageNodes": [
+              {
+                "id": "856:1294",
+                "w": 48,
+                "h": 48,
+                "imageHash": "6c027a5944f1d9f6db0d77f269b62a1a23d964f2"
+              }
+            ],
+            "description": "Decorative only; not status, approval, task execution or a control. One per view. jelly-ribbon-charm.png"
+          }
+        ]
+      }
+    ],
+    "board": {
+      "id": "856:1296",
+      "w": 1440,
+      "h": 974,
+      "nativeTypes": {
+        "TEXT": 42,
+        "FRAME": 27,
+        "INSTANCE": 12,
+        "RECTANGLE": 12
+      },
+      "textStyleLinked": 42,
+      "fontFamilies": ["Noto Serif SC", "Noto Sans SC"],
+      "instances": [
+        {
+          "id": "856:1304",
+          "master": "856:1276",
+          "w": 88,
+          "h": 88
+        },
+        {
+          "id": "856:1308",
+          "master": "856:1278",
+          "w": 64,
+          "h": 64
+        },
+        {
+          "id": "856:1317",
+          "master": "856:1280",
+          "w": 88,
+          "h": 88
+        },
+        {
+          "id": "856:1321",
+          "master": "856:1282",
+          "w": 64,
+          "h": 64
+        },
+        {
+          "id": "856:1330",
+          "master": "856:1284",
+          "w": 88,
+          "h": 88
+        },
+        {
+          "id": "856:1334",
+          "master": "856:1286",
+          "w": 64,
+          "h": 64
+        },
+        {
+          "id": "856:1342",
+          "master": "856:1289",
+          "w": 48,
+          "h": 48
+        },
+        {
+          "id": "856:1348",
+          "master": "856:1291",
+          "w": 48,
+          "h": 48
+        },
+        {
+          "id": "856:1354",
+          "master": "856:1293",
+          "w": 48,
+          "h": 48
+        },
+        {
+          "id": "856:1367",
+          "master": "856:1289",
+          "w": 48,
+          "h": 48
+        },
+        {
+          "id": "856:1376",
+          "master": "856:1291",
+          "w": 48,
+          "h": 48
+        },
+        {
+          "id": "856:1385",
+          "master": "856:1293",
+          "w": 48,
+          "h": 48
+        }
+      ],
+      "unboundSolidFills": 0
+    },
+    "strayNodes": [],
+    "referenceLedgerPreserved": true
+  },
+  "foundation": {
+    "pass": true,
+    "boards": [
+      {
+        "id": "824:1379",
+        "name": "Hazel × Claude / Quiet companion"
+      },
+      {
+        "id": "824:1382",
+        "name": "Color / Roles"
+      },
+      {
+        "id": "824:1422",
+        "name": "Typography / Read first"
+      },
+      {
+        "id": "824:1435",
+        "name": "Decoration / Budget"
+      },
+      {
+        "id": "824:1438",
+        "name": "Components / Contract"
+      },
+      {
+        "id": "824:1441",
+        "name": "Delivery / Evidence"
+      },
+      {
+        "id": "857:1480",
+        "name": "Greendou / Usage v3.1"
+      }
+    ],
+    "collections": [
+      {
+        "id": "VariableCollectionId:824:1280",
+        "count": 37
+      },
+      {
+        "id": "VariableCollectionId:824:1281",
+        "count": 25
+      },
+      {
+        "id": "VariableCollectionId:824:1282",
+        "count": 24
+      }
+    ],
+    "textStyles": 11,
+    "newBoard": {
+      "id": "857:1480",
+      "w": 1440,
+      "h": 342,
+      "textStyleLinked": 13,
+      "fontFamilies": ["Noto Sans SC"]
+    }
+  }
+}

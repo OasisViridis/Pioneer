@@ -1,0 +1,343 @@
+{
+  "references": [
+    {
+      "image": 1,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-1.png",
+      "sha256": "a47e06e5006240722b06ee7c1c182e2b900e835f5928476aa48d12e3ac70ff60",
+      "dimensions": [445, 400],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "chibi + jelly palette"
+    },
+    {
+      "image": 2,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-2.png",
+      "sha256": "686e4a70667dacfd6d4b346fe4376fad70d33d531ac87aaef7a6ea253d3d7206",
+      "dimensions": [1275, 1207],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "jelly rabbit + cherry hair clip"
+    },
+    {
+      "image": 3,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-3.png",
+      "sha256": "b74d9fbd692cc6cafab324b79c2277f9d6961a4f9fd356e08314d3b2bf583695",
+      "dimensions": [866, 1070],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "schedule: paper / navy / clipped corner"
+    },
+    {
+      "image": 4,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-4.jpg",
+      "sha256": "4a1c4608a52499b094655e4374fb5d70ff1ee66101994745392207fe2b22690c",
+      "dimensions": [1311, 1324],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "QR collateral; never embed QR as app decoration"
+    },
+    {
+      "image": 5,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-5.jpg",
+      "sha256": "30f1fc70793c910befbcc588bb2e8ec5009365c9f629ec65175db9b6cec0c2a4",
+      "dimensions": [2160, 3840],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "school uniform / sky, not application background"
+    },
+    {
+      "image": 6,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-6.png",
+      "sha256": "f4435ad4567c4d1bc871c9c43e8d84a20d0f51daab802fa1d1993b6c1166521b",
+      "dimensions": [2000, 2000],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "merchandise composition; crowded counterexample"
+    },
+    {
+      "image": 7,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-7.png",
+      "sha256": "cd4c85582a75a8b2311313dc3696a20f673b0061ba7f9f81eb50e2b640946b58",
+      "dimensions": [2894, 4093],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "pastel painting; mood only"
+    },
+    {
+      "image": 8,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-8.png",
+      "sha256": "9653a8bdfc8d740832cf0bc970bd2feb7eb9b342b0f72da26fee25050ba0a698",
+      "dimensions": [2894, 4093],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "alternate hood; mood only"
+    },
+    {
+      "image": 9,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-9.png",
+      "sha256": "9eb044e5f186044876cec0d43837abc487dd54010a759ba202eed7660caf42c5",
+      "dimensions": [4320, 8154],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "white dress; secondary reference"
+    },
+    {
+      "image": 10,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-10.png",
+      "sha256": "80481ed2b8f5131aa38391c08ad11a7f4c48a6e34f200e5e9eacfec04b718df4",
+      "dimensions": [8000, 8000],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "uniform chibi + jelly glyph + bow"
+    },
+    {
+      "image": 11,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-11.png",
+      "sha256": "fd7b90541875e3c280ef43c05602843739a7a8acd774cafd1190665c7c1dd7b5",
+      "dimensions": [4320, 8154],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "uniform: navy / silver / champagne / bow"
+    },
+    {
+      "image": 12,
+      "path": "C:\\Users\\Oasis\\.codex\\attachments\\c8d41eb2-23c2-4ac6-9a6f-1fb39fd496bd\\image-12.png",
+      "sha256": "d6bdfd38157b6b660742433bf8443146d601358ef926e9898b2e85529b3454a4",
+      "dimensions": [4200, 8010],
+      "source": "user-supplied; artist and publication rights not independently verified",
+      "use": "school uniform: navy / gray / mint"
+    }
+  ],
+  "assets": [
+    {
+      "file": "cherry-pair.svg",
+      "sha256": "3a465d752198008391ab7eda84893806a6a6541705fea6ad30b20374d9a8d86b",
+      "type": "original editable SVG interpretation",
+      "references": [10, 11],
+      "notOfficial": true
+    },
+    {
+      "file": "compass-seal.svg",
+      "sha256": "1fcccffbd0143761293827efff76c56f03df8475d87e9ecafc6795bf8bc5d6f9",
+      "type": "original editable SVG interpretation",
+      "references": [10, 11],
+      "notOfficial": true
+    },
+    {
+      "file": "jelly-companion.png",
+      "sha256": "585be08d03ce7668c74790114cacd1a1ecd948e41fabf76e494392d17c68a6f7",
+      "type": "GPT generated PNG",
+      "references": [2, 10],
+      "notOfficial": true
+    },
+    {
+      "file": "jelly-mark.svg",
+      "sha256": "0a56dff03dd5c081299e75cfcd39a23a74b9b0646e81e3b395580eccc472c15c",
+      "type": "original editable SVG interpretation",
+      "references": [10, 11],
+      "notOfficial": true
+    },
+    {
+      "file": "ribbon-outline.svg",
+      "sha256": "99c3dc492867a4de712a0335547f7a664f7a4d2c7c3557355af6360b39162b4a",
+      "type": "original editable SVG interpretation",
+      "references": [11],
+      "notOfficial": true
+    },
+    {
+      "file": "uniform-ribbon.png",
+      "sha256": "bfbe5ac5e8c79a9c7b17b4765bec87eb47a4bf74ee5e540b626afe8735b9374f",
+      "type": "GPT generated PNG",
+      "references": [11],
+      "notOfficial": true
+    },
+    {
+      "file": "greendou-reading.png",
+      "sha256": "103817d6de0e73a5f803ae359b2e3253482b79bd7778d8bc9aaf28b02c1f03e2",
+      "type": "GPT generated PNG",
+      "references": [2, 10],
+      "sourceAssets": [
+        {
+          "file": "jelly-companion.png",
+          "sha256": "585be08d03ce7668c74790114cacd1a1ecd948e41fabf76e494392d17c68a6f7"
+        }
+      ],
+      "directReferenceImages": [],
+      "notOfficial": true,
+      "generation": {
+        "tool": "built-in image_gen.imagegen",
+        "date": "2026-10-01",
+        "generatedFile": "exec-3a29f634-7736-4c03-b690-cf5f5d08931b.png",
+        "exactPrompt": "expansion/prompts.json#greendou-reading.png",
+        "transparentBackground": true
+      },
+      "use": "W02 conversation welcome; not the review-result panel"
+    },
+    {
+      "file": "greendou-organizing.png",
+      "sha256": "0d54c45287fcf4f0390dc1feb57af1ba509e5482aacf3bb48c10666e131a8bdf",
+      "type": "GPT generated PNG",
+      "references": [2, 10],
+      "sourceAssets": [
+        {
+          "file": "jelly-companion.png",
+          "sha256": "585be08d03ce7668c74790114cacd1a1ecd948e41fabf76e494392d17c68a6f7"
+        }
+      ],
+      "directReferenceImages": [],
+      "notOfficial": true,
+      "generation": {
+        "tool": "built-in image_gen.imagegen",
+        "date": "2026-10-01",
+        "generatedFile": "exec-d4b1b3e6-c698-4365-bc64-b0f1f12227b0.png",
+        "exactPrompt": "expansion/prompts.json#greendou-organizing.png",
+        "transparentBackground": true
+      },
+      "use": "L00 workspace onboarding; does not imply files changed"
+    },
+    {
+      "file": "greendou-listening.png",
+      "sha256": "0504fbf0fead98d3a2af3e8e17bc7c1360ef09aecd4fa439a40736ecbe010505",
+      "type": "GPT generated PNG",
+      "references": [2, 10],
+      "sourceAssets": [
+        {
+          "file": "jelly-companion.png",
+          "sha256": "585be08d03ce7668c74790114cacd1a1ecd948e41fabf76e494392d17c68a6f7"
+        }
+      ],
+      "directReferenceImages": [],
+      "notOfficial": true,
+      "generation": {
+        "tool": "built-in image_gen.imagegen",
+        "date": "2026-10-01",
+        "generatedFile": "exec-518883ad-c3df-456a-a2e4-97e1b6049f47.png",
+        "exactPrompt": "expansion/prompts.json#greendou-listening.png",
+        "transparentBackground": true
+      },
+      "use": "W01 new-session welcome and R02; no audio/online semantics"
+    },
+    {
+      "file": "cherry-bookmark.png",
+      "sha256": "4304c77ed8ab9f52e10efca1737fcd41cdce4b20e28843e226bace231a1e858b",
+      "type": "GPT generated PNG",
+      "references": [10, 11],
+      "sourceAssets": [
+        {
+          "file": "uniform-ribbon.png",
+          "sha256": "bfbe5ac5e8c79a9c7b17b4765bec87eb47a4bf74ee5e540b626afe8735b9374f"
+        }
+      ],
+      "directReferenceImages": [
+        {
+          "file": "image-10.png",
+          "sha256": "80481ed2b8f5131aa38391c08ad11a7f4c48a6e34f200e5e9eacfec04b718df4"
+        }
+      ],
+      "notOfficial": true,
+      "generation": {
+        "tool": "built-in image_gen.imagegen",
+        "date": "2026-10-01",
+        "generatedFile": "exec-62ede284-d55f-4acd-86c9-cf72b27dc907.png",
+        "exactPrompt": "expansion/prompts.json#cherry-bookmark.png",
+        "transparentBackground": true
+      },
+      "use": "Source/About layout pattern only; not a bookmark control"
+    },
+    {
+      "file": "paper-butterfly.png",
+      "sha256": "d273b13d41293c5479ca66e44286389254f3fae14a3369f7178651a298c7cf8b",
+      "type": "GPT generated PNG",
+      "references": [10, 11],
+      "sourceAssets": [
+        {
+          "file": "uniform-ribbon.png",
+          "sha256": "bfbe5ac5e8c79a9c7b17b4765bec87eb47a4bf74ee5e540b626afe8735b9374f"
+        }
+      ],
+      "directReferenceImages": [
+        {
+          "file": "image-10.png",
+          "sha256": "80481ed2b8f5131aa38391c08ad11a7f4c48a6e34f200e5e9eacfec04b718df4"
+        }
+      ],
+      "notOfficial": true,
+      "generation": {
+        "tool": "built-in image_gen.imagegen",
+        "date": "2026-10-01",
+        "generatedFile": "exec-2fbc0bd5-24b7-47d8-9476-f9959c75a375.png",
+        "exactPrompt": "expansion/prompts.json#paper-butterfly.png",
+        "transparentBackground": true
+      },
+      "use": "Source/About layout pattern only; not send/success"
+    },
+    {
+      "file": "jelly-ribbon-charm.png",
+      "sha256": "4b5b7abe12d9d259d0f74ebcf651b824ad86164020af541aafd05e91b7c9029e",
+      "type": "GPT generated PNG",
+      "references": [2, 10, 11],
+      "sourceAssets": [
+        {
+          "file": "jelly-companion.png",
+          "sha256": "585be08d03ce7668c74790114cacd1a1ecd948e41fabf76e494392d17c68a6f7"
+        },
+        {
+          "file": "uniform-ribbon.png",
+          "sha256": "bfbe5ac5e8c79a9c7b17b4765bec87eb47a4bf74ee5e540b626afe8735b9374f"
+        }
+      ],
+      "directReferenceImages": [],
+      "notOfficial": true,
+      "generation": {
+        "tool": "built-in image_gen.imagegen",
+        "date": "2026-10-01",
+        "generatedFile": "exec-592a3223-c6d8-4a5d-98b6-954f890b5125.png",
+        "exactPrompt": "expansion/prompts.json#jelly-ribbon-charm.png",
+        "transparentBackground": true
+      },
+      "use": "Source/About layout pattern only; not validation/approval"
+    },
+    {
+      "file": "jelly-outline.svg",
+      "sha256": "49a6d0165613ec0913834f95e03264cac6892b6664caaeed89a6a384bf82604c",
+      "type": "original editable SVG interpretation",
+      "references": [
+        2,
+        10
+      ],
+      "notOfficial": true,
+      "authored": {
+        "date": "2026-10-01",
+        "method": "Original native SVG paths, circles and strokes; not image generation or raster editing",
+        "palette": "Existing Hazel v3 tokens only"
+      },
+      "use": "Focus empty welcome alternative; not status or audio"
+    },
+    {
+      "file": "silver-paper-fold.svg",
+      "sha256": "4c4316d859ca45094b921274f07586fc11d8270420533c56c3c23a651f8ef1f5",
+      "type": "original editable SVG interpretation",
+      "references": [
+        3
+      ],
+      "notOfficial": true,
+      "authored": {
+        "date": "2026-10-01",
+        "method": "Original native SVG paths, circles and strokes; not image generation or raster editing",
+        "palette": "Existing Hazel v3 tokens only"
+      },
+      "use": "Review empty welcome alternative; not a document or saved artifact"
+    }
+  ],
+  "policy": "Not an official Hazel or Anthropic design system; no official attribution, commercial license, or registered brand status claimed. Original user reference art is not redistributed in the asset ZIP.",
+  "figmaUploadConsent": {
+    "scope": "12 user reference images and 6 new assets",
+    "publicLicenseGranted": false,
+    "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+    "answer": "允许上传这 18 项图片/素材到 Pioneer Figma",
+    "date": "2026-09-30"
+  },
+  "figmaExpansionRequest": {
+    "date": "2026-10-01",
+    "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+    "scope": "Only the 6 generated v3.1 PNG outputs; no additional original user files",
+    "request": "使用图像生成能力扩展绿冻形象与其他装饰元素，加入设计规范并落地到设计稿",
+    "publicLicenseGranted": false,
+    "distinctFromInitial18ItemConsent": true
+  },
+  "figmaDecorationRequest": {
+    "date": "2026-10-01",
+    "request": "资产利用率低下，重审并添加装饰素材资产，保证预算不变的情况下增加多样化",
+    "scope": "Reuse existing Figma image hashes; add two original native editable SVG motifs to the existing file. No new original-user-image upload.",
+    "publicLicenseGranted": false
+  }
+}

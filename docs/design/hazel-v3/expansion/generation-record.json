@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-01",
+  "tool": "built-in image_gen.imagegen",
+  "accepted": [
+    {
+      "file": "greendou-reading.png",
+      "generatedFile": "exec-3a29f634-7736-4c03-b690-cf5f5d08931b.png"
+    },
+    {
+      "file": "greendou-organizing.png",
+      "generatedFile": "exec-d4b1b3e6-c698-4365-bc64-b0f1f12227b0.png"
+    },
+    {
+      "file": "greendou-listening.png",
+      "generatedFile": "exec-518883ad-c3df-456a-a2e4-97e1b6049f47.png"
+    },
+    {
+      "file": "cherry-bookmark.png",
+      "generatedFile": "exec-62ede284-d55f-4acd-86c9-cf72b27dc907.png"
+    },
+    {
+      "file": "paper-butterfly.png",
+      "generatedFile": "exec-2fbc0bd5-24b7-47d8-9476-f9959c75a375.png"
+    },
+    {
+      "file": "jelly-ribbon-charm.png",
+      "generatedFile": "exec-592a3223-c6d8-4a5d-98b6-954f890b5125.png"
+    }
+  ],
+  "inspection": "All six outputs accepted; identity, material and 64/88/48px preview visually reviewed. No source image was edited or raster postprocessed."
+}

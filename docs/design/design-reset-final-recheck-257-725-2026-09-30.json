@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-30",
+  "scope": "current archived root IDs/node and reaction inventory; content fingerprints remain in cutover evidence",
+  "result": {
+    "pageId": "257:725",
+    "pageName": "archive",
+    "roots": 22,
+    "rootIds": [
+      "176:2",
+      "176:285",
+      "202:2",
+      "211:286",
+      "212:2",
+      "212:3",
+      "212:4",
+      "214:2",
+      "214:3",
+      "214:4",
+      "217:2",
+      "217:3",
+      "217:4",
+      "218:2",
+      "218:3",
+      "218:4",
+      "233:2",
+      "239:2",
+      "261:725",
+      "261:726",
+      "261:727",
+      "261:728"
+    ],
+    "nodeCount": 9329,
+    "reactionNodes": 0,
+    "problems": []
+  }
+}

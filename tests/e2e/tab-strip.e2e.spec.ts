@@ -1,3 +1,4 @@
+import { newSessionForProject } from './session-ui';
 import { _electron as electron, expect, test } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
@@ -21,7 +22,7 @@ const electronExecutablePath = createRequire(
   path.join(desktopDir, 'package.json'),
 )('electron') as string;
 
-test('supports keyboard activation and restores focus after closing active project tabs', async ({}, testInfo) => {
+test('supports keyboard activation and restores focus after closing active session tabs', async ({}, testInfo) => {
   const beforeHash = await captureFixtureHash(fixtureRoot);
   const userDataDir = testInfo.outputPath('user-data');
   await mkdir(userDataDir, { recursive: true });
@@ -41,7 +42,7 @@ test('supports keyboard activation and restores focus after closing active proje
     const libraryTab = page.getByRole('tab', { name: 'Library' });
     const settingsTab = page.getByRole('tab', { name: 'Settings' });
 
-    await page.getByRole('button', { name: 'Open project alpha-app' }).click();
+    await newSessionForProject(page, 'alpha-app');
     const alphaTab = page.getByRole('tab', { name: 'alpha-app' });
     await alphaTab.focus();
     await alphaTab.press('Home');
@@ -56,7 +57,7 @@ test('supports keyboard activation and restores focus after closing active proje
     await expect(alphaTab).toBeFocused();
 
     await libraryTab.click();
-    await page.getByRole('button', { name: 'Open project beta-notes' }).click();
+    await newSessionForProject(page, 'beta-notes');
     await expect(
       page.getByRole('button', { name: 'Close alpha-app' }),
     ).toHaveAttribute('tabindex', '-1');

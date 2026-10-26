@@ -1,0 +1,449 @@
+{
+  "pass": true,
+  "errors": [],
+  "variantCount": 24,
+  "variants": [
+    {
+      "id": "880:214",
+      "name": "Theme=Organizing, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        0,
+        0,
+        88,
+        88
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:217",
+      "name": "Theme=Organizing, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        0,
+        0,
+        64,
+        64
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:220",
+      "name": "Theme=Listening, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        0,
+        0,
+        88,
+        88
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:223",
+      "name": "Theme=Listening, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        0,
+        0,
+        64,
+        64
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:226",
+      "name": "Theme=Reading, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        0,
+        0,
+        88,
+        88
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:229",
+      "name": "Theme=Reading, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        0,
+        0,
+        64,
+        64
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:232",
+      "name": "Theme=Quiet, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        0,
+        0,
+        88,
+        88
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:234",
+      "name": "Theme=Quiet, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        0,
+        0,
+        64,
+        64
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:236",
+      "name": "Theme=Butterfly, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        40,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:239",
+      "name": "Theme=Butterfly, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        16,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:242",
+      "name": "Theme=Bookmark, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        40,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:245",
+      "name": "Theme=Bookmark, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        16,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:248",
+      "name": "Theme=Charm, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        40,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:251",
+      "name": "Theme=Charm, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        16,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:254",
+      "name": "Theme=UniformRibbon, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        40,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:256",
+      "name": "Theme=UniformRibbon, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        16,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 0,
+      "unbound": []
+    },
+    {
+      "id": "880:258",
+      "name": "Theme=RibbonOutline, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        40,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 4,
+      "unbound": []
+    },
+    {
+      "id": "880:264",
+      "name": "Theme=RibbonOutline, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        16,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 4,
+      "unbound": []
+    },
+    {
+      "id": "880:270",
+      "name": "Theme=CherryPair, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        40,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 4,
+      "unbound": []
+    },
+    {
+      "id": "880:276",
+      "name": "Theme=CherryPair, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        16,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 4,
+      "unbound": []
+    },
+    {
+      "id": "880:282",
+      "name": "Theme=PaperFold, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        40,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 4,
+      "unbound": []
+    },
+    {
+      "id": "880:288",
+      "name": "Theme=PaperFold, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        16,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 4,
+      "unbound": []
+    },
+    {
+      "id": "880:294",
+      "name": "Theme=JellyOutline, Slot=88",
+      "slot": [
+        88,
+        88
+      ],
+      "art": [
+        40,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 7,
+      "unbound": []
+    },
+    {
+      "id": "880:303",
+      "name": "Theme=JellyOutline, Slot=64",
+      "slot": [
+        64,
+        64
+      ],
+      "art": [
+        16,
+        0,
+        48,
+        48
+      ],
+      "vectorCount": 7,
+      "unbound": []
+    }
+  ],
+  "pages": [
+    {
+      "id": "824:1279",
+      "name": "main · v3"
+    },
+    {
+      "id": "824:1276",
+      "name": "design-system · v3"
+    },
+    {
+      "id": "824:1278",
+      "name": "components · v3"
+    },
+    {
+      "id": "824:1277",
+      "name": "assets · Hazel v3"
+    },
+    {
+      "id": "717:1578",
+      "name": "archive · v2 · main + P12"
+    },
+    {
+      "id": "717:1574",
+      "name": "archive · v2 · design-system"
+    },
+    {
+      "id": "717:1575",
+      "name": "archive · v2 · controls"
+    },
+    {
+      "id": "717:1576",
+      "name": "archive · v2 · navigation"
+    },
+    {
+      "id": "717:1577",
+      "name": "archive · v2 · workbench"
+    },
+    {
+      "id": "743:1574",
+      "name": "archive · v2 · states"
+    },
+    {
+      "id": "757:1574",
+      "name": "archive · v2 · responsive"
+    },
+    {
+      "id": "132:2",
+      "name": "archive · pre-v2 · main"
+    },
+    {
+      "id": "299:725",
+      "name": "archive · pre-v2 · workbench"
+    },
+    {
+      "id": "257:725",
+      "name": "archive · pre-v2 · experiments"
+    }
+  ]
+}

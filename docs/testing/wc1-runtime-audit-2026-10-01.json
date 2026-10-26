@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-01T03:33:30.857532+00:00",
+  "kind": "WC1-integrated-runtime-slice-audit",
+  "candidateIdentity": "e6b1011ed591cc78e9725d710f1c17461c1d3f09543a1cc258aa3f309db24527",
+  "inputCount": 136,
+  "fullGateExitCode": 0,
+  "inputsUnchangedAfterGate": true,
+  "changed": [],
+  "backupOf133StagedInputsIntact": true,
+  "backupChanged": [],
+  "artifactFingerprints": [
+    {
+      "path": ".private/wc1-probe/main.cjs",
+      "sha256": "6f7adb60a6fd18db8a795c745787ed7a13ee66fc17f16d541b60c56e5b28cb8a"
+    },
+    {
+      "path": ".private/wc1-probe/run.cjs",
+      "sha256": "6e9aaa4b8a17bc9f2462684201ae0a4a9cbf7bd71aae88ef1644ab939abd615d"
+    },
+    {
+      "path": "docs/testing/wc1-native-api-probe-2026-10-01.json",
+      "sha256": "5234bc8f9380d5d996f53240719ba1cfbc304240ea8d74d6e8eed4116baa71f8"
+    },
+    {
+      "path": "docs/testing/wc1-runtime-full-gate-2026-10-01.json",
+      "sha256": "a48303fc6ed1112e6a42fedf35f10e8f000b953bc4889e438b6456b4171dc99c"
+    },
+    {
+      "path": "docs/design/hazel-v3/qa/window-chrome-supplement-2026-10-01.json",
+      "sha256": "7d43ed285ad1bd24c8d966dab66b0a0848c5f817efa39d566b34f44d0171a099"
+    },
+    {
+      "path": "docs/design/hazel-v3/qa/wc1-runtime-2026-10-01/library-640.png",
+      "sha256": "2fada783a166a37bc4cd886f9f8c252e4c26def280ec66552eda26dd58308187"
+    },
+    {
+      "path": "docs/design/hazel-v3/qa/wc1-runtime-2026-10-01/focus-1440.png",
+      "sha256": "1566a4c4c232bf2442da22d204d0653c9c28fb8ca8439440aaeb0b8a9ef516f6"
+    }
+  ],
+  "independentReview": {
+    "lifecycle": "Luna read-only followup: disconnect generations, app quit cancellation, shared hydration/save barrier and crash-test approach; no remaining blocking defect identified",
+    "nativeControls": "Luna read-only followup: deferred native event readback, retained recovery snapshot, narrow IPC/chrome scope; no new blocking defect identified",
+    "agentsDidNotRunGates": true,
+    "findingsRepaired": [
+      "renderer disconnect quit intent",
+      "stale accepted-save close callback",
+      "unconsumed restoration data overwritten"
+    ],
+    "outsideScope": [
+      "full inherited checkout/entire M2 diff",
+      "Windows shell manual acceptance",
+      "PET implementation"
+    ]
+  },
+  "preserved": [
+    "inherited dirty tree",
+    "earlier red/failure/staged logs",
+    "original v3 variables and components",
+    "product palette and decoration budget",
+    "plugin and global configuration"
+  ],
+  "status": "integrated candidate and automated gates passed; WC1 IN PROGRESS manual Windows pending",
+  "milestonesClosed": false,
+  "publish": false,
+  "documentLinksVerified": true
+}

@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-03",
+  "scope": "cinematic-v8 isolated presentation, native F9 capture clone and runnable code fixture",
+  "status": "locally verified; accepted by user on 2026-10-03",
+  "video": {
+    "path": "tmp/pioneer-cinematic-v8-20261002/delivery/Pioneer-Cinematic-v8-1080p.mp4",
+    "sha256": "d69178ad6bc1796386c5e2df55a18c59dabd8aedf593a66e2d557560fdbe4f03",
+    "bytes": 48709358,
+    "seconds": 60,
+    "frames": 1800
+  },
+  "sourceZIP": {
+    "path": "tmp/pioneer-cinematic-v8-20261002/delivery/Pioneer-Cinematic-v8-Source.zip",
+    "sha256": "a77000f3440652b5f24604edaee6466459b2ce227fd36a561fae7f0525419da0",
+    "bytes": 58307791,
+    "roundtripChecks": 13
+  },
+  "goalAudit": "tmp/pioneer-cinematic-v8-20261002/qa/goal-acceptance.json",
+  "checks": {
+    "currentExplicitRequirements": true,
+    "actualGeminiAuthorship": true,
+    "currentCopyBoundToAuthorAndScreen": true,
+    "primaryHarnessResearch": true,
+    "readmeOpeningSevenUIAndFiveHarnessCaptions": true,
+    "nativeSoftwareScreensCurrent": true,
+    "nativeAssetProvenanceCurrent": true,
+    "panelGeometryAndTransformsAligned": true,
+    "openingContinuityAndSourceVerified": true,
+    "originalV71AndClosingKept": true,
+    "originalV71BytesStillIdentical": true,
+    "interfaceHarnessOneToOne": true,
+    "upstreamIntakeAndNativeHelpersKept": true,
+    "upstreamMITLicenseKept": true,
+    "realFixtureFailsBeforeAndPassesAfter": true,
+    "continuousVisibleTaskWithFeedback": true,
+    "fiveActualClickTargets": true,
+    "paintHistoryRegressionPassed": true,
+    "notLiveExecutionClaim": true,
+    "offlineBrowserPlayback": true,
+    "playPauseSeekKeyboardResizeAndReducedMotion": true,
+    "streamedAudioAndExportIsolation": true,
+    "all1800FramesRenderedFromCurrentSource": true,
+    "full1800FrameDecode": true,
+    "sameSourceAndExportTimes": true,
+    "fullAACAudio": true,
+    "nativeEncodedPlayback": true,
+    "actualVideoHashBoundToEvidence": true,
+    "sourceZIPRoundtrip": true,
+    "actualArchiveHashBoundToRoundtrip": true,
+    "actualCurrentSourcesPackaged": true,
+    "unusedMaterialsDependenciesLogsExcluded": true
+  },
+  "application": {
+    "development": "paused at export; resumed separately on 2026-10-03",
+    "protectedInputFiles": 1456,
+    "changed": [],
+    "pnpmCheckThisTurn": "not run; production inputs unchanged, scoped movie/fixture gates run"
+  },
+  "published": false,
+  "committed": false,
+  "deleted": false,
+  "previousDelivery": "v7.1 unchanged",
+  "visualReview": "tmp/pioneer-cinematic-v8-20261002/qa/art-direction-review-20261003.md",
+  "userAcceptance": {
+    "date": "2026-10-03",
+    "statement": "验收通过，恢复开发。向我介绍开发进度",
+    "videoSha256": "d69178ad6bc1796386c5e2df55a18c59dabd8aedf593a66e2d557560fdbe4f03"
+  }
+}

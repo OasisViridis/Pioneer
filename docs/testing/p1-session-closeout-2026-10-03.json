@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-03",
+  "status": "complete",
+  "slice": "P1 recoverable sessions, no legacy mode UI",
+  "mainHead": "10bd3b0c93836288237488c13af71103b87e21df",
+  "workingTree": "uncommitted integration; inherited work preserved",
+  "gate": {
+    "command": "pnpm check",
+    "exitCode": 0,
+    "contract": {
+      "files": 30,
+      "passed": 200
+    },
+    "frozenPrototype": {
+      "passed": 210,
+      "isElectronProof": false
+    },
+    "realElectron": {
+      "files": 7,
+      "passed": 21
+    },
+    "finalPackageSmoke": "passed",
+    "isolatedProfile": true,
+    "log": "tmp/p1-session-20261003/full-gate.log",
+    "logSha256": "12fe20a55b7f7d4e4dd50b1915b14ea7237878a15d0d4a9236ff738b4eac2e23",
+    "inputManifest": "tmp/p1-session-20261003/gate-inputs.json",
+    "inputManifestSha256": "f26c51c16fa9696858d90a9c44a146b1b178accea68446ba7d27c79dcea7225a",
+    "inputCount": 168,
+    "inputsUnchangedAfterGate": true
+  },
+  "review": {
+    "blockingFindings": 0,
+    "closeCopyFixed": "no guarantee of aborting accepted writes; close without retry waits for accepted atomic writes",
+    "recoveryRetryTestAdded": true,
+    "outputSelectionAfterRestartTestAdded": true
+  },
+  "backup": {
+    "path": "tmp/p1-session-20261003/p0-before-p1.zip",
+    "sha256": "93876e1cf44ff08bf0e0f60e708d6f1c453c75c672d2f2c0bacd4baa64ebde6c"
+  },
+  "capabilities": {
+    "modelAccess": false,
+    "toolExecution": false,
+    "fileMutation": false
+  },
+  "next": "P2 actual read-only Harness task; provider and outbound scope require authorization",
+  "scopeNotClaimed": [
+    "complete M3",
+    "live model/tool chain",
+    "actual workspace writes",
+    "P5 window chrome/tray/pet",
+    "Windows DPI/screen reader/manual acceptance",
+    "commit/push/release"
+  ]
+}
