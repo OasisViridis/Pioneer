@@ -1,5 +1,6 @@
 import { RUN_LIMITS } from '../../shared/contracts/pioneer-run';
 import type { AdapterOutcome, HarnessAdapterFactory } from './adapter-seam';
+import { splitTextChunks } from './text-budget';
 
 /**
  * Minimal Pi host adapter (#10 direction: pi-agent-core Agent + pi-ai Models
@@ -162,33 +163,6 @@ interface TypeBoxLike {
 
 /** Counts a tool execution as in-flight before it starts and after it drains. */
 type TrackTool = <T>(execute: () => Promise<T>) => Promise<T>;
-
-const textEncoder = new TextEncoder();
-
-/**
- * Split text into ordered chunks whose UTF-8 byte length stays within the
- * protocol per-chunk budget. Boundaries only ever fall between code points, so
- * a multi-byte character is never halved. Empty input yields no chunks.
- */
-function splitTextChunks(text: string, maxBytes: number): string[] {
-  if (text.length === 0) return [];
-  if (textEncoder.encode(text).byteLength <= maxBytes) return [text];
-  const chunks: string[] = [];
-  let current = '';
-  let currentBytes = 0;
-  for (const character of text) {
-    const characterBytes = textEncoder.encode(character).byteLength;
-    if (currentBytes > 0 && currentBytes + characterBytes > maxBytes) {
-      chunks.push(current);
-      current = '';
-      currentBytes = 0;
-    }
-    current += character;
-    currentBytes += characterBytes;
-  }
-  if (currentBytes > 0) chunks.push(current);
-  return chunks;
-}
 
 /**
  * Bridges the three read-only tools to Pi's AgentTool shape. Execution goes

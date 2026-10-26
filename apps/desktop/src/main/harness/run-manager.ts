@@ -95,6 +95,8 @@ interface Subscriber {
   windowEpoch: number;
   afterSeq: number;
   ackedSeq: number;
+  /** Highest seq this subscriber has actually been sent. */
+  deliveredSeq: number;
   awaitingBatch: boolean;
   lastActivityAt: number;
 }
@@ -132,6 +134,9 @@ interface ActiveRun {
     | null;
   pendingFailure: RunFailureCode | null;
   subscribers: Map<number, Subscriber>;
+  /** Terminal delivery waits for the durable terminal record (contract §4). */
+  publishHeld: boolean;
+  disposed: boolean;
   deadlineTimer: NodeJS.Timeout | null;
   stopTimer: NodeJS.Timeout | null;
   terminalAt: number | null;
@@ -182,6 +187,10 @@ export class RunManager {
 
   constructor(private readonly dependencies: RunManagerDependencies) {
     this.limits = dependencies.limits ?? RUN_LIMITS;
+    // Contract §5 fixes single-tool concurrency at 1; the executor is a serial
+    // chain, so refuse an override instead of silently ignoring it.
+    if (this.limits.toolConcurrency !== 1)
+      throw new Error('toolConcurrency budget is fixed at 1 (contract §5).');
     const injectedNow = dependencies.now;
     this.now = injectedNow ?? ((): number => Date.now());
   }
@@ -299,6 +308,18 @@ export class RunManager {
     const project = await this.dependencies.resolveProject(request.projectId);
     if (project === null) return { ok: false, code: 'INVALID_REQUEST' };
 
+    // A duplicate start that raced past the pre-await check must converge on
+    // the first admitted run instead of failing on the consumed grant.
+    const racingRunId = this.requestIndex.get(request.requestId);
+    if (racingRunId !== undefined) {
+      const racingPayload =
+        this.runs.get(racingRunId)?.requestPayload ??
+        this.finishedPayloads.get(request.requestId) ??
+        null;
+      if (racingPayload === payload) return { ok: true, runId: racingRunId };
+      return { ok: false, code: 'REQUEST_CONFLICT' };
+    }
+
     const grant = this.grants.get(request.grantId);
     if (
       grant === undefined ||
@@ -357,6 +378,8 @@ export class RunManager {
       toolCalls: 0,
       toolChain: Promise.resolve(),
       pendingToolCalls: new Set<string>(),
+      publishHeld: false,
+      disposed: false,
       terminalEmitted: false,
       preStartMessages: [],
       grant,
@@ -457,7 +480,7 @@ export class RunManager {
       startRun = handle.start();
     } catch {
       // Synchronous start failure never produces run.started.
-      await this.terminate(run, 'failed', 'START_FAILED');
+      await this.finish(run, 'failed', 'START_FAILED');
       return;
     }
     run.status = 'running';
@@ -491,27 +514,38 @@ export class RunManager {
       return;
     }
     if (run.pendingFailure !== null) {
-      await this.terminate(run, 'failed', run.pendingFailure);
+      await this.finish(run, 'failed', run.pendingFailure);
       return;
     }
     if (run.stopRequestedAt !== null) {
       if (outcome.status === 'failure') {
-        await this.terminate(run, 'failed', outcome.code);
+        await this.finish(run, 'failed', outcome.code);
       } else {
-        await this.terminate(run, 'stopped', null);
+        await this.finish(run, 'stopped', null);
       }
       return;
     }
     if (outcome.status === 'failure') {
-      await this.terminate(run, 'failed', outcome.code);
+      await this.finish(run, 'failed', outcome.code);
       return;
     }
-    await this.terminate(run, 'completed', null, {
+    await this.finish(run, 'completed', null, {
       inputTokens:
         outcome.status === 'success' ? outcome.usage.inputTokens : null,
       outputTokens:
         outcome.status === 'success' ? outcome.usage.outputTokens : null,
     });
+  }
+
+  /** Quiescent path: publish the terminal outcome, then release the adapter. */
+  private async finish(
+    run: ActiveRun,
+    status: 'completed' | 'failed' | 'stopped',
+    code: RunFailureCode | null,
+    usage?: { inputTokens: number | null; outputTokens: number | null },
+  ): Promise<void> {
+    await this.terminate(run, status, code, usage);
+    await this.disposeAdapter(run);
   }
 
   private acceptAdapterMessage(run: ActiveRun, message: AdapterMessage): void {
@@ -537,6 +571,15 @@ export class RunManager {
         return;
       }
       case 'tool.unknown': {
+        // Contract §5 counts rejections against the same per-run budget; this
+        // is the one rejection path no executor sits in front of.
+        if (run.toolCalls >= this.limits.toolCalls) {
+          if (run.pendingFailure === null) {
+            run.pendingFailure = 'TOOL_FAILED';
+            this.requestStop(run, 'host_failure');
+          }
+          return;
+        }
         run.toolCalls += 1;
         const callId = `call:${String(run.toolCalls)}`;
         this.emit(run, { type: 'tool.requested', callId, tool: null }, 'tool');
@@ -572,50 +615,45 @@ export class RunManager {
     try {
       if (this.isTerminal(run) || run.stopRequestedAt !== null)
         return { status: 'cancelled', code: 'CANCELLED' };
-      run.toolCalls += 1;
-      const callId = `call:${String(run.toolCalls)}`;
-      if (run.toolCalls > this.limits.toolCalls) {
-        // Rejections count against the budget. The over-budget call is still
-        // paired on the wire, then the run stops instead of looping forever.
-        this.emit(
-          run,
-          { type: 'tool.requested', callId, tool: request.tool },
-          'tool',
-        );
-        this.emit(
-          run,
-          {
-            type: 'tool.result',
-            callId,
-            result: { status: 'rejected', code: 'BUDGET_EXCEEDED' },
-          },
-          'tool',
-        );
-        run.pendingFailure = 'TOOL_FAILED';
-        this.requestStop(run, 'host_failure');
+      if (run.toolCalls >= this.limits.toolCalls) {
+        // Contract §5: the budget counts rejected requests too, so the run
+        // stops here instead of publishing a 33rd pair.
+        if (run.pendingFailure === null) {
+          run.pendingFailure = 'TOOL_FAILED';
+          this.requestStop(run, 'host_failure');
+        }
         return { status: 'rejected', code: 'BUDGET_EXCEEDED' };
       }
+      run.toolCalls += 1;
+      const callId = `call:${String(run.toolCalls)}`;
       this.emit(
         run,
         { type: 'tool.requested', callId, tool: request.tool },
         'tool',
       );
       run.pendingToolCalls.add(callId);
-      const outcome = await executeReadOnlyTool(
-        project.root,
-        request,
-        run.abort.signal,
-      );
-      run.pendingToolCalls.delete(callId);
-      // terminate() already published the cancelled pair for a run that ended
-      // while this call was in flight.
-      if (this.isTerminal(run))
-        return { status: 'cancelled', code: 'CANCELLED' };
-      if (outcome.status === 'succeeded') {
-        run.outputBytes += bytesOf(outcome.text);
+      try {
+        const outcome = await executeReadOnlyTool(
+          project.root,
+          request,
+          run.abort.signal,
+        );
+        // terminate() already published the cancelled pair for a run that
+        // ended while this call was in flight.
+        if (this.isTerminal(run))
+          return { status: 'cancelled', code: 'CANCELLED' };
+        if (outcome.status === 'succeeded') {
+          run.outputBytes += bytesOf(outcome.text);
+        }
+        this.emit(
+          run,
+          { type: 'tool.result', callId, result: outcome },
+          'tool',
+        );
+        return outcome;
+      } finally {
+        run.pendingToolCalls.delete(callId);
       }
-      this.emit(run, { type: 'tool.result', callId, result: outcome }, 'tool');
-      return outcome;
     } finally {
       release();
     }
@@ -770,6 +808,7 @@ export class RunManager {
       windowEpoch: input.windowEpoch,
       afterSeq: input.afterSeq,
       ackedSeq: input.afterSeq,
+      deliveredSeq: input.afterSeq,
       awaitingBatch: false,
       lastActivityAt: this.now(),
     });
@@ -788,12 +827,12 @@ export class RunManager {
     if (subscriber === undefined) return;
     subscriber.lastActivityAt = this.now();
     subscriber.awaitingBatch = false;
-    // ACKs are a cursor, never a promise: clamp to what main actually published
-    // so a renderer cannot skip the undelivered tail.
-    const publishedSeq = run.events.at(-1)?.seq ?? 0;
+    // ACKs are a cursor, never a promise: clamp to the last seq actually sent
+    // to this subscriber. Clamping to the newest published seq would let an
+    // over-claiming ACK skip the pages still queued for delivery.
     subscriber.ackedSeq = Math.min(
       Math.max(subscriber.ackedSeq, input.afterSeq),
-      publishedSeq,
+      subscriber.deliveredSeq,
     );
     this.flushSubscribers(run);
   }
@@ -811,6 +850,9 @@ export class RunManager {
   }
 
   private deliverBatches(run: ActiveRun): void {
+    // Terminal events are held until the journal owns the terminal record, so
+    // a durable-write failure cannot be reported as a converged run.
+    if (run.publishHeld) return;
     const now = this.now();
     for (const subscriber of [...run.subscribers.values()]) {
       if (now - subscriber.lastActivityAt > this.limits.subscriberAckMs) {
@@ -824,6 +866,7 @@ export class RunManager {
       const page = this.buildPage(run, subscriber.ackedSeq);
       if (page.events.length === 0) continue;
       subscriber.awaitingBatch = true;
+      subscriber.deliveredSeq = page.nextAfterSeq;
       this.dependencies.sender.send(subscriber.webContentsId, { page });
     }
   }
@@ -846,9 +889,9 @@ export class RunManager {
     };
     const size = bytesOf(JSON.stringify(event));
     if (size > this.limits.eventBytes) {
-      // Contract §5: a wire event has its own 16 KiB ceiling. The offending
-      // event is dropped and the run converges to a fixed code.
-      run.pendingFailure = 'PROTOCOL_ERROR';
+      // Contract §5: the wire-event ceiling converges to OUTPUT_LIMIT, the same
+      // budget family as the 4 KiB chunk rule.
+      run.pendingFailure = 'OUTPUT_LIMIT';
       this.requestStop(run, 'host_failure');
       return;
     }
@@ -873,6 +916,9 @@ export class RunManager {
     if (this.isTerminal(run)) return;
     if (run.deadlineTimer !== null) clearTimeout(run.deadlineTimer);
     if (run.stopTimer !== null) clearTimeout(run.stopTimer);
+    // Hold delivery until the terminal record is durable (contract §4): a
+    // write failure must not look like a converged run to the renderer.
+    run.publishHeld = true;
     // Contract §4: a stop can land while a tool is in flight. Every published
     // tool.requested gets exactly one result before the terminal event; the
     // late real result is dropped instead of rewriting history.
@@ -908,7 +954,6 @@ export class RunManager {
     for (const subscriber of run.subscribers.values()) {
       subscriber.awaitingBatch = false;
     }
-    this.deliverBatches(run);
     await this.dependencies.journal.appendTerminal({
       kind: 'terminal',
       runId: run.identity.runId,
@@ -917,6 +962,10 @@ export class RunManager {
       at: new Date().toISOString(),
       lastSeq: run.events.at(-1)?.seq ?? 0,
     });
+    // Release the hold even when the write failed: the renderer still has to
+    // see a terminal state, and the unhealthy journal already blocks new runs.
+    run.publishHeld = false;
+    this.deliverBatches(run);
     this.finishedPayloads.set(run.requestId, run.requestPayload);
     while (this.finishedPayloads.size > 128) {
       const oldest = this.finishedPayloads.keys().next().value;
@@ -1044,7 +1093,14 @@ export class RunManager {
     for (const run of this.runs.values()) {
       if (!this.isTerminal(run))
         await this.terminate(run, 'failed', 'STOP_TIMEOUT');
-      await run.handle?.dispose().catch(() => undefined);
+      await this.disposeAdapter(run);
     }
+  }
+
+  /** Contract §2: dispose is the normal release path after quiescence. */
+  private async disposeAdapter(run: ActiveRun): Promise<void> {
+    if (run.disposed) return;
+    run.disposed = true;
+    await run.handle?.dispose().catch(() => undefined);
   }
 }

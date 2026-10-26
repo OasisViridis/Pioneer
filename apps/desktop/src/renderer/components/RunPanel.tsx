@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react';
 import type { ProjectSummary } from '../../shared/contracts/catalog';
 import type { Session } from '../../shared/contracts/session-workspace';
 import { runViews } from '../state/run-view-instance';
-import { admissionText, visibleStatus } from '../state/run-view';
+import { rejectionText, visibleStatus } from '../state/run-view';
 
 /**
  * Run controls + live event log. Visible outcomes are exactly five
@@ -44,9 +44,9 @@ export function RunPanel({
           只读运行 · read_file / list_directory / search_in_files
         </span>
       </header>
-      {state.admissionCode !== null ? (
+      {state.rejectionCode !== null ? (
         <p role="alert" className="form-error">
-          {admissionText(state.admissionCode)}
+          {rejectionText(state.rejectionCode)}
         </p>
       ) : null}
       {canLaunch ? (

@@ -11,6 +11,7 @@ import type {
   HarnessEmit,
   HarnessHandle,
 } from './adapter-seam';
+import { splitTextChunks } from './text-budget';
 
 /**
  * Deterministic in-process model stand-in. Selected only by main startup
@@ -66,33 +67,6 @@ export async function loadControlledScript(
 ): Promise<ControlledScript> {
   const raw: unknown = JSON.parse(await readFile(path, 'utf-8'));
   return ControlledScriptSchema.parse(raw);
-}
-
-const textEncoder = new TextEncoder();
-
-/**
- * Split text into ordered chunks whose UTF-8 byte length stays within the
- * protocol per-chunk budget. Boundaries only ever fall between code points, so
- * a multi-byte character is never halved. Empty input yields no chunks.
- */
-function splitTextChunks(text: string, maxBytes: number): string[] {
-  if (text.length === 0) return [];
-  if (textEncoder.encode(text).byteLength <= maxBytes) return [text];
-  const chunks: string[] = [];
-  let current = '';
-  let currentBytes = 0;
-  for (const character of text) {
-    const characterBytes = textEncoder.encode(character).byteLength;
-    if (currentBytes > 0 && currentBytes + characterBytes > maxBytes) {
-      chunks.push(current);
-      current = '';
-      currentBytes = 0;
-    }
-    current += character;
-    currentBytes += characterBytes;
-  }
-  if (currentBytes > 0) chunks.push(current);
-  return chunks;
 }
 
 function abortableDelay(ms: number, signal: AbortSignal): Promise<void> {
@@ -213,14 +187,11 @@ export function createControlledAdapterFactory(
           return Promise.reject(new Error('adapter already started'));
         const run = runScript();
         startRun = run;
-        void settleQuiet(run).then(
-          () => {
-            resolveQuiescent?.();
-          },
-          () => {
-            resolveQuiescent?.();
-          },
-        );
+        // settleQuiet swallows every rejection, so the settle callback is the
+        // only continuation needed.
+        void settleQuiet(run).finally(() => {
+          resolveQuiescent?.();
+        });
         return run;
       },
       requestStop: () => {

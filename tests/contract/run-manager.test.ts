@@ -674,8 +674,64 @@ describe('P2 run manager review hardening', () => {
       .map((event) =>
         event.body.type === 'tool.result' ? event.body.callId : '',
       );
-    expect(requested).toHaveLength(RUN_LIMITS.toolCalls + 1);
+    expect(requested).toHaveLength(RUN_LIMITS.toolCalls);
     expect(results).toEqual(requested);
+  });
+
+  it('counts unknown-tool rejections against the same budget (contract §5)', async () => {
+    const unknownFactory: HarnessAdapterFactory = (_context, emit) => ({
+      start: () => {
+        for (let index = 0; index < RUN_LIMITS.toolCalls + 8; index += 1) {
+          emit({ type: 'tool.unknown', name: `bogus-${String(index)}` });
+        }
+        return Promise.resolve({
+          status: 'success',
+          usage: { inputTokens: null, outputTokens: null },
+        });
+      },
+      requestStop: () => undefined,
+      quiescent: Promise.resolve(),
+      dispose: () => Promise.resolve(),
+    });
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      { adapterFactory: unknownFactory },
+    );
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'failed');
+    const events = readAllEvents(manager, runId);
+    expect(events.at(-1)?.body).toEqual({
+      type: 'run.failed',
+      code: 'TOOL_FAILED',
+    });
+    const requested = events.filter(
+      (event) => event.body.type === 'tool.requested',
+    );
+    expect(requested).toHaveLength(RUN_LIMITS.toolCalls);
+  });
+
+  it('replays a concurrently duplicated requestId to the same run', async () => {
+    const { manager } = await createManager({
+      steps: [{ action: 'wait', ms: 120 }, { action: 'complete' }],
+    });
+    const grantId = await authorizeGrant(manager);
+    const request = {
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      expectedRevision: 1,
+      requestId: 'request:duplicate',
+      grantId,
+    };
+    const [first, second] = await Promise.all([
+      manager.start(request, binding),
+      manager.start(request, binding),
+    ]);
+    expect(first).toEqual({ ok: true, runId: second.ok ? second.runId : '' });
+    expect(second.ok).toBe(true);
+    await waitFor(
+      () =>
+        pageOf(manager, first.ok ? first.runId : '')?.status === 'completed',
+    );
   });
 
   it('rejects reads and stops from a foreign identity (contract §3)', async () => {

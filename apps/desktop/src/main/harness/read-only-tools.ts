@@ -1,5 +1,5 @@
 import type { Stats } from 'node:fs';
-import { lstat, open, readdir, realpath } from 'node:fs/promises';
+import { lstat, open, opendir, readdir, realpath } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 
 import {
@@ -62,13 +62,7 @@ function isBinaryContent(buffer: Buffer): boolean {
   return probe.includes(0);
 }
 
-interface EntryIdentity {
-  size: number;
-  mtimeMs: number;
-  ino: number;
-}
-
-function sameIdentity(a: EntryIdentity, b: EntryIdentity): boolean {
+function sameIdentity(a: Stats, b: Stats): boolean {
   return a.size === b.size && a.mtimeMs === b.mtimeMs && a.ino === b.ino;
 }
 
@@ -204,19 +198,25 @@ async function listDirectory(
   absolutePath: string,
   signal: AbortSignal,
 ): Promise<ToolOutcome> {
-  const entries = await readdir(absolutePath);
-  if (signal.aborted) return { status: 'cancelled', code: 'CANCELLED' };
+  // Stream the directory so an enormous listing stops after the first 201
+  // candidates instead of materialising every name.
+  const directory = await opendir(absolutePath);
   const names: string[] = [];
   let truncated = false;
-  for (const name of entries) {
-    if (names.length > TOOL_BUDGETS.listEntries) {
-      truncated = true;
-      break;
+  try {
+    for await (const entry of directory) {
+      if (names.length > TOOL_BUDGETS.listEntries) {
+        truncated = true;
+        break;
+      }
+      if (signal.aborted) return { status: 'cancelled', code: 'CANCELLED' };
+      if (isSensitiveEntryName(entry.name)) continue;
+      const checked = await recheckEntry(root, join(absolutePath, entry.name));
+      if (checked === null) continue;
+      names.push(checked === 'directory' ? `${entry.name}/` : entry.name);
     }
-    if (isSensitiveEntryName(name)) continue;
-    const checked = await recheckEntry(root, join(absolutePath, name));
-    if (checked === null) continue;
-    names.push(checked === 'directory' ? `${name}/` : name);
+  } finally {
+    await directory.close().catch(() => undefined);
   }
   names.sort((a, b) => a.localeCompare(b));
   if (names.length > TOOL_BUDGETS.listEntries) {

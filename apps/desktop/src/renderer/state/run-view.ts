@@ -33,7 +33,7 @@ export interface RunViewState {
   runId: string | null;
   status: RunStatus | null;
   failureCode: string | null;
-  admissionCode: string | null;
+  rejectionCode: string | null;
   summaryText: string | null;
   events: RunDisplayEvent[];
   omittedHistory: boolean;
@@ -113,7 +113,7 @@ const failureCopy: Record<string, string> = {
 export const failureText = (code: string): string =>
   failureCopy[code] ?? `失败（${code}）`;
 
-const admissionCopy: Record<string, string> = {
+const rejectionCopy: Record<string, string> = {
   INVALID_REQUEST: '请求无效',
   UNTRUSTED_SENDER: '来源不受信任',
   BINDING_MISMATCH: '窗口绑定不一致，请重试',
@@ -126,8 +126,8 @@ const admissionCopy: Record<string, string> = {
   RUN_NOT_FOUND: '找不到该运行',
 };
 
-export const admissionText = (code: string): string =>
-  admissionCopy[code] ?? `请求被拒绝（${code}）`;
+export const rejectionText = (code: string): string =>
+  rejectionCopy[code] ?? `请求被拒绝（${code}）`;
 
 const MAX_DISPLAY_EVENTS = 500;
 
@@ -210,7 +210,7 @@ const IDLE_STATE: RunViewState = {
   runId: null,
   status: null,
   failureCode: null,
-  admissionCode: null,
+  rejectionCode: null,
   summaryText: null,
   events: [],
   omittedHistory: false,
@@ -334,7 +334,7 @@ export class RunViewStore {
     try {
       this.update(input.sessionId, {
         phase: 'authorizing',
-        admissionCode: null,
+        rejectionCode: null,
         failureCode: null,
         summaryText: input.summaryText ?? null,
         omittedHistory: false,
@@ -348,7 +348,7 @@ export class RunViewStore {
       if (!authorization.ok) {
         this.update(input.sessionId, {
           phase: 'error',
-          admissionCode: authorization.code,
+          rejectionCode: authorization.code,
         });
         return;
       }
@@ -363,7 +363,7 @@ export class RunViewStore {
       if (!started.ok) {
         this.update(input.sessionId, {
           phase: 'error',
-          admissionCode: started.code,
+          rejectionCode: started.code,
         });
         return;
       }
@@ -408,7 +408,7 @@ export class RunViewStore {
     if (state.runId === null) return;
     if (state.phase !== 'active') return;
     const priorPhase = state.phase;
-    this.update(input.sessionId, { phase: 'stopping', admissionCode: null });
+    this.update(input.sessionId, { phase: 'stopping', rejectionCode: null });
     const reply = await this.port.stopRun({
       sessionId: input.sessionId,
       projectId: input.projectId,
@@ -436,7 +436,7 @@ export class RunViewStore {
       // 'stopping' would latch the stop button disabled forever.
       this.update(input.sessionId, {
         phase: priorPhase,
-        admissionCode: reply.code,
+        rejectionCode: reply.code,
       });
     }
   }

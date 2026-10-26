@@ -11,7 +11,7 @@ import type {
 } from '../../apps/desktop/src/shared/contracts/run-ipc';
 import {
   RunViewStore,
-  admissionText,
+  rejectionText,
   visibleStatus,
 } from '../../apps/desktop/src/renderer/state/run-view';
 import type { RunPort } from '../../apps/desktop/src/renderer/state/run-view';
@@ -189,8 +189,8 @@ describe('run view stop rejection', () => {
     expect(state.phase).not.toBe('stopping');
     expect(state.phase).toBe('active');
     expect(state.status).toBe('running');
-    expect(state.admissionCode).not.toBeNull();
-    expect(admissionText(state.admissionCode ?? '')).toBe(
+    expect(state.rejectionCode).not.toBeNull();
+    expect(rejectionText(state.rejectionCode ?? '')).toBe(
       '窗口绑定不一致，请重试',
     );
     expect(visibleStatus(state)).toBe('运行中');
