@@ -1,0 +1,1875 @@
+{
+  "schemaVersion": 1,
+  "request": {
+    "schemaVersion": 1,
+    "featureId": "s2-design-delivery",
+    "issue": 36,
+    "changeType": "infrastructure",
+    "baseSha": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+    "design": {
+      "commit": "a1b96bb0902f03392e36d3812e9a7deda927ad76",
+      "path": "docs/research/design-sync-s0/design-snapshot.json",
+      "sha256": "a6b28d7cb42a1c384d0b381aeee81d91bbbba81717950319f9a296d95c6619aa",
+      "kind": "snapshot-only",
+      "version": null,
+      "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+      "nodes": ["921:706", "921:648", "921:632"]
+    },
+    "behaviorChanges": []
+  },
+  "nodes": [
+    {
+      "id": "921:706",
+      "type": "COMPONENT_SET",
+      "name": "Pioneer F9 / Workspace Poster",
+      "x": 40,
+      "y": 970,
+      "width": 908,
+      "height": 222,
+      "visible": true,
+      "layoutMode": "NONE",
+      "itemSpacing": 0,
+      "paddingTop": 0,
+      "paddingRight": 0,
+      "paddingBottom": 0,
+      "paddingLeft": 0,
+      "cornerRadius": 5,
+      "properties": {
+        "Cover": {
+          "type": "VARIANT",
+          "defaultValue": "Code",
+          "variantOptions": ["Code", "Map", "Doc", "Unavailable"]
+        }
+      },
+      "solidFills": [],
+      "children": [
+        {
+          "id": "921:675",
+          "type": "COMPONENT",
+          "name": "Cover=Code",
+          "x": 24,
+          "y": 24,
+          "width": 200,
+          "height": 174,
+          "visible": true,
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 8,
+          "paddingTop": 12,
+          "paddingRight": 12,
+          "paddingBottom": 12,
+          "paddingLeft": 12,
+          "cornerRadius": 12,
+          "solidFills": [
+            {
+              "color": {
+                "r": 0.9921568632125854,
+                "g": 0.9882352948188782,
+                "b": 0.9803921580314636
+              },
+              "opacity": 1,
+              "visible": true
+            }
+          ],
+          "children": [
+            {
+              "id": "921:676",
+              "type": "FRAME",
+              "name": "Cover / Code",
+              "x": 13,
+              "y": 13,
+              "width": 174,
+              "height": 98,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 8,
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.8627451062202454,
+                    "g": 0.9137254953384399,
+                    "b": 0.8745098114013672
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ],
+              "children": [
+                {
+                  "id": "921:677",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 174,
+                  "height": 98,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "921:678",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 14,
+                      "y": 18,
+                      "width": 142,
+                      "height": 50,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": { "r": 0, "g": 0, "b": 0 },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "921:679",
+              "type": "TEXT",
+              "name": "Title",
+              "x": 13,
+              "y": 119,
+              "width": 95,
+              "height": 22,
+              "visible": true,
+              "characters": "billing-service",
+              "fontSize": 14,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Medium",
+                "variationSettings": { "wght": 500 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 22 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.1725490242242813,
+                    "g": 0.2078431397676468,
+                    "b": 0.27843138575553894
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            },
+            {
+              "id": "921:680",
+              "type": "TEXT",
+              "name": "Meta",
+              "x": 13,
+              "y": 149,
+              "width": 162,
+              "height": 18,
+              "visible": true,
+              "characters": "TypeScript · Node 22 · 发票…",
+              "fontSize": 11,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": { "wght": 400 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.3921568691730499,
+                    "g": 0.4117647111415863,
+                    "b": 0.43529412150382996
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "921:681",
+          "type": "COMPONENT",
+          "name": "Cover=Map",
+          "x": 244,
+          "y": 24,
+          "width": 200,
+          "height": 174,
+          "visible": true,
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 8,
+          "paddingTop": 12,
+          "paddingRight": 12,
+          "paddingBottom": 12,
+          "paddingLeft": 12,
+          "cornerRadius": 12,
+          "solidFills": [
+            {
+              "color": {
+                "r": 0.9921568632125854,
+                "g": 0.9882352948188782,
+                "b": 0.9803921580314636
+              },
+              "opacity": 1,
+              "visible": true
+            }
+          ],
+          "children": [
+            {
+              "id": "921:682",
+              "type": "FRAME",
+              "name": "Cover / Map",
+              "x": 13,
+              "y": 13,
+              "width": 174,
+              "height": 98,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 8,
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.8941176533699036,
+                    "g": 0.9019607901573181,
+                    "b": 0.8901960849761963
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ],
+              "children": [
+                {
+                  "id": "921:683",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 174,
+                  "height": 98,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "921:684",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 0,
+                      "y": 10,
+                      "width": 174,
+                      "height": 64.88888549804688,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": []
+                    },
+                    {
+                      "id": "921:685",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 68,
+                      "y": 0,
+                      "width": 66,
+                      "height": 100,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": { "r": 0, "g": 0, "b": 0 },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "921:686",
+              "type": "TEXT",
+              "name": "Title",
+              "x": 13,
+              "y": 119,
+              "width": 92,
+              "height": 22,
+              "visible": true,
+              "characters": "atlas-desktop",
+              "fontSize": 14,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Medium",
+                "variationSettings": { "wght": 500 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 22 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.1725490242242813,
+                    "g": 0.2078431397676468,
+                    "b": 0.27843138575553894
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            },
+            {
+              "id": "921:687",
+              "type": "TEXT",
+              "name": "Meta",
+              "x": 13,
+              "y": 149,
+              "width": 133,
+              "height": 18,
+              "visible": true,
+              "characters": "Rust · Tauri 2 · 离线地图",
+              "fontSize": 11,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": { "wght": 400 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.3921568691730499,
+                    "g": 0.4117647111415863,
+                    "b": 0.43529412150382996
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "921:688",
+          "type": "COMPONENT",
+          "name": "Cover=Doc",
+          "x": 464,
+          "y": 24,
+          "width": 200,
+          "height": 174,
+          "visible": true,
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 8,
+          "paddingTop": 12,
+          "paddingRight": 12,
+          "paddingBottom": 12,
+          "paddingLeft": 12,
+          "cornerRadius": 12,
+          "solidFills": [
+            {
+              "color": {
+                "r": 0.9921568632125854,
+                "g": 0.9882352948188782,
+                "b": 0.9803921580314636
+              },
+              "opacity": 1,
+              "visible": true
+            }
+          ],
+          "children": [
+            {
+              "id": "921:689",
+              "type": "FRAME",
+              "name": "Cover / Doc",
+              "x": 13,
+              "y": 13,
+              "width": 174,
+              "height": 98,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 8,
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.9450980424880981,
+                    "g": 0.9137254953384399,
+                    "b": 0.8705882430076599
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ],
+              "children": [
+                {
+                  "id": "921:690",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 174,
+                  "height": 98,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "921:691",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 48,
+                      "y": 8,
+                      "width": 78,
+                      "height": 100,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": {
+                            "r": 0.9921568632125854,
+                            "g": 0.9882352948188782,
+                            "b": 0.9803921580314636
+                          },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    },
+                    {
+                      "id": "921:692",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 55,
+                      "y": 18,
+                      "width": 55,
+                      "height": 30,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": { "r": 0, "g": 0, "b": 0 },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "921:693",
+              "type": "TEXT",
+              "name": "Title",
+              "x": 13,
+              "y": 119,
+              "width": 78,
+              "height": 22,
+              "visible": true,
+              "characters": "Q3 复盘草稿",
+              "fontSize": 14,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Medium",
+                "variationSettings": { "wght": 500 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 22 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.1725490242242813,
+                    "g": 0.2078431397676468,
+                    "b": 0.27843138575553894
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            },
+            {
+              "id": "921:694",
+              "type": "TEXT",
+              "name": "Meta",
+              "x": 13,
+              "y": 149,
+              "width": 134,
+              "height": 18,
+              "visible": true,
+              "characters": "Markdown · 12 篇 · 只读",
+              "fontSize": 11,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": { "wght": 400 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.3921568691730499,
+                    "g": 0.4117647111415863,
+                    "b": 0.43529412150382996
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "921:695",
+          "type": "COMPONENT",
+          "name": "Cover=Unavailable",
+          "x": 684,
+          "y": 24,
+          "width": 200,
+          "height": 174,
+          "visible": true,
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 8,
+          "paddingTop": 12,
+          "paddingRight": 12,
+          "paddingBottom": 12,
+          "paddingLeft": 12,
+          "cornerRadius": 12,
+          "solidFills": [
+            {
+              "color": {
+                "r": 0.9921568632125854,
+                "g": 0.9882352948188782,
+                "b": 0.9803921580314636
+              },
+              "opacity": 1,
+              "visible": true
+            }
+          ],
+          "children": [
+            {
+              "id": "921:696",
+              "type": "FRAME",
+              "name": "Cover / Unavailable",
+              "x": 13,
+              "y": 13,
+              "width": 174,
+              "height": 98,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 8,
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.9333333373069763,
+                    "g": 0.929411768913269,
+                    "b": 0.9176470637321472
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ],
+              "children": [
+                {
+                  "id": "921:697",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 174,
+                  "height": 98,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "921:698",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 12,
+                      "y": 12,
+                      "width": 48,
+                      "height": 32,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": {
+                            "r": 0.9647058844566345,
+                            "g": 0.9607843160629272,
+                            "b": 0.9450980424880981
+                          },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    },
+                    {
+                      "id": "921:699",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 65,
+                      "y": 12,
+                      "width": 48,
+                      "height": 32,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": {
+                            "r": 0.9647058844566345,
+                            "g": 0.9607843160629272,
+                            "b": 0.9450980424880981
+                          },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    },
+                    {
+                      "id": "921:700",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 118,
+                      "y": 12,
+                      "width": 44,
+                      "height": 32,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": {
+                            "r": 0.9647058844566345,
+                            "g": 0.9607843160629272,
+                            "b": 0.9450980424880981
+                          },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    },
+                    {
+                      "id": "921:701",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 12,
+                      "y": 53,
+                      "width": 48,
+                      "height": 32,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": {
+                            "r": 0.9647058844566345,
+                            "g": 0.9607843160629272,
+                            "b": 0.9450980424880981
+                          },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    },
+                    {
+                      "id": "921:702",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 65,
+                      "y": 53,
+                      "width": 48,
+                      "height": 32,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": {
+                            "r": 0.9647058844566345,
+                            "g": 0.9607843160629272,
+                            "b": 0.9450980424880981
+                          },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    },
+                    {
+                      "id": "921:703",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 118,
+                      "y": 53,
+                      "width": 44,
+                      "height": 32,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": [
+                        {
+                          "color": {
+                            "r": 0.9647058844566345,
+                            "g": 0.9607843160629272,
+                            "b": 0.9450980424880981
+                          },
+                          "opacity": 1,
+                          "visible": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "921:704",
+              "type": "TEXT",
+              "name": "Title",
+              "x": 13,
+              "y": 119,
+              "width": 82,
+              "height": 22,
+              "visible": true,
+              "characters": "hazel-assets",
+              "fontSize": 14,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Medium",
+                "variationSettings": { "wght": 500 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 22 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.1725490242242813,
+                    "g": 0.2078431397676468,
+                    "b": 0.27843138575553894
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            },
+            {
+              "id": "921:705",
+              "type": "TEXT",
+              "name": "Meta",
+              "x": 13,
+              "y": 149,
+              "width": 130,
+              "height": 18,
+              "visible": true,
+              "characters": "不可用 · 驱动器 E: 未连接",
+              "fontSize": 11,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": { "wght": 400 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 18 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.5803921818733215,
+                    "g": 0.29411765933036804,
+                    "b": 0.3490196168422699
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "921:648",
+      "type": "COMPONENT_SET",
+      "name": "Pioneer F9 / PanelTab",
+      "x": 40,
+      "y": 610,
+      "width": 396,
+      "height": 84,
+      "visible": true,
+      "layoutMode": "NONE",
+      "itemSpacing": 0,
+      "paddingTop": 0,
+      "paddingRight": 0,
+      "paddingBottom": 0,
+      "paddingLeft": 0,
+      "cornerRadius": 5,
+      "properties": {
+        "Label#921:23": { "type": "TEXT", "defaultValue": "产物预览" },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": ["Active", "Inactive"]
+        }
+      },
+      "solidFills": [],
+      "children": [
+        {
+          "id": "921:633",
+          "type": "COMPONENT",
+          "name": "State=Active",
+          "x": 24,
+          "y": 24,
+          "width": 113,
+          "height": 36,
+          "visible": true,
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 8,
+          "paddingTop": 0,
+          "paddingRight": 12,
+          "paddingBottom": 0,
+          "paddingLeft": 12,
+          "cornerRadius": 8,
+          "solidFills": [
+            {
+              "color": {
+                "r": 0.9921568632125854,
+                "g": 0.9882352948188782,
+                "b": 0.9803921580314636
+              },
+              "opacity": 1,
+              "visible": true
+            }
+          ],
+          "children": [
+            {
+              "id": "921:634",
+              "type": "INSTANCE",
+              "name": "Icon / panel",
+              "x": 12,
+              "y": 11.5,
+              "width": 13,
+              "height": 13,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 0,
+              "properties": {},
+              "mainComponentId": "921:525",
+              "solidFills": [],
+              "children": [
+                {
+                  "id": "I921:634;921:526",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 16,
+                  "height": 16,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "I921:634;921:527",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 2.5,
+                      "y": 3,
+                      "width": 11,
+                      "height": 10,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": []
+                    },
+                    {
+                      "id": "I921:634;921:528",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 10,
+                      "y": 3,
+                      "width": 0,
+                      "height": 10,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "921:638",
+              "type": "TEXT",
+              "name": "Label",
+              "x": 33,
+              "y": 8,
+              "width": 50,
+              "height": 20,
+              "visible": true,
+              "characters": "产物预览",
+              "fontSize": 12.5,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Medium",
+                "variationSettings": { "wght": 500 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 20 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.1725490242242813,
+                    "g": 0.2078431397676468,
+                    "b": 0.27843138575553894
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            },
+            {
+              "id": "921:639",
+              "type": "INSTANCE",
+              "name": "Icon / x",
+              "x": 91,
+              "y": 13,
+              "width": 10,
+              "height": 10,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 0,
+              "properties": {},
+              "mainComponentId": "921:503",
+              "solidFills": [],
+              "children": [
+                {
+                  "id": "I921:639;921:504",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 16,
+                  "height": 16,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "I921:639;921:505",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 4,
+                      "y": 4,
+                      "width": 8,
+                      "height": 8,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "921:642",
+          "type": "COMPONENT",
+          "name": "State=Inactive",
+          "x": 208,
+          "y": 24,
+          "width": 95,
+          "height": 36,
+          "visible": true,
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 8,
+          "paddingTop": 0,
+          "paddingRight": 12,
+          "paddingBottom": 0,
+          "paddingLeft": 12,
+          "cornerRadius": 8,
+          "solidFills": [],
+          "children": [
+            {
+              "id": "921:643",
+              "type": "INSTANCE",
+              "name": "Icon / panel",
+              "x": 12,
+              "y": 11.5,
+              "width": 13,
+              "height": 13,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 0,
+              "properties": {},
+              "mainComponentId": "921:525",
+              "solidFills": [],
+              "children": [
+                {
+                  "id": "I921:643;921:526",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 16,
+                  "height": 16,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "I921:643;921:527",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 2.5,
+                      "y": 3,
+                      "width": 11,
+                      "height": 10,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": []
+                    },
+                    {
+                      "id": "I921:643;921:528",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 10,
+                      "y": 3,
+                      "width": 0,
+                      "height": 10,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "921:647",
+              "type": "TEXT",
+              "name": "Label",
+              "x": 33,
+              "y": 8,
+              "width": 50,
+              "height": 20,
+              "visible": true,
+              "characters": "产物预览",
+              "fontSize": 12.5,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": { "wght": 400 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 20 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.3921568691730499,
+                    "g": 0.4117647111415863,
+                    "b": 0.43529412150382996
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "921:632",
+      "type": "COMPONENT_SET",
+      "name": "Pioneer F9 / SessionTab",
+      "x": 40,
+      "y": 510,
+      "width": 396,
+      "height": 82,
+      "visible": true,
+      "layoutMode": "NONE",
+      "itemSpacing": 0,
+      "paddingTop": 0,
+      "paddingRight": 0,
+      "paddingBottom": 0,
+      "paddingLeft": 0,
+      "cornerRadius": 5,
+      "properties": {
+        "Label#921:20": { "type": "TEXT", "defaultValue": "流式发票导出" },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": ["Active", "Inactive"]
+        }
+      },
+      "solidFills": [],
+      "children": [
+        {
+          "id": "921:619",
+          "type": "COMPONENT",
+          "name": "State=Active",
+          "x": 24,
+          "y": 24,
+          "width": 138,
+          "height": 34,
+          "visible": true,
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 8,
+          "paddingTop": 0,
+          "paddingRight": 12,
+          "paddingBottom": 0,
+          "paddingLeft": 12,
+          "cornerRadius": 8,
+          "solidFills": [
+            {
+              "color": {
+                "r": 0.9921568632125854,
+                "g": 0.9882352948188782,
+                "b": 0.9803921580314636
+              },
+              "opacity": 1,
+              "visible": true
+            }
+          ],
+          "children": [
+            {
+              "id": "921:620",
+              "type": "INSTANCE",
+              "name": "Icon / chat",
+              "x": 12,
+              "y": 10.5,
+              "width": 13,
+              "height": 13,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 0,
+              "properties": {},
+              "mainComponentId": "921:522",
+              "solidFills": [],
+              "children": [
+                {
+                  "id": "I921:620;921:523",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 16,
+                  "height": 16,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "I921:620;921:524",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 3,
+                      "y": 3,
+                      "width": 10,
+                      "height": 10.5,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "921:623",
+              "type": "TEXT",
+              "name": "Label",
+              "x": 33,
+              "y": 7,
+              "width": 75,
+              "height": 20,
+              "visible": true,
+              "characters": "流式发票导出",
+              "fontSize": 12.5,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Medium",
+                "variationSettings": { "wght": 500 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 20 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.1725490242242813,
+                    "g": 0.2078431397676468,
+                    "b": 0.27843138575553894
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            },
+            {
+              "id": "921:624",
+              "type": "INSTANCE",
+              "name": "Icon / x",
+              "x": 116,
+              "y": 12,
+              "width": 10,
+              "height": 10,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 0,
+              "properties": {},
+              "mainComponentId": "921:503",
+              "solidFills": [],
+              "children": [
+                {
+                  "id": "I921:624;921:504",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 16,
+                  "height": 16,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "I921:624;921:505",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 4,
+                      "y": 4,
+                      "width": 8,
+                      "height": 8,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "921:627",
+          "type": "COMPONENT",
+          "name": "State=Inactive",
+          "x": 208,
+          "y": 24,
+          "width": 120,
+          "height": 34,
+          "visible": true,
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 8,
+          "paddingTop": 0,
+          "paddingRight": 12,
+          "paddingBottom": 0,
+          "paddingLeft": 12,
+          "cornerRadius": 8,
+          "solidFills": [],
+          "children": [
+            {
+              "id": "921:628",
+              "type": "INSTANCE",
+              "name": "Icon / chat",
+              "x": 12,
+              "y": 10.5,
+              "width": 13,
+              "height": 13,
+              "visible": true,
+              "layoutMode": "NONE",
+              "itemSpacing": 0,
+              "paddingTop": 0,
+              "paddingRight": 0,
+              "paddingBottom": 0,
+              "paddingLeft": 0,
+              "cornerRadius": 0,
+              "properties": {},
+              "mainComponentId": "921:522",
+              "solidFills": [],
+              "children": [
+                {
+                  "id": "I921:628;921:523",
+                  "type": "FRAME",
+                  "name": "Frame",
+                  "x": 0,
+                  "y": 0,
+                  "width": 16,
+                  "height": 16,
+                  "visible": true,
+                  "layoutMode": "NONE",
+                  "itemSpacing": 0,
+                  "paddingTop": 0,
+                  "paddingRight": 0,
+                  "paddingBottom": 0,
+                  "paddingLeft": 0,
+                  "cornerRadius": 0,
+                  "solidFills": [
+                    {
+                      "color": { "r": 1, "g": 1, "b": 1 },
+                      "opacity": 1,
+                      "visible": false
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "I921:628;921:524",
+                      "type": "VECTOR",
+                      "name": "Vector",
+                      "x": 3,
+                      "y": 3,
+                      "width": 10,
+                      "height": 10.5,
+                      "visible": true,
+                      "cornerRadius": 0,
+                      "solidFills": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "921:631",
+              "type": "TEXT",
+              "name": "Label",
+              "x": 33,
+              "y": 7,
+              "width": 75,
+              "height": 20,
+              "visible": true,
+              "characters": "流式发票导出",
+              "fontSize": 12.5,
+              "fontName": {
+                "family": "Noto Sans SC",
+                "style": "Regular",
+                "variationSettings": { "wght": 400 }
+              },
+              "lineHeight": { "unit": "PIXELS", "value": 20 },
+              "solidFills": [
+                {
+                  "color": {
+                    "r": 0.3921568691730499,
+                    "g": 0.4117647111415863,
+                    "b": 0.43529412150382996
+                  },
+                  "opacity": 1,
+                  "visible": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "designNode": "921:706",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-706",
+      "designProperties": {
+        "Cover": {
+          "type": "VARIANT",
+          "defaultValue": "Code",
+          "variantOptions": ["Code", "Map", "Doc", "Unavailable"]
+        }
+      },
+      "designVersion": "S0 snapshot-only; three component-set screenshots re-read on 2026-10-26; no official Code Connect publication",
+      "status": "mapped",
+      "code": {
+        "exportName": "ProjectPoster",
+        "path": "apps/desktop/src/renderer/components/ProjectPoster.tsx",
+        "commit": null,
+        "blob": "2c34b00da414d9d1f967832a52f6a9c586cde8b0",
+        "inAcceptedMain": false,
+        "mainBlob": "5d906b384f7f1297182986844cd8882d148dccc9",
+        "props": {
+          "project": "ProjectSummary",
+          "onOpen": "(project: ProjectSummary) => void",
+          "unavailableReason": "string | undefined"
+        },
+        "proposedInThisPR": true,
+        "baseCommit": "d11dedefbd732f97c5cf549b103f405f3741a3af"
+      },
+      "usedProps": ["project", "onOpen", "unavailableReason"],
+      "example": "<ProjectPoster project={project} onOpen={onOpen} unavailableReason={unavailableReason} />",
+      "variants": [
+        {
+          "nodeId": "921:675",
+          "name": "Cover=Code",
+          "status": "preserved-difference",
+          "reason": "Explicit retained difference: Code/Map/Doc all use the existing seeded gradient, responsive card geometry and actual catalog text. No inferred category, new asset or cover prop. Mapping examples are identical for these three visual categories by design.",
+          "exercise": "Render actual catalog projects; verify enabled card and computed gradient, then open through the existing session picker.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 poster variants retain gradients and unavailable cards recover after rescan"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:681",
+          "name": "Cover=Map",
+          "status": "preserved-difference",
+          "reason": "Explicit retained difference: Code/Map/Doc all use the existing seeded gradient, responsive card geometry and actual catalog text. No inferred category, new asset or cover prop. Mapping examples are identical for these three visual categories by design.",
+          "exercise": "Render actual catalog projects; verify enabled card and computed gradient, then open through the existing session picker.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 poster variants retain gradients and unavailable cards recover after rescan"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:688",
+          "name": "Cover=Doc",
+          "status": "preserved-difference",
+          "reason": "Explicit retained difference: Code/Map/Doc all use the existing seeded gradient, responsive card geometry and actual catalog text. No inferred category, new asset or cover prop. Mapping examples are identical for these three visual categories by design.",
+          "exercise": "Render actual catalog projects; verify enabled card and computed gradient, then open through the existing session picker.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 poster variants retain gradients and unavailable cards recover after rescan"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:695",
+          "name": "Cover=Unavailable",
+          "status": "mapped",
+          "reason": "A stale catalog passes unavailableReason; native disabled button, grayscale cover and a visible accessible reason prevent opening until a successful rescan.",
+          "exercise": "Change workspace to an unavailable root, verify disabled cards and no modal, then rescan the retained root and open a real session.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 poster variants retain gradients and unavailable cards recover after rescan"
+            }
+          ]
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Cover=Code|Map|Doc",
+          "code": "project.coverSeed",
+          "status": "preserved-difference",
+          "reason": "Same gradient treatment for all three; catalog has no category contract."
+        },
+        {
+          "figma": "Cover=Unavailable",
+          "code": "unavailableReason",
+          "status": "mapped",
+          "reason": "ProjectLibrary supplies an explanation when the catalog is stale; it does not claim every individual directory has disappeared."
+        },
+        {
+          "figma": "Nested title/description text",
+          "code": "project.name / project.description",
+          "status": "mapped",
+          "reason": "Real catalog metadata; Figma sample text is not application data."
+        }
+      ],
+      "examplesExport": "WorkspacePosterExamples",
+      "acceptedAt": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+      "actualSourceSha256": "7c5384f25ff1813c10cb66161f9f19372fcb1b4f30ad91976d3dfe68f63b10c6"
+    },
+    {
+      "designNode": "921:648",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-648",
+      "designProperties": {
+        "Label#921:23": { "type": "TEXT", "defaultValue": "产物预览" },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": ["Active", "Inactive"]
+        }
+      },
+      "designVersion": "S0 snapshot-only; three component-set screenshots re-read on 2026-10-26; no official Code Connect publication",
+      "status": "mapped",
+      "code": {
+        "exportName": "DockSurface",
+        "path": "apps/desktop/src/renderer/components/DockSurface.tsx",
+        "commit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
+        "blob": "74dcbed5af0ca5f7935cd09360386d5b83129802",
+        "inAcceptedMain": true,
+        "mainBlob": "74dcbed5af0ca5f7935cd09360386d5b83129802",
+        "props": {
+          "session": "Session",
+          "dispatch": "Dispatch<SessionWorkspaceAction>",
+          "renderPanel": "(panel: DockPanelId) => ReactNode"
+        }
+      },
+      "usedProps": ["session", "dispatch", "renderPanel"],
+      "example": "<DockSurface session={session} dispatch={dispatch} renderPanel={renderPanel} />",
+      "variants": [
+        {
+          "nodeId": "921:633",
+          "name": "State=Active",
+          "status": "preserved-difference",
+          "reason": "An existing DockSurface header is the mapped unit. Current panels remain visible together: Active means :focus-within, Inactive means focus outside. This is an explicit composition difference from Figma stacked tabs; no selected/onClose prop is invented.",
+          "exercise": "Focus the context header, then the conversation input; verify both highlight states. Drag the context panel and collapse it through its real menu, retaining the session and draft.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:642",
+          "name": "State=Inactive",
+          "status": "preserved-difference",
+          "reason": "An existing DockSurface header is the mapped unit. Current panels remain visible together: Active means :focus-within, Inactive means focus outside. This is an explicit composition difference from Figma stacked tabs; no selected/onClose prop is invented.",
+          "exercise": "Focus the context header, then the conversation input; verify both highlight states. Drag the context panel and collapse it through its real menu, retaining the session and draft.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            }
+          ]
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Label#921:23",
+          "code": "DockSurface names[panel]",
+          "status": "composition",
+          "reason": "Labels are actual panel identities supplied by the existing panelNames registry."
+        },
+        {
+          "figma": "State=Active|Inactive",
+          "code": ".dock-panel:focus-within > .module-header",
+          "status": "preserved-difference",
+          "reason": "Focus state in a simultaneous-panel layout, not tab selection hiding sibling content."
+        },
+        {
+          "figma": "close icon / dock tab",
+          "code": "DockSurface drag handle + PanelMenu / TOGGLE_PANEL",
+          "status": "composition",
+          "reason": "Close is the existing menu action 收起面板; drag and keyboard menu moves use DOCK_PANEL. Neither stops a Run. The last visible panel cannot be hidden."
+        }
+      ],
+      "examplesExport": "PanelTabExamples",
+      "acceptedAt": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+      "actualSourceSha256": "a44b58f3a6e6fb915f7c2a0e39c5f2e10027f876b745dbc2845191990da499f9"
+    },
+    {
+      "designNode": "921:632",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-632",
+      "designProperties": {
+        "Label#921:20": { "type": "TEXT", "defaultValue": "流式发票导出" },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": ["Active", "Inactive"]
+        }
+      },
+      "designVersion": "S0 snapshot-only; three component-set screenshots re-read on 2026-10-26; no official Code Connect publication",
+      "status": "mapped",
+      "code": {
+        "exportName": "SessionTabStrip",
+        "path": "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
+        "commit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
+        "blob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
+        "inAcceptedMain": true,
+        "mainBlob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
+        "props": {
+          "state": "SessionWorkspaceState",
+          "dispatch": "Dispatch<SessionWorkspaceAction>"
+        }
+      },
+      "usedProps": ["state", "dispatch"],
+      "example": "<SessionTabStrip state={state} dispatch={dispatch} />",
+      "variants": [
+        {
+          "nodeId": "921:619",
+          "name": "State=Active",
+          "status": "preserved-difference",
+          "reason": "Map one session item inside SessionTabStrip; state.activeTabId determines aria-selected. Preserve current responsive width, project subtitle and inactive close button (pointer accessible, tabindex -1), rather than claiming pixel parity with Figma.",
+          "exercise": "Create two real sessions, verify selected/unselected colors and close focus policy, activate and close each, reopen retained sessions. Close and reopen a running session without stopping its Run.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            },
+            {
+              "path": "tests/e2e/p2-run.e2e.spec.ts",
+              "test": "stops mid-run and shows 已停止 only after background convergence"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:627",
+          "name": "State=Inactive",
+          "status": "preserved-difference",
+          "reason": "Map one session item inside SessionTabStrip; state.activeTabId determines aria-selected. Preserve current responsive width, project subtitle and inactive close button (pointer accessible, tabindex -1), rather than claiming pixel parity with Figma.",
+          "exercise": "Create two real sessions, verify selected/unselected colors and close focus policy, activate and close each, reopen retained sessions. Close and reopen a running session without stopping its Run.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            },
+            {
+              "path": "tests/e2e/p2-run.e2e.spec.ts",
+              "test": "stops mid-run and shows 已停止 only after background convergence"
+            }
+          ]
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Label#921:20",
+          "code": "state.sessions[].title",
+          "status": "composition",
+          "reason": "Library and Settings labels are fixed; project subtitle derives from session.project.name."
+        },
+        {
+          "figma": "State=Active|Inactive",
+          "code": "state.activeTabId",
+          "status": "composition",
+          "reason": "SessionTabStrip renders a list from state.openSessionIds; a single instance is not the entire strip."
+        },
+        {
+          "figma": "close icon",
+          "code": "dispatch({ type: 'CLOSE_TAB', tabId })",
+          "status": "composition",
+          "reason": "Rendered only for session tabs; closing does not delete the session or stop its run."
+        }
+      ],
+      "examplesExport": "SessionTabExamples",
+      "acceptedAt": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+      "actualSourceSha256": "f23f84f72c20d009918bfd4f0347849349068b0d4076ab816d3dfb7e99549f8e"
+    }
+  ],
+  "designDifferences": [],
+  "basis": [
+    {
+      "path": "docs/specs/2026-10-24-p2-run-contract.md",
+      "commit": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+      "sha256": "d43c56eb6cded91e6e5f634bc2133ede0ea749592d4bffd756d2fba280d552d0"
+    },
+    {
+      "path": "design/sync/component-mappings.json",
+      "commit": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+      "sha256": "8fd5c22995bc2f9a40e7d60ccb12ed3b9ae34d55c025a5247c59306df1a93dd6"
+    },
+    {
+      "path": "design/sync/mapping-acceptance.md",
+      "commit": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+      "sha256": "4dcf3bb51b5f090a358257d207ecb948ddd9ea0e69545d69f4dbd38125a5a79b"
+    },
+    {
+      "path": "design/tokens/pioneer.tokens.json",
+      "commit": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+      "sha256": "498cfd519fffa4a91217b140cdd60d72dc3842791c4f4537dd9c5bb77c6819d5"
+    },
+    {
+      "path": "tests/e2e/design-mappings.e2e.spec.ts",
+      "commit": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+      "sha256": "61682dab335c176f3eb0f37666c2441050626b116b1ba564d32cb24c413f8cc4"
+    },
+    {
+      "path": "tests/e2e/p2-run.e2e.spec.ts",
+      "commit": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+      "sha256": "07782adcd3048968a9d20b7c9974e8990f458a438cc3fc3057117c1d83b39925"
+    }
+  ],
+  "policy": {
+    "issue": 36,
+    "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+    "nodes": ["921:706", "921:648", "921:632"],
+    "changeTypes": ["infrastructure"],
+    "allowedPaths": [
+      "tools/design-delivery.mjs",
+      "tools/design-delivery-cli.mjs",
+      "tests/design-sync/delivery.test.mjs",
+      "design/delivery/",
+      "docs/workflow/design-delivery.md",
+      "docs/testing/issue36-verification.md",
+      "package.json",
+      ".github/workflows/quality.yml"
+    ],
+    "basis": [
+      "docs/specs/2026-10-24-p2-run-contract.md",
+      "design/sync/component-mappings.json",
+      "design/sync/mapping-acceptance.md",
+      "design/tokens/pioneer.tokens.json",
+      "tests/e2e/design-mappings.e2e.spec.ts",
+      "tests/e2e/p2-run.e2e.spec.ts"
+    ]
+  },
+  "constraints": [
+    "Design is visual evidence, not behavioral authority.",
+    "Preserve retained S1 differences; no inferred Grant, stop or Unknown state.",
+    "No automatic merge, issue edits, Figma writeback or real Provider execution."
+  ],
+  "packageHash": "aa8c32a229692f7de2ded7a99d1f12d75d52b0485d5fcea1c203159e581aea71",
+  "outputHash": "a878fb99502bf5b313cb9518bd8f079bad4c74135c97f25090f2ae8279d5ac92",
+  "files": [
+    {
+      "path": ".github/workflows/quality.yml",
+      "sha256": "2273541a1403813f651a44ce5a895516fc8d6fbd422a22fcedd3c482a214939b"
+    },
+    {
+      "path": "design/delivery/features.json",
+      "sha256": "b76cc56e3f2297d45b3db26535aba7b8cd3986fdd82fa8ddd511044c81d0941a"
+    },
+    {
+      "path": "design/delivery/issue36.request.json",
+      "sha256": "ae6b812784f3c9ac522511ef623b7cc5d3d22936b18d5070521a8a3482e9ce95"
+    },
+    {
+      "path": "docs/workflow/design-delivery.md",
+      "sha256": "0249fa102cbfab04664223af469a0cb3a65c38490ebb631e1bf14a620e7f0f08"
+    },
+    {
+      "path": "package.json",
+      "sha256": "34bafabbcd6e9ce6efc2c56f305a0d3537c58c4b695bfcc4263b1540ac772894"
+    },
+    {
+      "path": "tests/design-sync/delivery.test.mjs",
+      "sha256": "4a0addf0728d9be588f660eef20aeafeb00028fc8cd92d94d4c98d5a3682e9f5"
+    },
+    {
+      "path": "tools/design-delivery-cli.mjs",
+      "sha256": "9b37e52274caca3310b7f87dee41d5af8a920794bdb37ec3ed0ba369fe1f5086"
+    },
+    {
+      "path": "tools/design-delivery.mjs",
+      "sha256": "7d3d6418757a49a172d89f84e4151b027f8a3b52ad0f01ddb4c564c90da72dba"
+    }
+  ]
+}
