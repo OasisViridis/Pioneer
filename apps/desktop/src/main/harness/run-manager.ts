@@ -278,8 +278,8 @@ export class RunManager {
   }
 
   /**
-   * Contract §1 replay rules: an identical requestId converges on its run, a
-   * different payload is a conflict, and an evicted payload means a fresh
+   * Contract §1 replay rules: an identical requestId maps back to its run, a
+   * different payload is a conflict, and an evicted run means a fresh
    * authorization is required. Never hands back a runId before its accept
    * record settled, so a failed journal write cannot leak a phantom run.
    */
@@ -726,9 +726,7 @@ export class RunManager {
     // end is not quiescent, but §4 still asks for a best-effort release. The
     // rejection is swallowed so a failing terminal write never surfaces as an
     // unhandled rejection from a timer.
-    void this.terminate(run, 'failed', code)
-      .catch(() => undefined)
-      .finally(() => this.disposeAdapter(run));
+    void this.terminateAndRelease(run, 'failed', code).catch(() => undefined);
   }
 
   /**
@@ -928,7 +926,13 @@ export class RunManager {
       if (page.events.length === 0) continue;
       subscriber.awaitingBatch = true;
       subscriber.deliveredSeq = page.nextAfterSeq;
-      this.dependencies.sender.send(subscriber.webContentsId, { page });
+      try {
+        this.dependencies.sender.send(subscriber.webContentsId, { page });
+      } catch {
+        // A dead renderer must not break the delivery loop or the flush timer;
+        // drop the subscriber and let the run continue for the others.
+        run.subscribers.delete(subscriber.webContentsId);
+      }
     }
   }
 

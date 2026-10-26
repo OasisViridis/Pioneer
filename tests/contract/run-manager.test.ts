@@ -50,6 +50,17 @@ function memoryStore(initial: string | null = null): RunJournalStore & {
   };
 }
 
+function hookedStore(hook: (value: string) => void | Promise<void>) {
+  const base = memoryStore();
+  return {
+    ...base,
+    save: async (value: string) => {
+      await hook(value);
+      await base.save(value);
+    },
+  };
+}
+
 function collectSender(): RunSenderPort & { batches: RunEventBatch[] } {
   const batches: RunEventBatch[] = [];
   return {
@@ -909,18 +920,13 @@ describe('P2 run manager edge hardening', () => {
 
   it('publishes the terminal event only after the terminal record is durable', async () => {
     const order: string[] = [];
-    const base = memoryStore();
-    const store = {
-      ...base,
-      save: (value: string) => {
-        order.push(
-          value.includes('"kind":"terminal"')
-            ? 'journal:terminal'
-            : 'journal:accept',
-        );
-        return base.save(value);
-      },
-    };
+    const store = hookedStore((value) => {
+      order.push(
+        value.includes('"kind":"terminal"')
+          ? 'journal:terminal'
+          : 'journal:accept',
+      );
+    });
     const { manager } = await createManager(
       { steps: [{ action: 'complete' }] },
       {
@@ -1009,16 +1015,11 @@ describe('P2 run manager edge hardening', () => {
   });
 
   it('converges and releases when the terminal journal write fails', async () => {
-    const base = memoryStore();
-    const store = {
-      ...base,
-      save: (value: string) => {
-        if (value.includes('"kind":"terminal"')) {
-          return Promise.reject(new Error('terminal write failed'));
-        }
-        return base.save(value);
-      },
-    };
+    const store = hookedStore((value) => {
+      if (value.includes('"kind":"terminal"')) {
+        throw new Error('terminal write failed');
+      }
+    });
     let disposed = 0;
     const factory: HarnessAdapterFactory = () => ({
       start: () =>
@@ -1149,12 +1150,11 @@ describe('P2 run manager edge hardening', () => {
 
   it('still replays an accepted request after the journal turns unhealthy', async () => {
     let broken = false;
-    const base = memoryStore();
-    const store = {
-      ...base,
-      save: (value: string) =>
-        broken ? Promise.reject(new Error('journal broken')) : base.save(value),
-    };
+    const store = hookedStore((value) => {
+      if (broken) {
+        throw new Error(`journal broken: ${String(value.length)}`);
+      }
+    });
     const { manager } = await createManager(
       { steps: [{ action: 'complete' }] },
       undefined,
@@ -1162,7 +1162,22 @@ describe('P2 run manager edge hardening', () => {
     );
     const first = await launchRun(manager, { requestId: 'request:replay' });
     await waitFor(() => pageOf(manager, first.runId)?.status === 'completed');
+    // Reserve two grants while the journal is still healthy.
+    const doomedGrant = await authorizeGrant(manager);
+    const freshGrant = await authorizeGrant(manager);
     broken = true;
+    // This accept write fails, which is what flips the journal to unhealthy.
+    const doomed = await manager.start(
+      {
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:doomed',
+        grantId: doomedGrant,
+      },
+      binding,
+    );
+    expect(doomed).toEqual({ ok: false, code: 'JOURNAL_UNAVAILABLE' });
     const replayed = await manager.start(
       {
         sessionId: 'session:test',
@@ -1174,7 +1189,6 @@ describe('P2 run manager edge hardening', () => {
       binding,
     );
     expect(replayed).toEqual({ ok: true, runId: first.runId });
-    const freshGrant = await authorizeGrant(manager);
     const refused = await manager.start(
       {
         sessionId: 'session:test',
