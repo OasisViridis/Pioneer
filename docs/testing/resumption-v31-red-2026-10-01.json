@@ -1,0 +1,9 @@
+{
+  "phase": "red",
+  "command": "pnpm test:e2e --grep 'Hazel stays decorative'",
+  "exitCode": 1,
+  "log": "tests/resumption-v31-red-2026-10-01.log",
+  "node": "24.19.0",
+  "date": "2026-10-01T02:23:53.6402746+08:00",
+  "classification": "Electron launch Assertion error before browser actions; environment failure, not feature red"
+}

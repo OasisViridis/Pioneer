@@ -28,8 +28,8 @@ export class RunProtocolProbe {
   private activeCall: string | null = null;
   private outcome: Outcome | null = null;
   private stopRequested = false;
-  private convergenceUncertain = false;
   private sealed = false;
+  private terminalEmitted = false;
   private settledWaiters: (() => void)[] = [];
 
   constructor(identity: RunIdentity) {
@@ -38,6 +38,7 @@ export class RunProtocolProbe {
   }
 
   private emit(body: RunEventBody): void {
+    if (this.terminalEmitted) return;
     const event = RunEventSchema.parse({
       ...this.identity,
       version: 1,
@@ -210,29 +211,24 @@ export class RunProtocolProbe {
     return true;
   }
 
-  /** Injected deadline/transport loss; never interpreted as quiescence. */
-  unknown(reason: 'stop_timeout' | 'adapter_disconnected'): void {
-    if (this.terminal()) return;
-    this.convergenceUncertain = true;
-    this.requestStop('host_failure');
-    if (this.terminal() || this.status === 'unknown') return;
-    this.status = 'unknown';
-    this.emit({ type: 'run.unknown', reason });
-  }
-
-  /** Positive local adapter/resource acknowledgement after a disconnected channel.
-   * No pending promises alone is not proof that the adapter has no more work.
+  /** Host-side force termination after the stop grace expires. The stop path
+   * only ever converges to stopped or failed; a stuck teardown never lingers
+   * as a live unknown state. Pending resources are force-disposed by the host
+   * and their late settlement must not emit further events.
    */
-  confirmQuiescence(): boolean {
-    if (this.pending !== 0) return false;
-    this.convergenceUncertain = false;
-    this.finishIfQuiescent();
+  forceEnd(code: RunFailureCode): boolean {
+    if (this.terminal() || !this.stopRequested) return false;
+    this.sealed = true;
+    this.status = 'failed';
+    this.emit({ type: 'run.failed', code });
+    this.terminalEmitted = true;
+    for (const resolve of this.settledWaiters) resolve();
+    this.settledWaiters = [];
     return true;
   }
 
   private finishIfQuiescent(): void {
-    if (this.terminal() || this.pending !== 0 || this.convergenceUncertain)
-      return;
+    if (this.terminal() || this.pending !== 0) return;
     if (this.stopRequested) {
       this.status = this.outcome?.status === 'failed' ? 'failed' : 'stopped';
       this.emit(
@@ -248,6 +244,7 @@ export class RunProtocolProbe {
           : { type: 'run.completed', usage: null },
       );
     } else return;
+    this.terminalEmitted = true;
     for (const resolve of this.settledWaiters) resolve();
     this.settledWaiters = [];
   }

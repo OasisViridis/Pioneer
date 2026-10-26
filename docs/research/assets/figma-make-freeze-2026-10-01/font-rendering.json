@@ -1,0 +1,22 @@
+{
+  "body": {
+    "fonts": [
+      {
+        "familyName": "Noto Sans SC",
+        "glyphCount": 5,
+        "isCustomFont": true,
+        "postScriptName": "Noto-Sans-SC"
+      }
+    ]
+  },
+  "heading": {
+    "fonts": [
+      {
+        "familyName": "Noto Sans SC",
+        "glyphCount": 10,
+        "isCustomFont": true,
+        "postScriptName": "Noto-Sans-SC-Medium"
+      }
+    ]
+  }
+}

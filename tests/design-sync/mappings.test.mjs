@@ -84,18 +84,39 @@ test('an unsupported variant cannot be hidden behind a completed mapping status'
   );
 });
 
-test('unaccepted LocalTabs and SessionTabStrip remain blocked with no generated usage', () => {
+test('accepted LocalTabs and SessionTabStrip exports match pinned props without claiming complete mappings', async () => {
   for (const i of [1, 2]) {
-    validateMapping(index.components[i], s0.components[i], null);
+    const mapping = index.components[i];
+    const acceptedSource = await readFile(
+      path.join(root, mapping.code.path),
+      'utf8',
+    );
+    validateMapping(mapping, s0.components[i], acceptedSource);
+    assert.notEqual(mapping.status, 'mapped');
+    const changed = structuredClone(mapping);
+    changed.usedProps.push('selected');
+    assert.throws(
+      () => validateMapping(changed, s0.components[i], acceptedSource),
+      /Invented prop/,
+    );
+  }
+});
+
+test('unaccepted candidates require re-pinning when source appears and cannot generate usage', () => {
+  for (const i of [1, 2]) {
     const mapping = structuredClone(index.components[i]);
+    mapping.code.inAcceptedMain = false;
+    mapping.status = 'blocked';
+    mapping.example = null;
+    validateMapping(mapping, s0.components[i], null);
+    assert.throws(
+      () => validateMapping(mapping, s0.components[i], source),
+      /re-pin accepted version/,
+    );
     mapping.example = '<SessionTabStrip selected />';
     assert.throws(
       () => validateMapping(mapping, s0.components[i], null),
       /unaccepted code/,
-    );
-    assert.throws(
-      () => validateMapping(index.components[i], s0.components[i], source),
-      /re-pin accepted version/,
     );
   }
 });

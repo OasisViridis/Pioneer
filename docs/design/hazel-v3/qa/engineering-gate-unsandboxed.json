@@ -1,0 +1,8 @@
+{
+  "command": "pnpm check",
+  "startedAt": "2026-09-30T11:50:25.8047114+00:00",
+  "endedAt": "2026-09-30T11:51:57.6981227+00:00",
+  "exitCode": 1,
+  "execution": "Outside filesystem sandbox; app sandbox/contextIsolation/CSP unchanged; fixture-only profiles",
+  "log": "tests/hazel-v3-check-unsandboxed-2026-09-30.log"
+}

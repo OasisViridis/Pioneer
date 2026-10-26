@@ -1,0 +1,119 @@
+{
+  "setId": "880:312",
+  "boardId": "880:313",
+  "components": {
+    "greendou-organizing.png": {
+      "64": "880:217",
+      "88": "880:214"
+    },
+    "greendou-listening.png": {
+      "64": "880:223",
+      "88": "880:220"
+    },
+    "greendou-reading.png": {
+      "64": "880:229",
+      "88": "880:226"
+    },
+    "jelly-companion.png": {
+      "64": "880:234",
+      "88": "880:232"
+    },
+    "paper-butterfly.png": {
+      "64": "880:239",
+      "88": "880:236"
+    },
+    "cherry-bookmark.png": {
+      "64": "880:245",
+      "88": "880:242"
+    },
+    "jelly-ribbon-charm.png": {
+      "64": "880:251",
+      "88": "880:248"
+    },
+    "uniform-ribbon.png": {
+      "64": "880:256",
+      "88": "880:254"
+    },
+    "ribbon-outline.svg": {
+      "64": "880:264",
+      "88": "880:258"
+    },
+    "cherry-pair.svg": {
+      "64": "880:276",
+      "88": "880:270"
+    },
+    "silver-paper-fold.svg": {
+      "64": "880:288",
+      "88": "880:282"
+    },
+    "jelly-outline.svg": {
+      "64": "880:303",
+      "88": "880:294"
+    }
+  },
+  "variantCount": 24,
+  "currentPlacements": [
+    {
+      "id": "857:1476",
+      "file": "cherry-bookmark.png",
+      "previous": {
+        "id": "856:1276",
+        "w": 88,
+        "h": 88,
+        "parent": "838:1506",
+        "x": 472,
+        "y": 0
+      },
+      "master": "880:242",
+      "w": 88,
+      "h": 88,
+      "parent": "838:1506",
+      "x": 472,
+      "y": 0,
+      "art": [
+        {
+          "id": "I857:1476;880:243",
+          "w": 48,
+          "h": 48,
+          "x": 40,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "857:1478",
+      "file": "paper-butterfly.png",
+      "previous": {
+        "id": "856:1286",
+        "w": 64,
+        "h": 64,
+        "parent": "838:1692",
+        "x": 472,
+        "y": 0
+      },
+      "master": "880:239",
+      "w": 64,
+      "h": 64,
+      "parent": "838:1692",
+      "x": 472,
+      "y": 0,
+      "art": [
+        {
+          "id": "I857:1478;880:240",
+          "w": 48,
+          "h": 48,
+          "x": 16,
+          "y": 0
+        }
+      ]
+    }
+  ],
+  "foundation": {
+    "id": "857:1480",
+    "w": 1440,
+    "h": 364
+  },
+  "additionalPages": 0,
+  "additionalVariables": 0,
+  "additionalStyles": 0
+}

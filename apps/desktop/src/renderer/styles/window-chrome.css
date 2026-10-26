@@ -1,0 +1,155 @@
+/* Window-only tokens. Never reuse or override business danger/success colors. */
+.pioneer-window {
+  --window-close: #ff5f57;
+  --window-minimize: #febc2e;
+  --window-fullscreen: #28c840;
+  --window-inactive: #b8b3b1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  min-width: 640px;
+}
+.pioneer-window-body {
+  min-height: 0;
+  overflow: hidden;
+}
+.pioneer-window-body > .app-shell {
+  height: 100%;
+}
+.pioneer-window-body > .restore-screen {
+  min-height: 100%;
+  height: 100%;
+  overflow: auto;
+}
+.window-chrome {
+  position: relative;
+  z-index: 30;
+  background: var(--pioneer-background);
+}
+.window-titlebar {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 8px;
+  gap: 8px;
+  border-bottom: 1px solid var(--pioneer-border);
+  user-select: none;
+}
+.window-caption-drag {
+  -webkit-app-region: drag;
+  flex: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  color: var(--pioneer-muted);
+  font-size: 12px;
+}
+.window-traffic-lights {
+  display: flex;
+  gap: 0;
+}
+.window-control {
+  -webkit-app-region: no-drag;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  border: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+}
+.window-control-dot {
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgb(0 0 0 / 14%);
+  color: rgb(0 0 0 / 68%);
+}
+.window-control--close .window-control-dot {
+  background: var(--window-close);
+}
+.window-control--minimize .window-control-dot {
+  background: var(--window-minimize);
+}
+.window-control--fullscreen .window-control-dot {
+  background: var(--window-fullscreen);
+}
+.window-control-dot svg {
+  width: 8px;
+  height: 8px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2px;
+  opacity: 0;
+}
+.window-traffic-lights:hover svg,
+.window-control:focus-visible svg {
+  opacity: 1;
+}
+.window-control:active:not(:disabled) {
+  background: var(--pioneer-surface-muted);
+  filter: brightness(0.92);
+}
+.window-control:disabled {
+  background: transparent;
+}
+.window-control:disabled .window-control-dot,
+.window-chrome[data-focused='false'] .window-control-dot {
+  background: var(--window-inactive);
+}
+.window-control:disabled .window-control-dot {
+  opacity: 0.55;
+}
+.window-menu,
+.window-chrome button,
+.window-chrome summary {
+  -webkit-app-region: no-drag;
+}
+.window-menu > summary {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 2px 8px;
+  display: grid;
+  place-items: center;
+}
+.window-menu-note {
+  max-width: 200px;
+  padding: 8px;
+  font-size: 12px;
+  color: var(--pioneer-muted);
+  margin: 0;
+}
+.window-chrome-warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 16px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--pioneer-border);
+}
+.window-chrome-warning button {
+  padding: 4px 8px;
+  min-height: 32px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .window-control {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .window-control-dot {
+    forced-color-adjust: none;
+    background: Canvas !important;
+    border-color: ButtonText;
+    color: ButtonText;
+  }
+  .window-control-dot svg {
+    opacity: 1;
+  }
+}

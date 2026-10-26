@@ -87,6 +87,8 @@ export const RunFailureCodeSchema = z.enum([
   'OUTPUT_LIMIT',
   'RUN_DEADLINE',
   'AUTHORIZATION_REVOKED',
+  'STOP_TIMEOUT',
+  'ADAPTER_DISCONNECTED',
 ]);
 
 const toolFailure = z.union([
@@ -160,11 +162,7 @@ export const RunEventBodySchema = z.discriminatedUnion('type', [
   z
     .object({
       type: z.literal('run.unknown'),
-      reason: z.enum([
-        'stop_timeout',
-        'adapter_disconnected',
-        'host_restarted',
-      ]),
+      reason: z.enum(['host_restarted']),
     })
     .strict(),
   z.object({ type: z.literal('run.completed'), usage }).strict(),
@@ -213,6 +211,8 @@ export type RunStatus = z.infer<typeof RunStatusSchema>;
 export type RunEvent = z.infer<typeof RunEventSchema>;
 export type RunEventBody = z.infer<typeof RunEventBodySchema>;
 export type RunStartRequest = z.infer<typeof RunStartRequestSchema>;
+export type RunCursorRequest = z.infer<typeof RunCursorRequestSchema>;
+export type RunStopRequest = z.infer<typeof RunStopRequestSchema>;
 export type RunFailureCode = z.infer<typeof RunFailureCodeSchema>;
 
 /** A receiver must resynchronize on gaps; timestamps are never ordering keys. */

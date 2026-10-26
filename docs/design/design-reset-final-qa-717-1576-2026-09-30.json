@@ -1,0 +1,90 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static structure/solid-color text with recorded inside-stroke and CJK-code-fallback exceptions; not WCAG/runtime certification",
+  "result": {
+    "pageId": "717:1576",
+    "pageName": "components · navigation",
+    "problems": [],
+    "internalCloseVariants": 3,
+    "qa": {
+      "structure": {
+        "pageId": "717:1576",
+        "name": "components · navigation",
+        "nodes": 114,
+        "texts": 68,
+        "instances": 6,
+        "roots": [
+          {
+            "id": "722:1574",
+            "name": "00 · 关闭按钮",
+            "x": 200,
+            "y": 200,
+            "width": 1200,
+            "height": 250
+          },
+          {
+            "id": "722:1584",
+            "name": "01 · Session Tab",
+            "x": 200,
+            "y": 610,
+            "width": 1200,
+            "height": 266
+          },
+          {
+            "id": "722:1612",
+            "name": "02 · Local Tab",
+            "x": 200,
+            "y": 1036,
+            "width": 1200,
+            "height": 254
+          },
+          {
+            "id": "722:1624",
+            "name": "03 · Workspace Poster",
+            "x": 200,
+            "y": 1450,
+            "width": 1200,
+            "height": 618
+          },
+          {
+            "id": "722:1655",
+            "name": "04 · Panel Header",
+            "x": 200,
+            "y": 2228,
+            "width": 1200,
+            "height": 266
+          },
+          {
+            "id": "722:1669",
+            "name": "05 · Session Row",
+            "x": 200,
+            "y": 2654,
+            "width": 1200,
+            "height": 378
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": []
+        }
+      },
+      "contrast": {
+        "pageId": "717:1576",
+        "name": "components · navigation",
+        "tested": 68,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    }
+  }
+}

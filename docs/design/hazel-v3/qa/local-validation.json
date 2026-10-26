@@ -1,0 +1,548 @@
+{
+  "date": "2026-10-01",
+  "tokenBaselineDate": "2026-10-01",
+  "pass": true,
+  "errors": [],
+  "relativeLinksChecked": 31,
+  "palette": 21,
+  "semantics": 25,
+  "geometry": 24,
+  "textStyles": 11,
+  "cssDefinitions": 92,
+  "undefinedCss": [],
+  "referenceCount": 12,
+  "assets": [
+    {
+      "file": "cherry-pair.svg",
+      "sha256": "3a465d752198008391ab7eda84893806a6a6541705fea6ad30b20374d9a8d86b",
+      "bytes": 393,
+      "viewBox": "0 0 32 32",
+      "embeddedImages": 0
+    },
+    {
+      "file": "compass-seal.svg",
+      "sha256": "1fcccffbd0143761293827efff76c56f03df8475d87e9ecafc6795bf8bc5d6f9",
+      "bytes": 327,
+      "viewBox": "0 0 32 32",
+      "embeddedImages": 0
+    },
+    {
+      "file": "jelly-companion.png",
+      "sha256": "585be08d03ce7668c74790114cacd1a1ecd948e41fabf76e494392d17c68a6f7",
+      "bytes": 925794,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        0,
+        20,
+        1214,
+        1254
+      ],
+      "edgeAlphaMax": 1,
+      "lowAlphaEdgeFringe": true,
+      "contentBoundsAbove8": [
+        194,
+        241,
+        1077,
+        1105
+      ]
+    },
+    {
+      "file": "jelly-mark.svg",
+      "sha256": "0a56dff03dd5c081299e75cfcd39a23a74b9b0646e81e3b395580eccc472c15c",
+      "bytes": 458,
+      "viewBox": "0 0 32 32",
+      "embeddedImages": 0
+    },
+    {
+      "file": "ribbon-outline.svg",
+      "sha256": "99c3dc492867a4de712a0335547f7a664f7a4d2c7c3557355af6360b39162b4a",
+      "bytes": 526,
+      "viewBox": "0 0 48 48",
+      "embeddedImages": 0
+    },
+    {
+      "file": "uniform-ribbon.png",
+      "sha256": "bfbe5ac5e8c79a9c7b17b4765bec87eb47a4bf74ee5e540b626afe8735b9374f",
+      "bytes": 703549,
+      "dimensions": [
+        1295,
+        1214
+      ],
+      "mode": "RGBA",
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        66,
+        19,
+        1151,
+        1188
+      ],
+      "edgeAlphaMax": 0,
+      "lowAlphaEdgeFringe": false,
+      "contentBoundsAbove8": [
+        206,
+        283,
+        1112,
+        989
+      ]
+    },
+    {
+      "file": "greendou-reading.png",
+      "sha256": "103817d6de0e73a5f803ae359b2e3253482b79bd7778d8bc9aaf28b02c1f03e2",
+      "bytes": 1035490,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        0,
+        53,
+        1218,
+        1254
+      ],
+      "edgeAlphaMax": 1,
+      "lowAlphaEdgeFringe": true,
+      "contentBoundsAbove8": [
+        180,
+        215,
+        1083,
+        1118
+      ]
+    },
+    {
+      "file": "greendou-organizing.png",
+      "sha256": "0d54c45287fcf4f0390dc1feb57af1ba509e5482aacf3bb48c10666e131a8bdf",
+      "bytes": 1142689,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        0,
+        21,
+        1248,
+        1254
+      ],
+      "edgeAlphaMax": 1,
+      "lowAlphaEdgeFringe": true,
+      "contentBoundsAbove8": [
+        157,
+        188,
+        1121,
+        1139
+      ]
+    },
+    {
+      "file": "greendou-listening.png",
+      "sha256": "0504fbf0fead98d3a2af3e8e17bc7c1360ef09aecd4fa439a40736ecbe010505",
+      "bytes": 1025208,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        0,
+        21,
+        1236,
+        1254
+      ],
+      "edgeAlphaMax": 1,
+      "lowAlphaEdgeFringe": true,
+      "contentBoundsAbove8": [
+        172,
+        194,
+        1109,
+        1129
+      ]
+    },
+    {
+      "file": "cherry-bookmark.png",
+      "sha256": "4304c77ed8ab9f52e10efca1737fcd41cdce4b20e28843e226bace231a1e858b",
+      "bytes": 684965,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        49,
+        23,
+        1192,
+        1228
+      ],
+      "edgeAlphaMax": 0,
+      "lowAlphaEdgeFringe": false,
+      "contentBoundsAbove8": [
+        409,
+        79,
+        935,
+        1196
+      ]
+    },
+    {
+      "file": "paper-butterfly.png",
+      "sha256": "d273b13d41293c5479ca66e44286389254f3fae14a3369f7178651a298c7cf8b",
+      "bytes": 727046,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        91,
+        21,
+        1210,
+        1212
+      ],
+      "edgeAlphaMax": 0,
+      "lowAlphaEdgeFringe": false,
+      "contentBoundsAbove8": [
+        163,
+        195,
+        1131,
+        1071
+      ]
+    },
+    {
+      "file": "jelly-ribbon-charm.png",
+      "sha256": "4b5b7abe12d9d259d0f74ebcf651b824ad86164020af541aafd05e91b7c9029e",
+      "bytes": 803609,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "cornerAlpha": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBounds": [
+        97,
+        53,
+        1210,
+        1212
+      ],
+      "edgeAlphaMax": 0,
+      "lowAlphaEdgeFringe": false,
+      "contentBoundsAbove8": [
+        309,
+        154,
+        962,
+        1158
+      ]
+    },
+    {
+      "file": "jelly-outline.svg",
+      "sha256": "49a6d0165613ec0913834f95e03264cac6892b6664caaeed89a6a384bf82604c",
+      "bytes": 762,
+      "viewBox": "0 0 48 48",
+      "embeddedImages": 0
+    },
+    {
+      "file": "silver-paper-fold.svg",
+      "sha256": "4c4316d859ca45094b921274f07586fc11d8270420533c56c3c23a651f8ef1f5",
+      "bytes": 452,
+      "viewBox": "0 0 48 48",
+      "embeddedImages": 0
+    }
+  ],
+  "contrast": [
+    {
+      "foreground": "ink",
+      "background": "canvas",
+      "ratio": 11.275,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "secondary",
+      "background": "canvas",
+      "ratio": 5.076,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "secondary",
+      "background": "surface",
+      "ratio": 5.401,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "on-navy",
+      "background": "navy",
+      "ratio": 10.482,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "on-navy",
+      "background": "risk",
+      "ratio": 4.691,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "success-ink",
+      "background": "mint",
+      "ratio": 5.45,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "risk-ink",
+      "background": "rose",
+      "ratio": 4.988,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "ink",
+      "background": "notice",
+      "ratio": 9.763,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "control-border",
+      "background": "surface",
+      "ratio": 3.292,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "foreground": "navy",
+      "background": "canvas",
+      "ratio": 10.116,
+      "minimum": 3,
+      "pass": true
+    }
+  ],
+  "expansion": {
+    "generatedAssets": 6,
+    "copyChecks": [
+      {
+        "file": "greendou-reading.png",
+        "matchesOriginalGeneratedBytes": true
+      },
+      {
+        "file": "greendou-organizing.png",
+        "matchesOriginalGeneratedBytes": true
+      },
+      {
+        "file": "greendou-listening.png",
+        "matchesOriginalGeneratedBytes": true
+      },
+      {
+        "file": "cherry-bookmark.png",
+        "matchesOriginalGeneratedBytes": true
+      },
+      {
+        "file": "paper-butterfly.png",
+        "matchesOriginalGeneratedBytes": true
+      },
+      {
+        "file": "jelly-ribbon-charm.png",
+        "matchesOriginalGeneratedBytes": true
+      }
+    ],
+    "figmaAuditPassed": true,
+    "historicalStaticDeliveryRuntimeIntegrated": false,
+    "runtimeBehaviorVerifiedByThisTool": false
+  },
+  "decorationDiversity": {
+    "version": "3.2.0",
+    "outputAssets": 14,
+    "approvedRuntimeAssets": 12,
+    "runtimeSourceIntegrated": true,
+    "runtimeThemeCopyChecks": [
+      {
+        "file": "cherry-bookmark.png",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "cherry-pair.svg",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "greendou-listening.png",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "greendou-organizing.png",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "greendou-reading.png",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "jelly-companion.png",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "jelly-outline.svg",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "jelly-ribbon-charm.png",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "paper-butterfly.png",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "ribbon-outline.svg",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "silver-paper-fold.svg",
+        "matchesSourceBytes": true
+      },
+      {
+        "file": "uniform-ribbon.png",
+        "matchesSourceBytes": true
+      }
+    ],
+    "runtimeAssetImports": [
+      {
+        "path": "apps/desktop/src/renderer/components/HazelCompanion.tsx",
+        "assets": [
+          "cherry-bookmark.png",
+          "cherry-pair.svg",
+          "greendou-listening.png",
+          "greendou-organizing.png",
+          "greendou-reading.png",
+          "jelly-companion.png",
+          "jelly-outline.svg",
+          "jelly-ribbon-charm.png",
+          "paper-butterfly.png",
+          "ribbon-outline.svg",
+          "silver-paper-fold.svg",
+          "uniform-ribbon.png"
+        ]
+      }
+    ],
+    "figmaVariantCount": 24,
+    "reservedDesignOnly": [
+      "compass-seal.svg",
+      "jelly-mark.svg"
+    ],
+    "runtimeBehaviorVerifiedByThisTool": false
+  },
+  "v2ArchiveSha256": "499d60183adb85c71c12e88add9200290d6a7d53add400cacbc1c88e25fd287f",
+  "zip": {
+    "file": "Pioneer-Hazel-v3-assets.zip",
+    "sha256": "5d9d8bbc7b30708200dcb5127af407f55df31196df76c1e4a1fe1f2bb8a5ee77",
+    "files": [
+      "README.md",
+      "assets/cherry-bookmark.png",
+      "assets/cherry-pair.svg",
+      "assets/compass-seal.svg",
+      "assets/greendou-listening.png",
+      "assets/greendou-organizing.png",
+      "assets/greendou-reading.png",
+      "assets/jelly-companion.png",
+      "assets/jelly-mark.svg",
+      "assets/jelly-outline.svg",
+      "assets/jelly-ribbon-charm.png",
+      "assets/paper-butterfly.png",
+      "assets/ribbon-outline.svg",
+      "assets/silver-paper-fold.svg",
+      "assets/uniform-ribbon.png",
+      "decoration-policy.json",
+      "expansion/assets.json",
+      "expansion/generation-record.json",
+      "expansion/prompts.json",
+      "prompts.md",
+      "provenance.json",
+      "tokens.css",
+      "tokens.json"
+    ],
+    "crcError": null,
+    "referenceImagesIncluded": false,
+    "absolutePathsIncluded": false
+  }
+}

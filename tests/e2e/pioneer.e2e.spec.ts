@@ -1,3 +1,4 @@
+import { newSessionForProject } from './session-ui';
 import { _electron as electron, expect, test } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import { createRequire } from 'node:module';
@@ -22,7 +23,7 @@ const electronExecutablePath = createRequire(
 )('electron') as string;
 const electronCloseTimeoutMs = 5_000;
 
-test('opens fixture projects in unique MRU tabs without mutating the workspace', async ({}, testInfo) => {
+test('opens fixture projects and restores stored sessions in unique MRU tabs without mutating the workspace', async ({}, testInfo) => {
   const beforeHash = await captureFixtureHash(fixtureRoot);
   const userDataDir = testInfo.outputPath('user-data');
   await mkdir(userDataDir, { recursive: true });
@@ -93,11 +94,15 @@ test('opens fixture projects in unique MRU tabs without mutating the workspace',
       '16px',
     );
 
-    await page.getByRole('button', { name: 'Open project alpha-app' }).click();
+    await newSessionForProject(page, 'alpha-app');
     await expect(page.getByRole('tab', { name: 'alpha-app' })).toHaveCount(1);
 
     await page.getByRole('tab', { name: 'Library' }).click();
     await page.getByRole('button', { name: 'Open project alpha-app' }).click();
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: '打开会话 alpha-app', exact: true })
+      .click();
     await expect(page.getByRole('tab', { name: 'alpha-app' })).toHaveCount(1);
     await expect(page.getByRole('tab', { name: 'alpha-app' })).toHaveAttribute(
       'aria-selected',
@@ -105,7 +110,7 @@ test('opens fixture projects in unique MRU tabs without mutating the workspace',
     );
 
     await page.getByRole('tab', { name: 'Library' }).click();
-    await page.getByRole('button', { name: 'Open project beta-notes' }).click();
+    await newSessionForProject(page, 'beta-notes');
     await page.getByRole('tab', { name: 'alpha-app' }).click();
     await page.getByRole('button', { name: 'Close alpha-app' }).click();
     await expect(page.getByRole('tab', { name: 'beta-notes' })).toHaveAttribute(
@@ -124,7 +129,7 @@ test('opens fixture projects in unique MRU tabs without mutating the workspace',
     await page.getByRole('tab', { name: 'Settings' }).click();
     await expect(page.getByText(fixtureRoot, { exact: true })).toBeVisible();
     await page.getByRole('tab', { name: 'Library' }).click();
-    await expect(page.getByRole('status')).toContainText('metadata');
+    await expect(page.locator('.catalog-notice')).toContainText('metadata');
     await expect(
       page.getByRole('button', { name: 'Open project alpha-app' }),
     ).toBeVisible();

@@ -1,0 +1,89 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static structure/solid-color text with recorded inside-stroke and CJK-code-fallback exceptions; not WCAG/runtime certification",
+  "result": {
+    "pageId": "717:1574",
+    "pageName": "design-system",
+    "problems": [],
+    "qa": {
+      "structure": {
+        "pageId": "717:1574",
+        "name": "design-system",
+        "nodes": 208,
+        "texts": 130,
+        "instances": 0,
+        "roots": [
+          {
+            "id": "717:1579",
+            "name": "00 · 从对话出发，把工作留在眼前",
+            "x": 200,
+            "y": 200,
+            "width": 1440,
+            "height": 548
+          },
+          {
+            "id": "717:1603",
+            "name": "01 · 颜色承担角色，不承担装饰",
+            "x": 1800,
+            "y": 200,
+            "width": 1440,
+            "height": 712
+          },
+          {
+            "id": "717:1661",
+            "name": "02 · 清楚的字阶，安静的密度",
+            "x": 200,
+            "y": 1072,
+            "width": 1440,
+            "height": 746
+          },
+          {
+            "id": "717:1704",
+            "name": "03 · 一个窗口，一条会话主轴",
+            "x": 1800,
+            "y": 1072,
+            "width": 1440,
+            "height": 616
+          },
+          {
+            "id": "717:1733",
+            "name": "04 · 先说事实，再说影响和下一步",
+            "x": 200,
+            "y": 1978,
+            "width": 1440,
+            "height": 824
+          },
+          {
+            "id": "717:1755",
+            "name": "05 · 开发稿重置与交接",
+            "x": 1800,
+            "y": 1978,
+            "width": 1440,
+            "height": 510
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [],
+          "cjkCodeFallbacks": []
+        }
+      },
+      "contrast": {
+        "pageId": "717:1574",
+        "name": "design-system",
+        "tested": 130,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    }
+  }
+}

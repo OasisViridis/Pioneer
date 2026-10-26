@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static Figma delivery verification; not prototype or Electron",
+  "result": {
+    "pageId": "717:1577",
+    "pageName": "components · workbench",
+    "problems": [],
+    "components": [
+      {
+        "name": "Context Row",
+        "id": "725:1580",
+        "variants": 3
+      },
+      {
+        "name": "Artifact Card",
+        "id": "725:1618",
+        "variants": 4
+      },
+      {
+        "name": "Permission Card",
+        "id": "725:1678",
+        "variants": 4
+      },
+      {
+        "name": "Run Status",
+        "id": "725:1747",
+        "variants": 5
+      },
+      {
+        "name": "Validation",
+        "id": "725:1803",
+        "variants": 4
+      },
+      {
+        "name": "Composer",
+        "id": "725:1854",
+        "variants": 7
+      }
+    ]
+  }
+}

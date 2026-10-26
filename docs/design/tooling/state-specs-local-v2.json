@@ -1,0 +1,579 @@
+[
+  {
+    "key": "L",
+    "title": "工作区库 · 扫描与恢复",
+    "desc": "只读扫描；失败保留最后一次有效结果。完整窗口见 L00 / L01。",
+    "tiles": [
+      {
+        "id": "L02",
+        "title": "扫描中",
+        "badge": [
+          "Wait",
+          "正在扫描目录"
+        ],
+        "lead": "已发现 12 个目录。扫描范围：D:/Project。",
+        "actions": [
+          [
+            "取消扫描",
+            "Secondary"
+          ]
+        ],
+        "note": "读屏礼貌播报进度，不逐文件抢焦点。取消回到旧海报墙；不删旧数据。"
+      },
+      {
+        "id": "L03",
+        "title": "工作区概览",
+        "components": [
+          [
+            "Workspace Poster",
+            "Ready",
+            {
+              "Timestamp": "设计样例 · 上次扫描 09:28"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "打开本机会话",
+            "Primary"
+          ],
+          [
+            "重新扫描",
+            "Secondary"
+          ]
+        ],
+        "note": "海报 Enter 打开概览；新会话建立后焦点进入输入框。不得自动提交给模型。"
+      },
+      {
+        "id": "L04",
+        "title": "部分结果 / 已过期",
+        "components": [
+          [
+            "Workspace Poster",
+            "Stale",
+            {
+              "Title": "阅读集",
+              "Path": "D:/Project/Reading",
+              "Summary": "部分子目录无法访问"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "查看问题",
+            "Secondary"
+          ],
+          [
+            "重新扫描",
+            "Quiet"
+          ]
+        ],
+        "note": "明确旧结果时间与缺失范围，保留可用入口；不能把部分读取记成完整成功。"
+      },
+      {
+        "id": "L05",
+        "title": "目录失联",
+        "components": [
+          [
+            "Workspace Poster",
+            "Unavailable",
+            {
+              "Title": "归档项目",
+              "Path": "D:/Project/Archive"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "检查原目录",
+            "Secondary"
+          ],
+          [
+            "更换根目录",
+            "Quiet"
+          ]
+        ],
+        "note": "路径和本机记录保留。重新选择范围需明确动作，不能静默扩大扫描范围。"
+      },
+      {
+        "id": "L06",
+        "title": "重扫失败",
+        "badge": [
+          "Error",
+          "未能更新扫描结果"
+        ],
+        "lead": "D:/Project/Reading 拒绝访问。仍显示 09:28 的旧结果。",
+        "actions": [
+          [
+            "重试扫描",
+            "Secondary",
+            "Focus"
+          ],
+          [
+            "返回工作区库",
+            "Quiet"
+          ]
+        ],
+        "note": "错误文字与焦点并存，不靠红色。重试只读；失败不覆盖有效快照。"
+      },
+      {
+        "id": "L07",
+        "title": "键盘焦点",
+        "components": [
+          [
+            "Workspace Poster",
+            "Ready",
+            {
+              "Title": "Pioneer"
+            }
+          ]
+        ],
+        "focus": true,
+        "actions": [
+          [
+            "打开概览",
+            "Primary",
+            "Focus"
+          ]
+        ],
+        "note": "整张海报为一个主焦点入口；次级菜单单独可聚焦。Enter 打开、Esc 退回并恢复原焦点。"
+      },
+      {
+        "id": "L08",
+        "title": "搜索无结果",
+        "fields": [
+          [
+            "Focus",
+            {
+              "Label": "搜索工作区",
+              "Value": "未匹配项目",
+              "Helper": "仅匹配当前工作区库"
+            }
+          ]
+        ],
+        "lead": "没有匹配的工作区。不会自动扩大到其他目录。",
+        "actions": [
+          [
+            "清空搜索",
+            "Secondary"
+          ]
+        ],
+        "note": "结果数量用礼貌播报。清空后恢复海报墙；输入和焦点不丢失。"
+      },
+      {
+        "id": "L09",
+        "title": "取消选择 / 扫描取消",
+        "badge": [
+          "Neutral",
+          "已取消，原工作区库未变"
+        ],
+        "lead": "继续使用 D:/Project 的最后有效结果。",
+        "actions": [
+          [
+            "返回工作区库",
+            "Secondary"
+          ]
+        ],
+        "note": "原生选择器取消不清空路径与卡片。实际 Windows 选择器证据独立记录。"
+      },
+      {
+        "id": "L10",
+        "title": "范围变更确认",
+        "lead": "将扫描根目录从 D:/Project 改为 D:/Research。\n已有会话保留原工作区关联，不自动重绑。",
+        "actions": [
+          [
+            "取消",
+            "Secondary",
+            "Focus"
+          ],
+          [
+            "确认新范围",
+            "Primary"
+          ]
+        ],
+        "note": "这是范围变更设计合同。确认后才开始新扫描；目录读取不等于模型上下文授权。"
+      }
+    ]
+  },
+  {
+    "key": "S",
+    "title": "本机会话 · 保存、关闭与恢复",
+    "desc": "保存仅发生在本机；关闭不删除、不代表停止任务。完整窗口见 S01 / S02。",
+    "tiles": [
+      {
+        "id": "S00",
+        "title": "空草稿",
+        "components": [
+          [
+            "Composer",
+            "LocalEmpty",
+            {}
+          ]
+        ],
+        "note": "Tab 可到输入；空内容不可保存，原因可见。没有虚构助手欢迎回复。"
+      },
+      {
+        "id": "S03",
+        "title": "正在保存",
+        "components": [
+          [
+            "Composer",
+            "Saving",
+            {}
+          ]
+        ],
+        "note": "保存期间阻止重复提交，保留原输入；礼貌播报状态，焦点不跳到页面顶部。"
+      },
+      {
+        "id": "S04",
+        "title": "保存失败",
+        "components": [
+          [
+            "Composer",
+            "Error",
+            {}
+          ]
+        ],
+        "note": "正文与附件引用留在输入区。重试不重复创建记录；关闭前显式处理未保存内容。"
+      },
+      {
+        "id": "S05",
+        "title": "关闭前确认",
+        "lead": "这段输入尚未保存。\n关闭会话不会删除已保存记录，也不会停止运行中的任务。",
+        "actions": [
+          [
+            "继续编辑",
+            "Secondary",
+            "Focus"
+          ],
+          [
+            "保存后关闭",
+            "Primary"
+          ],
+          [
+            "放弃草稿并关闭",
+            "Quiet"
+          ]
+        ],
+        "note": "dialog 以标题命名；初始焦点在继续编辑。Esc 等于取消，关闭后焦点回相邻会话标签。"
+      },
+      {
+        "id": "S06",
+        "title": "全部会话 / 恢复",
+        "fields": [
+          [
+            "Default",
+            {
+              "Label": "查找本机会话",
+              "Value": "毕业项目",
+              "Helper": "按标题与工作区筛选"
+            }
+          ]
+        ],
+        "components": [
+          [
+            "Session Row",
+            "Open",
+            {}
+          ],
+          [
+            "Session Row",
+            "Closed",
+            {
+              "Title": "设计调研",
+              "Workspace": "Pioneer"
+            }
+          ]
+        ],
+        "note": "恢复已关闭会话复用原 ID、草稿和布局；已有标签时只激活，不重复新建。"
+      },
+      {
+        "id": "S07",
+        "title": "会话搜索无结果",
+        "fields": [
+          [
+            "Focus",
+            {
+              "Label": "查找本机会话",
+              "Value": "未知会话",
+              "Helper": "包含已关闭会话"
+            }
+          ]
+        ],
+        "lead": "没有找到匹配会话。",
+        "actions": [
+          [
+            "清空搜索",
+            "Secondary"
+          ]
+        ],
+        "note": "不自动创建会话。清空保留键盘位置，恢复按最近活动排序的列表。"
+      },
+      {
+        "id": "S08",
+        "title": "已关闭，不是删除",
+        "components": [
+          [
+            "Session Row",
+            "Closed",
+            {
+              "Title": "设计调研"
+            }
+          ]
+        ],
+        "badge": [
+          "Info",
+          "已保留本机记录"
+        ],
+        "actions": [
+          [
+            "恢复会话",
+            "Primary"
+          ]
+        ],
+        "note": "运行状态必须另行核对；关闭标签不能被当成已停止。删除走独立危险确认。"
+      },
+      {
+        "id": "S09",
+        "title": "标签与关闭按钮焦点",
+        "components": [
+          [
+            "Session Tab",
+            "Focus",
+            {
+              "Title": "整理毕业项目"
+            }
+          ]
+        ],
+        "lead": "当前工作区：Pioneer。未保存草稿仍在本机。",
+        "note": "标签使用 roving tabindex；左右切换标签、Delete/关闭按钮触发同一确认。关闭按钮有完整会话名称。"
+      },
+      {
+        "id": "S10",
+        "title": "最近活动 / 草稿恢复",
+        "components": [
+          [
+            "Session Row",
+            "Draft",
+            {
+              "Title": "新会话草稿",
+              "Last active": "最近活动：今天 09:31"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "继续编辑",
+            "Primary"
+          ]
+        ],
+        "note": "最近活动来自用户保存或编辑，不因后台轮询乱序。重启恢复保留草稿和工作区；持久化失败不报成功。"
+      }
+    ]
+  },
+  {
+    "key": "D",
+    "title": "布局与上下文 · 可撤销、可键盘操作",
+    "desc": "布局按会话隔离；临时收起不覆盖用户保存布局。完整窗口见 D01 / D02。",
+    "tiles": [
+      {
+        "id": "D03",
+        "title": "面板与布局菜单",
+        "lead": "当前：审阅布局",
+        "actions": [
+          [
+            "专注布局",
+            "Secondary"
+          ],
+          [
+            "审阅布局 · 当前",
+            "Secondary"
+          ],
+          [
+            "交付布局",
+            "Secondary"
+          ],
+          [
+            "显示上下文",
+            "Quiet"
+          ],
+          [
+            "保存当前布局",
+            "Primary"
+          ]
+        ],
+        "note": "菜单以按钮命名，↑↓移动、Enter执行、Esc关闭并回触发器；布局切换不提交任务。"
+      },
+      {
+        "id": "D04",
+        "title": "键盘移动面板",
+        "components": [
+          [
+            "Panel Header",
+            "Open",
+            {
+              "Title": "上下文"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "移到左侧",
+            "Secondary"
+          ],
+          [
+            "移到右侧",
+            "Secondary"
+          ],
+          [
+            "移到底部",
+            "Secondary"
+          ],
+          [
+            "取消移动",
+            "Quiet",
+            "Focus"
+          ]
+        ],
+        "note": "这是拖拽的等价入口。移动后焦点留在面板标题并播报目标；Esc撤销尚未提交的移动。"
+      },
+      {
+        "id": "D05",
+        "title": "调整分栏",
+        "lead": "主会话最小 360px；侧面板最小 320px。\n分隔线可见 1px，命中区域 24px。",
+        "actions": [
+          [
+            "缩小侧栏",
+            "Secondary"
+          ],
+          [
+            "扩大侧栏",
+            "Secondary"
+          ]
+        ],
+        "note": "separator 可聚焦，左右键 16px、Shift 48px；Home/End 到安全边界。空间不足先临时收起，不挤掉主操作。"
+      },
+      {
+        "id": "D06",
+        "title": "暂收 / 恢复",
+        "components": [
+          [
+            "Panel Header",
+            "Compact",
+            {
+              "Title": "上下文 · 暂收"
+            }
+          ]
+        ],
+        "actions": [
+          [
+            "重新打开上下文",
+            "Primary"
+          ]
+        ],
+        "note": "面板来源与滚动位置保留；重新打开恢复焦点。窄屏自动暂收不是永久布局修改。"
+      },
+      {
+        "id": "D07",
+        "title": "保存布局中",
+        "badge": [
+          "Wait",
+          "正在保存此会话布局"
+        ],
+        "actions": [
+          [
+            "保存中",
+            "Primary",
+            "Loading"
+          ]
+        ],
+        "note": "请求完成前不显示已保存；不重复写入。切换会话不能把A布局写进B。"
+      },
+      {
+        "id": "D08",
+        "title": "保存成功 / 放弃修改",
+        "badge": [
+          "Success",
+          "已保存到此会话"
+        ],
+        "actions": [
+          [
+            "恢复上次布局",
+            "Secondary"
+          ],
+          [
+            "保留当前布局",
+            "Quiet"
+          ]
+        ],
+        "note": "成功回执必须来自持久化。取消未保存调整恢复该会话上次布局，不覆盖其他会话。"
+      },
+      {
+        "id": "D09",
+        "title": "保存失败",
+        "badge": [
+          "Error",
+          "布局未保存"
+        ],
+        "lead": "当前排列暂时可用；上次保存的布局未改变。",
+        "actions": [
+          [
+            "重试保存",
+            "Secondary",
+            "Focus"
+          ],
+          [
+            "恢复上次布局",
+            "Quiet"
+          ]
+        ],
+        "note": "保留当前临时布局与失败原因。离开前说明未保存，不以静默重试造成跨会话污染。"
+      },
+      {
+        "id": "D10",
+        "title": "会话隔离",
+        "components": [
+          [
+            "Session Tab",
+            "Active",
+            {
+              "Title": "会话 A · 审阅"
+            }
+          ],
+          [
+            "Session Tab",
+            "Inactive",
+            {
+              "Title": "会话 B · 专注"
+            }
+          ]
+        ],
+        "lead": "A：左侧改动 + 右侧会话。\nB：仅会话。切回 A 恢复 A 的布局。",
+        "note": "存储键关联 sessionId 与布局版本；恢复失败只影响当前会话，不清空全局配置。"
+      },
+      {
+        "id": "D11",
+        "title": "上下文过期 / 不可访问",
+        "future": true,
+        "components": [
+          [
+            "Context Row",
+            "Stale",
+            {
+              "Path": "docs/design/设计说明.md"
+            }
+          ],
+          [
+            "Context Row",
+            "Unavailable",
+            {
+              "Title": "旧提案.md",
+              "Path": "docs/archive/旧提案.md"
+            }
+          ]
+        ],
+        "note": "引用管理为待实现设计。刷新只核对本机来源；移除引用不删原文件，任何外发仍独立批准。"
+      }
+    ]
+  }
+]

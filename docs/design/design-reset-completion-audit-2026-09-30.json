@@ -1,0 +1,151 @@
+{
+  "date": "2026-09-30",
+  "status": "complete-static-design-delivery",
+  "objective": "以融合后的设计规范为准，重做全局的设计规范，如有不足你可以自由改进；并整理开发稿进行重置\nPS:现在电脑已修好，你需要复工后端时无需通知我授权",
+  "scope": {
+    "delivery": "editable static design specification/library/development drafts",
+    "backendResume": "User-authorized local backend resumption as needed; no repeated resume approval request",
+    "applicationSourceChangedInDesignDelivery": false,
+    "prototypeClickAudit": false,
+    "windowsAccessibilityAudit": false,
+    "publication": false
+  },
+  "requirements": [
+    {
+      "id": "R1",
+      "requirement": "融合规范成为全局唯一视觉入口，并与行为合同分工",
+      "result": "PASS",
+      "evidence": [
+        "DESIGN-SYSTEM.md",
+        "workbench-product-spec.md",
+        "references/claude-2026-09-28/DESIGN.md",
+        "references/claude-2026-09-28/DESKTOP.md",
+        "../../README.md"
+      ],
+      "finding": "Claude snapshot evidence is distinguished from original Hazel adaptation and unverified private Desktop tokens. Historic specs explicitly stay historical."
+    },
+    {
+      "id": "R2",
+      "requirement": "规范/token/Figma基础逐项对应，可编辑规范板完成",
+      "result": "PASS",
+      "evidence": [
+        "pioneer-design-tokens-v2.json",
+        "design-reset-completion-717-1574-2026-09-30.json"
+      ],
+      "finding": "3 collections/84 variables;24 semantic colors,24 dimensions match aliases/scopes/WEB syntax/values;9 text and2 effect styles;6 editable boards."
+    },
+    {
+      "id": "R3",
+      "requirement": "全部计划组件及属性、变体、业务/交互状态可编辑",
+      "result": "PASS",
+      "evidence": [
+        "design-reset-component-map-2026-09-29.json",
+        "design-reset-completion-717-1575-2026-09-30.json",
+        "design-reset-completion-717-1576-2026-09-30.json",
+        "design-reset-completion-717-1577-2026-09-30.json",
+        "design-reset-handoff.md"
+      ],
+      "finding": "14 primary families/78 exact variant IDs and names;3 internal Close variants;every exposed TEXT property referenced;81 state compositions and N/A reasons."
+    },
+    {
+      "id": "R4",
+      "requirement": "主开发稿、组合状态和响应式按矩阵重置且未来能力明确标示",
+      "result": "PASS",
+      "evidence": [
+        "design-reset-completion-717-1578-2026-09-30.json",
+        "design-reset-completion-743-1574-2026-09-30.json",
+        "design-reset-completion-757-1574-2026-09-30.json",
+        "design-reset-handoff.md"
+      ],
+      "finding": "13 main windows plus8 responsive windows match exact IDs/dimensions;81 unique state IDs with nonzero editable UI;all required future markers visible in text. Main/states/responsive remain separate pages."
+    },
+    {
+      "id": "R5",
+      "requirement": "截图与全范围静态结构/文字检查完成，发现有修复或明确说明",
+      "result": "PASS",
+      "evidence": [
+        "design-reset-final-qa-2026-09-30.json",
+        "design-reset-main-final-fix-2026-09-29.json",
+        "design-reset-states-interaction-2026-09-29.json",
+        "design-reset-responsive-approval-2026-09-29.json",
+        "development-reset.md"
+      ],
+      "finding": "Previous composition/visual-fix screenshots were reviewed in the same goal; no canvas changes in final readonly closeout. Current7-page1697-text strict audit records119 exact border offsets and28 CJK fallback spans;no blocking structure or text contrast issue. This is not WCAG/runtime certification."
+    },
+    {
+      "id": "R6",
+      "requirement": "旧稿完整保留，新main入口切换可追溯可逆",
+      "result": "PASS",
+      "evidence": [
+        "design-reset-cutover-2026-09-29.json",
+        "design-reset-legacy-before-2026-09-29.json",
+        "design-reset-legacy-after-2026-09-29.json",
+        "design-reset-final-recheck-132-2-2026-09-30.json",
+        "design-reset-final-recheck-299-725-2026-09-30.json",
+        "design-reset-final-recheck-257-725-2026-09-30.json"
+      ],
+      "finding": "Current legacy root ID order/node/reaction inventories match cutover records;original content fingerprints before/after cutover match. All final calls readonly;no deletion."
+    },
+    {
+      "id": "R7",
+      "requirement": "交接与后续阶段不得冒充已实现/已实测，最新用户后端复工授权不丢失",
+      "result": "PASS",
+      "evidence": [
+        "design-reset-handoff.md",
+        "development-reset.md",
+        "../../themasterplan/ROADMAP.md",
+        "../plans/2026-09-28-pioneer-integrated-closeout.md"
+      ],
+      "finding": "P12 now targets main717:1578, currently0starts/0reactionNodes;must build then click. No M2/M3 status promotion. Backend may resume as needed without re-asking;publication/destructive/data-transfer gates retained."
+    },
+    {
+      "id": "R8",
+      "requirement": "JSON严格解析、局部链接有效、交接ID数量对账、格式检查与独立文档复核完成",
+      "result": "PASS",
+      "evidence": [
+        "design-reset-local-checks-2026-09-30.json",
+        "design-reset-document-review-2026-09-30.json",
+        "tooling/verify-design-reset-v2.mjs",
+        "tooling/figma-completion-audit-v2.js"
+      ],
+      "finding": "Strict JSON parsing,113 local Markdown links,21 screen and81 state handoff rows match live IDs;independent document review PASS;focused Prettier andNode helper syntax checks PASS. Final closed-ledger checks rerun after status updates."
+    }
+  ],
+  "counts": {
+    "primaryFamilies": 14,
+    "primaryVariants": 78,
+    "internalCloseVariants": 3,
+    "mainWindows": 13,
+    "responsiveWindows": 8,
+    "stateCompositions": 81,
+    "variables": 84,
+    "textStyles": 9,
+    "effectStyles": 2,
+    "guidelineBoards": 6,
+    "textNodes": 1697
+  },
+  "currentQA": "design-reset-final-qa-2026-09-30.json",
+  "coverageEvidence": [
+    "design-reset-completion-717-1574-2026-09-30.json",
+    "design-reset-completion-717-1575-2026-09-30.json",
+    "design-reset-completion-717-1576-2026-09-30.json",
+    "design-reset-completion-717-1577-2026-09-30.json",
+    "design-reset-completion-717-1578-2026-09-30.json",
+    "design-reset-completion-743-1574-2026-09-30.json",
+    "design-reset-completion-757-1574-2026-09-30.json"
+  ],
+  "deferredOutsideStaticGoal": [
+    "P12 build v2 prototype reactions and run actual click traces",
+    "v2 application CSS/component implementation",
+    "Windows keyboard/IME/NVDA/200%/forced-colors/reduced-motion acceptance",
+    "reviewed M2 revision full fresh quality gate",
+    "M3/M4 real permission/event/runtime integration",
+    "Code Connect/library publication"
+  ],
+  "commandEvidence": {
+    "localCheck": "node docs/design/tooling/verify-design-reset-v2.mjs --final",
+    "formatting": "node node_modules/prettier/bin/prettier.cjs --check <named authority docs,ledger,tokens,new evidence andhelpers>",
+    "helperSyntax": "node --check docs/design/tooling/figma-completion-audit-v2.js andverify-design-reset-v2.mjs",
+    "applicationGateRunForThisDesignDelivery": false
+  }
+}

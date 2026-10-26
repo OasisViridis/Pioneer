@@ -1,0 +1,308 @@
+{
+  "date": "2026-10-01",
+  "before": {
+    "assetOutputs": 12,
+    "directSourceAssetReferences": 4,
+    "inlineBrandMarkNearDuplicate": true,
+    "mainIllustrationTypes": 3
+  },
+  "decision": "Reuse six idle accessories in the same empty-state slot; add only two small native SVG alternatives. Reserve certification-like seal and duplicate brand mark. Catalog instances are not runtime utilization.",
+  "budgetUnchanged": true,
+  "runtimeCandidateBefore": "docs/testing/resumption-candidate-2026-10-01.json",
+  "originalsBackedUp": true,
+  "implementationPending": false,
+  "after": {
+    "assetOutputs": 14,
+    "directRuntimeFileReferences": 12,
+    "conversationThemeCount": 11,
+    "workspaceOnboardingThemeCount": 1,
+    "addedAssets": [
+      "jelly-outline.svg",
+      "silver-paper-fold.svg"
+    ],
+    "reusedIdleAccessories": [
+      "paper-butterfly.png",
+      "cherry-bookmark.png",
+      "jelly-ribbon-charm.png",
+      "uniform-ribbon.png",
+      "ribbon-outline.svg",
+      "cherry-pair.svg"
+    ],
+    "reservedDesignOnly": [
+      "jelly-mark.svg",
+      "compass-seal.svg"
+    ],
+    "newImageGenerationCalls": 0
+  },
+  "runtime": {
+    "candidate": "docs/testing/decoration-v32-candidate-2026-10-01.json",
+    "identity": "ee45eea2a514cc035c0e5fda0dfa1304c7d2f25c704e502e90f191b8cdd4cd6f",
+    "inputCount": 123,
+    "scopeDelta": {
+      "modified": [
+        "apps/desktop/src/renderer/components/Conversation.tsx",
+        "apps/desktop/src/renderer/components/HazelCompanion.tsx",
+        "apps/desktop/src/renderer/global.d.ts",
+        "apps/desktop/src/renderer/styles/app.css",
+        "tests/e2e/hazel-design.e2e.spec.ts"
+      ],
+      "added": [
+        "apps/desktop/src/renderer/assets/hazel/cherry-bookmark.png",
+        "apps/desktop/src/renderer/assets/hazel/cherry-pair.svg",
+        "apps/desktop/src/renderer/assets/hazel/jelly-outline.svg",
+        "apps/desktop/src/renderer/assets/hazel/jelly-ribbon-charm.png",
+        "apps/desktop/src/renderer/assets/hazel/paper-butterfly.png",
+        "apps/desktop/src/renderer/assets/hazel/ribbon-outline.svg",
+        "apps/desktop/src/renderer/assets/hazel/silver-paper-fold.svg",
+        "apps/desktop/src/renderer/assets/hazel/uniform-ribbon.png",
+        "docs/design/hazel-v3/decoration-policy.json"
+      ]
+    },
+    "fullGate": "docs/testing/decoration-v32-full-gate-2026-10-01.json",
+    "exitCode": 0,
+    "contractTests": 124,
+    "prototypeTests": 210,
+    "electronTests": 20,
+    "finalPackageSmoke": true,
+    "screenshots": [
+      {
+        "file": "qa/decoration-runtime-2026-10-01/active-1440.png",
+        "sha256": "d54164e6f81e0481f1997d372b60e02d8c968ae952c170073cab0e3360cf2652",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/focus-1440.png",
+        "sha256": "a10486df72d2e854788eb6ea8691bdbd51362ebf79cb61bfa0c73492198994c9",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/focus-640.png",
+        "sha256": "d3281df149523d325778b3c8289c2b1f0565d15a0f931ea1f30ad1f8ceaddb31",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/focus-900.png",
+        "sha256": "d358c3577f96c3a49fcbac1e18023525971fd356414ba806b536f703b0638b11",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/review-1440.png",
+        "sha256": "c6acf87a4166fa78026ce2da4c577eb95119b779215a6ef3903725cb951d41fb",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/review-640.png",
+        "sha256": "7f0a1ae2aa9f6d273770a3cfcbaff78e8a9c5c406a7874687a27af0ef46f58bd",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/review-900.png",
+        "sha256": "dbf7be2e416658b0db5792bd8a4260167cd8cf482b2dac72e70c15fd95b8ff7f",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/review-constrained-900.png",
+        "sha256": "9085e5550a953f0074229d2b750ff635204a44853c48e5cf1aaf761a6f3b36f1",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/settings-1440.png",
+        "sha256": "a45ecc0292ded4f821eb984018c5c671b1cfd1dac4d5abb03c639ac7365c2be0",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/onboarding-1440.png",
+        "sha256": "f1ce4bc4cbd144d73777085fbfc283e999f406a6e40cf7f9c172b26442b466cd",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/onboarding-640.png",
+        "sha256": "8d3e425babbd382b9ceb5682e0631041953b473faabdb111fd09b6437ef10bf5",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/onboarding-900.png",
+        "sha256": "2dc92daca48ac1e5b2c40a03c1fefc8435adfc3af77f5f7d820f77340166c718",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/theme-1-delivery.png",
+        "sha256": "1e46f6ea3330d093405446107e577371cfec36d041a265f714a2175d6856f189",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/theme-1-focus.png",
+        "sha256": "9e118a841b9a414ea5f0d5f691e16e650d59d9e2ca6f68879d7377adf1ad8b87",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/theme-1-review.png",
+        "sha256": "8ebcc9980b695a0e8c52a3a3014ad31d75c950543c30e82767f83ccd8bbbf0e9",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/theme-2-delivery.png",
+        "sha256": "ea261349584a00d62d31a9c0ef66d8dff098c2448a37a1d9419242a55c61c9dd",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/theme-2-focus.png",
+        "sha256": "ca57ca8fd224a0513ddd6cf99b14381b51b2a6de6bd86c5b94a725974ae32bec",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/theme-2-review.png",
+        "sha256": "d389347b8ab9bbf221c4707156f11c0d3f8f9d89cd71e5e3fa48f46636b77857",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/theme-3-delivery.png",
+        "sha256": "dd8fc8fe4a0db6f34f90aaa45ba7f2d1520305259bc8caac8c8cc9e233a0e836",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/theme-3-focus.png",
+        "sha256": "33b5c34c5d4efea5b64c42cc6e12abd6c54749960cd7b692200c3e3bbc970207",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      },
+      {
+        "file": "qa/decoration-runtime-2026-10-01/theme-3-review.png",
+        "sha256": "ed40dcbf0e4ad5a973a1eb1c86b1c61427ccd64d96215add20d7ad9abbe005d5",
+        "source": "Fresh full-gate actual Electron screenshot; not Figma"
+      }
+    ],
+    "verified": [
+      "11 exact conversation-theme resource hashes via real Electron",
+      "onboarding exact organizing hash, 88 at 1440 /64 at 900/640",
+      "one illustration per visible empty view; 48px motifs replace rather than add",
+      "same session/layout stable across draft editing and real app restart",
+      "24px minimum safe copy gap in all desktop themes",
+      "narrow docked conversation hides decoration",
+      "first saved message removes DOM in all three layouts",
+      "actual save failure and onboarding error remain text-only via existing E2E",
+      "fixture content unchanged; isolated userData; no model calls"
+    ],
+    "visualReviewedScreenshots": [
+      "qa/decoration-runtime-2026-10-01/theme-3-focus.png",
+      "qa/decoration-runtime-2026-10-01/theme-2-review.png"
+    ]
+  },
+  "redGreen": {
+    "featureRed": {
+      "log": "tests/decoration-v32-red-2026-10-01.log",
+      "exitCode": 1,
+      "reason": "Old listening hash received instead of independent butterfly hash"
+    },
+    "onboardingRed": {
+      "log": "tests/decoration-v32-onboarding-red-2026-10-01.log",
+      "exitCode": 1,
+      "reason": "900px onboarding received 88px, expected64px"
+    },
+    "targetedGreen": {
+      "log": "tests/decoration-v32-green-2026-10-01.log",
+      "exitCode": 0,
+      "passed": 3
+    },
+    "testAssumptionRepairs": [
+      "Use canonical PNG intrinsic widths: uniform-ribbon is1295, others1254",
+      "Use real separator at900px;640px layout has no split control"
+    ]
+  },
+  "figma": {
+    "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+    "audit": "qa/decoration-figma-audit-2026-10-01.json",
+    "mutations": "qa/decoration-figma-mutations-2026-10-01.json",
+    "creation": "qa/decoration-figma-creation-2026-10-01.json",
+    "fixes": "qa/decoration-figma-fixes-2026-10-01.json",
+    "assetBoard": "880:313",
+    "componentSet": "880:312",
+    "variantCount": 24,
+    "mainSwappedInstances": [
+      "857:1476",
+      "857:1478"
+    ],
+    "existingSlotGeometryPreserved": true,
+    "pagesAdded": 0,
+    "variablesAdded": 0,
+    "stylesAdded": 0,
+    "visualReviewedNodes": [
+      "880:313",
+      "880:294",
+      "880:282",
+      "838:1506",
+      "838:1455",
+      "857:1480"
+    ],
+    "staticNotElectronProof": true
+  },
+  "invariants": {
+    "normSections2Through4Unchanged": true,
+    "normPreservedSectionSha256": "892df2e5fe1e347b191132752741fb5162cf227dd1cd9bf45d25f18a29445c23",
+    "first12ProvenanceRecordsPreserved": true,
+    "first12AssetOutputBytesUnchanged": true,
+    "protectedAuthorities": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "9fd5a17794c6f2f00351d023e683ce9b0efb7092c33e6044b84bc5d4baecf1e4",
+        "unchanged": true
+      },
+      {
+        "path": "docs/design/workbench-product-spec.md",
+        "sha256": "5ec45aa26ccd32fc887554de986f958e8e5786cf611ec6a995e4b4b591f1cd4b",
+        "unchanged": true
+      }
+    ],
+    "protectedEngineeringInputs": {
+      "apps/desktop/src/main/security.ts": true,
+      "apps/desktop/src/main/index.ts": true,
+      "apps/desktop/src/preload/index.ts": true,
+      "apps/desktop/src/shared/session-state.ts": true,
+      "apps/desktop/src/renderer/styles/tokens.css": true,
+      "apps/desktop/webpack.renderer.config.ts": true
+    },
+    "originalsBackup": ".private/decoration-v32-baseline-2026-10-01",
+    "oldExpansionRuntimeFalsePreserved": true
+  },
+  "independentReview": {
+    "status": "PASS",
+    "reviewer": "Luna read-only decoration_inventory_review",
+    "agentDidNotRunTestsOrBuild": true,
+    "initialFinding": "L00 onboarding did not obey compact64px budget",
+    "resolution": "Existing <=900 media now applies to onboarding; actual900px red88->green64 and640px assertions",
+    "finalScope": [
+      "12 direct file references /14 output assets; policy and pools",
+      "One-slot budget, decorative semantics and protected business/security scope",
+      "Canonical asset hashes, SVG native/remote-free structure",
+      "Real full gate /123 input identity and unchanged hashes",
+      "ZIP14 assets /23 entries; no references, QA, profiles or absolute paths",
+      "Separate historical F1a/static expansion and current F1c runtime evidence"
+    ],
+    "finalFindings": [],
+    "limitations": "Independent source/metadata/ZIP review, not Windows manual usability or runtime test execution by reviewer"
+  },
+  "remaining": [
+    "WC1 traffic-light window chrome not implemented",
+    "Windows200% DPI/forced colors/screen reader/native picker applicability not verified by this slice",
+    "Current-v3 P12 actual clicking not proven",
+    "M2/Workbench/M3 overall milestones remain open"
+  ],
+  "published": false,
+  "kitValidation": {
+    "record": "qa/local-validation.json",
+    "exitCode": 0,
+    "assets": 14,
+    "approvedRuntimeAssets": 12,
+    "nativeSvg": 6,
+    "png": 8,
+    "zipEntries": 23,
+    "originalUserImagesIncluded": false,
+    "absolutePathsIncluded": false,
+    "qaIncluded": false
+  },
+  "postGateVerification": "qa/decoration-post-gate-verification-2026-10-01.json",
+  "finalDiffCheck": {
+    "command": "git diff --check -- scoped modified source/tests/authority docs",
+    "exitCode": 0,
+    "notVcsMutation": true
+  }
+}

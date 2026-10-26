@@ -1,0 +1,97 @@
+- application "Pioneer（原型）":
+  - group "窗口控制":
+    - button "关闭窗口（应用继续在托盘运行，不会退出）":
+      - generic: ×
+    - button "最小化":
+      - generic: −
+    - button "全屏 (F11) · 最大化请双击标题栏":
+      - generic: ↗
+  - tablist "会话标签":
+    - tab "工作区":
+      - text: 工作区
+    - tab "v1 待审阅 流式发票导出 关闭标签 流式发票导出（不删除会话、不停止任务）":
+      - generic "v1 待审阅"
+      - generic: 流式发票导出
+      - button "关闭标签 流式发票导出（不删除会话、不停止任务）":
+    - tab "v1 待审阅 瓦片缓存清理 关闭标签 瓦片缓存清理（不删除会话、不停止任务）":
+      - generic "v1 待审阅"
+      - generic: 瓦片缓存清理
+      - button "关闭标签 瓦片缓存清理（不删除会话、不停止任务）":
+    - tab "已交付 9 月对账差异报表 关闭标签 9 月对账差异报表（不删除会话、不停止任务）":
+      - generic "已交付"
+      - generic: 9 月对账差异报表
+      - button "关闭标签 9 月对账差异报表（不删除会话、不停止任务）":
+    - tab "等你允许 新会话 关闭标签 新会话（不删除会话、不停止任务）" [selected]:
+      - generic "等你允许"
+      - generic: 新会话
+      - button "关闭标签 新会话（不删除会话、不停止任务）":
+    - button "新会话":
+  - button "4":
+    - generic: "4"
+  - button "命令 Ctrl K":
+    - text: 命令
+    - generic: Ctrl K
+  - button "桌宠开关" [pressed]
+  - button "设置":
+  - button "设计说明":
+  - banner:
+    - button "新会话":
+      - generic: 新会话
+    - generic "D:\\work\\billing-service"
+    - generic: 等你允许
+    - button "面板 1":
+      - text: 面板 1
+  - region "面板组：对话":
+    - tablist "面板标签":
+      - tab "对话" [selected]:
+        - text: 对话
+    - button "面板操作：拆分、移动、合并、关闭":
+    - generic: 最终验收样例：只读梳理 billing-service 的模块结构，不修改文件。
+    - heading "执行 · 第 1 次" [level=3]
+    - generic: 2/6
+    - button "日志":
+      - text: 日志
+    - list:
+      - button "读取 invoice.ts 与 3 个调用点 只读 · 412 行":
+        - generic: 读取 invoice.ts 与 3 个调用点
+        - generic: 只读 · 412 行
+      - button "规划：buildAll() 改为逐页流式写入 第 1 轮":
+        - generic: 规划：buildAll() 改为逐页流式写入
+        - generic: 第 1 轮
+      - button "修改 src/export/invoice.ts +38 −21" [disabled]:
+        - generic: 修改 src/export/invoice.ts
+        - generic: +38 −21
+      - button "新建 src/export/csv-stream.ts +46" [disabled]:
+        - generic: 新建 src/export/csv-stream.ts
+        - generic: "+46"
+      - button "运行 pnpm test export 本机终端" [disabled]:
+        - generic: 运行 pnpm test export
+        - generic: 本机终端
+      - button "汇总改动与验收建议" [disabled]:
+        - generic: 汇总改动与验收建议
+    - alertdialog "允许写入文件？":
+      - generic: 允许写入文件？
+      - generic: 修改 src/export/invoice.ts · 写入前自动快照，可整体回滚
+      - button "允许一次"
+      - button "本会话允许"
+      - button "始终允许"
+      - button "拒绝"
+    - textbox "输入消息":
+      - /placeholder: 继续提要求…
+    - button "权限：写入前询问":
+      - text: 写入前询问
+    - button "2 项上下文":
+      - text: 2 项上下文
+    - button "模型：Claude Opus 5.5":
+      - text: Claude Opus 5.5
+    - generic: Ctrl+Enter 发送
+    - button "发送" [disabled]:
+  - generic "桌宠图层（原型）":
+    - button "叫回桌宠":
+  - text: 本机执行器 · 模拟
+  - generic "D:\\work\\billing-service"
+  - generic: 空闲
+  - generic: 已保存到本机
+  - generic: 原型 · 模拟
+  - button "快捷键":
+    - text: 快捷键

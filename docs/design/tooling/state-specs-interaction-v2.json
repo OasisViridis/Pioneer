@@ -1,0 +1,168 @@
+{
+  "key": "I",
+  "title": "列表、局部视图与输入保护",
+  "desc": "补充相关的hover、逐文件加载、空列表与关闭等待；hover不替代键盘焦点，未来数据始终有示例标签。",
+  "tiles": [
+    {
+      "id": "I01",
+      "title": "海报 Hover",
+      "components": [
+        [
+          "Workspace Poster",
+          "Ready",
+          {}
+        ]
+      ],
+      "note": "鼠标悬停只改变中性表面，不暗示授权或执行。整卡主动作与旁侧动作分开；触屏和键盘不依赖hover。"
+    },
+    {
+      "id": "I02",
+      "title": "会话行 Hover",
+      "components": [
+        [
+          "Session Row",
+          "Closed",
+          {}
+        ]
+      ],
+      "note": "hover提示可恢复；不会自动恢复或改最近活动时间。键盘焦点样例见E08。"
+    },
+    {
+      "id": "I03",
+      "title": "局部 Tab Hover",
+      "components": [
+        [
+          "Local Tab",
+          "Inactive",
+          {
+            "Label": "文件清单"
+          }
+        ]
+      ],
+      "note": "hover不切换当前产物。点击/Enter后才激活；方向键只在此tablist，不能改变全局会话。"
+    },
+    {
+      "id": "I04",
+      "title": "逐文件读取中",
+      "future": true,
+      "badge": [
+        "Wait",
+        "正在读取改动 · 2 / 5 个文件"
+      ],
+      "lead": "当前：docs/outline.md\n基线：v2 · 提案：v3\n读取范围未扩大；尚未应用差异。",
+      "actions": [
+        [
+          "取消读取",
+          "Secondary"
+        ]
+      ],
+      "note": "取消保留已确认片段并标部分，不显示整项完成。未读文件不当成无改动。"
+    },
+    {
+      "id": "I05",
+      "title": "文件清单 · 同一产物 v3",
+      "future": true,
+      "components": [
+        [
+          "Local Tab",
+          "Active",
+          {
+            "Label": "文件清单"
+          }
+        ]
+      ],
+      "lead": "产物：结构梳理 · v3 · task-example\n文件 1：artifacts/结构梳理.md\n状态：已生成，尚未写入工作区\n类型：Markdown · 范围：章节与引用",
+      "actions": [
+        [
+          "查看此文件",
+          "Secondary"
+        ]
+      ],
+      "note": "预览、文件清单和验收绑定同一artifactId/version。文件失联逐项标记，不退回别的会话同名文件。"
+    },
+    {
+      "id": "I06",
+      "title": "验收记录 · 同一产物 v3",
+      "future": true,
+      "components": [
+        [
+          "Local Tab",
+          "Active",
+          {
+            "Label": "验收记录"
+          }
+        ]
+      ],
+      "lead": "09:32:08 · 示例校验通过 · exit 0\n目标：结构梳理.md · v3\n方法：node verify-artifact.mjs --version v3\n范围：章节与引用；非Electron全量验收",
+      "actions": [
+        [
+          "查看版本化记录",
+          "Secondary"
+        ]
+      ],
+      "note": "记录是手工设计样例，脚本未实现。历史失败仍可见；切换v4不继承v3结果。"
+    },
+    {
+      "id": "I07",
+      "title": "全部会话 · 尚无记录",
+      "lead": "还没有本机会话。\n先选择工作区，再创建具体会话。",
+      "actions": [
+        [
+          "选择工作区",
+          "Primary"
+        ],
+        [
+          "关闭列表",
+          "Secondary"
+        ]
+      ],
+      "note": "与搜索无结果S07不同。关闭后焦点回全部会话按钮；不创建无工作区的幽灵会话。"
+    },
+    {
+      "id": "I08",
+      "title": "关闭等待已受理保存",
+      "badge": [
+        "Wait",
+        "正在等待本次保存完成"
+      ],
+      "lead": "记录尚未确认落盘。\n完成后再关闭；失败会回到编辑，不丢草稿。",
+      "actions": [
+        [
+          "取消关闭",
+          "Secondary",
+          "Focus"
+        ]
+      ],
+      "note": "不强行截断写入。超时显示未知/失败并保留输入，不声称已关闭成功；取消关闭不撤销已受理保存。"
+    },
+    {
+      "id": "I09",
+      "title": "标签重排的键盘替代",
+      "components": [
+        [
+          "Session Tab",
+          "Active",
+          {
+            "Title": "整理毕业项目"
+          }
+        ]
+      ],
+      "actions": [
+        [
+          "向前移动",
+          "Secondary"
+        ],
+        [
+          "向后移动",
+          "Secondary"
+        ],
+        [
+          "取消排列",
+          "Quiet",
+          "Focus"
+        ]
+      ],
+      "note": "重排只改变标签顺序，不改sessionId或草稿。完成后焦点留在原标签；Esc取消当前拖拽。"
+    }
+  ]
+}

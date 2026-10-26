@@ -1,0 +1,97 @@
+{
+  "effects": [
+    {
+      "expectedName": "Pioneer v2 / Elevation / Flat",
+      "id": "S:43eabf74852819294e4c160b892848375d07c072,",
+      "exists": true,
+      "name": "Pioneer v2 / Elevation / Flat",
+      "type": "EFFECT",
+      "effects": []
+    },
+    {
+      "expectedName": "Pioneer v2 / Elevation / Overlay",
+      "id": "S:6362f0e1103f41c9d20b804efecca4ce35cba08a,",
+      "exists": true,
+      "name": "Pioneer v2 / Elevation / Overlay",
+      "type": "EFFECT",
+      "effects": [
+        {
+          "type": "DROP_SHADOW",
+          "visible": true,
+          "radius": 24,
+          "boundVariables": {},
+          "color": {
+            "r": 0.12941177189350128,
+            "g": 0.16470588743686676,
+            "b": 0.23137255012989044,
+            "a": 0.11999999731779099
+          },
+          "offset": {
+            "x": 0,
+            "y": 8
+          },
+          "spread": 0,
+          "blendMode": "NORMAL",
+          "showShadowBehindNode": true
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "id": "717:1578",
+      "name": "main"
+    },
+    {
+      "id": "717:1574",
+      "name": "design-system"
+    },
+    {
+      "id": "717:1575",
+      "name": "components · controls"
+    },
+    {
+      "id": "717:1576",
+      "name": "components · navigation"
+    },
+    {
+      "id": "717:1577",
+      "name": "components · workbench"
+    },
+    {
+      "id": "743:1574",
+      "name": "states · v2"
+    },
+    {
+      "id": "757:1574",
+      "name": "responsive · v2"
+    },
+    {
+      "id": "132:2",
+      "name": "archive · main (pre-v2)"
+    },
+    {
+      "id": "299:725",
+      "name": "archive · workbench (pre-v2)"
+    },
+    {
+      "id": "257:725",
+      "name": "archive"
+    }
+  ],
+  "mainScreens": 13,
+  "guideText": [
+    {
+      "id": "733:1575",
+      "characters": "Pioneer · v2 开发稿"
+    },
+    {
+      "id": "733:1576",
+      "characters": "Claude × Hazel v2 · 13个主要窗口，配套8个响应式窗口与81个组合状态。\n规范与主组件可编辑；状态矩阵见 states · v2，尺寸/临界样本见 responsive · v2。\n这是静态设计交付，不代表代码、运行器、P12实际点击或Windows实测已完成。旧main/workbench保留在历史页。"
+    },
+    {
+      "id": "733:1577",
+      "characters": "L 工作区库 / S 本机会话 / D 布局与上下文 / P 设置与数据 / R 未来权限与运行 / A 未来审阅交付"
+    }
+  ]
+}

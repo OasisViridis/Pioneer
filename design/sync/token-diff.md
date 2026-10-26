@@ -122,16 +122,16 @@
 ## 字体、文字样式与 modes
 
 - 六集合只有 Light（S0 原始 mode ID、scopes、codeSyntax 全部保留）。当前生成只输出一个 `:root`，不引入深色主题。
-- 历史 v2/v3 与 F9 的 Noto Sans SC、Noto Serif SC、JetBrains Mono 和字体 style/字重/字号/行高保留在 S0 快照与 evidence.json。生产保持 Inter → Noto Sans SC → system-ui → sans-serif；不下载、嵌入或宣称安装了设计字体。
+- 历史 v2/v3 与 F9 的 Noto Sans SC、Noto Serif SC、JetBrains Mono 和字体 style/字重/字号/行高保留在 S0 快照与 evidence.json。生产保持 Inter → Noto Sans SC → system-ui → sans-serif；本 PR 不新增字体；同步 main `fd26d06` 后，沿用 #13 已接受的 Noto Sans SC / Noto Serif SC 字体资产与 fonts.css，不改其加载方式。
 - 当前 main 的组件字号、布局间距仍是局部 CSS 常量；没有把所有 FLOAT 自动转成 px，也不全量重排界面。
 - 七个 F9 补充值全部保留为设计专用；没有 main 消费者，暂不输出 CSS。
 - Window 两集合重复声明同一 WEB codeSyntax，保留原始元数据，禁止直接扁平化为同名 token；当前 main 用原生窗口，不迁移这些颜色。
 
 ## 历史资产和过时工具
 
-历史 Hazel v3 包、ZIP、provenance、decoration-policy 与 v2 JSON 未在当前 main 中；固定 commit 路径和 SHA-256 在 evidence.json。没有复制 #13 资产，没有覆盖 ZIP/manifest，也没有把旧素材偷偷接入运行时。原生变量与历史文字样式差异保留，未迁移内容不是已接受输入。
+初始基线 `d5a2f87` 未包含历史 Hazel v3 包、ZIP、provenance、decoration-policy 与 v2 JSON；历史固定 commit 路径和 SHA-256 保留在 evidence.json。合并前同步 main `fd26d06` 后已继承 #13 的这些材料，本 PR 相对该 main 不改资产、ZIP/manifest 或运行时素材接入。原生变量与历史文字样式差异保留，未迁移内容不是已接受输入。
 
-历史 `build-local.py` 和 `validate-kit.py` **退出日常生产路线**：它们含重建 CSS、写 QA/ZIP 及读取用户目录生成图的副作用。当前复用的是纯读的对比度公式、S0 哈希及已有 Electron fixture 不变量。素材哈希/装饰预算的运行时规则须在 #13 的资产被接受后再按新主线适配；本票不把“无当前资产”说成历史 12 素材预算已通过。
+历史 `build-local.py` 和 `validate-kit.py` **退出日常生产路线**：它们含重建 CSS、写 QA/ZIP 及读取用户目录生成图的副作用。当前复用的是纯读的对比度公式、S0 哈希及已有 Electron fixture 不变量。素材哈希/装饰预算的运行时规则仍须按 #13 已接受的主线适配；本票未运行历史 12 素材预算，不将继承资产等同于该预算通过。
 
 ## 参考
 

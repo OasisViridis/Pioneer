@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-01",
+  "candidateInputsMatched": 123,
+  "candidateIdentityRecomputed": "ee45eea2a514cc035c0e5fda0dfa1304c7d2f25c704e502e90f191b8cdd4cd6f",
+  "linksChecked": 90,
+  "missingLinks": [],
+  "zipSha256": "5d9d8bbc7b30708200dcb5127af407f55df31196df76c1e4a1fe1f2bb8a5ee77",
+  "zipCrcPassed": true,
+  "zipEntries": 23,
+  "scope": "Final post-gate files/metadata/ZIP; not a new Electron test"
+}

@@ -1,0 +1,198 @@
+{
+  "mutatedNodeIds": [
+    "717:1667",
+    "717:1670",
+    "717:1673",
+    "717:1676",
+    "717:1679",
+    "717:1682",
+    "717:1685",
+    "717:1688",
+    "717:1691",
+    "717:1579",
+    "717:1603",
+    "717:1661",
+    "717:1704",
+    "717:1708",
+    "717:1733",
+    "717:1737",
+    "717:1755",
+    "717:1609",
+    "717:1612",
+    "717:1615",
+    "717:1618",
+    "717:1622",
+    "717:1625",
+    "717:1628",
+    "717:1631",
+    "717:1635",
+    "717:1638",
+    "717:1641",
+    "717:1644",
+    "717:1648",
+    "717:1651",
+    "717:1654",
+    "717:1657"
+  ],
+  "specimens": [
+    {
+      "id": "717:1667",
+      "size": 24,
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Bold",
+        "variationSettings": {
+          "wght": 700
+        }
+      },
+      "style": "S:257c6c917d8fa2dde989032051b51b26f3c9a197,"
+    },
+    {
+      "id": "717:1670",
+      "size": 20,
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "variationSettings": {
+          "wght": 500
+        }
+      },
+      "style": "S:5f654470ee0fa802090097da484862b9991ae33e,"
+    },
+    {
+      "id": "717:1673",
+      "size": 15,
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "style": "S:009108471da5abf19de0f60cac5d933e051e0b67,"
+    },
+    {
+      "id": "717:1676",
+      "size": 14,
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "style": "S:2d0b0108f7903d2148b96ff53086cca00eaaa24a,"
+    },
+    {
+      "id": "717:1679",
+      "size": 14,
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "variationSettings": {
+          "wght": 500
+        }
+      },
+      "style": "S:1bf61ddccb263e7fe2ba02396fb5ac0147d7f9a5,"
+    },
+    {
+      "id": "717:1682",
+      "size": 12,
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "style": "S:1ef90af28ba27bff54c0e0f7b65c5c40917e9819,"
+    },
+    {
+      "id": "717:1685",
+      "size": 12,
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "variationSettings": {
+          "wght": 500
+        }
+      },
+      "style": "S:162f281c8522b6bd9b95f7172ec5385575cedc60,"
+    },
+    {
+      "id": "717:1688",
+      "size": 14,
+      "font": {
+        "family": "JetBrains Mono",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "style": "S:c2b51bf8345deeaf843453037b01769be1b43769,"
+    },
+    {
+      "id": "717:1691",
+      "size": 12,
+      "font": {
+        "family": "JetBrains Mono",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "style": "S:23fe9b0e29ac8c065b16eb54041a8e02d7410ebe,"
+    }
+  ],
+  "boards": [
+    {
+      "id": "717:1579",
+      "name": "00 · 从对话出发，把工作留在眼前",
+      "x": 200,
+      "y": 200,
+      "width": 1440,
+      "height": 548
+    },
+    {
+      "id": "717:1603",
+      "name": "01 · 颜色承担角色，不承担装饰",
+      "x": 1800,
+      "y": 200,
+      "width": 1440,
+      "height": 712
+    },
+    {
+      "id": "717:1661",
+      "name": "02 · 清楚的字阶，安静的密度",
+      "x": 200,
+      "y": 1072,
+      "width": 1440,
+      "height": 746
+    },
+    {
+      "id": "717:1704",
+      "name": "03 · 一个窗口，一条会话主轴",
+      "x": 1800,
+      "y": 1072,
+      "width": 1440,
+      "height": 616
+    },
+    {
+      "id": "717:1733",
+      "name": "04 · 先说事实，再说影响和下一步",
+      "x": 200,
+      "y": 1978,
+      "width": 1440,
+      "height": 824
+    },
+    {
+      "id": "717:1755",
+      "name": "05 · 开发稿重置与交接",
+      "x": 1800,
+      "y": 1978,
+      "width": 1440,
+      "height": 510
+    }
+  ],
+  "primitivePaintsRemaining": []
+}

@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-01T02:59:23.1477062+08:00",
+  "command": "pnpm check",
+  "execution": "outside agent tool sandbox; product sandbox/contextIsolation/CSP unchanged; isolated fixture/profile",
+  "exitCode": 0,
+  "candidate": "resumption-candidate-2026-10-01.json",
+  "candidateIdentity": "e42ce03b82dd143a8dde08c86e9624e13f0976b324e33cb7837759f487b3a621",
+  "inputsUnchanged": true,
+  "changedDuringGate": [],
+  "log": "tests/resumption-v31-full-gate-2026-10-01.log",
+  "node": "24.19.0",
+  "rootPnpm": "11.19.0",
+  "forgeNestedPnpm": "observed in log",
+  "publish": false,
+  "postGateInputVerification": {
+    "matched": 114,
+    "mismatched": 0,
+    "identityRecomputed": true,
+    "serializationCorrection": "Empty PowerShell pipeline [null] normalized to [] after 114-file hash verification; gate exit/log unchanged."
+  }
+}

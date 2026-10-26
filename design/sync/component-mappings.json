@@ -21,7 +21,7 @@
       "code": {
         "exportName": "ProjectPoster",
         "path": "apps/desktop/src/renderer/components/ProjectPoster.tsx",
-        "commit": "0410d5a8a1e8a262b811721e5cfa8234d4b79795",
+        "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
         "blob": "5d906b384f7f1297182986844cd8882d148dccc9",
         "inAcceptedMain": true,
         "mainBlob": "5d906b384f7f1297182986844cd8882d148dccc9",
@@ -80,15 +80,15 @@
       ],
       "acceptance": [
         {
-          "commit": "0410d5a8a1e8a262b811721e5cfa8234d4b79795",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "apps/desktop/src/shared/contracts/catalog.ts"
         },
         {
-          "commit": "0410d5a8a1e8a262b811721e5cfa8234d4b79795",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "tests/contract/catalog-contract.test.ts"
         },
         {
-          "commit": "0410d5a8a1e8a262b811721e5cfa8234d4b79795",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "tests/e2e/pioneer.e2e.spec.ts"
         }
       ],
@@ -113,10 +113,10 @@
       "code": {
         "exportName": "LocalTabs",
         "path": "apps/desktop/src/renderer/components/LocalTabs.tsx",
-        "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+        "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
         "blob": "a60d9345a1ef480e5a20bfd53b3571173b176a99",
-        "inAcceptedMain": false,
-        "mainBlob": null,
+        "inAcceptedMain": true,
+        "mainBlob": "a60d9345a1ef480e5a20bfd53b3571173b176a99",
         "props": {
           "items": "{ id: T; label: string }[]",
           "value": "T",
@@ -133,13 +133,13 @@
           "nodeId": "921:633",
           "name": "State=Active",
           "status": "blocked",
-          "reason": "No accepted main implementation; re-pin after #13 acceptance. PanelTab is not LocalTabs; needs a real dock composition API."
+          "reason": "LocalTabs is accepted in main after PR #16, but is not a dock PanelTab: it has no close/drag/dock/menu API. Keep this pilot blocked pending an actual dock composition API or a separately reviewed replacement."
         },
         {
           "nodeId": "921:642",
           "name": "State=Inactive",
           "status": "blocked",
-          "reason": "No accepted main implementation; re-pin after #13 acceptance. PanelTab is not LocalTabs; needs a real dock composition API."
+          "reason": "LocalTabs is accepted in main after PR #16, but is not a dock PanelTab: it has no close/drag/dock/menu API. Keep this pilot blocked pending an actual dock composition API or a separately reviewed replacement."
         }
       ],
       "propertyMapping": [
@@ -162,19 +162,19 @@
       ],
       "acceptance": [
         {
-          "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "apps/desktop/src/renderer/components/WorkbenchPanels.tsx"
         },
         {
-          "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "apps/desktop/src/renderer/components/DockSurface.tsx"
         },
         {
-          "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "apps/desktop/src/shared/contracts/session-workspace.ts"
         },
         {
-          "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "tests/e2e/p1-session.e2e.spec.ts"
         }
       ],
@@ -195,33 +195,33 @@
         }
       },
       "designVersion": "S0 snapshot-only; identical live projection on 2026-10-26",
-      "status": "blocked",
+      "status": "partial",
       "code": {
         "exportName": "SessionTabStrip",
         "path": "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
-        "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+        "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
         "blob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
-        "inAcceptedMain": false,
-        "mainBlob": null,
+        "inAcceptedMain": true,
+        "mainBlob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
         "props": {
           "state": "SessionWorkspaceState",
           "dispatch": "Dispatch<SessionWorkspaceAction>"
         }
       },
-      "usedProps": [],
-      "example": null,
+      "usedProps": ["state", "dispatch"],
+      "example": "<SessionTabStrip state={state} dispatch={dispatch} />",
       "variants": [
         {
           "nodeId": "921:619",
           "name": "State=Active",
-          "status": "blocked",
-          "reason": "No accepted main implementation; map a strip composition after #13 acceptance, never per-tab invented props."
+          "status": "preserved-difference",
+          "reason": "Accepted SessionTabStrip selects each tab through state.activeTabId and state.openSessionIds; use the containing strip with state/dispatch, not invented per-tab props. Visual parity with the single Figma SessionTab still needs acceptance."
         },
         {
           "nodeId": "921:627",
           "name": "State=Inactive",
-          "status": "blocked",
-          "reason": "No accepted main implementation; map a strip composition after #13 acceptance, never per-tab invented props."
+          "status": "preserved-difference",
+          "reason": "Accepted SessionTabStrip selects each tab through state.activeTabId and state.openSessionIds; use the containing strip with state/dispatch, not invented per-tab props. Visual parity with the single Figma SessionTab still needs acceptance."
         }
       ],
       "propertyMapping": [
@@ -246,27 +246,27 @@
       ],
       "acceptance": [
         {
-          "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "apps/desktop/src/shared/contracts/session-workspace.ts"
         },
         {
-          "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "apps/desktop/src/renderer/state/session-workspace-reducer.ts"
         },
         {
-          "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "tests/contract/session-workspace-reducer.test.ts"
         },
         {
-          "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "tests/e2e/tab-strip.e2e.spec.ts"
         },
         {
-          "commit": "395df15cd544d1d6f8bb8adb0fa292ff23f3c901",
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
           "path": "tests/e2e/p1-session.e2e.spec.ts"
         }
       ],
-      "next": "Wait for acceptance of #13 code, re-pin its accepted commit and map the containing strip; do not invent an exported SessionTab or per-tab selected/onClose props."
+      "next": "Accepted commit/blob and real state/dispatch props are pinned after PR #16. Complete single-tab visual/composition acceptance before marking the SessionTab pilot mapped; do not invent an exported SessionTab or per-tab selected/onClose props."
     }
   ]
 }

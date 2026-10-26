@@ -1,0 +1,62 @@
+[
+  {
+    "file": "greendou-reading.png",
+    "response": {
+      "success": true,
+      "imageHash": "07eb833119df1c8a848f1fde0f8c5269dd89a363",
+      "sizeBytes": 1035490,
+      "contentType": "image/png",
+      "placedOnNodeId": "854:1276"
+    }
+  },
+  {
+    "file": "greendou-organizing.png",
+    "response": {
+      "success": true,
+      "imageHash": "804567681a23b3b1f73d16114134d3c914e3213f",
+      "sizeBytes": 1142689,
+      "contentType": "image/png",
+      "placedOnNodeId": "854:5751"
+    }
+  },
+  {
+    "file": "greendou-listening.png",
+    "response": {
+      "success": true,
+      "imageHash": "c1fa42150c9a3e8e18a9c944573c9c9aabade404",
+      "sizeBytes": 1025208,
+      "contentType": "image/png",
+      "placedOnNodeId": "854:5752"
+    }
+  },
+  {
+    "file": "cherry-bookmark.png",
+    "response": {
+      "success": true,
+      "imageHash": "8f87e47794fd2a6f823ad48fc87b96dd2d764d91",
+      "sizeBytes": 684965,
+      "contentType": "image/png",
+      "placedOnNodeId": "854:5753"
+    }
+  },
+  {
+    "file": "paper-butterfly.png",
+    "response": {
+      "success": true,
+      "imageHash": "26204c0fd21fdece726b270e1e2c7e2e78a57e0e",
+      "sizeBytes": 727046,
+      "contentType": "image/png",
+      "placedOnNodeId": "854:5754"
+    }
+  },
+  {
+    "file": "jelly-ribbon-charm.png",
+    "response": {
+      "success": true,
+      "imageHash": "6c027a5944f1d9f6db0d77f269b62a1a23d964f2",
+      "sizeBytes": 803609,
+      "contentType": "image/png",
+      "placedOnNodeId": "854:5755"
+    }
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-01T04:23:34.2596379+08:00",
+  "command": "pnpm check",
+  "execution": "outside agent tool sandbox; product sandbox/contextIsolation/CSP unchanged; isolated fixture/profile",
+  "exitCode": 0,
+  "candidate": "decoration-v32-candidate-2026-10-01.json",
+  "candidateIdentity": "ee45eea2a514cc035c0e5fda0dfa1304c7d2f25c704e502e90f191b8cdd4cd6f",
+  "inputsUnchanged": true,
+  "changedDuringGate": [],
+  "inputCount": 123,
+  "log": "tests/decoration-v32-full-gate-2026-10-01.log",
+  "node": "24.19.0",
+  "publish": false
+}

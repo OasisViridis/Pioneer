@@ -104,11 +104,12 @@ export function validateMapping(mapping, design, source) {
   for (const prop of mapping.usedProps)
     assert(props.includes(prop), `Invented prop: ${prop}`);
   // A disabled Figma poster must not become a clickable available project.
-  assert.equal(
-    mapping.variants.find((v) => v.name === 'Cover=Unavailable')?.status,
-    'unsupported',
-    'Unavailable has no safe real API',
-  );
+  if (mapping.designProperties.Cover)
+    assert.equal(
+      mapping.variants.find((v) => v.name === 'Cover=Unavailable')?.status,
+      'unsupported',
+      'Unavailable has no safe real API',
+    );
 }
 
 export async function checkMappings({ requireComplete = false } = {}) {

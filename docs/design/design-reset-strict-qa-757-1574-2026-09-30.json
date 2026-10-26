@@ -1,0 +1,302 @@
+{
+  "date": "2026-09-30",
+  "scope": "strict static audit: exact 1px right-boundary geometry and adjacent linked Code-style CJK fallback; no runtime certification",
+  "result": {
+    "pageId": "757:1574",
+    "pageName": "responsive · v2",
+    "problems": [],
+    "qa": {
+      "structure": {
+        "pageId": "757:1574",
+        "name": "responsive · v2",
+        "nodes": 467,
+        "texts": 197,
+        "instances": 95,
+        "roots": [
+          {
+            "id": "758:1574",
+            "name": "V · 宽度与分栏",
+            "x": 200,
+            "y": 200,
+            "width": 2340,
+            "height": 922
+          },
+          {
+            "id": "758:1715",
+            "name": "V · 最窄与短窗口",
+            "x": 200,
+            "y": 1320,
+            "width": 2080,
+            "height": 864
+          },
+          {
+            "id": "758:1830",
+            "name": "V · 759 / 760 临界",
+            "x": 200,
+            "y": 2410,
+            "width": 1679,
+            "height": 842
+          },
+          {
+            "id": "761:1761",
+            "name": "V · 审批优先与草稿保留",
+            "x": 200,
+            "y": 3412,
+            "width": 2080,
+            "height": 864
+          }
+        ],
+        "issues": {
+          "unboundPaints": [],
+          "unresolvedPaints": [],
+          "stalePaintCache": [],
+          "missingTextStyles": [],
+          "unexpectedFonts": [],
+          "cjkInMono": [],
+          "overflows": []
+        },
+        "documentedExceptions": {
+          "insideStrokeBoundaryOffsets": [
+            {
+              "id": "758:1580",
+              "parent": "758:1579",
+              "bounds": [1, 1, 1280, 64],
+              "parentSize": [1280, 800]
+            },
+            {
+              "id": "758:1609",
+              "parent": "758:1579",
+              "bounds": [1, 65, 1280, 72],
+              "parentSize": [1280, 800]
+            },
+            {
+              "id": "758:1620",
+              "parent": "758:1579",
+              "bounds": [1, 137, 1280, 630],
+              "parentSize": [1280, 800]
+            },
+            {
+              "id": "758:1622",
+              "parent": "758:1621",
+              "bounds": [1, 1, 724, 48],
+              "parentSize": [724, 598]
+            },
+            {
+              "id": "758:1629",
+              "parent": "758:1621",
+              "bounds": [1, 49, 724, 548],
+              "parentSize": [724, 598]
+            },
+            {
+              "id": "758:1643",
+              "parent": "758:1642",
+              "bounds": [1, 1, 500, 48],
+              "parentSize": [500, 598]
+            },
+            {
+              "id": "758:1648",
+              "parent": "758:1642",
+              "bounds": [1, 49, 500, 548],
+              "parentSize": [500, 598]
+            },
+            {
+              "id": "758:1663",
+              "parent": "758:1579",
+              "bounds": [1, 767, 1280, 32],
+              "parentSize": [1280, 800]
+            },
+            {
+              "id": "758:1669",
+              "parent": "758:1668",
+              "bounds": [1, 1, 900, 64],
+              "parentSize": [900, 700]
+            },
+            {
+              "id": "758:1689",
+              "parent": "758:1668",
+              "bounds": [1, 65, 900, 72],
+              "parentSize": [900, 700]
+            },
+            {
+              "id": "758:1699",
+              "parent": "758:1668",
+              "bounds": [1, 137, 900, 530],
+              "parentSize": [900, 700]
+            },
+            {
+              "id": "758:1712",
+              "parent": "758:1668",
+              "bounds": [1, 667, 900, 32],
+              "parentSize": [900, 700]
+            },
+            {
+              "id": "758:1721",
+              "parent": "758:1720",
+              "bounds": [1, 1, 640, 64],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "758:1741",
+              "parent": "758:1720",
+              "bounds": [1, 65, 640, 72],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "758:1751",
+              "parent": "758:1720",
+              "bounds": [1, 137, 640, 550],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "758:1764",
+              "parent": "758:1720",
+              "bounds": [1, 687, 640, 32],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "758:1770",
+              "parent": "758:1769",
+              "bounds": [1, 1, 1280, 64],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "758:1797",
+              "parent": "758:1769",
+              "bounds": [1, 65, 1280, 72],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "758:1807",
+              "parent": "758:1769",
+              "bounds": [1, 137, 1280, 390],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "758:1827",
+              "parent": "758:1769",
+              "bounds": [1, 527, 1280, 32],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "758:1836",
+              "parent": "758:1835",
+              "bounds": [1, 1, 759, 64],
+              "parentSize": [759, 720]
+            },
+            {
+              "id": "758:1856",
+              "parent": "758:1835",
+              "bounds": [1, 65, 759, 72],
+              "parentSize": [759, 720]
+            },
+            {
+              "id": "758:1866",
+              "parent": "758:1835",
+              "bounds": [1, 137, 759, 550],
+              "parentSize": [759, 720]
+            },
+            {
+              "id": "758:1881",
+              "parent": "758:1835",
+              "bounds": [1, 687, 759, 32],
+              "parentSize": [759, 720]
+            },
+            {
+              "id": "758:1887",
+              "parent": "758:1886",
+              "bounds": [1, 1, 760, 64],
+              "parentSize": [760, 720]
+            },
+            {
+              "id": "758:1907",
+              "parent": "758:1886",
+              "bounds": [1, 65, 760, 72],
+              "parentSize": [760, 720]
+            },
+            {
+              "id": "758:1917",
+              "parent": "758:1886",
+              "bounds": [1, 137, 760, 550],
+              "parentSize": [760, 720]
+            },
+            {
+              "id": "758:1930",
+              "parent": "758:1886",
+              "bounds": [1, 687, 760, 32],
+              "parentSize": [760, 720]
+            },
+            {
+              "id": "761:1767",
+              "parent": "761:1766",
+              "bounds": [1, 1, 640, 64],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1787",
+              "parent": "761:1766",
+              "bounds": [1, 65, 640, 72],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1797",
+              "parent": "761:1766",
+              "bounds": [1, 137, 640, 46],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1799",
+              "parent": "761:1766",
+              "bounds": [1, 183, 640, 504],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1821",
+              "parent": "761:1766",
+              "bounds": [1, 687, 640, 32],
+              "parentSize": [640, 720]
+            },
+            {
+              "id": "761:1827",
+              "parent": "761:1826",
+              "bounds": [1, 1, 1280, 64],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "761:1854",
+              "parent": "761:1826",
+              "bounds": [1, 65, 1280, 72],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "761:1864",
+              "parent": "761:1826",
+              "bounds": [1, 137, 1280, 46],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "761:1866",
+              "parent": "761:1826",
+              "bounds": [1, 183, 1280, 344],
+              "parentSize": [1280, 560]
+            },
+            {
+              "id": "761:1882",
+              "parent": "761:1826",
+              "bounds": [1, 527, 1280, 32],
+              "parentSize": [1280, 560]
+            }
+          ],
+          "cjkCodeFallbacks": []
+        }
+      },
+      "contrast": {
+        "pageId": "757:1574",
+        "name": "responsive · v2",
+        "tested": 197,
+        "minRatio": 4.651208246923584,
+        "failures": [],
+        "unknown": []
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "mutatedNodeIds": [
+    "722:1587",
+    "722:1588",
+    "722:1589",
+    "722:1590",
+    "722:1658",
+    "722:1659"
+  ],
+  "reason": "Fixed outer width while text children fill available space; 48px row retained."
+}

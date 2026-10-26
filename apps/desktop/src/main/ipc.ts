@@ -62,7 +62,7 @@ function matchesExpectedRendererUrl(
   }
 }
 
-function isTrustedSender(
+export function isTrustedSender(
   event: IpcInvokeEventLike,
   window: { webContents: WebContentsLike },
   expectedRendererUrl: string,

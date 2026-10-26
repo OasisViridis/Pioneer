@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static Figma delivery verification; not prototype or Electron",
+  "result": {
+    "pageId": "717:1575",
+    "pageName": "components · controls",
+    "problems": [],
+    "components": [
+      {
+        "name": "Button",
+        "id": "720:1608",
+        "variants": 24
+      },
+      {
+        "name": "Field",
+        "id": "720:1670",
+        "variants": 5
+      },
+      {
+        "name": "Status",
+        "id": "720:1700",
+        "variants": 6
+      }
+    ]
+  }
+}

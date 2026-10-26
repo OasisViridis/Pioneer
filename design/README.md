@@ -1,6 +1,6 @@
 # S1 设计同步 · #35
 
-本 PR 完成 token 生产管线和映射证据校验，**不是 #35 全部验收通过**。基于已接受 main `d5a2f87`，不依赖或修改 #13 施工分支。
+本 PR 完成 token 生产管线和映射证据校验，**不是 #35 全部验收通过**。初始基线为 main `d5a2f87`；合并前已同步 main `fd26d06`（含 #13 / PR #16），重新固定三个导出的 accepted commit/blob。
 
 ## 唯一生产输入
 
@@ -27,12 +27,12 @@ Tokens Studio Git Sync 仍未验证；当前使用 S0 选定的明确文件导�
 | 设计组件                   | 已核对的代码                             | 当前结果                                                                                                                    |
 | -------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | Workspace Poster `921:706` | main 的 `ProjectPoster(project, onOpen)` | Code/Map/Doc 保留 seeded-gradient 差异；Unavailable 无可用状态/禁用 API，禁止生成可点击卡片。部分对应，未完成全部变体支持。 |
-| PanelTab `921:648`         | #13 的 `LocalTabs` 候选                  | 不在 main，且职责不等价；不得虚构 active/onClose/停靠 props。等待已接受的真实停靠组合 API或另行审阅替换试点。               |
-| SessionTab `921:632`       | #13 的 `SessionTabStrip` 候选            | 不在 main；后续在列表组合层使用 state/dispatch，不能把单 Tab 映成独立 Strip。关闭 Tab 不能等同停止 Run。                    |
+| PanelTab `921:648`         | main 的 `LocalTabs`                      | 已进入 main，但职责不等价；不得虚构 active/onClose/停靠 props。等待已接受的真实停靠组合 API或另行审阅替换试点。             |
+| SessionTab `921:632`       | main 的 `SessionTabStrip`                | 已核对列表组合层的 state/dispatch；单 Tab 的视觉/组合映射仍待验收。关闭 Tab 不能等同停止 Run。                              |
 
 因此 `pnpm design:acceptance` **预期失败**并列出 S1 阻塞；不要关闭 #35 或父入口 #33。`pnpm design:check` 仅证明当前管线和诚实的索引证据有效，明确输出 `3/3 pilots still incomplete`，不声称三组件映射验收通过。
 
-#13 合并后须重新固定 accepted commit/blob、核对真实导出和 props，再处理 Unavailable 与 PanelTab 职责缺口。届时更新索引、映射测试和完整验收门槛；不要把仅调整状态字符串当成完成。Code Connect 权限若变化，需另行实测发布及回读，不能借此索引推导官方成功。
+PR #16 已合并，真实导出和 props 已重新核对；Unavailable 与 PanelTab 职责缺口仍未解决，SessionTab 也尚无单 Tab 的视觉/组合验收。后续须更新索引、映射测试和完整验收门槛；不能将进入 main 等同于设计映射完成。Code Connect 权限若变化，需另行实测发布及回读，不能借此索引推导官方成功。
 
 ## 校验边界
 

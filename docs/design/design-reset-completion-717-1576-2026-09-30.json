@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-30",
+  "scope": "read-only static Figma delivery verification; not prototype or Electron",
+  "result": {
+    "pageId": "717:1576",
+    "pageName": "components · navigation",
+    "problems": [],
+    "components": [
+      {
+        "name": "Session Tab",
+        "id": "722:1591",
+        "variants": 4
+      },
+      {
+        "name": "Local Tab",
+        "id": "722:1619",
+        "variants": 4
+      },
+      {
+        "name": "Workspace Poster",
+        "id": "722:1630",
+        "variants": 3
+      },
+      {
+        "name": "Panel Header",
+        "id": "722:1660",
+        "variants": 2
+      },
+      {
+        "name": "Session Row",
+        "id": "722:1675",
+        "variants": 3
+      }
+    ],
+    "internalCloseVariants": 3
+  }
+}

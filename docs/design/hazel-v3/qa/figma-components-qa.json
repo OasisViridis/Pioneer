@@ -1,0 +1,85 @@
+{
+  "sets": [
+    {
+      "id": "830:1276",
+      "name": "Pioneer v3 / Button",
+      "variants": 24
+    },
+    {
+      "id": "830:1353",
+      "name": "Pioneer v3 / Field",
+      "variants": 5
+    },
+    {
+      "id": "830:1379",
+      "name": "Pioneer v3 / Status",
+      "variants": 6
+    },
+    {
+      "id": "830:1392",
+      "name": ".Pioneer v3 / Close Button",
+      "variants": 3
+    },
+    {
+      "id": "830:1399",
+      "name": "Pioneer v3 / Session Tab",
+      "variants": 4
+    },
+    {
+      "id": "830:1426",
+      "name": "Pioneer v3 / Local Tab",
+      "variants": 4
+    },
+    {
+      "id": "830:1435",
+      "name": "Pioneer v3 / Workspace Poster",
+      "variants": 3
+    },
+    {
+      "id": "830:1463",
+      "name": "Pioneer v3 / Panel Header",
+      "variants": 2
+    },
+    {
+      "id": "830:1474",
+      "name": "Pioneer v3 / Session Row",
+      "variants": 3
+    },
+    {
+      "id": "830:1490",
+      "name": "Pioneer v3 / Context Row",
+      "variants": 3
+    },
+    {
+      "id": "830:1524",
+      "name": "Pioneer v3 / Artifact Card",
+      "variants": 4
+    },
+    {
+      "id": "830:1593",
+      "name": "Pioneer v3 / Permission Card",
+      "variants": 4
+    },
+    {
+      "id": "830:1666",
+      "name": "Pioneer v3 / Run Status",
+      "variants": 5
+    },
+    {
+      "id": "830:1720",
+      "name": "Pioneer v3 / Validation",
+      "variants": 4
+    },
+    {
+      "id": "830:1773",
+      "name": "Pioneer v3 / Composer",
+      "variants": 7
+    }
+  ],
+  "variantTotal": 81,
+  "nestedWrong": [],
+  "contrastIssues": [],
+  "reactionCount": 0,
+  "pass": true,
+  "note": "14 families / 78 variants + 3 internal Close variants. Leading-dot internal set membership validated by captured component IDs."
+}

@@ -1,0 +1,140 @@
+{
+  "kind": "WC1-pre-wiring-scoped-audit",
+  "capturedAt": "2026-10-01T02:32:56.148099+00:00",
+  "candidate": {
+    "path": "docs/testing/wc1-staged-candidate-2026-10-01.json",
+    "identitySha256": "cc51eb96ec64d47b2832480ee425e189c9593377bb0c3b7268f766dff42a6e68",
+    "filesVerifiedAfterGates": 133,
+    "inheritedF1cInputsUnchanged": 123
+  },
+  "status": "pre-wiring-modules-reviewed-offline-gates-passed; WC1-incomplete",
+  "productionWired": false,
+  "visibleTrafficLightsImplemented": false,
+  "existingRuntimeSourceChanged": false,
+  "offlineGates": {
+    "record": "docs/testing/wc1-staged-offline-gates-2026-10-01.json",
+    "allSixExitZero": true,
+    "contract": 174,
+    "newFocusedContracts": 50,
+    "prototype": 210,
+    "packageSmokeExitZero": true,
+    "fullPnpmCheckPassed": false,
+    "realElectronE2E": "not-executed"
+  },
+  "redEvidence": [
+    {
+      "log": "tests/wc1-lifecycle-red-2026-10-01.log",
+      "exitCode": 1,
+      "scope": "8 behavior failures before lifecycle implementation"
+    },
+    {
+      "log": "tests/wc1-window-contract-red-2026-10-01.log",
+      "exitCode": 1,
+      "scope": "14 window handler/state failures before implementation"
+    },
+    {
+      "log": "tests/wc1-preload-red-2026-10-01.log",
+      "exitCode": 1,
+      "scope": "4 preload adapter failures before implementation"
+    },
+    {
+      "log": "tests/wc1-review-red-2026-10-01.log",
+      "exitCode": 1,
+      "scope": "2 reviewer-identified behavior failures plus transport-related error before repair"
+    },
+    {
+      "log": "tests/wc1-restore-red-2026-10-01.log",
+      "exitCode": 1,
+      "scope": "6 geometry failures before restoration implementation"
+    }
+  ],
+  "lintFailurePreserved": {
+    "record": "docs/testing/wc1-staged-offline-gates-before-lint-fix-2026-10-01.json",
+    "candidate": "docs/testing/wc1-staged-candidate-before-lint-fix-2026-10-01.json"
+  },
+  "nativeProbe": {
+    "status": "not-executed",
+    "approvalReviewCompleted": false,
+    "reason": "automatic approval review service usage limit",
+    "toolExplicitlyReportedActionNotExecuted": true,
+    "bypassAttempted": false,
+    "serviceRecoveryRetryAuthorizedByUser": true,
+    "resultFileExists": false,
+    "scripts": [
+      {
+        "path": ".private/wc1-probe/main.cjs",
+        "sha256": "6f7adb60a6fd18db8a795c745787ed7a13ee66fc17f16d541b60c56e5b28cb8a"
+      },
+      {
+        "path": ".private/wc1-probe/run.cjs",
+        "sha256": "f11e2a9e7e2ab5660f4d28c95721ae06d4e612150dca1988e0e25beb7959fca2"
+      }
+    ]
+  },
+  "independentReadOnlyReviews": [
+    {
+      "agent": "/root/wc1_lifecycle_review",
+      "model": "gpt-6-luna",
+      "scope": "app-window-lifecycle module and contract tests",
+      "result": "no new module logic defects after fixes; integration hooks pending",
+      "didRunGates": false
+    },
+    {
+      "agent": "/root/wc1_native_probe_review",
+      "model": "gpt-6-luna",
+      "scope": "window-controls/window-ipc/window-state/preload adapter/geometry and focused contracts; final lint delta reread",
+      "result": "scoped module review passed; no new final-delta defects; native and production integration unproven",
+      "didRunGates": false
+    }
+  ],
+  "authorityFiles": [
+    {
+      "path": "docs/specs/2026-10-01-window-chrome.md",
+      "sha256": "afbd938ce80e25436dd9f78415f48b20612ae3b283f7b87a6aacc62ed989af73"
+    },
+    {
+      "path": "docs/plans/2026-09-30-pioneer-unified-development-plan.md",
+      "sha256": "439e2d07dc18dc201eb12b13b92d28c9ae235203836f4f96180e392986b87932"
+    },
+    {
+      "path": "themasterplan/ROADMAP.md",
+      "sha256": "22a8aeeaab177625443f83dc9eea17d30e17ccf415c8d40caf16eb577d0f3177"
+    },
+    {
+      "path": "docs/testing/pioneer-evidence-ledger.md",
+      "sha256": "cc4e320c22029f72f8f0784eb3c27139880b931b6b2800d5cf2a58c433be6821"
+    },
+    {
+      "path": "docs/testing/wc1-prewiring-2026-10-01.md",
+      "sha256": "8d2706a66112d002d2e5d542949b3ccc680acda4c7f61751744198fe5580d1c4"
+    }
+  ],
+  "pending": [
+    "Approved isolated native shell probe and evidence-based style selection",
+    "Main app-level store/save tracker/close-quit-reopen/tray integration",
+    "Real cancel AND failure clear quit intent; later retry does not inherit canceled intent",
+    "Per-window fixed IPC ownership, sync state broadcast and old sender disposal",
+    "Actual preload API and renderer controls/subscriptions including loading/error state",
+    "Current-v3 Figma window component supplement without design reset",
+    "Real Electron E2E including changed last-window-close semantics and preserved save/failure gates",
+    "Fresh full pnpm check and independent final integrated diff review",
+    "Windows system menu/Snap/notification area/DPI/multiscreen/accessibility/system-ending manual evidence"
+  ],
+  "nonClaims": [
+    "Not WC1 acceptance",
+    "Not M2/M3/W/P12 completion",
+    "Not PET implementation",
+    "Type compatibility and fake ports are not Electron proof",
+    "Package output is not runtime launch or native shell proof"
+  ],
+  "preserved": [
+    "Unexplained inherited changes",
+    "Hazel v3.2 palette/type/density/decoration budget",
+    "Plugin source/config/assets and personal profiles",
+    "Historical successful and failing evidence"
+  ],
+  "localLinkAudit": {
+    "linksChecked": 81,
+    "missing": []
+  }
+}

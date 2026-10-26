@@ -1,0 +1,38 @@
+{
+  "action": "non-destructive archive move",
+  "date": "2026-10-02",
+  "activeCopiesPreserved": true,
+  "files": [
+    {
+      "source": "docs/superpowers/plans/2026-09-04-m15-repository-normalization.md",
+      "destination": "docs/archive/plans/2026-09-04-m15-repository-normalization.md",
+      "bytes": 16769,
+      "sha256": "d8a177e1399045ca7bccc8f594f348bedaae140be4e0cd871dec295b61ad9269"
+    },
+    {
+      "source": "docs/superpowers/plans/2026-09-04-m2-desktop-foundation.md",
+      "destination": "docs/archive/plans/2026-09-04-m2-desktop-foundation.md",
+      "bytes": 30442,
+      "sha256": "7cf7cf81aa0357ba1fcf7df540d10c6824970bb383e5474d74b3fb0ae0a950c3"
+    },
+    {
+      "source": "docs/superpowers/plans/2026-09-09-m3-intent-review.md",
+      "destination": "docs/archive/plans/2026-09-09-m3-intent-review.md",
+      "bytes": 3559,
+      "sha256": "4cf61675a252ad4d06f329720015db8403635dc4ae3064a671b1c9754696d94f"
+    },
+    {
+      "source": "docs/superpowers/specs/2026-09-04-m15-m2-foundation-design.md",
+      "destination": "docs/archive/specs/2026-09-04-m15-m2-foundation-design.md",
+      "bytes": 16199,
+      "sha256": "15248979d3c0ea928e3a609409d678f80a67916e859ef74c84ccee03e1b6847e"
+    },
+    {
+      "source": "docs/superpowers/specs/2026-09-09-m3-intent-review-design.md",
+      "destination": "docs/archive/specs/2026-09-09-m3-intent-review-design.md",
+      "bytes": 3677,
+      "sha256": "9426444c2f948673b48929d02d5158b0c593573e4b463cc1ed36308140c1d948"
+    }
+  ],
+  "globalSkillsChanged": false
+}

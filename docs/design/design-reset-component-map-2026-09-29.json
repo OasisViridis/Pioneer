@@ -1,0 +1,726 @@
+{
+  "Button": {
+    "id": "720:1608",
+    "variants": [
+      {
+        "id": "720:1584",
+        "name": "Style=Primary, State=Default"
+      },
+      {
+        "id": "720:1585",
+        "name": "Style=Primary, State=Hover"
+      },
+      {
+        "id": "720:1586",
+        "name": "Style=Primary, State=Pressed"
+      },
+      {
+        "id": "720:1587",
+        "name": "Style=Primary, State=Focus"
+      },
+      {
+        "id": "720:1588",
+        "name": "Style=Primary, State=Disabled"
+      },
+      {
+        "id": "720:1589",
+        "name": "Style=Primary, State=Loading"
+      },
+      {
+        "id": "720:1590",
+        "name": "Style=Secondary, State=Default"
+      },
+      {
+        "id": "720:1591",
+        "name": "Style=Secondary, State=Hover"
+      },
+      {
+        "id": "720:1592",
+        "name": "Style=Secondary, State=Pressed"
+      },
+      {
+        "id": "720:1593",
+        "name": "Style=Secondary, State=Focus"
+      },
+      {
+        "id": "720:1594",
+        "name": "Style=Secondary, State=Disabled"
+      },
+      {
+        "id": "720:1595",
+        "name": "Style=Secondary, State=Loading"
+      },
+      {
+        "id": "720:1596",
+        "name": "Style=Quiet, State=Default"
+      },
+      {
+        "id": "720:1597",
+        "name": "Style=Quiet, State=Hover"
+      },
+      {
+        "id": "720:1598",
+        "name": "Style=Quiet, State=Pressed"
+      },
+      {
+        "id": "720:1599",
+        "name": "Style=Quiet, State=Focus"
+      },
+      {
+        "id": "720:1600",
+        "name": "Style=Quiet, State=Disabled"
+      },
+      {
+        "id": "720:1601",
+        "name": "Style=Quiet, State=Loading"
+      },
+      {
+        "id": "720:1602",
+        "name": "Style=Danger, State=Default"
+      },
+      {
+        "id": "720:1603",
+        "name": "Style=Danger, State=Hover"
+      },
+      {
+        "id": "720:1604",
+        "name": "Style=Danger, State=Pressed"
+      },
+      {
+        "id": "720:1605",
+        "name": "Style=Danger, State=Focus"
+      },
+      {
+        "id": "720:1606",
+        "name": "Style=Danger, State=Disabled"
+      },
+      {
+        "id": "720:1607",
+        "name": "Style=Danger, State=Loading"
+      }
+    ],
+    "properties": {
+      "Label#720:0": {
+        "type": "TEXT",
+        "defaultValue": "保存到会话"
+      },
+      "Danger label#721:0": {
+        "type": "TEXT",
+        "defaultValue": "删除会话"
+      },
+      "Style": {
+        "type": "VARIANT",
+        "defaultValue": "Primary",
+        "variantOptions": [
+          "Primary",
+          "Secondary",
+          "Quiet",
+          "Danger"
+        ]
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Default",
+        "variantOptions": [
+          "Default",
+          "Hover",
+          "Pressed",
+          "Focus",
+          "Disabled",
+          "Loading"
+        ]
+      }
+    }
+  },
+  "Field": {
+    "id": "720:1670",
+    "variants": [
+      {
+        "id": "720:1665",
+        "name": "State=Default"
+      },
+      {
+        "id": "720:1666",
+        "name": "State=Focus"
+      },
+      {
+        "id": "720:1667",
+        "name": "State=Disabled"
+      },
+      {
+        "id": "720:1668",
+        "name": "State=Error"
+      },
+      {
+        "id": "720:1669",
+        "name": "State=Loading"
+      }
+    ],
+    "properties": {
+      "Label#720:25": {
+        "type": "TEXT",
+        "defaultValue": "工作区名称"
+      },
+      "Value#720:31": {
+        "type": "TEXT",
+        "defaultValue": "Pioneer"
+      },
+      "Helper#721:25": {
+        "type": "TEXT",
+        "defaultValue": "仅修改本机显示名称"
+      },
+      "Disabled reason#721:31": {
+        "type": "TEXT",
+        "defaultValue": "当前不可编辑：工作区不可访问"
+      },
+      "Error message#721:37": {
+        "type": "TEXT",
+        "defaultValue": "名称不能为空，已保留当前输入"
+      },
+      "Progress message#721:43": {
+        "type": "TEXT",
+        "defaultValue": "正在检查名称，请稍候"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Default",
+        "variantOptions": [
+          "Default",
+          "Focus",
+          "Disabled",
+          "Error",
+          "Loading"
+        ]
+      }
+    }
+  },
+  "Status": {
+    "id": "720:1700",
+    "variants": [
+      {
+        "id": "720:1694",
+        "name": "Tone=Neutral"
+      },
+      {
+        "id": "720:1695",
+        "name": "Tone=Info"
+      },
+      {
+        "id": "720:1696",
+        "name": "Tone=Wait"
+      },
+      {
+        "id": "720:1697",
+        "name": "Tone=Success"
+      },
+      {
+        "id": "720:1698",
+        "name": "Tone=Error"
+      },
+      {
+        "id": "720:1699",
+        "name": "Tone=Unknown"
+      }
+    ],
+    "properties": {
+      "Text#720:43": {
+        "type": "TEXT",
+        "defaultValue": "仅保存在本机"
+      },
+      "Info text#749:0": {
+        "type": "TEXT",
+        "defaultValue": "运行器尚未接入"
+      },
+      "Wait text#749:7": {
+        "type": "TEXT",
+        "defaultValue": "等待你的决定"
+      },
+      "Success text#749:14": {
+        "type": "TEXT",
+        "defaultValue": "已保存到本机"
+      },
+      "Error text#749:21": {
+        "type": "TEXT",
+        "defaultValue": "保存失败，草稿仍保留"
+      },
+      "Unknown text#749:28": {
+        "type": "TEXT",
+        "defaultValue": "连接中断，结果未知"
+      },
+      "Tone": {
+        "type": "VARIANT",
+        "defaultValue": "Neutral",
+        "variantOptions": [
+          "Neutral",
+          "Info",
+          "Wait",
+          "Success",
+          "Error",
+          "Unknown"
+        ]
+      }
+    }
+  },
+  "Session Tab": {
+    "id": "722:1591",
+    "variants": [
+      {
+        "id": "722:1587",
+        "name": "State=Active"
+      },
+      {
+        "id": "722:1588",
+        "name": "State=Inactive"
+      },
+      {
+        "id": "722:1589",
+        "name": "State=Hover"
+      },
+      {
+        "id": "722:1590",
+        "name": "State=Focus"
+      }
+    ],
+    "properties": {
+      "Title#722:0": {
+        "type": "TEXT",
+        "defaultValue": "整理毕业项目"
+      },
+      "Workspace#722:5": {
+        "type": "TEXT",
+        "defaultValue": "Pioneer · 本机记录"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Active",
+        "variantOptions": [
+          "Active",
+          "Inactive",
+          "Hover",
+          "Focus"
+        ]
+      }
+    }
+  },
+  "Local Tab": {
+    "id": "722:1619",
+    "variants": [
+      {
+        "id": "722:1615",
+        "name": "State=Active"
+      },
+      {
+        "id": "722:1616",
+        "name": "State=Inactive"
+      },
+      {
+        "id": "722:1617",
+        "name": "State=Focus"
+      },
+      {
+        "id": "722:1618",
+        "name": "State=Disabled"
+      }
+    ],
+    "properties": {
+      "Label#722:10": {
+        "type": "TEXT",
+        "defaultValue": "预览"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Active",
+        "variantOptions": [
+          "Active",
+          "Inactive",
+          "Focus",
+          "Disabled"
+        ]
+      }
+    }
+  },
+  "Workspace Poster": {
+    "id": "722:1630",
+    "variants": [
+      {
+        "id": "722:1627",
+        "name": "State=Ready"
+      },
+      {
+        "id": "722:1628",
+        "name": "State=Stale"
+      },
+      {
+        "id": "722:1629",
+        "name": "State=Unavailable"
+      }
+    ],
+    "properties": {
+      "Identifier#722:15": {
+        "type": "TEXT",
+        "defaultValue": "P"
+      },
+      "Title#722:19": {
+        "type": "TEXT",
+        "defaultValue": "Pioneer"
+      },
+      "Summary#722:23": {
+        "type": "TEXT",
+        "defaultValue": "模块化 Agent 交互系统"
+      },
+      "Timestamp#722:27": {
+        "type": "TEXT",
+        "defaultValue": "上次扫描：09:28"
+      },
+      "Path#722:31": {
+        "type": "TEXT",
+        "defaultValue": "D:/Project/Pioneer"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Ready",
+        "variantOptions": [
+          "Ready",
+          "Stale",
+          "Unavailable"
+        ]
+      }
+    }
+  },
+  "Panel Header": {
+    "id": "722:1660",
+    "variants": [
+      {
+        "id": "722:1658",
+        "name": "State=Open"
+      },
+      {
+        "id": "722:1659",
+        "name": "State=Compact"
+      }
+    ],
+    "properties": {
+      "Title#722:35": {
+        "type": "TEXT",
+        "defaultValue": "上下文"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Open",
+        "variantOptions": [
+          "Open",
+          "Compact"
+        ]
+      }
+    }
+  },
+  "Session Row": {
+    "id": "722:1675",
+    "variants": [
+      {
+        "id": "722:1672",
+        "name": "State=Open"
+      },
+      {
+        "id": "722:1673",
+        "name": "State=Closed"
+      },
+      {
+        "id": "722:1674",
+        "name": "State=Draft"
+      }
+    ],
+    "properties": {
+      "Title#722:38": {
+        "type": "TEXT",
+        "defaultValue": "整理毕业项目"
+      },
+      "Workspace#722:42": {
+        "type": "TEXT",
+        "defaultValue": "Pioneer"
+      },
+      "Last active#722:46": {
+        "type": "TEXT",
+        "defaultValue": "最近活动：今天 09:28"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Open",
+        "variantOptions": [
+          "Open",
+          "Closed",
+          "Draft"
+        ]
+      }
+    }
+  },
+  "Context Row": {
+    "id": "725:1580",
+    "variants": [
+      {
+        "id": "725:1577",
+        "name": "State=Attached"
+      },
+      {
+        "id": "725:1578",
+        "name": "State=Stale"
+      },
+      {
+        "id": "725:1579",
+        "name": "State=Unavailable"
+      }
+    ],
+    "properties": {
+      "Title#725:0": {
+        "type": "TEXT",
+        "defaultValue": "设计说明.md"
+      },
+      "Path#725:4": {
+        "type": "TEXT",
+        "defaultValue": "docs/design/设计说明.md"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Attached",
+        "variantOptions": [
+          "Attached",
+          "Stale",
+          "Unavailable"
+        ]
+      }
+    }
+  },
+  "Artifact Card": {
+    "id": "725:1618",
+    "variants": [
+      {
+        "id": "725:1614",
+        "name": "State=Ready"
+      },
+      {
+        "id": "725:1615",
+        "name": "State=Generating"
+      },
+      {
+        "id": "725:1616",
+        "name": "State=Failed"
+      },
+      {
+        "id": "725:1617",
+        "name": "State=Stale"
+      }
+    ],
+    "properties": {
+      "Title#725:8": {
+        "type": "TEXT",
+        "defaultValue": "结构梳理.md"
+      },
+      "Source#725:13": {
+        "type": "TEXT",
+        "defaultValue": "来源：整理毕业项目 · task-example · v3"
+      },
+      "Path#725:18": {
+        "type": "TEXT",
+        "defaultValue": "artifacts/结构梳理.md"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Ready",
+        "variantOptions": [
+          "Ready",
+          "Generating",
+          "Failed",
+          "Stale"
+        ]
+      }
+    }
+  },
+  "Permission Card": {
+    "id": "725:1678",
+    "variants": [
+      {
+        "id": "725:1674",
+        "name": "State=Awaiting"
+      },
+      {
+        "id": "725:1675",
+        "name": "State=Denied"
+      },
+      {
+        "id": "725:1676",
+        "name": "State=Expired"
+      },
+      {
+        "id": "725:1677",
+        "name": "State=Approved"
+      }
+    ],
+    "properties": {
+      "Operation#725:23": {
+        "type": "TEXT",
+        "defaultValue": "对象：毕业项目的设计文档"
+      },
+      "Scope#725:28": {
+        "type": "TEXT",
+        "defaultValue": "路径：D:/Project/Pioneer/docs\n权限：只读；不写入、不执行命令"
+      },
+      "Recipient#725:33": {
+        "type": "TEXT",
+        "defaultValue": "接收方：本地示例运行器；不外发"
+      },
+      "Expiry#725:38": {
+        "type": "TEXT",
+        "defaultValue": "时效：仅此一次；目标变更或超时即失效"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Awaiting",
+        "variantOptions": [
+          "Awaiting",
+          "Denied",
+          "Expired",
+          "Approved"
+        ]
+      }
+    }
+  },
+  "Run Status": {
+    "id": "725:1747",
+    "variants": [
+      {
+        "id": "725:1742",
+        "name": "State=Running"
+      },
+      {
+        "id": "725:1743",
+        "name": "State=Stopping"
+      },
+      {
+        "id": "725:1744",
+        "name": "State=Stopped"
+      },
+      {
+        "id": "725:1745",
+        "name": "State=Unknown"
+      },
+      {
+        "id": "725:1746",
+        "name": "State=Failed"
+      }
+    ],
+    "properties": {
+      "Last event#725:43": {
+        "type": "TEXT",
+        "defaultValue": "最后确认：task-example / event-12 / 09:28:12"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Running",
+        "variantOptions": [
+          "Running",
+          "Stopping",
+          "Stopped",
+          "Unknown",
+          "Failed"
+        ]
+      }
+    }
+  },
+  "Validation": {
+    "id": "725:1803",
+    "variants": [
+      {
+        "id": "725:1799",
+        "name": "State=Never"
+      },
+      {
+        "id": "725:1800",
+        "name": "State=Running"
+      },
+      {
+        "id": "725:1801",
+        "name": "State=Passed"
+      },
+      {
+        "id": "725:1802",
+        "name": "State=Failed"
+      }
+    ],
+    "properties": {
+      "Target#725:49": {
+        "type": "TEXT",
+        "defaultValue": "目标：结构梳理.md · v3"
+      },
+      "Method#725:54": {
+        "type": "TEXT",
+        "defaultValue": "步骤：检查路径引用与章节完整性"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "Never",
+        "variantOptions": [
+          "Never",
+          "Running",
+          "Passed",
+          "Failed"
+        ]
+      }
+    }
+  },
+  "Composer": {
+    "id": "725:1854",
+    "variants": [
+      {
+        "id": "725:1847",
+        "name": "State=LocalEmpty"
+      },
+      {
+        "id": "725:1848",
+        "name": "State=LocalDraft"
+      },
+      {
+        "id": "725:1849",
+        "name": "State=Saving"
+      },
+      {
+        "id": "725:1850",
+        "name": "State=Saved"
+      },
+      {
+        "id": "725:1851",
+        "name": "State=Error"
+      },
+      {
+        "id": "725:1852",
+        "name": "State=RemoteReady"
+      },
+      {
+        "id": "725:1853",
+        "name": "State=Running"
+      }
+    ],
+    "properties": {
+      "Draft#727:0": {
+        "type": "TEXT",
+        "defaultValue": "请梳理毕业项目的文档结构，先说明你的理解。"
+      },
+      "Placeholder#727:8": {
+        "type": "TEXT",
+        "defaultValue": "写下当前想整理的内容…"
+      },
+      "State": {
+        "type": "VARIANT",
+        "defaultValue": "LocalEmpty",
+        "variantOptions": [
+          "LocalEmpty",
+          "LocalDraft",
+          "Saving",
+          "Saved",
+          "Error",
+          "RemoteReady",
+          "Running"
+        ]
+      }
+    }
+  }
+}

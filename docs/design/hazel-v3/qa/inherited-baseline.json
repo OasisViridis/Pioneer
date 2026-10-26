@@ -1,0 +1,37 @@
+[
+  {
+    "path": "apps/desktop/src/renderer/styles/tokens.css",
+    "sha256": "639364A9543772158711EDEFE1CDFF194DD26778D2A78B403C172732A3DC6A31",
+    "backup": "C:\\Users\\Oasis\\.codex\\visualizations\\2026\\09\\30\\01a0f208-3e5e-7050-99a0-fd43041f5e3e\\baseline\\apps__desktop__src__renderer__styles__tokens.css"
+  },
+  {
+    "path": "apps/desktop/src/renderer/styles/app.css",
+    "sha256": "8F47CD59558A6C2E12EE0BAB7891DD72EADFDE58FCEAB0DFE6DFD218B2EE176A",
+    "backup": "C:\\Users\\Oasis\\.codex\\visualizations\\2026\\09\\30\\01a0f208-3e5e-7050-99a0-fd43041f5e3e\\baseline\\apps__desktop__src__renderer__styles__app.css"
+  },
+  {
+    "path": "apps/desktop/src/renderer/components/ProjectLibrary.tsx",
+    "sha256": "CBAE22C34BE5C10BAD319AFFFFB4964066DF97F1DA78C0D8B5FAFB0992CCD8A7",
+    "backup": "C:\\Users\\Oasis\\.codex\\visualizations\\2026\\09\\30\\01a0f208-3e5e-7050-99a0-fd43041f5e3e\\baseline\\apps__desktop__src__renderer__components__ProjectLibrary.tsx"
+  },
+  {
+    "path": "apps/desktop/src/renderer/components/ProjectPoster.tsx",
+    "sha256": "330E20217CD3F419A5313F15F93F861BE8382F3364DE5E602DC9ABCEF6CBEC45",
+    "backup": "C:\\Users\\Oasis\\.codex\\visualizations\\2026\\09\\30\\01a0f208-3e5e-7050-99a0-fd43041f5e3e\\baseline\\apps__desktop__src__renderer__components__ProjectPoster.tsx"
+  },
+  {
+    "path": "apps/desktop/src/renderer/components/Conversation.tsx",
+    "sha256": "03AFFD515961F52481A77C7ADA5C677B680AE5A4367A4D0C5C328C6E9C74B146",
+    "backup": "C:\\Users\\Oasis\\.codex\\visualizations\\2026\\09\\30\\01a0f208-3e5e-7050-99a0-fd43041f5e3e\\baseline\\apps__desktop__src__renderer__components__Conversation.tsx"
+  },
+  {
+    "path": "apps/desktop/src/renderer/components/TabStrip.tsx",
+    "sha256": "A693CCC7E0022BD0EBA661F71F4A41B9D5782B6112B9E1FDF75E21072E80EAAC",
+    "backup": "C:\\Users\\Oasis\\.codex\\visualizations\\2026\\09\\30\\01a0f208-3e5e-7050-99a0-fd43041f5e3e\\baseline\\apps__desktop__src__renderer__components__TabStrip.tsx"
+  },
+  {
+    "path": "docs/design/DESIGN-SYSTEM.md",
+    "sha256": "499D60183ADB85C71C12E88ADD9200290D6A7D53ADD400CACBC1C88E25FD287F",
+    "backup": "C:\\Users\\Oasis\\.codex\\visualizations\\2026\\09\\30\\01a0f208-3e5e-7050-99a0-fd43041f5e3e\\baseline\\docs__design__DESIGN-SYSTEM.md"
+  }
+]
