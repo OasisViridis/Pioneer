@@ -60,7 +60,7 @@
 
 ## 评审修复记录（2026-10-26）
 
-PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补齐的运行层缺口。修复前基线 `395df15`，分支 `fix-pr16-review`（自 `codex/issue13-readonly-harness` 头）。修复按复审轮次提交：第一轮 `3bbb21b` + `0196478` + `de0e0f1`；第二轮 `8328bdc` + `cfff311`；第三轮 `97594a2` + `08665fb`；第四轮 `8ecb5ef` + `69884bb`；第五轮 `a6ff9e5` + `956a55f` + `fcebcb2`；第六轮 `321d82e`。每轮的门禁与证据见下。
+PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补齐的运行层缺口。修复前基线 `395df15`，分支 `fix-pr16-review`（自 `codex/issue13-readonly-harness` 头）。修复按复审轮次提交：第一轮 `3bbb21b` + `0196478` + `de0e0f1`；第二轮 `8328bdc` + `cfff311`；第三轮 `97594a2` + `08665fb`；第四轮 `8ecb5ef` + `69884bb`；第五轮 `a6ff9e5` + `956a55f` + `fcebcb2`；第六轮 `321d82e` + `96955f5`；第七轮 `0bfd5de`。每轮的门禁与证据见下。
 
 | 审查缺口 | 修复 |
 | --- | --- |
@@ -130,14 +130,14 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 
 ### 第五次复审修复（`a6ff9e5` 代码 + `956a55f` 清理，2026-10-26）
 
-对第四轮修复再做复审后补的收尾（`a6ff9e5` 为行为修复，`956a55f` 为命名/释放路径清理）：
+对第四轮修复再做复审后补的收尾（`a6ff9e5` 为 ACK/重放/游标修复，`956a55f` 为发送异常隔离、命名与释放路径清理）：
 
 | 复审缺口 | 修复 | 提交 |
 | --- | --- | --- |
 | 旧/重复 ACK 也会清除 `awaitingBatch`，可能同时存在两批未确认 | 只有 `afterSeq >= deliveredSeq` 的 ACK 才释放下一批（§5「只允许一批未确认」） | `a6ff9e5` |
 | journal 转为不健康后，已被接受的 requestId 重放被 `JOURNAL_UNAVAILABLE` 挡掉 | `start` 先做 replay 再检查 journal 可用性；只有真正的新请求被拒 | `a6ff9e5` |
 | 空 run 的过期游标会原样回显 | 钳到 0，后续事件仍能送达 | `a6ff9e5` |
-| `terminate` 的 `finally` 里 `sender.send` 抛错会跳过槽位释放，`driveRun` 还会产生未处理拒绝 | 投递加 `try/catch`，槽位释放仍在 `finally`；`driveRun` 的分离 promise 补 `catch` | `a6ff9e5` |
+| `terminate` 的 `finally` 里 `sender.send` 抛错会跳过槽位释放，`driveRun` 还会产生未处理拒绝 | 投递加 `try/catch`，槽位释放仍在 `finally`；`driveRun` 的分离 promise 补 `catch` | `956a55f` |
 | `shutdown` 自成一套 `terminate`+`dispose`，`terminate` 抛错照样跳过释放 | 复用 `terminateAndRelease` | `956a55f` |
 | `terminateConverged` 是 GLOSSARY「收敛/Quiescent」之外的第三种拼法 | 改名 `terminateAndRelease`，描述它真正的额外职责（释放） | `956a55f` |
 | `exhaustToolBudget` 只是一行转发 | 删除，两条预算路径直接 `failWith(run, 'TOOL_FAILED')` | `956a55f` |
@@ -155,11 +155,25 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 
 `run-manager` 定向套件 31 项（其中重放用例现在具备区分力）。
 
+### 第七次复审补正（`0bfd5de`，2026-10-26）
+
+| 复审缺口 | 修复 |
+| --- | --- |
+| 第五轮把「发送异常隔离」记到了 `a6ff9e5`，实际落在 `956a55f` | 修正行归属；第五轮标题与说明同步改准确 |
+| `terminate` 的投递外层 `catch` 与 `deliverBatches` 内层隔离重复，注释还声称「sender 抛错会跳过释放」 | 外层改为 `try/finally`，只保证 `releaseSlot` 必然执行；注释改为实际职责 |
+| 订阅者发送抛错后的丢弃分支没有测试 | 新增用例：发送必抛错 → 订阅者被丢弃、flush 定时器不崩、run 仍到达终态 |
+| 轮次列表漏了第六轮的文档提交 `96955f5` | 补入轮次列表 |
+
+`run-manager` 定向套件 32 项。
+
 ### 门禁记录
 
 | 项 | 命令 | 结果 |
 | --- | --- | --- |
-| 完整门禁（第六轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `321d82e` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **374/374**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
+| 完整门禁（第七轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `0bfd5de` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **375/375**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
+| A08 干净检出（第七轮） | `0bfd5de` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
+| 定向套件（第七轮） | `vitest run` run-manager（32）/ controlled-adapter（12）/ pi-adapter-tools（2）/ read-only-tools-exec（14）/ run-view（2） | 全绿 |
+| 完整门禁（第六轮） | `pnpm check`，提交 `321d82e` | 退出码 0（2026-10-26）：Contract **374/374**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
 | A08 干净检出（第六轮） | `321d82e` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
 | 完整门禁（第五轮） | `pnpm check`，提交 `956a55f` | 退出码 0（2026-10-26）：Contract **374/374**、Prototype **210/210**、Real E2E **24/24**、package smoke |
 | A08 干净检出（第五轮） | `956a55f` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26） |
