@@ -189,6 +189,8 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 
 **环境注意**：本机 DSH 会话会继承 `ELECTRON_RUN_AS_NODE=1`，此时 Electron 按 Node 解释并拒绝 `--remote-debugging-port`，E2E 全红；这不是代码回归，跑 E2E 或 `pnpm check` 前需清除该变量（CI 无此变量）。
 
+**合并后补正（2026-10-26，`474fb16`）**：PR #16 合并进 `main` 后的 `Pioneer Quality Gate` 失败，唯一失败项是 `read-only-tools-exec` 的 200/201 目录边界用例——它在 Windows CI 上把 200 个文件逐个写、再对 200 条目各做一次 `realpath`/`lstat`，单个用例超过 vitest 默认 5s。修复：文件并行创建、去掉重复的 202 项列表、该用例超时放宽到 30s（本机 0.3s）。这是测试预算问题，不是运行层回归。
+
 ### 仍未完成（不在本次修复范围）
 
 - **外发材料清单（egress manifest）与授权撤销模型**：合同 §1/§4 要求按材料清单授权、材料变更即撤销，但"用户如何选定可外发材料"属产品决策，代码仍无执行者；A05/A06 的该子项不能算 PASS。
