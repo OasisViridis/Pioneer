@@ -29,7 +29,9 @@
     "design:acceptance": "pnpm check && node tools/design-mappings.mjs --require-complete",
     "design:types": "tsc --noEmit -p apps/desktop/design/tsconfig.json",
     "design:assets": "node tools/design-assets.mjs",
-    "design:delivery": "node tools/design-delivery-cli.mjs"
+    "design:delivery": "node tools/design-delivery-cli.mjs",
+    "test:visual": "playwright test --config tests/e2e/playwright.visual.config.ts",
+    "design:visual:candidate": "playwright test --config tests/e2e/playwright.visual-candidate.config.ts"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.1",

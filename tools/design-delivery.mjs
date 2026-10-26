@@ -265,7 +265,7 @@ export function validateOutput(root, pkg, raw) {
   }
   return result;
 }
-function metadata(body) {
+export function metadata(body) {
   const start = body?.indexOf(metadataStart) ?? -1;
   if (start < 0) return null;
   const end = body.indexOf(metadataEnd, start + metadataStart.length);
@@ -528,6 +528,31 @@ export async function publish({ root, pkg, output, api, actor }) {
     };
   }
 }
+// Shared by S2 receipts and the read-only, post-merge S3 publication plan.
+export function qualityJobsPassed(jobs) {
+  const required = {
+    'Windows / pnpm check': [
+      'Verify repository normalization',
+      'Contract tests',
+      'Electron E2E',
+      'Package smoke',
+      'Confirm aggregate quality and S1 acceptance',
+    ],
+    'Windows / reviewed visual baseline': ['Compare reviewed Windows baseline'],
+  };
+  return Object.entries(required).every(([name, steps]) => {
+    const job = jobs.find((item) => item.name === name);
+    return (
+      job?.conclusion === 'success' &&
+      steps.every((step) =>
+        job.steps?.some(
+          (item) => item.name === step && item.conclusion === 'success',
+        ),
+      )
+    );
+  });
+}
+
 export async function verify(api, number) {
   const pr = await api('GET', `${prefix}/pulls/${number}`);
   const headSha = pr.head.sha;
@@ -555,23 +580,7 @@ export async function verify(api, number) {
         `${prefix}/actions/runs/${run.id}/jobs?per_page=100`,
       );
       jobs = response.jobs;
-      const gate = jobs.find((job) => job.name === 'Windows / pnpm check');
-      const required = [
-        'Verify repository normalization',
-        'Contract tests',
-        'Electron E2E',
-        'Package smoke',
-        'Confirm aggregate quality and S1 acceptance',
-      ];
-      state =
-        gate?.conclusion === 'success' &&
-        required.every((name) =>
-          gate.steps?.some(
-            (step) => step.name === name && step.conclusion === 'success',
-          ),
-        )
-          ? 'verified'
-          : 'validation-incomplete';
+      state = qualityJobsPassed(jobs) ? 'verified' : 'validation-incomplete';
     }
   }
   const current = await api('GET', `${prefix}/pulls/${number}`);

@@ -75,3 +75,9 @@ pnpm design:delivery verify <PR编号>
 | `verified` | 仅证明回执所列 head 的要求检查通过，合并仍需人工授权 |
 
 发布阶段 `elapsedMs` 为实际测量值，不是模型运行总耗时。模型费用未知时保持 null；当前会话不需要新的付费调用。`manualInterventions` 记录交付过程中的额外人工介入；不编造省时或成本收益。#13、#33、#17、#21 的状态和范围不由本工具改写。
+
+## S3 检查与合并后的准备
+
+S3 增加独立的 Windows 应用像素比较 job。`verify` 现在还要求 `Windows / reviewed visual baseline` 的 `Compare reviewed Windows baseline` 步骤成功，候选抓图、跳过比较和旧 SHA 不能取得 `verified`。
+
+`pnpm design:delivery writeback-plan <PR编号> <已登记featureId>` 只读准备合并提交的节点链接，未验证发布条件时返回 `writeback-blocked`。Windows 基线审阅、回填权限、S2 dispatch 消费者与真实 Figma 事件的待办见 [#37 验证记录](../testing/issue37-verification.md)。本轮没有启用 Webhook 或自动回填，不改变 #33 的 Open 状态和人工验收状态。

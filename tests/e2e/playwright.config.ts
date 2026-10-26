@@ -6,6 +6,8 @@ export default defineConfig({
     'pioneer.e2e.spec.ts',
     'design-mappings.e2e.spec.ts',
     'design-decoration.e2e.spec.ts',
+    'design-states.e2e.spec.ts',
+    'window-lifecycle.e2e.spec.ts',
     'tab-strip.e2e.spec.ts',
     'catalog-state.e2e.spec.ts',
     'm3-intent.e2e.spec.ts',
@@ -17,7 +19,11 @@ export default defineConfig({
   outputDir: 'test-output/artifacts',
   fullyParallel: false,
   workers: 1,
-  reporter: 'line',
+  reporter: [
+    ['line'],
+    ['html', { outputFolder: 'test-output/report', open: 'never' }],
+    ['json', { outputFile: 'test-output/results.json' }],
+  ],
   timeout: 30_000,
   expect: {
     timeout: 4_000,

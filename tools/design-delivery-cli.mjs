@@ -1,3 +1,4 @@
+import { planWriteback } from './design-writeback.mjs';
 import { execFileSync } from 'node:child_process';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -80,7 +81,15 @@ async function save(name, value) {
 }
 try {
   let receipt;
-  if (command === 'verify') {
+  if (command === 'writeback-plan') {
+    receipt = await planWriteback(
+      api,
+      Number(args[1]),
+      args[2],
+      await json('design/delivery/features.json'),
+    );
+    await save('writeback-plan.json', receipt);
+  } else if (command === 'verify') {
     const number = Number(args[1]);
     if (!Number.isSafeInteger(number) || number < 1)
       throw new Error('Expected PR number');
