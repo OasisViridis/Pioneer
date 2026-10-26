@@ -345,10 +345,7 @@ export function createPiAdapterFactory(
             if (message.role !== 'assistant') continue;
             for (const block of message.content) {
               if (block.type === 'text' && block.text.trim().length > 0) {
-                for (const chunk of splitTextChunks(
-                  block.text,
-                  RUN_LIMITS.textChunkBytes,
-                )) {
+                for (const chunk of splitTextChunks(block.text)) {
                   emit({ type: 'text.delta', text: chunk });
                 }
               }

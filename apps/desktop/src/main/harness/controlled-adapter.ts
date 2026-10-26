@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 
-import { RUN_LIMITS } from '../../shared/contracts/pioneer-run';
 import { ReadOnlyToolRequestSchema } from '../../shared/contracts/read-only-tools';
 import type {
   AdapterOutcome,
@@ -137,10 +136,7 @@ export function createControlledAdapterFactory(
         try {
           switch (step.action) {
             case 'text':
-              for (const chunk of splitTextChunks(
-                step.text,
-                RUN_LIMITS.textChunkBytes,
-              )) {
+              for (const chunk of splitTextChunks(step.text)) {
                 emit({ type: 'text.delta', text: chunk });
               }
               break;

@@ -134,6 +134,8 @@ interface ActiveRun {
     | null;
   pendingFailure: RunFailureCode | null;
   subscribers: Map<number, Subscriber>;
+  /** Resolves once the accept record is durable (or definitively failed). */
+  admission: Promise<boolean> | null;
   /** Terminal delivery waits for the durable terminal record (contract §4). */
   publishHeld: boolean;
   disposed: boolean;
@@ -275,6 +277,36 @@ export class RunManager {
     };
   }
 
+  /**
+   * Contract §1 replay rules: an identical requestId converges on its run, a
+   * different payload is a conflict, and an evicted payload means a fresh
+   * authorization is required. Never hands back a runId before its accept
+   * record settled, so a failed journal write cannot leak a phantom run.
+   */
+  private async replay(
+    requestId: string,
+    payload: string,
+  ): Promise<
+    { ok: true; runId: string } | { ok: false; code: AdmissionCode } | null
+  > {
+    const previousRunId = this.requestIndex.get(requestId);
+    if (previousRunId === undefined) return null;
+    const run = this.runs.get(previousRunId);
+    const previousPayload =
+      run?.requestPayload ?? this.finishedPayloads.get(requestId) ?? null;
+    if (previousPayload === null || run === undefined) {
+      return { ok: false, code: 'AUTHORIZATION_REQUIRED' };
+    }
+    if (previousPayload !== payload) {
+      return { ok: false, code: 'REQUEST_CONFLICT' };
+    }
+    if (run.admission !== null) {
+      const accepted = await run.admission;
+      if (!accepted) return { ok: false, code: 'JOURNAL_UNAVAILABLE' };
+    }
+    return { ok: true, runId: previousRunId };
+  }
+
   async start(
     request: RunStartRequest,
     context: { webContentsId: number; windowEpoch: number },
@@ -290,16 +322,8 @@ export class RunManager {
       webContentsId: context.webContentsId,
       windowEpoch: context.windowEpoch,
     });
-    const previousRunId = this.requestIndex.get(request.requestId);
-    if (previousRunId !== undefined) {
-      const previousPayload =
-        this.runs.get(previousRunId)?.requestPayload ??
-        this.finishedPayloads.get(request.requestId) ??
-        null;
-      if (previousPayload === payload)
-        return { ok: true, runId: previousRunId };
-      return { ok: false, code: 'REQUEST_CONFLICT' };
-    }
+    const replayed = await this.replay(request.requestId, payload);
+    if (replayed !== null) return replayed;
 
     // The project lookup awaits main state, so it runs before the admission
     // section. Everything below must stay synchronous: with an await inside the
@@ -308,16 +332,13 @@ export class RunManager {
     const project = await this.dependencies.resolveProject(request.projectId);
     if (project === null) return { ok: false, code: 'INVALID_REQUEST' };
 
-    // A duplicate start that raced past the pre-await check must converge on
-    // the first admitted run instead of failing on the consumed grant.
-    const racingRunId = this.requestIndex.get(request.requestId);
-    if (racingRunId !== undefined) {
-      const racingPayload =
-        this.runs.get(racingRunId)?.requestPayload ??
-        this.finishedPayloads.get(request.requestId) ??
-        null;
-      if (racingPayload === payload) return { ok: true, runId: racingRunId };
-      return { ok: false, code: 'REQUEST_CONFLICT' };
+    // The reservation section below must not await: everything between the
+    // grant check and the run registration stays synchronous. A duplicate
+    // requestId yields to the winner here and then returns without reserving,
+    // so the synchronous invariant only ever protects reserving paths.
+    if (this.requestIndex.has(request.requestId)) {
+      const replayed = await this.replay(request.requestId, payload);
+      return replayed ?? { ok: false, code: 'AUTHORIZATION_REQUIRED' };
     }
 
     const grant = this.grants.get(request.grantId);
@@ -380,6 +401,7 @@ export class RunManager {
       pendingToolCalls: new Set<string>(),
       publishHeld: false,
       disposed: false,
+      admission: null,
       terminalEmitted: false,
       preStartMessages: [],
       grant,
@@ -410,19 +432,32 @@ export class RunManager {
     // journal write can never precede run.accepted in the sequence.
     this.emit(run, { type: 'run.accepted' }, 'host');
 
-    const accepted = await this.dependencies.journal.appendAccept({
-      kind: 'accept',
-      runId,
-      sessionId: request.sessionId,
-      projectId: request.projectId,
-      revision: request.expectedRevision,
-      taskDigest: grant.taskDigest,
-      adapter: run.adapterKind,
-      windowEpoch: context.windowEpoch,
-      rootRevision: 0,
-      requestId: request.requestId,
-      at: new Date().toISOString(),
+    // A concurrent duplicate replays only once this settles, so it can never
+    // hand back a runId whose accept record was never written (contract §1).
+    let settleAdmission: (accepted: boolean) => void = () => undefined;
+    run.admission = new Promise<boolean>((resolve) => {
+      settleAdmission = resolve;
     });
+    let accepted = false;
+    try {
+      accepted = await this.dependencies.journal.appendAccept({
+        kind: 'accept',
+        runId,
+        sessionId: request.sessionId,
+        projectId: request.projectId,
+        revision: request.expectedRevision,
+        taskDigest: grant.taskDigest,
+        adapter: run.adapterKind,
+        windowEpoch: context.windowEpoch,
+        rootRevision: 0,
+        requestId: request.requestId,
+        at: new Date().toISOString(),
+      });
+    } catch {
+      accepted = false;
+    } finally {
+      settleAdmission(accepted);
+    }
     if (!accepted) {
       this.unindexRun(run);
       this.runs.delete(runId);
@@ -431,7 +466,7 @@ export class RunManager {
     }
     if (run.stopRequestedAt !== null) {
       // Stopped during preparation: the late-constructed handle must not start.
-      await this.terminate(run, 'stopped', null);
+      await this.terminateQuiet(run, 'stopped', null);
       return { ok: true, runId };
     }
 
@@ -439,7 +474,7 @@ export class RunManager {
     try {
       handle = this.constructAdapter(run, project, task);
     } catch {
-      await this.terminate(run, 'failed', 'START_FAILED');
+      await this.terminateQuiet(run, 'failed', 'START_FAILED');
       return { ok: true, runId };
     }
     run.handle = handle;
@@ -480,7 +515,7 @@ export class RunManager {
       startRun = handle.start();
     } catch {
       // Synchronous start failure never produces run.started.
-      await this.finish(run, 'failed', 'START_FAILED');
+      await this.terminateQuiet(run, 'failed', 'START_FAILED');
       return;
     }
     run.status = 'running';
@@ -514,22 +549,22 @@ export class RunManager {
       return;
     }
     if (run.pendingFailure !== null) {
-      await this.finish(run, 'failed', run.pendingFailure);
+      await this.terminateQuiet(run, 'failed', run.pendingFailure);
       return;
     }
     if (run.stopRequestedAt !== null) {
       if (outcome.status === 'failure') {
-        await this.finish(run, 'failed', outcome.code);
+        await this.terminateQuiet(run, 'failed', outcome.code);
       } else {
-        await this.finish(run, 'stopped', null);
+        await this.terminateQuiet(run, 'stopped', null);
       }
       return;
     }
     if (outcome.status === 'failure') {
-      await this.finish(run, 'failed', outcome.code);
+      await this.terminateQuiet(run, 'failed', outcome.code);
       return;
     }
-    await this.finish(run, 'completed', null, {
+    await this.terminateQuiet(run, 'completed', null, {
       inputTokens:
         outcome.status === 'success' ? outcome.usage.inputTokens : null,
       outputTokens:
@@ -538,7 +573,7 @@ export class RunManager {
   }
 
   /** Quiescent path: publish the terminal outcome, then release the adapter. */
-  private async finish(
+  private async terminateQuiet(
     run: ActiveRun,
     status: 'completed' | 'failed' | 'stopped',
     code: RunFailureCode | null,
@@ -557,13 +592,11 @@ export class RunManager {
     switch (message.type) {
       case 'text.delta': {
         if (bytesOf(message.text) > this.limits.textChunkBytes) {
-          run.pendingFailure = 'OUTPUT_LIMIT';
-          this.requestStop(run, 'host_failure');
+          this.failWith(run, 'OUTPUT_LIMIT');
           return;
         }
         if (run.outputBytes + bytesOf(message.text) > this.limits.outputBytes) {
-          run.pendingFailure = 'OUTPUT_LIMIT';
-          this.requestStop(run, 'host_failure');
+          this.failWith(run, 'OUTPUT_LIMIT');
           return;
         }
         run.outputBytes += bytesOf(message.text);
@@ -574,10 +607,7 @@ export class RunManager {
         // Contract §5 counts rejections against the same per-run budget; this
         // is the one rejection path no executor sits in front of.
         if (run.toolCalls >= this.limits.toolCalls) {
-          if (run.pendingFailure === null) {
-            run.pendingFailure = 'TOOL_FAILED';
-            this.requestStop(run, 'host_failure');
-          }
+          this.exhaustToolBudget(run);
           return;
         }
         run.toolCalls += 1;
@@ -618,10 +648,7 @@ export class RunManager {
       if (run.toolCalls >= this.limits.toolCalls) {
         // Contract §5: the budget counts rejected requests too, so the run
         // stops here instead of publishing a 33rd pair.
-        if (run.pendingFailure === null) {
-          run.pendingFailure = 'TOOL_FAILED';
-          this.requestStop(run, 'host_failure');
-        }
+        this.exhaustToolBudget(run);
         return { status: 'rejected', code: 'BUDGET_EXCEEDED' };
       }
       run.toolCalls += 1;
@@ -686,7 +713,26 @@ export class RunManager {
     if (this.isTerminal(run)) return;
     const code = run.pendingFailure ?? 'STOP_TIMEOUT';
     run.stopTimer = null;
-    void this.terminate(run, 'failed', code);
+    // Contract §2: dispose is the normal release after quiescence; the forced
+    // end is not quiescent, but §4 still asks for a best-effort release.
+    void this.terminate(run, 'failed', code).finally(() => {
+      void this.disposeAdapter(run);
+    });
+  }
+
+  /**
+   * First confirmed failure wins (contract §4): a later budget or protocol
+   * overflow must not rewrite the reason the run is already stopping for.
+   */
+  private failWith(run: ActiveRun, code: RunFailureCode): void {
+    run.pendingFailure ??= code;
+    this.requestStop(run, 'host_failure');
+  }
+
+  /** Shared budget stop so both tool paths converge identically (contract §5). */
+  private exhaustToolBudget(run: ActiveRun): void {
+    run.pendingFailure ??= 'TOOL_FAILED';
+    this.requestStop(run, 'host_failure');
   }
 
   stop(input: {
@@ -891,8 +937,7 @@ export class RunManager {
     if (size > this.limits.eventBytes) {
       // Contract §5: the wire-event ceiling converges to OUTPUT_LIMIT, the same
       // budget family as the 4 KiB chunk rule.
-      run.pendingFailure = 'OUTPUT_LIMIT';
-      this.requestStop(run, 'host_failure');
+      this.failWith(run, 'OUTPUT_LIMIT');
       return;
     }
     run.events.push(event);
@@ -954,18 +999,21 @@ export class RunManager {
     for (const subscriber of run.subscribers.values()) {
       subscriber.awaitingBatch = false;
     }
-    await this.dependencies.journal.appendTerminal({
-      kind: 'terminal',
-      runId: run.identity.runId,
-      status,
-      code,
-      at: new Date().toISOString(),
-      lastSeq: run.events.at(-1)?.seq ?? 0,
-    });
-    // Release the hold even when the write failed: the renderer still has to
-    // see a terminal state, and the unhealthy journal already blocks new runs.
-    run.publishHeld = false;
-    this.deliverBatches(run);
+    // A throwing append must never strand the hold: the renderer has to see a
+    // terminal state even when the journal write itself failed.
+    try {
+      await this.dependencies.journal.appendTerminal({
+        kind: 'terminal',
+        runId: run.identity.runId,
+        status,
+        code,
+        at: new Date().toISOString(),
+        lastSeq: run.events.at(-1)?.seq ?? 0,
+      });
+    } finally {
+      run.publishHeld = false;
+      this.deliverBatches(run);
+    }
     this.finishedPayloads.set(run.requestId, run.requestPayload);
     while (this.finishedPayloads.size > 128) {
       const oldest = this.finishedPayloads.keys().next().value;

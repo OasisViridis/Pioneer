@@ -284,3 +284,39 @@ describe('P2 read-only tool executor budgets and rechecks (contract §5)', () =>
     expect(search).toEqual({ status: 'succeeded', text: '', truncated: false });
   });
 });
+
+describe('P2 read-only list_directory budget boundary', () => {
+  it('publishes 200 entries untruncated and truncates the 201st', async () => {
+    const root = await realpath(await mkdtemp(join(tmpdir(), 'pioneer-list-')));
+    const crowded = join(root, 'crowded');
+    await mkdir(crowded, { recursive: true });
+    for (let index = 0; index < 200; index += 1) {
+      await writeFile(
+        join(crowded, `f${String(index).padStart(3, '0')}.txt`),
+        'x',
+        'utf-8',
+      );
+    }
+
+    const exact = await executeReadOnlyTool(
+      root,
+      { tool: 'list_directory', arguments: { path: 'crowded' } },
+      never,
+    );
+    expect(exact.status).toBe('succeeded');
+    if (exact.status !== 'succeeded') return;
+    expect(exact.truncated).toBe(false);
+    expect(exact.text.split('\n')).toHaveLength(200);
+
+    await writeFile(join(crowded, 'f200.txt'), 'x', 'utf-8');
+    const over = await executeReadOnlyTool(
+      root,
+      { tool: 'list_directory', arguments: { path: 'crowded' } },
+      never,
+    );
+    expect(over.status).toBe('succeeded');
+    if (over.status !== 'succeeded') return;
+    expect(over.truncated).toBe(true);
+    expect(over.text.split('\n')).toHaveLength(200);
+  });
+});

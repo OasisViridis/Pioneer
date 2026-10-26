@@ -726,7 +726,7 @@ describe('P2 run manager review hardening', () => {
       manager.start(request, binding),
       manager.start(request, binding),
     ]);
-    expect(first).toEqual({ ok: true, runId: second.ok ? second.runId : '' });
+    expect(second).toEqual(first);
     expect(second.ok).toBe(true);
     await waitFor(
       () =>
@@ -764,16 +764,16 @@ describe('P2 run manager review hardening', () => {
     });
   });
 
-  it('never lets an ACK skip events main has not published', async () => {
-    const { manager, sender } = await createManager({
-      steps: [
-        { action: 'wait', ms: 120 },
-        { action: 'text', text: '第一段' },
-        { action: 'text', text: '第二段' },
-        { action: 'complete' },
-      ],
-    });
+  it('clamps an over-claiming ACK to what was actually delivered', async () => {
+    const script = {
+      steps: Array.from({ length: 40 }, (_, index) => ({
+        action: 'text',
+        text: `chunk-${String(index)}`,
+      })) as never,
+    };
+    const { manager, sender } = await createManager(script);
     const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
     const subscribed = manager.subscribe({
       sessionId: 'session:test',
       projectId: 'project:test',
@@ -784,22 +784,16 @@ describe('P2 run manager review hardening', () => {
     });
     expect(subscribed).toBe(true);
     await waitFor(() => sender.batches.length > 0);
-    const publishedByFirstBatch = sender.batches[0]?.page.lastSeq ?? 0;
-    manager.acknowledge({
-      runId,
-      webContentsId,
-      afterSeq: 9_999,
-    });
+    const delivered = sender.batches[0]?.page.nextAfterSeq ?? 0;
+    expect(delivered).toBe(RUN_LIMITS.subscriberBatch);
+    // A renderer that claims everything must still receive the unseen tail;
+    // clamping to the run's newest seq (the previous behaviour) would starve it.
+    manager.acknowledge({ runId, webContentsId, afterSeq: 9_999 });
     await waitFor(() =>
       sender.batches.some((batch) =>
-        batch.page.events.some((event) => event.seq > publishedByFirstBatch),
+        batch.page.events.some((event) => event.seq > delivered),
       ),
     );
-    expect(
-      sender.batches.some((batch) =>
-        batch.page.events.some((event) => event.seq > publishedByFirstBatch),
-      ),
-    ).toBe(true);
     manager.unsubscribe({ runId, webContentsId });
   });
 
@@ -850,3 +844,164 @@ function pageOfRun(manager: RunManager, runId: string) {
     ...binding,
   });
 }
+
+describe('P2 run manager edge hardening', () => {
+  it('keeps the first failure reason when a later budget breach arrives', async () => {
+    const oversizeAfterDeadline: HarnessAdapterFactory = (_context, emit) => ({
+      start: () =>
+        new Promise<AdapterOutcome>((resolve) => {
+          // Fires after the 400ms deadline already decided RUN_DEADLINE.
+          setTimeout(() => {
+            emit({ type: 'text.delta', text: 'x'.repeat(4_097) });
+            resolve({ status: 'aborted' });
+          }, 450);
+        }),
+      requestStop: () => undefined,
+      quiescent: Promise.resolve(),
+      dispose: () => Promise.resolve(),
+    });
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      { adapterFactory: oversizeAfterDeadline },
+    );
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'failed', 3_000);
+    expect(readAllEvents(manager, runId).at(-1)?.body).toEqual({
+      type: 'run.failed',
+      code: 'RUN_DEADLINE',
+    });
+  });
+
+  it('best-effort disposes an adapter that the force end had to cut off', async () => {
+    let disposed = 0;
+    const stuckFactory: HarnessAdapterFactory = () => ({
+      start: () => new Promise<AdapterOutcome>(() => undefined),
+      requestStop: () => undefined,
+      quiescent: new Promise<void>(() => undefined),
+      dispose: () => {
+        disposed += 1;
+        return Promise.resolve();
+      },
+    });
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      { adapterFactory: stuckFactory },
+    );
+    const { runId } = await launchRun(manager);
+    // A user stop leaves pendingFailure empty, so grace expiry owns the code.
+    manager.stop({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      ...binding,
+    });
+    await waitFor(() => pageOf(manager, runId)?.status === 'failed', 3_000);
+    expect(readAllEvents(manager, runId).at(-1)?.body).toEqual({
+      type: 'run.failed',
+      code: 'STOP_TIMEOUT',
+    });
+    await waitFor(() => disposed === 1);
+  });
+
+  it('publishes the terminal event only after the terminal record is durable', async () => {
+    const order: string[] = [];
+    const base = memoryStore();
+    const store = {
+      ...base,
+      save: (value: string) => {
+        order.push(
+          value.includes('"kind":"terminal"')
+            ? 'journal:terminal'
+            : 'journal:accept',
+        );
+        return base.save(value);
+      },
+    };
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      {
+        sender: {
+          send: (_id, batch) => {
+            order.push(
+              batch.page.events.some(
+                (event) => event.body.type === 'run.completed',
+              )
+                ? 'send:terminal'
+                : 'send:other',
+            );
+          },
+        },
+      },
+      store,
+    );
+    const { runId } = await launchRun(manager);
+    manager.subscribe({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      afterSeq: 0,
+      ...binding,
+    });
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+    await waitFor(() => order.includes('send:terminal'));
+    expect(order.indexOf('journal:terminal')).toBeGreaterThanOrEqual(0);
+    expect(order.indexOf('journal:terminal')).toBeLessThan(
+      order.indexOf('send:terminal'),
+    );
+  });
+
+  it('never hands back a runId whose accept record failed to persist', async () => {
+    const store = memoryStore();
+    store.failNextSave();
+    const { manager } = await createManager(
+      { steps: [{ action: 'complete' }] },
+      undefined,
+      store,
+    );
+    const grantId = await authorizeGrant(manager);
+    const request = {
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      expectedRevision: 1,
+      requestId: 'request:phantom',
+      grantId,
+    };
+    const [first, second] = await Promise.all([
+      manager.start(request, binding),
+      manager.start(request, binding),
+    ]);
+    expect(first.ok || second.ok).toBe(false);
+    expect(
+      manager.getRun({
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        runId: first.ok ? first.runId : second.ok ? second.runId : 'run:none',
+        revision: 1,
+        afterSeq: 0,
+        ...binding,
+      }),
+    ).toBeNull();
+  });
+
+  it('reports a conflict when a requestId is reused with a different grant', async () => {
+    const { manager } = await createManager({
+      steps: [{ action: 'wait', ms: 80 }, { action: 'complete' }],
+    });
+    const first = await launchRun(manager, { requestId: 'request:conflict' });
+    const otherGrant = await authorizeGrant(manager);
+    const conflict = await manager.start(
+      {
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:conflict',
+        grantId: otherGrant,
+      },
+      binding,
+    );
+    expect(conflict).toEqual({ ok: false, code: 'REQUEST_CONFLICT' });
+    await waitFor(() => pageOf(manager, first.runId)?.status === 'completed');
+  });
+});
