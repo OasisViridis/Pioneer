@@ -21,14 +21,13 @@ export function RunPanel({
     runViews.get(session.id),
   );
   const status = visibleStatus(state);
-  const intent = session.intentState.intent;
+  // 运行任务来自用户明确保存的最近一条消息，不再依赖本地意图卡。
+  const task = session.messages.at(-1) ?? '';
   const canLaunch =
-    session.intentState.phase === 'session' &&
-    session.intentState.runtime !== null &&
-    intent !== null &&
-    (state.phase === 'idle' ||
-      state.phase === 'terminal' ||
-      state.phase === 'error');
+    state.phase === 'idle' ||
+    state.phase === 'terminal' ||
+    state.phase === 'error' ||
+    state.phase === 'authorizing';
   const stopping = state.phase === 'stopping' || state.status === 'stopping';
 
   return (
@@ -50,22 +49,29 @@ export function RunPanel({
         </p>
       ) : null}
       {canLaunch ? (
-        <button
+        <>
+          <p className="metadata">
+            {task
+              ? '本次运行使用会话中最近保存的消息。保存新消息可更换任务。'
+              : '先在会话下方填写任务并保存，再启动运行。'}
+          </p>
+          <button
           type="button"
           className="button button--primary"
-          disabled={state.phase === 'authorizing'}
+          disabled={state.phase === 'authorizing' || !task.trim()}
           onClick={() => {
             void runViews.launch({
               sessionId: session.id,
               projectId: project.id,
-              revision: intent.revision,
-              task: intent.instruction,
-              summaryText: `${project.name} · REV ${String(intent.revision)}`,
+              revision: 1,
+              task,
+              summaryText: `${project.name} · ${task.slice(0, 48)}`,
             });
           }}
         >
           {state.phase === 'authorizing' ? '正在授权…' : '启动运行'}
-        </button>
+          </button>
+        </>
       ) : null}
       {state.phase === 'active' || state.phase === 'stopping' ? (
         <button
@@ -76,7 +82,7 @@ export function RunPanel({
             void runViews.stop({
               sessionId: session.id,
               projectId: project.id,
-              revision: session.intentState.intent?.revision ?? 1,
+              revision: 1,
             });
           }}
         >

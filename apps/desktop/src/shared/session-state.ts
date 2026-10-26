@@ -27,7 +27,8 @@ const SessionSchema = LegacySessionSchema.omit({
       dockLayouts: true,
       savedLayouts: true,
     }).nullable(),
-    intentState: IntentWorkspaceStateSchema,
+    // 旧记录可能没有该字段；保留契约但不再让旧意图阻断读取。
+    intentState: IntentWorkspaceStateSchema.catch(initialIntentWorkspaceState()),
   })
   .strict()
   .superRefine((session, context) => {

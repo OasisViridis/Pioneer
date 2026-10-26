@@ -57,14 +57,12 @@ const writeRunScript = async (dir: string, script: object): Promise<string> => {
 };
 
 const prepareTask = async (page: Page): Promise<void> => {
-  await page.getByRole('button', { name: '澄清任务', exact: true }).click();
   await page
-    .getByRole('textbox', { name: '任务说明' })
+    .getByRole('textbox', { name: '给 Agent 的消息' })
     .fill('读取 alpha-app 的 README 并总结内容。');
-  await page.getByRole('button', { name: '生成意图摘要' }).click();
-  await page.getByRole('button', { name: '确认摘要' }).click();
-  await page.getByRole('button', { name: '初始化运行会话' }).click();
+  await page.getByRole('button', { name: '保存到会话' }).click();
   await page.locator('details.run-log summary').click();
+  await expect(page.getByRole('button', { name: '启动运行' })).toBeEnabled();
 };
 
 test('completes a controlled read-only run with a real tool result and unchanged fixtures', async ({}, testInfo) => {
