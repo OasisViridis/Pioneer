@@ -5,7 +5,7 @@
 | 找什么                 | 入口                                                                                                                        |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | 里程碑完成状态         | [ROADMAP](../themasterplan/ROADMAP.md)                                                                                      |
-| 复工顺序与完成条件     | [Wayfinder 端到端开发计划](plans/2026-10-10-pioneer-wayfinder-development-plan.md)（接替 [10-01 计划](plans/2026-10-01-pioneer-frozen-prototype-development-plan.md)）；2026-10-03 P0、P1 已完成，下一片 P2 只读 Harness |
+| 复工顺序与完成条件     | [Wayfinder 端到端开发计划](plans/2026-10-10-pioneer-wayfinder-development-plan.md)（接替 [10-01 计划](plans/2026-10-01-pioneer-frozen-prototype-development-plan.md)）；P0、P1 于 2026-10-03 完成，P2 只读 Harness 于 2026-10-26 合并（PR #16），当前前沿为 P3 |
 | 设计与原型             | [Make F9 原生写回](design/figma-make-f9-writeback-2026-10-02.md)、[冻结源码](design/make/frozen/2026-10-01-f9/README.md)    |
 | 工程实际状态与历史测试 | [证据账本](testing/pioneer-evidence-ledger.md)、[P0 收口](testing/p0-integration-closeout-2026-10-03.md)、[P1 收口](testing/p1-session-closeout-2026-10-03.md) |
 | 测试怎么分层           | [TEST_INFRA](../TEST_INFRA.md)                                                                                              |

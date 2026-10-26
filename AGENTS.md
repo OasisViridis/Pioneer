@@ -5,9 +5,9 @@
 
 ## 项目事实 (Project Facts)
 
-- **项目名**：Pioneer (模块化 AI Agent 交互系统)
+- **项目名**：Pioneer（模块化智能体交互系统）
 - **正式毕业设计题目**：`基于TypeScript的模块化智能体交互系统设计与实现`（用户于 2026-10-08 按导师意见确认）。后续新材料按 [选题收敛说明](选题收敛说明.md) 与 [填表基准](docs/academic/2026-10-08-topic-and-form-baseline.md) 起稿；旧表/旧演示名称不覆盖新题，个人资料只读本地私密档案，不外传。
-- **项目目标**：实现模块化 AI Agent 交互系统，践行「一切皆 UI」哲学，由两条主线构成——① 交互系统：Tabs 多标签页、媒体库海报墙、模块化工作区（会话 + 按需打开的可停靠面板）；② Harness 工程：轻量上下文、能力模块化、统一接入，复用 Pi Agent Harness 运行底座。
+- **项目目标**：实现模块化智能体交互系统，践行「一切皆 UI」哲学，由两条主线构成——① 交互系统：Tabs 多标签页、媒体库海报墙、模块化工作区（会话 + 按需打开的可停靠面板）；② Harness 工程：轻量上下文、能力模块化、统一接入，复用 Pi Agent Harness 运行底座。
 - **默认分支 / 书签**：`main`
 - **版本控制基线**：
   - 当前 checkout 为 Git-only（2026-10-02 核对），无 `.jj`，本机未找到 `jj`；Git 为 `2.55.0.windows.2`。
@@ -50,7 +50,7 @@
 
 当前工作副本为 Git-only，使用标准 Git 配合 TheMasterplan 门禁流程。若工作副本具备 `.jj`，请参阅 [Jujutsu 工作流](docs/workflow/jujutsu.md)。
 
-用户于 2026-10-03 验收 v8 展示视频并恢复应用开发；P0 底座与 P1 可恢复会话已通过完整门禁，下一片 P2 真实只读 Harness，唯一施工队列见[Wayfinder 端到端开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)与 [GitHub Issues #9 主地图](https://github.com/OasisViridis/Pioneer/issues/9)。
+用户于 2026-10-03 验收 v8 展示视频并恢复应用开发；P0 底座、P1 可恢复会话与 P2 真实只读 Harness（PR #16，2026-10-26 合并）均已完成。当前前沿是 P3：面板接真实数据（#17）、移除意图卡（#41）、修正运行提示（#42）；唯一施工队列见[Wayfinder 端到端开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)与 [GitHub Issues #9 主地图](https://github.com/OasisViridis/Pioneer/issues/9)。
 
 ```powershell
 # 1. 检查当前工作副本状态与变更

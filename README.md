@@ -1,121 +1,153 @@
 # Pioneer
 
-> **模块化 AI Agent 桌面工作台**  
-> 为开发者打造的本地项目与任务协同工作区。告别千篇一律的单一聊天气泡，像专业 IDE 一样自由停靠面板、管理会话草稿与查看 Agent 的工作过程。
+> **基于TypeScript的模块化智能体交互系统设计与实现**  
+> 毕业设计课题（2026-10-08 按导师意见确认）。Pioneer 是这个课题的工程实现：用桌面界面组织本地项目、会话和 Agent 的运行状态，项目用海报墙浏览，会话用标签页隔离，执行过程摊在按需打开的停靠面板里。
 
-[🖼️ 交互原型预览](https://nix-medley-14707825.figma.site/) · [🎨 Figma 设计稿](https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=925-3) · [💻 apps/desktop 桌面工程源码](apps/desktop/) · [📖 毕业设计定位](选题收敛说明.md)
+[交互原型](https://nix-medley-14707825.figma.site/) · [Figma 设计稿](https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=925-3) · [apps/desktop 桌面工程源码](apps/desktop/) · [课题定位](选题收敛说明.md)
 
----
+## 这个项目在做什么
 
-## 为什么做 Pioneer？
+Pioneer 的设计前提是：项目、会话与运行状态都应当是可操作的对象，而不是藏在侧边栏和聊天气泡里。它由此分成两条并行主线。
 
-当前的 AI 助手大多停留在“一个输入框 + 连续对话气泡”的轻量形态，或者是僵化的三栏布局（左侧历史、中间对话、右侧预览）。当开发者真正尝试用 Agent 协助完成复杂的多任务、长流程工作时，往往会面临几个直接痛点：
+**交互系统**：本地项目从媒体库海报墙进入，同一项目可以开多个会话；会话内是对话加可停靠的面板，布局能保存，重启后恢复。
 
-- **缺乏项目视角**：每次开新对话都要手动描述项目背景，难以直观浏览和管理多个本地工程；
-- **版式僵化死板**：对话、代码变更、执行日志和上下文被固定在狭小区域，无法根据双屏、宽屏或当前任务自由排布；
-- **执行过程看不清**：工具调用、文件改动与运行结果缺少清楚的呈现，用户难以判断进展，也不方便及时介入。
+**Harness 工程**：把上下文组装、工具白名单与模型接入拆成可替换的模块，复用 Pi Agent Harness 的运行底座。目标是让同一条任务在不同 Harness 下可比较，比较的指标是上下文用量、完成率与耗时，这也是论文实验的落点。
 
-Pioneer 的核心思路是 **“一切皆 UI (Everything is a UI)”** —— 把 Agent 的工作区、多会话、上下文引用与运行状态，全部转化为界面上**看得见、能拖拽、可直接操作**的实体对象，从“被动聊天框”走向“专业级工作台”。
+两者的取舍与不做的范围写在[选题收敛说明](选题收敛说明.md)，视觉与交互规范写在[产品定义与美学纲领](产品定义与美学纲领.md)。
 
----
+## 当前状态
 
-## 核心特性
+里程碑以 [ROADMAP](themasterplan/ROADMAP.md) 为唯一权威，下表只做导航。
 
-### 1. 媒体库式项目海报墙
+| 阶段或工作包 | 状态 | 证据 |
+| --- | --- | --- |
+| M1 开题定音、M1.5 仓库规范化 | 完成 | ROADMAP 里程碑表；冻结原型保留为历史设计基线 |
+| M2 只读桌面切片 | 完成 | 受限 preload、海报墙、契约与真实 Electron 测试均通过；原生目录选择器的人工验收见[记录](docs/testing/m2-native-picker-smoke.md) |
+| M3 任务执行 | 进行中 | P0 整合底座与 P1 可恢复会话于 2026-10-03 收口，见 [P1 收口记录](docs/testing/p1-session-closeout-2026-10-03.md) |
+| P2 真实只读 Harness | 已合并 `main`（PR #16，2026-10-26） | 验证清单见 [Issue #13 验证记录](docs/testing/issue13-verification.md)；真实 Provider 运行见 [A09 记录](docs/testing/issue13-real-provider.md) |
+| P3 及之后 | 未开始（#41、#42 在未合并工作树实施中） | #17 至 #32 十六张已发布；2026-10-26 追加 #41、#42（移除意图卡、修正运行提示），设计同步另有 #33 至 #37 |
 
-告别枯燥的文件夹路径选择器。借鉴媒体库的展示方式，将本地扫描到的工作区以“项目海报墙”的形式直观陈列，点击即可快速检索、切换并进入对应的工程上下文。
+以上按 `main` 的 `fd26d06`（2026-10-26）核对，未合并的工作树改动不计入。工作树里的 #41 会移除意图卡、把任务直接填进运行日志，#42 修正运行提示文案；两票落地后，「确认意图」这个前置和 8 个 e2e spec 的数字都会变。
 
-### 2. 多会话标签页与草稿隔离
+### 现在能做的事
 
-采用类似现代浏览器的顶部标签页机制，目标是多个任务自由切换，草稿和上下文各自保留。当前主线已实现项目 Tabs 与切换时的草稿隔离；跨重启会话恢复已有本地候选代码，待与新工作台整合。
+- 扫描指定目录的即时子目录，把本地项目陈列成海报墙；不做递归，不改动被扫描的目录
+- 同一项目开多个会话，各自的草稿与消息互不干扰
+- 会话内是对话加四个可选面板（上下文、能力、改动、产物）；面板能拖到左右两栏、调整宽高、收起，布局可保存并在重启后恢复
+- 上下文面板读的是真实项目概览；改动与产物面板目前是空状态，真实数据随 P3 接入
+- 草稿、消息与布局写入 Electron `userData`；关窗前先确认保存，读取失败时保留原始记录而不是覆盖
+- 写下一个任务并确认意图后，在运行日志里启动一次只读运行；不启动就不调用模型，工具只走只读白名单
 
-### 3. 自由停靠的模块化面板
+### 还没做的事
 
-借鉴专业桌面工具（如 Adobe Premiere Pro、VS Code）的面板停靠（Docking）体系。对话、上下文树、任务清单与产物面板均可按需打开，目标支持拖拽拆分、重叠分组、收起与复原。停靠算法与组件已有本地候选，当前 `main` 入口尚未接入；F9 原型是下一轮整合的交互参考。
+- 写入项目文件、执行命令、可逆快照与回滚
+- 插件库、会话分支与历史回退
+- 打包成品内的真实 Provider 运行尚未自动化，仍靠人工授权验收
 
-### 4. 面向高智能模型的 Harness：脚手架，而不是囚笼
+## Harness 目前接到哪一步
 
-Harness 应提供清楚的目标、可靠的工具和恰当的上下文，而不是替模型规定每一步。Pioneer 计划复用 Pi Agent Harness，按任务需要加载技能、文件引用与运行信息，让模型在已授权范围内自行规划、选择工具、调整方法并完成验证，不把固定流程和反复审批当作智能的替代品。
+P2 只接通一条只读链路，边界都放在主进程里：
 
-界面呈现工具调用、执行反馈、改动与结果，用户可以随时补充要求、审阅或停止任务。人工确认用于权限扩大、破坏性操作、对外发布等真正需要人决定的地方，不让日常读取、分析和已授权的操作被重复打断。意图卡是澄清复杂目标的辅助工具，不是所有任务开始前的必经关卡。
+| 环节 | 现状 |
+| --- | --- |
+| 模型接入 | `pi-ai` 与 `pi-agent-core` 1.4.0，经主进程适配器调用；运行未启动时不发请求 |
+| 只读工具 | `read_file`（单次 64 KiB）、`list_directory`（200 条目）、`search_in_files`（深度 16、1000 文件、每文件 64 KiB、合计 4 MiB、100 命中）；路径先过预检 |
+| 运行时 | 主进程管理 Run 生命周期，append-only 事件日志；停止先等收敛，宽限期（默认 5 秒）到期由主进程强制结束并记固定失败码 |
+| 授权 | 每次运行签发一次性 Grant，绑定任务内容、会话、revision 与发起窗口，超时或内容变更后重新授权 |
+| 凭证 | 只在主进程内从环境变量读取后交给适配器；不进仓库，不写日志，事件与错误码里也不出现 |
+| 未接通 | 写入、命令、通用文件系统 IPC、Runtime 子进程 |
 
-这一设计思路深度参考了 OpenAI 的 [Rethinking skills and prompts for GPT-6 Astra](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra)：面对高智能模型，工程重心应从“过度约束的固定流程”转向“按需渐进披露（Progressive Disclosure）与最小上下文路由”，明确交付目标与权限边界，把具体的规划推演与验证闭环留给模型。
-
-### 5. 克制低噪的美学规范
-
-专为长时间开发与阅读设计的沉浸界面：低饱和中性配色、清晰的中文字体排版阶梯，任务信息一目了然，去除花哨的无意义动效与装饰性插画，让注意力完全聚焦在工程本身。
-
----
-
-## 开发进度与后续规划 (Status & Roadmap)
-
-本项目是数字媒体技术专业本科毕业设计《基于TypeScript的模块化智能体交互系统设计与实现》的工程实践，现阶段重心在桌面交互框架与本地工程协同体验。用户于 2026-10-03 验收 v8 展示视频并恢复应用开发，P0 整合底座与 P1 可恢复会话已通过完整门禁，下一片 P2 真实只读 Harness。当前主线、本地候选和设计交付分开核对，复工与实施队列见[Wayfinder 端到端开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)（接替 [10-01 计划](docs/plans/2026-10-01-pioneer-frozen-prototype-development-plan.md)）。各模块现状如下：
-
-| 模块 / 维度                           | 当前已实现 (Implemented)                                               | 规划与进行中 (Roadmap)                            |
-| :------------------------------------ | :--------------------------------------------------------------------- | :------------------------------------------------ |
-| **桌面端交互系统 (Electron + React)** | 主线：只读扫描、海报墙、会话 Tabs、草稿／意图／停靠布局保存与重启恢复  | 接真实只读任务；窗口外壳与桌宠按独立阶段推进      |
-| **进程通信与安全契约**                | TypeScript/Zod IPC、受限 preload、意图修订与本地 RuntimeSession 初始化 | 可选意图辅助已进入会话；下一步接真实运行事件      |
-| **模型与工具链 (Harness)**            | Pi 底座方案与接入边界已设计                                            | 优先接通一条真实只读任务，再扩展命令、写入与 Diff |
-| **设计系统与交互原型**                | 完整的 Figma Design 视觉规范与高保真可交互原型                         | 将设计原型手感持续落地为生产级前端实现            |
-
----
+[A09 记录](docs/testing/issue13-real-provider.md)里，模型在一次运行中发起四次工具调用：其中一次因路径重复被预检拒绝且未泄露绝对路径，模型自行纠正后读到目标文件；另一次运行在执行中被用户停止，落在 `stopped`。
 
 ## 技术架构
 
-Pioneer 采用标准的前端桌面全栈技术与分层质量保障体系：
+代码分层固定为四层，源码在 [apps/desktop/src](apps/desktop/src/)：
 
-- **桌面运行时**：Electron 44 + React 19 + TypeScript
-- **工程构建**：Electron Forge + Webpack 5
-- **数据契约与安全**：Zod（运行时 IPC 契约强校验，严格隔离主进程与受限 preload）
-- **测试体系**：
-  - **契约与状态测试**：Vitest 覆盖窗口生命周期、草稿保存队列与停靠状态；
-  - **真实 E2E 测试**：Playwright 启动真实 Electron 实例，贯穿 `main → preload → renderer` 完整调用链。
+| 层 | 职责 | 位置 |
+| --- | --- | --- |
+| 主进程 | 窗口生命周期、只读扫描、设置与会话存储、Harness 运行宿主 | `src/main` |
+| 预加载 | 经 `contextBridge` 暴露窄接口 `window.pioneer`，不提供通用 IPC 或文件系统方法 | `src/preload` |
+| 渲染进程 | React 界面：海报墙、会话 Tabs、停靠面板、运行日志 | `src/renderer` |
+| 共享契约 | Zod schema、IPC 通道常量、路径与状态模型，跨进程共用 | `src/shared` |
 
----
+应用依赖取自 `apps/desktop/package.json`，Node 与 pnpm 取自根 `package.json` 的 `engines` 与 `packageManager`：
 
-## 快速上手
+| 依赖 | 版本 |
+| --- | --- |
+| Electron | 44.2.0 |
+| React / React DOM | 19.2.8 |
+| TypeScript | 6.0.3 |
+| Zod | 4.5.4 |
+| Pi Agent（`pi-ai` / `pi-agent-core`） | 1.4.0 |
+| Electron Forge / Webpack | 7.11.2 / 5.110.3 |
 
-### 环境要求
+界面令牌有两处来源：设计稿版本在 `docs/design/hazel-v3/tokens.json`，运行时用的是 `renderer/styles/tokens.css` 里的 M3 工作区调色板。两套色值尚未合流（例如 canvas 一处是 `#F6F5F1`，另一处是 `#f1f2ee`）。
 
-- **Node.js**：`>= 24.0.0`
-- **包管理器**：`pnpm >= 9.0.0`
+## 快速开始
 
-### 本地启动与调试
+环境要求：Node 不低于 24（`engines.node` 写的是 `>=24`），pnpm 11.7.0（`packageManager` 已固定，用 Corepack 启用最省事）。自动化门禁与人工验收目前都在 Windows 上完成（CI 用 `windows-latest`），其它平台未经验证。
 
 ```bash
-# 1. 安装项目依赖
+# 安装依赖
 pnpm install
 
-# 2. 启动桌面端开发模式（启动 Electron 窗口）
+# 启动桌面端开发模式
 pnpm dev
 ```
 
-### 运行质量门禁与测试
+首次启动后先在媒体库选择项目根目录，它只扫描该目录的即时子目录，不递归、不写入。
 
-```bash
-# 运行 IPC 契约与持久化测试
-pnpm test:contract
+质量门禁按证据层级分开跑，不要用一层的结果代替另一层：
 
-# 运行 Playwright 真实 Electron E2E 测试
-pnpm test:e2e
+| 命令 | 检查什么 |
+| --- | --- |
+| `pnpm verify:repository` | 仓库规范化：公开身份与旧路径、绝对 `file://` 链接、210 声明必须限定为 Prototype Tests、README 必须链到 `apps/desktop` |
+| `pnpm test:contract` | 共享契约、路径遏制、IPC 与 sender 校验、设置存储与 Tabs |
+| `pnpm test:prototype` | 冻结的 M1 模拟器 210 项用例，属 Prototype Tests 证据，不是 Electron 证据 |
+| `pnpm test:e2e` | Playwright 启动真实 Electron，跨 main → preload → renderer，并校验 fixture 未被改动 |
+| `pnpm check` | 依次跑格式、lint、类型、上述三层测试与 package smoke |
 
-# 运行完整工程检查（TypeScript 类型检查 + 语法规范 + 测试）
-pnpm check
+最近一次完整门禁记录在 2026-10-26（提交 `0bfd5de`，见 [Issue #13 验证记录](docs/testing/issue13-verification.md)）：契约 375/375（39 文件）、冻结原型 210/210（Prototype Tests）、真实 Electron 24/24、仓库规范化 6/6。合并后 CI 的一次用例超时已在 `474fb16` 修复。数字随提交变化，引用时带上日期与版本。
+
+`test:e2e` 的 `testMatch` 只列了 8 个 spec；`window-chrome`、`session-persistence`、`hazel-design` 三个 spec 不在白名单内，因此不进 `pnpm check`，也不进 CI。
+
+## 目录结构
+
+```text
+apps/desktop/src/
+├── main/        Electron 主进程：窗口、扫描、设置与会话存储、Harness 运行宿主
+├── preload/     contextBridge 暴露的窄接口 window.pioneer
+├── renderer/    React 界面：海报墙、会话 Tabs、停靠面板、运行日志
+└── shared/      跨进程契约：Zod schema、IPC 通道、路径与状态模型
+tests/
+├── contract/    确定性契约测试
+├── e2e/         Playwright 与真实 Electron
+├── prototype/   冻结的 M1 模拟器与探针
+├── fixtures/    只读测试工作区
+└── repository/  仓库规范化门禁
 ```
 
----
+## 文档入口
 
-## 深入阅读与参考文档
+| 想了解 | 去哪看 |
+| --- | --- |
+| 里程碑与阶段状态 | [ROADMAP](themasterplan/ROADMAP.md) |
+| 当前施工前沿与后续票 | [Wayfinder 开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md) |
+| 长期交付范围与验收条件 | [长期开发规格](docs/specs/2026-10-24-pioneer-long-term-development-spec.md) |
+| 三层测试的证据边界 | [TEST_INFRA](TEST_INFRA.md) |
+| 术语：Session、Run、Grant、收敛 | [GLOSSARY](GLOSSARY.md) |
+| 课题定位（题目、双主线、时间线） | [选题收敛说明](选题收敛说明.md) |
+| 产品形态与美学 | [产品定义与美学纲领](产品定义与美学纲领.md)（v2.1，题名已同步 2026-10-08 正式题目） |
+| 设计系统与色板令牌 | [Hazel v3](docs/design/hazel-v3/tokens.json) |
+| 文档总导航 | [docs/README](docs/README.md) |
 
-- [文档导航](docs/README.md) —— 现役入口、工程证据与历史档案
-- [课题背景与选题收敛说明](选题收敛说明.md) —— 毕业设计立项背景、研究哲学与双主线演进
-- [产品定义与美学纲领](产品定义与美学纲领.md) —— 视觉规范、设计哲学与交互细节
-- [测试架构与质量门禁说明 (TEST_INFRA.md)](TEST_INFRA.md) —— 测试分层设计与验证标准
-- [工程路线图 (ROADMAP.md)](themasterplan/ROADMAP.md) —— 阶段目标与里程碑演进记录
-- [Figma 设计工作区](https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=925-3) —— 完整高保真设计稿与组件库
+## 参与与边界
 
----
+- 本地代码与用户数据默认不外发；真实模型只使用明确获准的 Provider、模型与材料清单。
+- 数据外发、磁盘写入、破坏性操作与远程推送都需要人类明确许可，Agent 不自行扩大权限。
+- 桌宠与插画只做装饰，不承担运行状态或授权提示。
+- 交付走 [AGENTS.md](AGENTS.md) 的单一交付责任人流程，`pnpm check` 是合并前的门禁；合并、推送与清理未经许可不执行。
 
-## 开源协议
+## 协议
 
-本项目工程源码遵循 [MIT License](LICENSE) 开源。外部字体、设计素材与参考图集保留原作者版权。
+工程源码遵循 [MIT License](LICENSE) 开源。外部字体、设计素材与参考图集保留原作者版权。

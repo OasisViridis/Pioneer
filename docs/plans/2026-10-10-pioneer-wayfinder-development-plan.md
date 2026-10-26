@@ -4,14 +4,14 @@
 > **项目代号**：Pioneer · **代码主目录**：[apps/desktop](../../apps/desktop/)（相对根目录：[apps/desktop](apps/desktop/)）  
 > **GitHub 远端主决策地图**：[Issue #9：Pioneer 开发计划（至 2027 年 6 月）](https://github.com/OasisViridis/Pioneer/issues/9)
 > **前置计划替代说明**：本计划正式替代 [2026-10-01 冻结原型开发计划](2026-10-01-pioneer-frozen-prototype-development-plan.md) 的后续实施队列；阶段总纲仍以 [themasterplan/ROADMAP.md](../../themasterplan/ROADMAP.md) 为准。
-> **2026-10-25 更新**：#12 已完成，#13 正在开发且本次不作改动；两分钟简报、后续工作包与验收条件见[长期规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)。
+> **2026-10-26 更新**：P2 已通过 PR #16 合并进 `main`（`3f262fe`，后续 PR #40 到 `fd26d06`）。#12 已关闭，#13 票据仍开放、验收收口另计；当前前沿为 P3（#17、#41、#42）。两分钟简报、后续工作包与验收条件见[长期规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)。
 
 ---
 
 ## 1. 终点锚定 (Destination: 2027.06 毕设终版归档)
 
 在 2027 年 6 月完成毕业设计终版归档，实现课题《基于TypeScript的模块化智能体交互系统设计与实现》的完整工程与学术交付闭环：
-- 交付具备「一切皆 UI」特征的桌面端模块化智能体交互系统（媒体库海报墙 + Dockview 可组合工作区面板）；
+- 交付具备「一切皆 UI」特征的桌面端模块化智能体交互系统（媒体库海报墙 + 会话内可停靠的工作区面板）；
 - 复用 Pi-Agent Harness 运行底座（轻量上下文组装、能力模块化沙箱、统一模型接口接入）；
 - 产出相同模型与任务下的 Harness 对比实验数据（Token 消耗、任务完成率、端到端延迟）；
 - 交付符合数字媒体技术专业规范的「设计、技术、内容、智能」四合一成果（源码、论文、高清演示视频与归档资产包）。
@@ -25,7 +25,7 @@ Pioneer 的研发不是单纯给现有 Agent 套壳，也不是先写完所有�
 1. **主线一：交互系统 (Interaction System)**
    - **顶级框架**：Tabs 多标签页系统（`[ 📚 媒体库 ] | [ 📦 项目工作区 ] | [ ⚙️ 系统设置 ]`）；
    - **媒体库管理**：Jellyfin 风格项目工作区海报墙、即时子目录只读扫描、项目内多会话独立隔离；
-   - **模块化工作区**：借鉴专业工作站（Adobe Premiere Pro / Blender）的可停靠布局理念，以 Dockview 为核心容器，对话为主控入口，改动 (Changes)、上下文 (Context)、能力 (Capabilities)、产物 (Artifacts)、日志 (RunLog) 按需显式打开与停靠；
+   - **模块化工作区**：借鉴专业工作站（Adobe Premiere Pro / Blender）的可停靠布局理念，以会话内两列停靠容器为核心（自研，未引入第三方停靠库），对话为主控入口，改动 (Changes)、上下文 (Context)、能力 (Capabilities)、产物 (Artifacts)、日志 (RunLog) 按需显式打开与停靠；
    - **意图核对 (Intent Review)**：将任务编写、可选意图澄清、修改重提与显式确认收敛在会话内部，不设立全局阻塞式模式切换。
 2. **主线二：Harness 工程 (Harness Engineering)**
    - **轻量上下文组装**：只装配当前任务所需的只读引用与必要信息，记录 Token 消耗，杜绝盲目注入全局技能文本与整库上下文；
@@ -64,29 +64,30 @@ Pioneer 的研发不是单纯给现有 Agent 套壳，也不是先写完所有�
 - **P1 · 可恢复任务会话与单布局工作区 (COMPLETE, 2026-10-03)**：
   - 详见验收文档：[P1 收口报告](../testing/p1-session-closeout-2026-10-03.md)；
   - 媒体库连接会话创建与恢复，实现同项目多会话独立隔离；
-  - `SessionWorkbench` 采用 Dockview 单一停靠布局，彻底移除旧三模式入口；
+  - `SessionWorkbench` 采用自研两列停靠布局，彻底移除旧三模式入口；
   - 草稿、消息、可选意图澄清与单布局持久化通过 sender origin 校验写入 `userData`，不污染项目目录；
   - 本地 `RuntimeSession` bootstrap 仅生成状态合法快照（capabilities 均为 false），无假执行；
   - 通过 200 项 Contract Tests、21 项 Real Electron E2E 测试，以及 Prototype Tests: 210/210 passed。
 
 ---
 
-## 4. 当前施工前沿 (The Frontier: P2 真实只读 Harness)
+## 4. 当前施工前沿 (The Frontier: P3 面板体验与运行提示)
 
-P2 是当前唯一处于活跃状态的施工前沿，核心使命是：**在 Electron 桌面环境中尽早跑通第一条真实、可观察、可停止的只读 Harness 任务**。
+P3 是当前活跃的前沿：让会话内面板接上真实数据，并把运行入口与提示文案收敛到「写任务、启动、看过程」这一条路径（#17、#41、#42）。P2 已完成合并，验收收口另计。
 
-### 4.1 当前施工队列（2026-10-25 核对）
+### 4.1 当前施工队列（2026-10-26 核对）
 
 总入口为已置顶的 [Issue #9 · Pioneer 开发计划](https://github.com/OasisViridis/Pioneer/issues/9)。长期规格已并入该票；本地镜像见[长期开发计划与验收规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)。
 
 | 顺序 | 任务 | 状态与交付 |
 | --- | --- | --- |
 | 已完成 | [#12 · Runtime：读取权限与停止规则](https://github.com/OasisViridis/Pioneer/issues/12) | 已关闭；交付为已合并 PR #15，停止语义以后续人类确认评论为准 |
-| 当前 | [#13 · Harness：只读接入与验证](https://github.com/OasisViridis/Pioneer/issues/13) | 开发中，PR #16 尚未合并；#12 前置已解除，原生依赖保留；本次不修改票据或实现 |
+| 已合并 | [#13 · Harness：只读接入与验证](https://github.com/OasisViridis/Pioneer/issues/13) | PR #16 已合并（`3f262fe`）；七轮复审修复与 PR #40 已在 `main`（`fd26d06`）；票据仍开放，验收收口另计 |
+| 当前 | [#17 · P3-A 面板](https://github.com/OasisViridis/Pioneer/issues/17)、[#41](https://github.com/OasisViridis/Pioneer/issues/41)、[#42](https://github.com/OasisViridis/Pioneer/issues/42) | #41 移除意图卡改为直接填任务，#42 修正运行提示；均在未合并工作树实施中 |
 
-原 #10、#11 已归并至 #12，原 #14 规格并入 #9 后归档。#9 仍为置顶总入口，子票保留已关闭 #12 与开放 #13；当前唯一实现前沿为 #13，后续按长期规格的进入条件拆票。
+原 #10、#11 已归并至 #12，原 #14 规格并入 #9 后归档。#9 仍为置顶总入口；#17 至 #32 十六张已发布，#33 至 #37 为设计同步票，#41、#42 于 2026-10-26 追加。
 
-远程 main 为 `0410d5a`；PR #16 / 本地输入为 `4b2ce29`，已含 Pi 依赖、只读工具及 P1 整合。分支验证记录含本地与干净检出通过，但该 PR 当前 Windows CI 为 FAILURE，真实 Provider A09 为 NOT_RUN；这些待办由 #13 继续处理，不以分支记录代替最终交付。
+远程 `main` 为 `fd26d06`；P2 的最后一次完整门禁记录在 `0bfd5de`（Contract 375/375、Prototype 210/210、Real Electron 24/24、package smoke，退出码 0），合并后 CI 的一次用例超时已在 `474fb16` 修复。真实 Provider A09 为 PASS（开发入口）：一次 completed 含四次真实只读工具调用与路径拒绝后的自行恢复，一次运行中停止收敛为 `stopped`。详见 [Issue #13 验证记录](../testing/issue13-verification.md)。
 
 ### 4.2 P2 完成验收条件
 1. 在隔离测试工作区中，主进程能成功调度只读 Harness 执行确定性目标（例如读取指定代码并输出分析报告）；
@@ -97,9 +98,25 @@ P2 是当前唯一处于活跃状态的施工前沿，核心使命是：**在 El
 
 ---
 
+### 4.3 后续 Issue 导航
+
+P2 已合并；当前由 #41、#42 收敛运行入口，#17 起按各票原生依赖和完成条件进入开发。
+
+| 阶段 | 已发布任务 |
+| --- | --- |
+| P3 面板与结果 | [#17](https://github.com/OasisViridis/Pioneer/issues/17) 上下文/能力/日志；[#21](https://github.com/OasisViridis/Pioneer/issues/21) 真实结果审阅；[#41](https://github.com/OasisViridis/Pioneer/issues/41) 移除意图卡；[#42](https://github.com/OasisViridis/Pioneer/issues/42) 修正运行提示 |
+| P4 权限、修改与恢复 | [#18](https://github.com/OasisViridis/Pioneer/issues/18) 写入决策 → [#19](https://github.com/OasisViridis/Pioneer/issues/19) 最小写入 → [#20](https://github.com/OasisViridis/Pioneer/issues/20) 恢复；[#22](https://github.com/OasisViridis/Pioneer/issues/22) 命令决策 → [#23](https://github.com/OasisViridis/Pioneer/issues/23) 限定命令 |
+| M3 验收 | [#24](https://github.com/OasisViridis/Pioneer/issues/24) 同版本证据与验收建议 |
+| M4 会话与能力 | [#25](https://github.com/OasisViridis/Pioneer/issues/25) 会话分支；[#26](https://github.com/OasisViridis/Pioneer/issues/26) 能力与 Runbook |
+| P5 Windows | [#27](https://github.com/OasisViridis/Pioneer/issues/27) 独立成品；[#28](https://github.com/OasisViridis/Pioneer/issues/28) 可选陪伴体验 |
+| M5 实验与论文 | [#29](https://github.com/OasisViridis/Pioneer/issues/29) 方案/先导 → [#30](https://github.com/OasisViridis/Pioneer/issues/30) 正式实验/初稿 |
+| M6 终验与归档 | [#31](https://github.com/OasisViridis/Pioneer/issues/31) 候选冻结/终验 → [#32](https://github.com/OasisViridis/Pioneer/issues/32) 终稿/展演/归档 |
+
+P3 至 M6 共 16 张子票、24 条原生依赖；另有 #33 至 #37 设计同步票与 2026-10-26 追加的 #41、#42。不要只按编号先后开工；准备材料可并行，核心交付不依赖可选陪伴票。
+
 ## 5. 后续阶段与待定实现
 
-长期阶段目标、时间窗口和验收条件已在[长期规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)中细化。以下阶段的具体接口与实施票仍在进入前沿时逐步决定：
+长期阶段目标、时间窗口和验收条件已在[长期规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)中细化。各阶段实施票已发布为 #17—#32；具体接口、权限决定和验收以子票为准，未决内容在进入前沿时确认：
 
 - **Layer 1: M3 任务执行与受控工作区操作后半程**
   - **P3 完整面板体验与真实内容接线**：上下文、能力、日志、文本/产物视图按需加载与定位，布局持久性保持，窄窗自适应；
