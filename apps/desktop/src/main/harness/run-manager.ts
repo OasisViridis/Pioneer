@@ -470,7 +470,7 @@ export class RunManager {
     }
     if (run.stopRequestedAt !== null) {
       // Stopped during preparation: the late-constructed handle must not start.
-      await this.terminateConverged(run, 'stopped', null);
+      await this.terminateAndRelease(run, 'stopped', null);
       return { ok: true, runId };
     }
 
@@ -478,7 +478,7 @@ export class RunManager {
     try {
       handle = this.constructAdapter(run, project, task);
     } catch {
-      await this.terminateConverged(run, 'failed', 'START_FAILED');
+      await this.terminateAndRelease(run, 'failed', 'START_FAILED');
       return { ok: true, runId };
     }
     run.handle = handle;
@@ -487,7 +487,7 @@ export class RunManager {
       this.requestStop(run, 'deadline');
     }, this.limits.runMs);
 
-    void this.driveRun(run, handle);
+    void this.driveRun(run, handle).catch(() => undefined);
     return { ok: true, runId };
   }
 
@@ -519,7 +519,7 @@ export class RunManager {
       startRun = handle.start();
     } catch {
       // Synchronous start failure never produces run.started.
-      await this.terminateConverged(run, 'failed', 'START_FAILED');
+      await this.terminateAndRelease(run, 'failed', 'START_FAILED');
       return;
     }
     run.status = 'running';
@@ -553,22 +553,22 @@ export class RunManager {
       return;
     }
     if (run.pendingFailure !== null) {
-      await this.terminateConverged(run, 'failed', run.pendingFailure);
+      await this.terminateAndRelease(run, 'failed', run.pendingFailure);
       return;
     }
     if (run.stopRequestedAt !== null) {
       if (outcome.status === 'failure') {
-        await this.terminateConverged(run, 'failed', outcome.code);
+        await this.terminateAndRelease(run, 'failed', outcome.code);
       } else {
-        await this.terminateConverged(run, 'stopped', null);
+        await this.terminateAndRelease(run, 'stopped', null);
       }
       return;
     }
     if (outcome.status === 'failure') {
-      await this.terminateConverged(run, 'failed', outcome.code);
+      await this.terminateAndRelease(run, 'failed', outcome.code);
       return;
     }
-    await this.terminateConverged(run, 'completed', null, {
+    await this.terminateAndRelease(run, 'completed', null, {
       inputTokens:
         outcome.status === 'success' ? outcome.usage.inputTokens : null,
       outputTokens:
@@ -576,8 +576,8 @@ export class RunManager {
     });
   }
 
-  /** Converged path: publish the terminal outcome, then release the adapter. */
-  private async terminateConverged(
+  /** Terminal path: publish the outcome, then release the adapter. */
+  private async terminateAndRelease(
     run: ActiveRun,
     status: 'completed' | 'failed' | 'stopped',
     code: RunFailureCode | null,
@@ -616,7 +616,7 @@ export class RunManager {
         // Contract §5 counts rejections against the same per-run budget; this
         // is the one rejection path no executor sits in front of.
         if (run.toolCalls >= this.limits.toolCalls) {
-          this.exhaustToolBudget(run);
+          this.failWith(run, 'TOOL_FAILED');
           return;
         }
         run.toolCalls += 1;
@@ -657,7 +657,7 @@ export class RunManager {
       if (run.toolCalls >= this.limits.toolCalls) {
         // Contract §5: the budget counts rejected requests too, so the run
         // stops here instead of publishing a 33rd pair.
-        this.exhaustToolBudget(run);
+        this.failWith(run, 'TOOL_FAILED');
         return { status: 'rejected', code: 'BUDGET_EXCEEDED' };
       }
       run.toolCalls += 1;
@@ -741,11 +741,6 @@ export class RunManager {
     if (run.stopRequestedAt !== null) return;
     run.pendingFailure ??= code;
     this.requestStop(run, 'host_failure');
-  }
-
-  /** Shared budget stop so both tool paths converge identically (contract §5). */
-  private exhaustToolBudget(run: ActiveRun): void {
-    this.failWith(run, 'TOOL_FAILED');
   }
 
   stop(input: {
@@ -1038,7 +1033,11 @@ export class RunManager {
       // Bookkeeping below still runs; the journal marks itself unhealthy.
     } finally {
       run.publishHeld = false;
-      this.deliverBatches(run);
+      try {
+        this.deliverBatches(run);
+      } catch {
+        // A throwing sender must not skip the slot release below.
+      }
       this.releaseSlot(run);
     }
   }
@@ -1157,9 +1156,7 @@ export class RunManager {
       });
     }
     for (const run of this.runs.values()) {
-      if (!this.isTerminal(run))
-        await this.terminate(run, 'failed', 'STOP_TIMEOUT');
-      await this.disposeAdapter(run);
+      await this.terminateAndRelease(run, 'failed', 'STOP_TIMEOUT');
     }
   }
 

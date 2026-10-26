@@ -319,7 +319,10 @@ describe('P2 read-only list_directory budget boundary', () => {
     expect(over.truncated).toBe(true);
     expect(over.text.split('\n')).toHaveLength(200);
 
-    // Two past the budget forces the streaming early-stop, not just the clamp.
+    // Two past the budget exercises the streaming path (iterator still has an
+    // entry when the budget trips); the published result must be identical to
+    // the post-loop clamp case. The early stop itself is not observable from
+    // the public outcome, only via the bounded recheck work.
     await writeFile(join(crowded, 'f201.txt'), 'x', 'utf-8');
     const far = await executeReadOnlyTool(
       root,
