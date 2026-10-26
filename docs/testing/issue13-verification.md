@@ -60,7 +60,7 @@
 
 ## 评审修复记录（2026-10-26）
 
-PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补齐的运行层缺口。修复前基线 `395df15`，分支 `fix-pr16-review`（自 `codex/issue13-readonly-harness` 头）。修复分两轮提交：第一轮 `3bbb21b`（运行层）、`0196478`（Pi 输出预算）、`de0e0f1`（记录）；第二轮复审后 `8328bdc`（见下节）。
+PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补齐的运行层缺口。修复前基线 `395df15`，分支 `fix-pr16-review`（自 `codex/issue13-readonly-harness` 头）。修复按复审轮次提交：`3bbb21b`/`0196478`/`de0e0f1`（第一轮）、`8328bdc`（第二轮）、`97594a2`（第三轮）、`8ecb5ef`（第四轮）、`956a55f`（第五轮）；每轮的门禁与证据见下。
 
 | 审查缺口 | 修复 |
 | --- | --- |
@@ -126,21 +126,39 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 | 订阅者游标超过 `lastSeq` 时永远收不到新事件 | `subscribe` 把游标钳到当前最新 seq |
 | `TEXT_CHUNK_BYTES` 无引用，工具投影仍从 `RUN_LIMITS` 另取一份 | 工具投影改用 `TEXT_CHUNK_BYTES`，单一来源 |
 
-新增测试：终态写失败后的收敛与释放、用户停止不被越限升级、过期游标仍能收到后续事件、202 项目录触发流式提前停止。`run-manager` 定向套件 29 项。
+新增测试：终态写失败后的收敛与释放、用户停止不被越限升级、过期游标仍能收到后续事件、202 项目录仍按预算截断。`run-manager` 定向套件 29 项。
+
+### 第五次复审修复（`956a55f`，2026-10-26）
+
+对第四轮修复再做复审后补的收尾：
+
+| 复审缺口 | 修复 |
+| --- | --- |
+| 旧/重复 ACK 也会清除 `awaitingBatch`，可能同时存在两批未确认 | 只有 `afterSeq >= deliveredSeq` 的 ACK 才释放下一批（§5「只允许一批未确认」） |
+| journal 转为不健康后，已被接受的 requestId 重放被 `JOURNAL_UNAVAILABLE` 挡掉 | `start` 先做 replay 再检查 journal 可用性；只有真正的新请求被拒 |
+| 空 run 的过期游标会原样回显 | 钳到 0，后续事件仍能送达 |
+| `terminate` 的 `finally` 里 `sender.send` 抛错会跳过槽位释放，`driveRun` 还会产生未处理拒绝 | 投递加 `try/catch`，槽位释放仍在 `finally`；`driveRun` 的分离 promise 补 `catch` |
+| `shutdown` 自成一套 `terminate`+`dispose`，`terminate` 抛错照样跳过释放 | 复用 `terminateAndRelease` |
+| `terminateConverged` 是 GLOSSARY「收敛/Quiescent」之外的第三种拼法 | 改名 `terminateAndRelease`，描述它真正的额外职责（释放） |
+| `exhaustToolBudget` 只是一行转发 | 删除，两条预算路径直接 `failWith(run, 'TOOL_FAILED')` |
+
+新增测试：旧 ACK 不释放下一批、journal 失效后仍能重放已接受请求。`run-manager` 定向套件 31 项。
 
 ### 门禁记录
 
 | 项 | 命令 | 结果 |
 | --- | --- | --- |
-| 完整门禁（第四轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `8ecb5ef` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **372/372**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
-| A08 干净检出（第四轮） | `8ecb5ef` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
+| 完整门禁（第五轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `956a55f` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **374/374**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
+| A08 干净检出（第五轮） | `956a55f` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
+| 完整门禁（第四轮） | `pnpm check`，提交 `8ecb5ef` | 退出码 0（2026-10-26）：Contract **372/372**、Prototype **210/210**、Real E2E **24/24**、package smoke |
+| A08 干净检出（第四轮） | `8ecb5ef` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26） |
 | 完整门禁（第三轮） | `pnpm check`，提交 `97594a2` | 退出码 0（2026-10-26）：Contract **369/369**、Prototype **210/210**、Real E2E **24/24**、package smoke |
 | A08 干净检出（第三轮） | `97594a2` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26） |
 | 完整门禁（第二轮） | `pnpm check`，提交 `8328bdc` | 退出码 0（2026-10-26）：Contract **363/363**、Prototype **210/210**、Real E2E **24/24**、package smoke |
 | A08 干净检出（第二轮） | `8328bdc` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26） |
 | 完整门禁（第一轮） | `pnpm check`，提交 `de0e0f1` | 退出码 0（2026-10-26）：Contract **361/361**、Prototype **210/210**、Real E2E **24/24**、package smoke |
 | 仓库规范化 | `pnpm verify:repository`（文档改动后复跑） | 6/6 |
-| 定向套件（第四轮） | `vitest run` run-manager（29）/ controlled-adapter（12）/ pi-adapter-tools（2）/ read-only-tools-exec（14）/ run-view（2） | 全绿 |
+| 定向套件（第五轮） | `vitest run` run-manager（31）/ controlled-adapter（12）/ pi-adapter-tools（2）/ read-only-tools-exec（14）/ run-view（2） | 全绿 |
 
 **环境注意**：本机 DSH 会话会继承 `ELECTRON_RUN_AS_NODE=1`，此时 Electron 按 Node 解释并拒绝 `--remote-debugging-port`，E2E 全红；这不是代码回归，跑 E2E 或 `pnpm check` 前需清除该变量（CI 无此变量）。
 
