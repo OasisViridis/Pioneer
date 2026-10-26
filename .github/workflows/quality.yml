@@ -44,6 +44,9 @@ jobs:
       - name: Verify repository normalization
         run: pnpm verify:repository
 
+      - name: Verify design tokens and mapping evidence
+        run: pnpm design:check
+
       - name: Check formatting
         run: pnpm format:check
 

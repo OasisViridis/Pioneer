@@ -1,8 +1,8 @@
 :root {
   background: var(--pioneer-background);
   color: var(--pioneer-foreground);
-  font-family: Inter, 'Noto Sans SC', system-ui, sans-serif;
-  line-height: 1.5;
+  font-family: var(--pioneer-font-body);
+  line-height: var(--pioneer-line-height-body);
 }
 
 body {

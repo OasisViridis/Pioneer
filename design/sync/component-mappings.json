@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "issue": 35,
+  "route": "lightweight-index",
+  "officialCodeConnectPublished": false,
+  "codeConnectReason": "S0 actual read denied by plan gate; fallback selected. No publish or readback performed.",
+  "complete": false,
+  "components": [
+    {
+      "designNode": "921:706",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-706",
+      "designProperties": {
+        "Cover": {
+          "type": "VARIANT",
+          "defaultValue": "Code",
+          "variantOptions": ["Code", "Map", "Doc", "Unavailable"]
+        }
+      },
+      "designVersion": "S0 snapshot-only; identical live projection on 2026-10-26",
+      "status": "partial",
+      "code": {
+        "exportName": "ProjectPoster",
+        "path": "apps/desktop/src/renderer/components/ProjectPoster.tsx",
+        "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+        "blob": "5d906b384f7f1297182986844cd8882d148dccc9",
+        "inAcceptedMain": true,
+        "mainBlob": "5d906b384f7f1297182986844cd8882d148dccc9",
+        "props": {
+          "project": "ProjectSummary",
+          "onOpen": "(project: ProjectSummary) => void"
+        }
+      },
+      "usedProps": ["project", "onOpen"],
+      "example": "<ProjectPoster project={project} onOpen={onOpen} />",
+      "variants": [
+        {
+          "nodeId": "921:675",
+          "name": "Cover=Code",
+          "status": "preserved-difference",
+          "reason": "Use project/onOpen for available project cards. Actual visual is seeded gradient; the Cover category has no runtime prop and is not inferred from project metadata."
+        },
+        {
+          "nodeId": "921:681",
+          "name": "Cover=Map",
+          "status": "preserved-difference",
+          "reason": "Use project/onOpen for available project cards. Actual visual is seeded gradient; the Cover category has no runtime prop and is not inferred from project metadata."
+        },
+        {
+          "nodeId": "921:688",
+          "name": "Cover=Doc",
+          "status": "preserved-difference",
+          "reason": "Use project/onOpen for available project cards. Actual visual is seeded gradient; the Cover category has no runtime prop and is not inferred from project metadata."
+        },
+        {
+          "nodeId": "921:695",
+          "name": "Cover=Unavailable",
+          "status": "unsupported",
+          "reason": "No availability/disabled prop. Do not emit an interactive ProjectPoster for Unavailable."
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Cover=Code|Map|Doc",
+          "code": null,
+          "status": "unsupported",
+          "reason": "coverSeed deterministically produces gradients; no cover, kind or variant prop."
+        },
+        {
+          "figma": "Cover=Unavailable",
+          "code": null,
+          "status": "unsupported",
+          "reason": "ProjectSummary has no availability state; cannot fake a disabled prop."
+        },
+        {
+          "figma": "Nested title/description text",
+          "code": "project.name / project.description",
+          "status": "partial",
+          "reason": "These texts are not exposed Figma component properties; technologies and recency come from the catalog."
+        }
+      ],
+      "acceptance": [
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "apps/desktop/src/shared/contracts/catalog.ts"
+        },
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "tests/contract/catalog-contract.test.ts"
+        },
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "tests/e2e/pioneer.e2e.spec.ts"
+        }
+      ],
+      "next": "Reuse ProjectPoster only after an explicit accepted cover/availability treatment in S1 or an existing product issue; never claim full variant parity."
+    },
+    {
+      "designNode": "921:648",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-648",
+      "designProperties": {
+        "Label#921:23": {
+          "type": "TEXT",
+          "defaultValue": "产物预览"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": ["Active", "Inactive"]
+        }
+      },
+      "designVersion": "S0 snapshot-only; identical live projection on 2026-10-26",
+      "status": "blocked",
+      "code": {
+        "exportName": "LocalTabs",
+        "path": "apps/desktop/src/renderer/components/LocalTabs.tsx",
+        "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+        "blob": "a60d9345a1ef480e5a20bfd53b3571173b176a99",
+        "inAcceptedMain": true,
+        "mainBlob": "a60d9345a1ef480e5a20bfd53b3571173b176a99",
+        "props": {
+          "items": "{ id: T; label: string }[]",
+          "value": "T",
+          "onChange": "(id: T) => void",
+          "label": "string",
+          "className": "string",
+          "panelId": "string"
+        }
+      },
+      "usedProps": [],
+      "example": null,
+      "variants": [
+        {
+          "nodeId": "921:633",
+          "name": "State=Active",
+          "status": "blocked",
+          "reason": "LocalTabs is accepted in main after PR #16, but is not a dock PanelTab: it has no close/drag/dock/menu API. Keep this pilot blocked pending an actual dock composition API or a separately reviewed replacement."
+        },
+        {
+          "nodeId": "921:642",
+          "name": "State=Inactive",
+          "status": "blocked",
+          "reason": "LocalTabs is accepted in main after PR #16, but is not a dock PanelTab: it has no close/drag/dock/menu API. Keep this pilot blocked pending an actual dock composition API or a separately reviewed replacement."
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Label#921:23",
+          "code": "items[].label",
+          "status": "visual-only"
+        },
+        {
+          "figma": "State=Active|Inactive",
+          "code": "items[].id === value",
+          "status": "visual-only"
+        },
+        {
+          "figma": "close icon / dock tab",
+          "code": null,
+          "status": "unsupported",
+          "reason": "LocalTabs has no close, drag, dock or menu props; WorkbenchPanels uses it for outputTab."
+        }
+      ],
+      "acceptance": [
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "apps/desktop/src/renderer/components/WorkbenchPanels.tsx"
+        },
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "apps/desktop/src/renderer/components/DockSurface.tsx"
+        },
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "apps/desktop/src/shared/contracts/session-workspace.ts"
+        },
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "tests/e2e/p1-session.e2e.spec.ts"
+        }
+      ],
+      "next": "Keep PanelTab as the negative/conditional pilot; #17 owns docking behavior. S1 must not publish PanelTab as LocalTabs. Choose an accepted actual dock-tab API (or document a separately reviewed pilot replacement) before marking all three mappings complete."
+    },
+    {
+      "designNode": "921:632",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-632",
+      "designProperties": {
+        "Label#921:20": {
+          "type": "TEXT",
+          "defaultValue": "流式发票导出"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": ["Active", "Inactive"]
+        }
+      },
+      "designVersion": "S0 snapshot-only; identical live projection on 2026-10-26",
+      "status": "partial",
+      "code": {
+        "exportName": "SessionTabStrip",
+        "path": "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
+        "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+        "blob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
+        "inAcceptedMain": true,
+        "mainBlob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
+        "props": {
+          "state": "SessionWorkspaceState",
+          "dispatch": "Dispatch<SessionWorkspaceAction>"
+        }
+      },
+      "usedProps": ["state", "dispatch"],
+      "example": "<SessionTabStrip state={state} dispatch={dispatch} />",
+      "variants": [
+        {
+          "nodeId": "921:619",
+          "name": "State=Active",
+          "status": "preserved-difference",
+          "reason": "Accepted SessionTabStrip selects each tab through state.activeTabId and state.openSessionIds; use the containing strip with state/dispatch, not invented per-tab props. Visual parity with the single Figma SessionTab still needs acceptance."
+        },
+        {
+          "nodeId": "921:627",
+          "name": "State=Inactive",
+          "status": "preserved-difference",
+          "reason": "Accepted SessionTabStrip selects each tab through state.activeTabId and state.openSessionIds; use the containing strip with state/dispatch, not invented per-tab props. Visual parity with the single Figma SessionTab still needs acceptance."
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Label#921:20",
+          "code": "state.sessions[].title",
+          "status": "composition",
+          "reason": "Library and Settings labels are fixed; project subtitle derives from session.project.name."
+        },
+        {
+          "figma": "State=Active|Inactive",
+          "code": "state.activeTabId",
+          "status": "composition",
+          "reason": "SessionTabStrip renders a list from state.openSessionIds; a single instance is not the entire strip."
+        },
+        {
+          "figma": "close icon",
+          "code": "dispatch({ type: 'CLOSE_TAB', tabId })",
+          "status": "composition",
+          "reason": "Rendered only for session tabs; closing does not delete the session or stop its run."
+        }
+      ],
+      "acceptance": [
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "apps/desktop/src/shared/contracts/session-workspace.ts"
+        },
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "apps/desktop/src/renderer/state/session-workspace-reducer.ts"
+        },
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "tests/contract/session-workspace-reducer.test.ts"
+        },
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "tests/e2e/tab-strip.e2e.spec.ts"
+        },
+        {
+          "commit": "fd26d06344163a112570813dd6a1af985771e3a5",
+          "path": "tests/e2e/p1-session.e2e.spec.ts"
+        }
+      ],
+      "next": "Accepted commit/blob and real state/dispatch props are pinned after PR #16. Complete single-tab visual/composition acceptance before marking the SessionTab pilot mapped; do not invent an exported SessionTab or per-tab selected/onClose props."
+    }
+  ]
+}

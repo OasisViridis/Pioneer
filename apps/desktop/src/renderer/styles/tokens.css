@@ -1,10 +1,10 @@
-/* Approved M3 workspace palette synchronized from Figma Pioneer · DEMO Lab. */
+/* Generated from design/tokens/pioneer.tokens.json by pnpm tokens:build. Do not edit. */
 :root {
   --hazel-canvas: #f1f2ee;
   --hazel-surface: #f9faf7;
   --hazel-ink: #2c3547;
   --hazel-navy: #333c50;
-  --hazel-secondary: #646e72;
+  --hazel-secondary: #64696f; /** Paired S1 proposal: #64696f native text-secondary keeps >=4.5:1 contrast on #eeedea muted surface. */
   --hazel-line: #d3d3d3;
   --hazel-mint: #d7e3da;
   --hazel-slate: #dde2e9;
@@ -13,16 +13,17 @@
   --hazel-gold: #c6af94;
   --hazel-gold-ink: #76614b;
   --hazel-success-ink: #35644b;
-  --hazel-tool-surface: #eef1f3;
-
+  --hazel-tool-surface: #eeedea; /** Accepted S1 proposal from native color/surface-muted, #eeedea; replaces runtime #eef1f3. */
+  --pioneer-focus: #0071e3;
+  --pioneer-radius: 0.75rem;
+  --pioneer-space: 1rem;
+  --pioneer-font-body: Inter, 'Noto Sans SC', system-ui, sans-serif;
+  --pioneer-line-height-body: 1.5;
   --pioneer-background: var(--hazel-canvas);
   --pioneer-surface: var(--hazel-surface);
   --pioneer-surface-muted: var(--hazel-tool-surface);
   --pioneer-border: var(--hazel-line);
   --pioneer-foreground: var(--hazel-ink);
-  --pioneer-focus: #0071e3;
   --pioneer-muted: var(--hazel-secondary);
   --pioneer-notice: var(--hazel-warm);
-  --pioneer-radius: 0.75rem;
-  --pioneer-space: 1rem;
 }

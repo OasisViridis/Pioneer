@@ -82,7 +82,11 @@ export default [
     },
   },
   {
-    files: ['*.config.{js,mjs,cjs}'],
+    files: [
+      '*.config.{js,mjs,cjs}',
+      'tools/design-*.mjs',
+      'tests/design-sync/*.mjs',
+    ],
     languageOptions: {
       ecmaVersion: 'latest',
       globals: globals.node,
