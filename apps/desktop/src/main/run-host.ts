@@ -63,11 +63,55 @@ export interface AssembledRunHost {
 type RunManagerResolveProject = RunManagerDependencies['resolveProject'];
 export type { ProjectBinding, WindowBindingPort, RunSenderPort };
 
+export interface RunHostAdapterSelection {
+  kind: 'controlled' | 'pi';
+  scriptPath: string | null;
+}
+
+export interface RunHostLaunchGate {
+  isPackaged: boolean;
+  /** Resolved by the packaged acceptance seam; null in every other launch. */
+  acceptanceRunScriptPath: string | null;
+}
+
+/**
+ * Decides which adapter source this launch may use. A packaged build never
+ * reads the development E2E variables at all: it selects the controlled
+ * adapter only through a script path the acceptance seam already validated.
+ * A development launch keeps the E2E guard unchanged. A renderer request
+ * cannot reach either branch.
+ */
+export function selectRunHostAdapter(
+  environment: RunHostEnvironment,
+  gate: RunHostLaunchGate,
+): RunHostAdapterSelection {
+  if (gate.isPackaged) {
+    return gate.acceptanceRunScriptPath === null
+      ? { kind: 'pi', scriptPath: null }
+      : { kind: 'controlled', scriptPath: gate.acceptanceRunScriptPath };
+  }
+
+  if (
+    environment.PIONEER_E2E === '1' &&
+    environment.PIONEER_E2E_RUN_ADAPTER === 'controlled'
+  ) {
+    const scriptPath = environment.PIONEER_E2E_RUN_SCRIPT;
+    return {
+      kind: 'controlled',
+      scriptPath:
+        scriptPath === undefined || scriptPath.length === 0 ? null : scriptPath,
+    };
+  }
+
+  return { kind: 'pi', scriptPath: null };
+}
+
 /**
  * Assembles the run host. The controlled adapter is injected only through the
- * development/E2E launch guard (never a renderer request); production uses
- * the Pi adapter, which without an authorized provider config refuses
- * admission and is recorded as NOT_RUN instead of replaying anything.
+ * development/E2E launch guard or the packaged acceptance seam (never a
+ * renderer request); production uses the Pi adapter, which without an
+ * authorized provider config refuses admission and is recorded as NOT_RUN
+ * instead of replaying anything.
  */
 export async function assembleRunHost(dependencies: {
   userDataPath: string;
@@ -75,28 +119,29 @@ export async function assembleRunHost(dependencies: {
   resolveProject: RunManagerResolveProject;
   windowBindings: WindowBindingPort;
   sender: RunSenderPort;
+  /** Says whether this launch is a packaged build and, if so, the acceptance script. */
+  launchGate: RunHostLaunchGate;
 }): Promise<AssembledRunHost> {
   const environment = dependencies.environment ?? process.env;
   const journalStore = createFileJournalStore(dependencies.userDataPath);
   const { journal } = await RunJournal.open(journalStore);
 
-  const e2eControlled =
-    environment.PIONEER_E2E === '1' &&
-    environment.PIONEER_E2E_RUN_ADAPTER === 'controlled';
+  const selection = selectRunHostAdapter(environment, dependencies.launchGate);
 
   let adapterFactory: HarnessAdapterFactory;
   let adapterKind: 'controlled' | 'pi';
   let adapterAvailable: boolean;
   let modelName: string | null = null;
 
-  if (e2eControlled) {
+  if (selection.kind === 'controlled') {
     adapterKind = 'controlled';
     adapterAvailable = true;
-    adapterFactory = environment.PIONEER_E2E_RUN_SCRIPT
-      ? createControlledAdapterFactory(
-          await loadControlledScript(environment.PIONEER_E2E_RUN_SCRIPT),
-        )
-      : createControlledAdapterFactory();
+    adapterFactory =
+      selection.scriptPath !== null
+        ? createControlledAdapterFactory(
+            await loadControlledScript(selection.scriptPath),
+          )
+        : createControlledAdapterFactory();
   } else {
     adapterKind = 'pi';
     const config = resolvePiRuntimeConfig(environment);
