@@ -103,8 +103,24 @@ async function resolveGitEntry(
   }
 }
 
+function plainSummary(paragraph: string): string {
+  return paragraph
+    .replace(/(^|\s)>+\s*/g, '$1')
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/`{1,3}([^`]*)`{1,3}/g, '$1')
+    .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
+    .replace(/_{1,2}([^_]+)_{1,2}/g, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function firstReadmeParagraph(readme: string): string | null {
-  const lines = readme.replace(/^\uFEFF/, '').split(/\r?\n/);
+  const lines = readme
+    .replace(/^\uFEFF/, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .split(/\r?\n/);
   const paragraphs: string[] = [];
   let current: string[] = [];
 
@@ -122,7 +138,15 @@ function firstReadmeParagraph(readme: string): string | null {
     }
   }
   flush();
-  return paragraphs.find((paragraph) => !paragraph.startsWith('#')) ?? null;
+  const plain = (paragraph: string): string => {
+    const cleaned = plainSummary(paragraph);
+    return cleaned.length > 0 ? cleaned : paragraph;
+  };
+  const picked = paragraphs.find((paragraph) => {
+    const head = paragraph.trimStart();
+    return !head.startsWith('#') && !head.startsWith('<');
+  });
+  return picked ? plain(picked) : null;
 }
 
 function packageTechnologies(record: Record<string, unknown>): string[] {
