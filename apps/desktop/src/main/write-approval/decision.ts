@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import {
   WriteApprovalRejectionSchema,
   WriteApprovalSchema,
@@ -8,6 +10,7 @@ import {
   type WriteFileState,
   type WriteRevocationReason,
   type WriteStaleTarget,
+  type WriteTarget,
   type WriteTargetOutcome,
 } from '../../shared/contracts/write-approval';
 import type { TargetObservation } from './observe-targets';
@@ -67,42 +70,79 @@ export interface WriteApprovalContext {
 export type WriteApprovalDecision =
   { ok: true } | { ok: false; rejection: WriteApprovalRejection };
 
-/** Content main retains for one approved target so it can write the reviewed bytes. */
+/**
+ * Content main retains for one approved target so it can write the reviewed
+ * bytes. The digest is never trusted from the caller: `checkRetainedPostImages`
+ * re-hashes `content` on every check.
+ */
 export interface RetainedPostImage {
   path: string;
-  sha256: string;
+  content: Uint8Array;
 }
 
 function sameState(a: WriteFileState, b: WriteFileState): boolean {
   return a.bytes === b.bytes && a.sha256 === b.sha256;
 }
 
+function digestOf(content: Uint8Array): string {
+  return createHash('sha256').update(content).digest('hex');
+}
+
 /**
  * Checks the retained post-image before any write: every approved target must
- * still have exactly one retained entry with the reviewed SHA-256. The content
- * itself stays in main's approval store and never enters the serializable
- * summary, so the renderer cannot substitute different bytes.
+ * have exactly one retained entry whose bytes hash to the reviewed SHA-256 and
+ * whose length equals the reviewed length. The content stays in main's
+ * approval store and never enters the serializable summary, so the renderer
+ * cannot substitute different bytes.
  */
 export function checkRetainedPostImages(
   approval: WriteApproval,
   retained: readonly RetainedPostImage[],
 ): WriteApprovalDecision {
   const approvedPaths = new Set(approval.targets.map((target) => target.path));
-  const byPath = new Map<string, string>();
+  const byPath = new Map<string, Uint8Array>();
   for (const entry of retained) {
     if (!approvedPaths.has(entry.path) || byPath.has(entry.path)) {
       return { ok: false, rejection: reject('APPROVAL_TARGET_MISMATCH') };
     }
-    byPath.set(entry.path, entry.sha256);
+    byPath.set(entry.path, entry.content);
   }
   for (const target of approval.targets) {
-    const sha256 = byPath.get(target.path);
-    if (sha256 === undefined)
+    const content = byPath.get(target.path);
+    if (content === undefined)
       return { ok: false, rejection: reject('APPROVAL_REQUIRED') };
-    if (sha256 !== target.after.sha256)
+    if (
+      content.byteLength !== target.after.bytes ||
+      digestOf(content) !== target.after.sha256
+    ) {
       return { ok: false, rejection: reject('APPROVAL_DIGEST_MISMATCH') };
+    }
   }
   return { ok: true };
+}
+
+/**
+ * Canonical `diffDigest` (spec §2.5): SHA-256 over UTF-8 JSON of the version,
+ * operation, the approved targets in order and the rendered Diff text. main
+ * computes it when it builds the preview; the renderer only echoes the value
+ * the user confirmed.
+ */
+export function computeDiffDigest(input: {
+  operation: 'replace_file';
+  targets: readonly WriteTarget[];
+  diff: string;
+}): string {
+  return createHash('sha256')
+    .update(
+      JSON.stringify({
+        version: 1,
+        operation: input.operation,
+        targets: input.targets,
+        diff: input.diff,
+      }),
+      'utf-8',
+    )
+    .digest('hex');
 }
 
 /**
@@ -178,6 +218,16 @@ export function revokeWriteApproval(
   });
 }
 
+/**
+ * Consumes the approval when the write stage starts, before any target is
+ * touched. `appliedAt` stays null until the whole set succeeded, so a partial
+ * write or a crash leaves a consumed approval with no completion stamp and can
+ * never be applied twice.
+ */
+export function consumeWriteApproval(approval: WriteApproval): WriteApproval {
+  return WriteApprovalSchema.parse({ ...approval, consumed: true });
+}
+
 /** Marks the approval as applied once, after the whole set succeeded. */
 export function markApprovalApplied(
   approval: WriteApproval,
@@ -232,18 +282,21 @@ export function summarizeWriteOutcomes(
       return { path: target.path, status: 'unchanged' as const, code: null };
     }
     switch (record.kind) {
-      case 'applied':
+      case 'applied': {
+        // Defense in depth: the contract forbids a "verified" record whose
+        // observed hash differs from the after hash, but a record loaded from
+        // an older store must still be presented as unverified.
+        const verified =
+          record.verification === 'verified' &&
+          record.observedSha256 === record.afterSha256;
         return {
           path: target.path,
-          status:
-            record.verification === 'verified'
-              ? ('applied' as const)
-              : ('verification_failed' as const),
-          code:
-            record.verification === 'verified'
-              ? null
-              : ('VERIFY_FAILED' as const),
+          status: verified
+            ? ('applied' as const)
+            : ('verification_failed' as const),
+          code: verified ? null : ('VERIFY_FAILED' as const),
         };
+      }
       case 'failed':
         return {
           path: target.path,
@@ -335,13 +388,16 @@ export function planRecovery(input: {
     }
     // The file object the run's bytes landed on, not the pre-image object: a
     // temp-file + rename writer replaces the object, so comparing against the
-    // pre-image identity would turn every recovery into a conflict.
+    // pre-image identity would turn every recovery into a conflict. When the
+    // run recorded an identity but the current observation cannot report one,
+    // identity is unproven and the file stays a conflict; when the run itself
+    // had no identity, content is the only evidence and it decides.
     const appliedIdentity =
       applied.kind === 'applied' ? applied.observedIdentity : null;
     const identityMatches =
       appliedIdentity === null ||
-      observation.identity === null ||
-      sameIdentity(appliedIdentity, observation.identity);
+      (observation.identity !== null &&
+        sameIdentity(appliedIdentity, observation.identity));
     if (
       observation.state === 'changed' &&
       observation.observed !== null &&

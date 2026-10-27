@@ -40,18 +40,19 @@ const RESERVED_DEVICE_NAME =
 
 /**
  * Shape-only check: plain project-relative components with no traversal,
- * drive, UNC, ADS, reserved device name or over-long path. Containment, link,
- * sensitive-name and type checks stay in main's path policy and are re-run
- * before any write.
+ * drive, UNC, ADS, reserved device name or over-long path. Components must use
+ * `/` so one file cannot enter an approval twice as `src/a.ts` and `src\a.ts`.
+ * Containment, link, sensitive-name and type checks stay in main's path policy
+ * and are re-run before any write.
  */
 export const WriteTargetPathSchema = z
   .string()
   .min(1)
   .max(WRITE_APPROVAL_LIMITS.pathChars)
   .refine((value) => {
-    const normalized = value.replaceAll('\\', '/');
-    if (normalized.startsWith('/')) return false;
-    const segments = normalized.split('/');
+    if (value.includes('\\')) return false;
+    if (value.startsWith('/')) return false;
+    const segments = value.split('/');
     if (segments.length > WRITE_APPROVAL_LIMITS.pathComponents) return false;
     return segments.every(
       (segment) =>
@@ -105,14 +106,17 @@ export const WriteTargetsSchema = z
     const paths = new Set<string>();
     let totalAfter = 0;
     for (const target of targets) {
-      if (paths.has(target.path)) {
+      // Windows treats these as the same file, so fold case before comparing;
+      // a case-sensitive volume only ever rejects a redundant approval.
+      const folded = target.path.toLowerCase();
+      if (paths.has(folded)) {
         context.addIssue({
           code: 'custom',
           path: ['targets'],
           message: 'Duplicate target path.',
         });
       }
-      paths.add(target.path);
+      paths.add(folded);
       totalAfter += target.after.bytes;
     }
     if (totalAfter > WRITE_APPROVAL_LIMITS.approvalBytes) {
@@ -189,10 +193,26 @@ export const WriteApprovalSchema = z
   });
 
 /**
+ * Renderer-visible summary target. It carries both sides of the reviewed
+ * change and only whether an identity was recorded, so main's raw file index
+ * and birth time never leave the main process.
+ */
+export const WriteApprovalSummaryTargetSchema = z
+  .object({
+    path: WriteTargetPathSchema,
+    before: WriteFileStateSchema,
+    after: WriteFileStateSchema,
+    identityRecorded: z.boolean(),
+  })
+  .strict();
+
+/**
  * Renderer-visible summary. It carries exactly what the user must be able to
  * check: the Run, the relative targets, both sides of the reviewed change,
- * the Diff digest and the validity window. It carries no absolute path, no
- * binding secret and no "already applied" claim.
+ * whether an identity was recorded, the Diff digest and the validity window.
+ * It carries no absolute path, no raw file identity, no binding secret and no
+ * "already applied" claim; the reviewed Diff text itself is rendered from the
+ * retained post-image and checked against `diffDigest`.
  */
 export const WriteApprovalSummarySchema = z
   .object({
@@ -205,7 +225,10 @@ export const WriteApprovalSummarySchema = z
     createdAt: z.iso.datetime(),
     expiresAt: z.iso.datetime(),
     diffDigest: sha256,
-    targets: WriteTargetsSchema,
+    targets: z
+      .array(WriteApprovalSummaryTargetSchema)
+      .min(1)
+      .max(WRITE_APPROVAL_LIMITS.targets),
   })
   .strict();
 
@@ -214,6 +237,7 @@ export const WRITE_TARGET_STATES = [
   'changed',
   'missing',
   'replaced',
+  'identity_unavailable',
   'not_regular_file',
   'link_not_allowed',
   'too_large',
@@ -313,7 +337,18 @@ export const WriteChangeJournalRecordSchema = z.discriminatedUnion('kind', [
       verification: z.enum(['verified', 'unverified']),
       at: z.iso.datetime(),
     })
-    .strict(),
+    .strict()
+    .superRefine((record, context) => {
+      if (record.verification === 'verified') {
+        if (record.observedSha256 !== record.afterSha256) {
+          context.addIssue({
+            code: 'custom',
+            path: ['observedSha256'],
+            message: 'A verified record must observe the after hash.',
+          });
+        }
+      }
+    }),
   z
     .object({
       kind: z.literal('failed'),
@@ -342,6 +377,9 @@ export type WriteFileIdentity = z.infer<typeof WriteFileIdentitySchema>;
 export type WriteTarget = z.infer<typeof WriteTargetSchema>;
 export type WriteApproval = z.infer<typeof WriteApprovalSchema>;
 export type WriteApprovalSummary = z.infer<typeof WriteApprovalSummarySchema>;
+export type WriteApprovalSummaryTarget = z.infer<
+  typeof WriteApprovalSummaryTargetSchema
+>;
 export type WriteTargetState = z.infer<typeof WriteTargetStateSchema>;
 export type WriteTargetStatus = z.infer<typeof WriteTargetStatusSchema>;
 export type WriteApprovalRejectionCode = z.infer<
