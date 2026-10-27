@@ -57,14 +57,10 @@ const writeRunScript = async (dir: string, script: object): Promise<string> => {
 };
 
 const prepareTask = async (page: Page): Promise<void> => {
-  await page.getByRole('button', { name: '澄清任务', exact: true }).click();
-  await page
-    .getByRole('textbox', { name: '任务说明' })
-    .fill('读取 alpha-app 的 README 并总结内容。');
-  await page.getByRole('button', { name: '生成意图摘要' }).click();
-  await page.getByRole('button', { name: '确认摘要' }).click();
-  await page.getByRole('button', { name: '初始化运行会话' }).click();
   await page.locator('details.run-log summary').click();
+  await page
+    .getByRole('textbox', { name: '运行任务' })
+    .fill('读取 alpha-app 的 README 并总结内容。');
 };
 
 test('completes a controlled read-only run with a real tool result and unchanged fixtures', async ({}, testInfo) => {
@@ -91,7 +87,7 @@ test('completes a controlled read-only run with a real tool result and unchanged
     await newSessionForProject(page, 'alpha-app');
     await prepareTask(page);
 
-    await expect(page.locator('.hazel-companion')).toHaveCount(0);
+    await expect(page.locator('.hazel-companion')).toHaveCount(1);
     await page.getByRole('button', { name: '启动运行' }).click();
     await expect(page.locator('.hazel-companion')).toHaveCount(0);
 
@@ -142,7 +138,7 @@ test('stops mid-run and shows 已停止 only after background convergence', asyn
     await newSessionForProject(page, 'alpha-app');
     await prepareTask(page);
 
-    await expect(page.locator('.hazel-companion')).toHaveCount(0);
+    await expect(page.locator('.hazel-companion')).toHaveCount(1);
     await page.getByRole('button', { name: '启动运行' }).click();
     await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await expect(
@@ -208,7 +204,7 @@ test('allows a fresh authorized run after a stopped one converges', async ({}, t
     await newSessionForProject(page, 'alpha-app');
     await prepareTask(page);
 
-    await expect(page.locator('.hazel-companion')).toHaveCount(0);
+    await expect(page.locator('.hazel-companion')).toHaveCount(1);
     await page.getByRole('button', { name: '启动运行' }).click();
     await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await expect(

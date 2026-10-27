@@ -62,7 +62,7 @@ export async function designApp(info: TestInfo) {
     });
     await writeFile(
       path.join(userData, 'pioneer-session-state.json'),
-      JSON.stringify(SessionStateRecordSchema.parse({ version: 4, state })),
+      JSON.stringify(SessionStateRecordSchema.parse({ version: 5, state })),
     );
     app = await launch();
     page = await app.firstWindow();

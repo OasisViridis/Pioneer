@@ -1,6 +1,6 @@
 # #37 · S3 检查、回传与事件接收
 
-2026-10-27，基于 main `1cbface10f24667b8babc1b9d427f64d29588536`。关联 [#37](https://github.com/OasisViridis/Pioneer/issues/37)，不关闭长期入口 #33。
+2026-10-27，最初基于 main `1cbface10f24667b8babc1b9d427f64d29588536`，随后同步 `c12a20a03f7debe3060b7f8993cae0ebd85e1212`（意图契约移除，会话记录升至 v5）。关联 [#37](https://github.com/OasisViridis/Pioneer/issues/37)，不关闭长期入口 #33。
 
 ## 当前交付边界
 
@@ -14,7 +14,7 @@ S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook �
 
 | 旧文件 / 用例 | 当前适用性与处置 | 实际替代入口 |
 | --- | --- | --- |
-| `hazel-design` 的多主题/重启 | 旧版 v3 record、专注/审阅/交付标签已被 v4 单布局替换，原文件不运行 | 已选入的 `design-decoration` 验证 11 个实际素材、hash、重启、窄窗、隐藏边界和错误态 |
+| `hazel-design` 的多主题/重启 | 旧版 v3 record、专注/审阅/交付标签已被单布局替换，当前记录为 v5，原文件不运行 | 已选入的 `design-decoration` 验证 11 个实际素材、hash、重启、窄窗、隐藏边界和错误态 |
 | `hazel-design` 的 onboarding | 当前 ProjectLibrary 没有 Hazel 插画；`PIONEER_E2E_SKIP_INITIAL_ROOT` 也未被主进程读取，不能恢复一个不存在的功能 | `catalog-state` 验证选择目录/错误/重试，`design/sync/asset-policy.json` 明确 organizing 素材 dormant |
 | `hazel-design` 的三宽度与本机草稿 | 旧选择器和布局标签不再存在，迁移仍适用的交互断言 | 新选入 `design-states`：1440/900/640、长文本、键盘可见焦点、减少动态效果、本机保存、消息出现后移除插画 |
 | `window-chrome` 的自定义红黄绿、托盘、全屏、最大化、退出菜单 | `App.tsx` 未挂载 WindowChrome；main 未注册 window-ipc；原测试依赖的 tray/initialize seam 不存在。保留旧文件作历史规格，不计为当前 E2E 覆盖 | `window-controls` / `window-preload` 等 Contract Tests 仅证明独立模块；原生拖动、系统菜单、托盘、自定义 chrome 仍未验收 |

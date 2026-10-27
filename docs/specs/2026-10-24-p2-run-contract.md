@@ -123,6 +123,6 @@ schema 的 RUN_LIMITS 是默认硬上限，renderer/模型不得覆盖。单工�
 | A08 | pnpm verify:repository、完整 pnpm check、独立审阅；干净检出复建和成品启动的版本绑定 | 门禁/审阅/成品证据 |
 | A09 | 明确获准的真实 Provider 启动、至少一个真实只读工具结果、完成和中途停止；usage 未提供则 null | 单独真实 Provider 记录 |
 
-#12 探针只验证协议决策，不能替代 A01—A09 的生产实现验收。当前 #13 仍由 #12 阻塞；代码交付须获得用户远程发布授权、核对最终远端版本后再处理票据，不通过修改 label 或关闭 #12 跳过交付门。
+#12 探针只验证协议决策，不能替代 A01—A09 的生产实现验收。当前 #13 仍由 #12 阻塞；代码交付须核对最终远端版本后再处理票据，不通过修改 label 或关闭 #12 跳过交付门。
 
 真实 Provider 记录固定字段：evidenceKind=real-provider、软件 commit/dirty 状态、包 SHA-256、平台与 Node/Electron/Pi 版本、provider/model/endpoint origin（无凭证）、授权时间与范围摘要/hash、run/session/revision、开始/停止请求/本地收敛时间、工具调用与结果摘要、结果状态、fixture 前后 hash、input/output tokens（nullable）、限制及脱敏日志路径。拒绝外发/无凭证/服务不可用分别记录原因与 NOT_RUN/FAILED，不用 controlled 或 replay 补票。#12 不调用真实 Provider。

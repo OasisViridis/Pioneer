@@ -16,7 +16,7 @@
 - Preserve the 210-case suite and report it only as **Prototype Tests**, never as proof of Electron integration.
 - Use repository-relative Markdown links. `demo-thesis-2027` may remain only inside explicitly labeled sample/fixture content.
 - Add no passing no-op command for Contract Tests or Real E2E. M2 adds those commands with their real implementations.
-- Do not push, merge, publish, release, or rename the live checkout during these tasks. The physical directory rename remains the final M2 operational step.
+- Do not merge, publish, release, or rename the live checkout during these tasks. The physical directory rename remains the final M2 operational step.
 
 ---
 

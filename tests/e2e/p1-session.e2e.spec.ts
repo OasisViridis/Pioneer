@@ -51,7 +51,7 @@ async function createSession(page: Page, title: string) {
   await page.getByRole('button', { name: '保存名称', exact: true }).click();
 }
 
-test('creates independent sessions, reopens a closed tab and restores draft, intent and layout after Electron restart', async ({}, info) => {
+test('creates independent sessions, reopens a closed tab and restores draft, messages and layout after Electron restart', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);
   const userData = info.outputPath('user-data');
   await mkdir(userData, { recursive: true });
@@ -64,15 +64,6 @@ test('creates independent sessions, reopens a closed tab and restores draft, int
       .fill('修复缓存键冲突，并补充并发请求测试');
     await page.getByText('模块', { exact: true }).click();
     await page.getByRole('button', { name: '+ 上下文', exact: true }).click();
-    await page.getByRole('button', { name: '澄清任务', exact: true }).click();
-    await page
-      .getByRole('textbox', { name: '任务说明', exact: true })
-      .fill('先定位缓存键构建逻辑，不修改文件');
-    await page
-      .getByRole('button', { name: '生成意图摘要', exact: true })
-      .click();
-    await expect(page.getByText('REV 1', { exact: true })).toBeVisible();
-    await page.getByText('模块', { exact: true }).click();
     await page.getByRole('button', { name: '+ 产物', exact: true }).click();
     await page.getByRole('tab', { name: '文件清单', exact: true }).click();
     await createSession(page, '补充扫描测试');
@@ -105,7 +96,6 @@ test('creates independent sessions, reopens a closed tab and restores draft, int
       .getByRole('button', { name: '打开会话 修复请求缓存', exact: true })
       .click();
     await expect(page.locator('[data-panel-id="context"]')).toBeVisible();
-    await expect(page.getByText('REV 1', { exact: true })).toBeVisible();
     await expect(
       page.getByRole('tab', { name: '文件清单', exact: true }),
     ).toHaveAttribute('aria-selected', 'true');
@@ -126,7 +116,6 @@ test('creates independent sessions, reopens a closed tab and restores draft, int
       page.getByRole('textbox', { name: '给 Agent 的消息', exact: true }),
     ).toHaveValue('修复缓存键冲突，并补充并发请求测试');
     await expect(page.locator('[data-panel-id="context"]')).toBeVisible();
-    await expect(page.getByText('REV 1', { exact: true })).toBeVisible();
     await expect(
       page.getByRole('tab', { name: '文件清单', exact: true }),
     ).toHaveAttribute('aria-selected', 'true');
@@ -164,7 +153,7 @@ test('retries loading a repaired record without replacing the damaged original',
     await writeFile(
       file,
       JSON.stringify({
-        version: 4,
+        version: 5,
         state: {
           sessions: [],
           openSessionIds: [],
@@ -256,64 +245,101 @@ test('persists a moved panel and keyboard-resized single layout without changing
   }
 });
 
-test('restores an initialized revised intent after restart without enabling execution', async ({}, info) => {
+test('migrates a v4 record without restoring its intent card and keeps draft, messages and dock layout', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);
   const userData = info.outputPath('user-data');
   await mkdir(userData, { recursive: true });
+  const file = path.join(userData, 'pioneer-session-state.json');
   let app = await launch(userData);
   try {
     let page = await app.firstWindow();
-    await createSession(page, '定位请求取消问题');
-    await page.getByRole('button', { name: '澄清任务', exact: true }).click();
-    await page
-      .getByRole('textbox', { name: '任务说明', exact: true })
-      .fill('定位取消请求后缓存未释放的问题');
-    await page
-      .getByRole('button', { name: '生成意图摘要', exact: true })
-      .click();
-    await page.getByRole('button', { name: '返回修改', exact: true }).click();
-    await page
-      .getByRole('textbox', { name: '任务说明', exact: true })
-      .fill('定位取消请求后缓存未释放的问题，仅做只读分析');
-    await page
-      .getByRole('button', { name: '生成意图摘要', exact: true })
-      .click();
-    await page.getByRole('button', { name: '确认摘要', exact: true }).click();
-    await page
-      .getByRole('button', { name: '初始化运行会话', exact: true })
-      .click();
-    await expect(page.locator('.save-status')).toHaveText('已保存到本机');
+    await expect(
+      page.getByRole('button', { name: 'Open project alpha-app', exact: true }),
+    ).toBeVisible();
+    const project = await page.evaluate(async () =>
+      (await (window as RendererWindow).pioneer.getCatalog()).projects.find(
+        (item) => item.name === 'alpha-app',
+      ),
+    );
+    if (!project) throw new Error('Expected catalog fixture');
     await app.close();
+    const original = JSON.stringify({
+      version: 4,
+      state: {
+        sessions: [
+          {
+            id: 'session:stored-intent',
+            project,
+            title: '旧意图记录',
+            customTitle: true,
+            draft: '继续定位缓存键冲突',
+            messages: ['读取缓存模块'],
+            lastActivityAt: 100,
+            dock: { ...createDockLayout('review', ['context']), ratio: 41 },
+            savedDock: null,
+            layoutHistory: null,
+            outputTab: 'files',
+            intentState: {
+              phase: 'ready',
+              draftInstruction: '定位缓存键冲突',
+              intent: {
+                id: 'intent:session:stored-intent',
+                projectId: project.id,
+                revision: 2,
+                instruction: '定位缓存键冲突，不修改文件',
+                steps: [{ id: 'step:1', summary: '读取缓存模块' }],
+                status: 'ready',
+              },
+              runtime: null,
+              error: null,
+            },
+          },
+        ],
+        openSessionIds: ['session:stored-intent'],
+        activeTabId: 'session:stored-intent',
+        mruTabIds: ['session:stored-intent', 'library'],
+      },
+    });
+    await writeFile(file, original, 'utf8');
     app = await launch(userData);
     page = await app.firstWindow();
     await expect(
-      page.getByRole('heading', { name: '运行会话已初始化', exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText('REV 2', { exact: true })).toBeVisible();
-    const saved = await page.evaluate(() =>
-      (window as RendererWindow).pioneer.loadSessionState(),
+      page.getByRole('textbox', { name: '给 Agent 的消息', exact: true }),
+    ).toHaveValue('继续定位缓存键冲突');
+    await expect(page.locator('.message-list li')).toHaveCount(1);
+    await expect(page.locator('[data-panel-id="context"]')).toBeVisible();
+    await expect(
+      page.getByRole('separator', { name: '左右分栏宽度', exact: true }),
+    ).toHaveAttribute('aria-valuenow', '41');
+    await expect(
+      page.getByRole('button', { name: '澄清任务', exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole('heading', { name: '意图摘要', exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByText('REV 2', { exact: true })).toHaveCount(0);
+    // Loading is pure: the stored record stays byte-identical until a save.
+    expect(await readFile(file, 'utf8')).toBe(original);
+    await page
+      .getByRole('textbox', { name: '给 Agent 的消息', exact: true })
+      .fill('继续定位缓存键冲突，仅做只读分析');
+    await expect(page.locator('.save-status')).toHaveText('已保存到本机');
+    const record = SessionStateRecordSchema.parse(
+      JSON.parse(await readFile(file, 'utf8')),
     );
-    const session = saved?.sessions[0];
-    if (!session) throw new Error('Expected restored session');
-    expect(session.intentState.intent).toMatchObject({
-      id: `intent:${session.id}`,
-      revision: 2,
-    });
-    expect(session.intentState.runtime?.session.capabilities).toEqual({
-      modelAccess: false,
-      toolExecution: false,
-      fileMutation: false,
-    });
-    expect(session.intentState.runtime?.session.approvedIntent).toEqual(
-      session.intentState.intent,
+    expect(record.state.sessions[0]?.draft).toBe(
+      '继续定位缓存键冲突，仅做只读分析',
     );
+    expect(record.state.sessions[0]?.messages).toEqual(['读取缓存模块']);
+    expect(record.version).toBe(5);
+    expect(record.state.sessions[0]).not.toHaveProperty('intentState');
   } finally {
     await app.close();
     expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(before);
   }
 });
 
-test('reads a v3 active layout without rewriting it, then preserves its history when UI edits save v4', async ({}, info) => {
+test('reads a v3 active layout without rewriting it, then preserves its history when UI edits save v5', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);
   const userData = info.outputPath('user-data');
   await mkdir(userData, { recursive: true });
@@ -380,7 +406,7 @@ test('reads a v3 active layout without rewriting it, then preserves its history 
     const record = SessionStateRecordSchema.parse(
       JSON.parse(await readFile(file, 'utf8')),
     );
-    expect(record.version).toBe(4);
+    expect(record.version).toBe(5);
     expect(record.state.sessions[0]?.layoutHistory).toEqual({
       layout: 'review',
       dockLayouts: layouts,

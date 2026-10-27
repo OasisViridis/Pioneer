@@ -171,7 +171,7 @@ export const App = (): React.JSX.Element => {
               ? '正在保存最新会话，请稍候。'
               : '尚未确认保存，窗口尚未关闭。已开始的保存仍会完成。'}
           </p>
-          <div className="intent-actions">
+          <div className="modal-actions">
             <button
               type="button"
               className="button"

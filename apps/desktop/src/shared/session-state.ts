@@ -1,10 +1,6 @@
 import { z } from 'zod';
 import type { SessionWorkspaceState } from './contracts/session-workspace';
 import {
-  initialIntentWorkspaceState,
-  IntentWorkspaceStateSchema,
-} from './contracts/intent-workspace';
-import {
   DockLayoutSchema,
   LegacySessionSchema,
   LegacyStateObjectSchema,
@@ -12,7 +8,7 @@ import {
   loadRecord as loadLegacyRecord,
 } from './legacy-session-state';
 export { MAX_SESSION_STATE_BYTES } from './legacy-session-state';
-export const SESSION_STATE_VERSION = 4 as const;
+export const SESSION_STATE_VERSION = 5 as const;
 
 const SessionSchema = LegacySessionSchema.omit({
   layout: true,
@@ -27,22 +23,8 @@ const SessionSchema = LegacySessionSchema.omit({
       dockLayouts: true,
       savedLayouts: true,
     }).nullable(),
-    intentState: IntentWorkspaceStateSchema,
   })
-  .strict()
-  .superRefine((session, context) => {
-    const intent = session.intentState.intent;
-    if (
-      intent &&
-      (intent.projectId !== session.project.id ||
-        intent.id !== `intent:${session.id}`)
-    )
-      context.addIssue({
-        code: 'custom',
-        path: ['intentState', 'intent'],
-        message: 'Intent must belong to this project and conversation.',
-      });
-  });
+  .strict();
 export const SessionStateSchema: z.ZodType<SessionWorkspaceState> =
   LegacyStateObjectSchema.extend({
     sessions: z.array(SessionSchema).max(10_000),
@@ -58,12 +40,51 @@ export interface SessionStateRecord {
   state: SessionWorkspaceState;
 }
 
+/**
+ * v4 records still carry the removed intent workspace. Loading one drops that
+ * field and returns v5 state; the source file is not rewritten until the user
+ * saves, so an old record stays byte-identical on read.
+ */
+const V4SessionSchema = SessionSchema.extend({
+  intentState: z.unknown().optional(),
+}).strict();
+const V4StateSchema = LegacyStateObjectSchema.extend({
+  sessions: z.array(V4SessionSchema).max(10_000),
+}).superRefine(validateWorkspaceState);
+const V4RecordSchema = z
+  .object({ version: z.literal(4), state: V4StateSchema })
+  .strict();
+
+function migrateV4(input: unknown): SessionStateRecord {
+  const old = V4RecordSchema.parse(input);
+  return SessionStateRecordSchema.parse({
+    version: SESSION_STATE_VERSION,
+    state: {
+      ...old.state,
+      sessions: old.state.sessions.map((session) => ({
+        id: session.id,
+        project: session.project,
+        title: session.title,
+        customTitle: session.customTitle,
+        lastActivityAt: session.lastActivityAt,
+        draft: session.draft,
+        messages: session.messages,
+        dock: session.dock,
+        savedDock: session.savedDock,
+        layoutHistory: session.layoutHistory,
+        outputTab: session.outputTab,
+      })),
+    },
+  });
+}
+
 /** Loading is pure: unknown or corrupt records throw, never clear or rewrite the source. */
 export function loadRecord(input: unknown): SessionStateRecord {
   if (typeof input !== 'object' || input === null || !('version' in input))
     throw new Error('Unsupported session state record.');
   if (input.version === SESSION_STATE_VERSION)
     return SessionStateRecordSchema.parse(input);
+  if (input.version === 4) return migrateV4(input);
   const legacy = loadLegacyRecord(input);
   return SessionStateRecordSchema.parse({
     version: SESSION_STATE_VERSION,
@@ -75,7 +96,6 @@ export function loadRecord(input: unknown): SessionStateRecord {
           dock: dockLayouts[layout],
           savedDock: savedLayouts[layout] ?? null,
           layoutHistory: { layout, dockLayouts, savedLayouts },
-          intentState: initialIntentWorkspaceState(),
         }),
       ),
     },

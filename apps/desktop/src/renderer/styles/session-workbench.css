@@ -263,6 +263,24 @@
   justify-content: space-between;
   gap: 8px;
 }
+.run-panel__task {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--hazel-secondary);
+}
+.run-panel__task textarea {
+  border: 1px solid #858d92;
+  border-radius: 8px;
+  background: var(--hazel-surface);
+  color: var(--hazel-ink);
+  font: inherit;
+  padding: 8px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
 .run-status {
   font-weight: 600;
 }
@@ -364,8 +382,7 @@
   border-radius: 8px;
   background: var(--hazel-tool-surface);
 }
-.message-list p,
-.intent-summary p {
+.message-list p {
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -403,53 +420,11 @@
   justify-content: space-between;
   gap: 8px;
 }
-.session-intent {
-  margin: 20px 0;
-  border-top: 1px solid var(--hazel-line);
-  padding-top: 8px;
-}
-.session-intent__body {
-  padding: 8px;
-}
-.session-intent form label {
-  display: grid;
-  gap: 8px;
-}
-.session-intent textarea {
-  border: 1px solid #858d92;
-  border-radius: 8px;
-  font: inherit;
-  color: inherit;
-  background: var(--hazel-surface);
-  padding: 12px;
-  width: 100%;
-  box-sizing: border-box;
-  resize: vertical;
-}
-.session-intent form > button {
-  margin-top: 8px;
-}
-.intent-summary header,
-.intent-actions {
+.modal-actions {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-}
-.intent-summary h3 {
-  margin: 8px 0;
-}
-.intent-summary header span {
-  color: var(--hazel-secondary);
-  font-size: 12px;
-}
-.runtime-snapshot {
-  border-left: 3px solid var(--hazel-mint);
-  padding-left: 16px;
-}
-.runtime-snapshot p {
-  margin: 4px 0;
-  font-size: 13px;
 }
 .persistence-footer {
   display: flex;
