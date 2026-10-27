@@ -105,5 +105,16 @@
 ### 仍未解决
 
 - 开题报告正式版仍缺（需从维普/教务系统导出）。
-- 打包成品内的真实 Provider 运行未纳入自动化验收。
+- 打包成品内的真实 Provider 运行未纳入自动化验收（原因见下）。
 - 论文正文与对比实验数据未开始。
+
+### 打包成品为什么暂时只能人工验收
+
+2026-10-27 用 Playwright `_electron.launch` 直接驱动打包成品，两次都停在 `firstWindow`（60 秒超时），拿不到窗口。查代码确认是产品设计使然：
+
+```ts
+// apps/desktop/src/main/runtime-config.ts:57
+if (isPackaged || environment.PIONEER_E2E !== '1') return null;
+```
+
+打包后 `PIONEER_E2E`、`PIONEER_E2E_ROOT`、`PIONEER_E2E_USER_DATA` 一律被忽略，成品只能用真实用户目录与原生目录选择器，没有可自动化的探测入口；Provider 配置（`PIONEER_PI_*` 与 `PIONEER_PI_API_KEY_ENV`）在打包后仍然生效。要自动化验收需要新增一个成品级入口（启动诊断文件、`--workspace` 参数或双重开关），已记在 issue #53，与 P11 第一条的 2026-11-15 计划对应。
