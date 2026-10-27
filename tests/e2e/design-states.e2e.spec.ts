@@ -34,9 +34,9 @@ test('current Hazel conversation supports narrow windows, long text, keyboard fo
     expect(await draft.evaluate((node) => node.matches(':focus-visible'))).toBe(
       true,
     );
-    expect(
-      await draft.evaluate((node) => getComputedStyle(node).outlineStyle),
-    ).not.toBe('none');
+    await expect(draft).toHaveCSS('outline-style', 'solid');
+    await expect(draft).toHaveCSS('outline-width', '2px');
+    await expect(draft).toHaveCSS('outline-color', 'rgb(0, 113, 227)');
     expect(
       await page.evaluate(
         () => matchMedia('(prefers-reduced-motion: reduce)').matches,

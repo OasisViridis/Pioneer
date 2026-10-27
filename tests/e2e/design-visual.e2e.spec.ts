@@ -55,6 +55,10 @@ test('reviewed Windows application pixels: normal, narrow, long text, focus and 
       ).toBeVisible();
       await expectNoOverflow(page);
       await expect(page).toHaveScreenshot(`conversation-${String(width)}.png`);
+      await info.attach(`NORMAL conversation ${String(width)}`, {
+        body: await page.screenshot({ animations: 'disabled', caret: 'hide' }),
+        contentType: 'image/png',
+      });
     }
     const draft = page.getByRole('textbox', {
       name: '给 Agent 的消息',
@@ -66,23 +70,34 @@ test('reviewed Windows application pixels: normal, narrow, long text, focus and 
     await expect(draft).toBeFocused();
     await expect(page.locator('.save-status')).toHaveText('已保存到本机');
     await expectNoOverflow(page);
+    await info.attach('NORMAL long text and keyboard focus', {
+      body: await page.screenshot({ animations: 'disabled', caret: 'hide' }),
+      contentType: 'image/png',
+    });
     await expect(page).toHaveScreenshot('long-text-focus-reduced-motion.png');
     // Deliberate visible regression uses the SAME reviewed image and must fail.
     // No baseline mutation: Playwright emits actual/expected/diff for this probe.
     if (!info.config.metadata.candidate) {
-      const style = await page.addStyleTag({
-        content: '.app-shell { filter: invert(1) !important; }',
+      await test.step('INTENTIONAL FAILURE: inverted colors; diff is not the normal UI', async () => {
+        const style = await page.addStyleTag({
+          content: '.app-shell { filter: invert(1) !important; }',
+        });
+        try {
+          await expect(
+            expect(page).toHaveScreenshot(
+              'long-text-focus-reduced-motion.png',
+              {
+                timeout: 1500,
+              },
+            ),
+          ).rejects.toThrow();
+        } finally {
+          await style.evaluate((node) => node.parentNode?.removeChild(node));
+        }
+        await expect(page).toHaveScreenshot(
+          'long-text-focus-reduced-motion.png',
+        );
       });
-      try {
-        await expect(
-          expect(page).toHaveScreenshot('long-text-focus-reduced-motion.png', {
-            timeout: 1500,
-          }),
-        ).rejects.toThrow();
-      } finally {
-        await style.evaluate((node) => node.parentNode?.removeChild(node));
-      }
-      await expect(page).toHaveScreenshot('long-text-focus-reduced-motion.png');
     }
   } finally {
     await fixture.close();
