@@ -307,7 +307,7 @@ M2 Settings contains only the current scan root, a root-change action, and appli
 5. Implement the tab reducer and React application shell.
 6. Implement the project library, poster cards, dynamic project overview tabs, and minimal Settings tab.
 7. Implement Real E2E against committed fixture workspaces.
-8. Run `pnpm check`, review the complete diff, and push only after human authorization.
+8. Run `pnpm check`, review the complete diff, and push the reviewed change.
 9. Rename the physical checkout to `D:\Projects\Pioneer` and reopen the project from that path.
 
 ## 10. Acceptance criteria
