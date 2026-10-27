@@ -295,7 +295,7 @@
   "evidenceFiles": {
     "apps/desktop/design/component-examples.tsx": "eff2447744389d9dc531222ed992b64b92f91b34",
     "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "2d39cd9aeeeb35137a6813016a4cf1e8dce9fcf1",
-    "apps/desktop/src/renderer/components/Conversation.tsx": "fdb5fdc0bd051bc7f979fb8c42bd6afc875ffff1",
+    "apps/desktop/src/renderer/components/Conversation.tsx": "f395a2fe2ce5ec8333596c161289b0634c923d25",
     "apps/desktop/src/renderer/styles/app.css": "9328955da08caabddb2437f934e5c021d65dbe29",
     "apps/desktop/src/renderer/styles/session-workbench.css": "5ecf0dd83e7770337724833bb9814609de3cf1ab",
     "tests/e2e/design-mappings.e2e.spec.ts": "41968a251c1e44c8b29d1ffb704e6dd23815f7e6",
