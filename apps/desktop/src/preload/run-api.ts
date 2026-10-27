@@ -4,6 +4,10 @@ import {
   RunStopRequestSchema,
 } from '../shared/contracts/pioneer-run';
 import {
+  ListRunMaterialsReplySchema,
+  ListRunMaterialsRequestSchema,
+} from '../shared/contracts/egress';
+import {
   RUN_IPC_CHANNELS,
   RunAckRequestSchema,
   RunAuthorizeReplySchema,
@@ -37,6 +41,13 @@ export function createRunApi(ipc: RunIpcRendererPort): RunDesktopApi {
         await ipc.invoke(
           RUN_IPC_CHANNELS.authorize,
           RunAuthorizeRequestSchema.parse(request),
+        ),
+      ),
+    listRunMaterials: async (request) =>
+      ListRunMaterialsReplySchema.parse(
+        await ipc.invoke(
+          RUN_IPC_CHANNELS.materials,
+          ListRunMaterialsRequestSchema.parse(request),
         ),
       ),
     startRun: async (request) =>

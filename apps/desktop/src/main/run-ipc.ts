@@ -4,6 +4,10 @@ import {
   RunStopRequestSchema,
 } from '../shared/contracts/pioneer-run';
 import {
+  ListRunMaterialsReplySchema,
+  ListRunMaterialsRequestSchema,
+} from '../shared/contracts/egress';
+import {
   RUN_IPC_CHANNELS,
   RunAuthorizeReplySchema,
   RunAuthorizeRequestSchema,
@@ -25,6 +29,10 @@ export interface RunIpcDependencies {
   mainWindow: { webContents: { id: number } };
   expectedRendererUrl: string;
   manager: RunManager;
+  /** Bounded candidate list for the explicit egress material picker. */
+  listMaterials: (
+    projectId: string,
+  ) => Promise<{ path: string; bytes: number }[] | null>;
   /** Current epoch of the bound window; bumps on navigation/reload (§1). */
   windowEpoch: () => number;
 }
@@ -81,6 +89,7 @@ export function registerRunIpc(dependencies: RunIpcDependencies): void {
         projectId: parsed.data.projectId,
         revision: parsed.data.expectedRevision,
         task: parsed.data.task,
+        materials: parsed.data.materials,
         ...binding(event),
       });
       return RunAuthorizeReplySchema.parse(
@@ -88,6 +97,29 @@ export function registerRunIpc(dependencies: RunIpcDependencies): void {
           ? { ok: true, summary: reply.authorization }
           : { ok: false, code: reply.code },
       );
+    },
+  );
+
+  dependencies.ipcMain.handle(
+    RUN_IPC_CHANNELS.materials,
+    async (event, ...args) => {
+      const trusted = guard(event);
+      const parsed = ListRunMaterialsRequestSchema.safeParse(args[0]);
+      if (!trusted.ok || !parsed.success)
+        return ListRunMaterialsReplySchema.parse({
+          ok: false,
+          code: 'INVALID_REQUEST',
+        });
+      const materials = await dependencies.listMaterials(parsed.data.projectId);
+      if (materials === null)
+        return ListRunMaterialsReplySchema.parse({
+          ok: false,
+          code: 'INVALID_REQUEST',
+        });
+      return ListRunMaterialsReplySchema.parse({
+        ok: true,
+        materials,
+      });
     },
   );
 

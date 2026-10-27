@@ -22,6 +22,8 @@ import type {
   HarnessAdapterFactory,
 } from '../../apps/desktop/src/main/harness/adapter-seam';
 import { createControlledAdapterFactory } from '../../apps/desktop/src/main/harness/controlled-adapter';
+import type { ToolOutcome } from '../../apps/desktop/src/main/harness/read-only-tools';
+import { executeReadOnlyTool } from '../../apps/desktop/src/main/harness/read-only-tools';
 
 const webContentsId = 7;
 const windowEpoch = 3;
@@ -129,6 +131,7 @@ async function launchRun(
     requestId?: string;
     task?: string;
     revision?: number;
+    materials?: string[];
   } = {},
 ) {
   const sessionId = options.sessionId ?? 'session:test';
@@ -138,6 +141,7 @@ async function launchRun(
     projectId: 'project:test',
     revision,
     task: options.task ?? '读取 fixture 并回答。',
+    materials: options.materials ?? [],
     ...binding,
   });
   if (!authorization.ok)
@@ -193,6 +197,7 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       projectId: 'project:test',
       revision: 1,
       task: '读取 fixture 并回答。',
+      materials: [],
       ...binding,
     });
     expect(authorization.ok).toBe(true);
@@ -231,6 +236,7 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       projectId: 'project:test',
       revision: 2,
       task: '第二轮任务。',
+      materials: [],
       ...binding,
     });
     expect(regrant.ok).toBe(true);
@@ -264,6 +270,7 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       projectId: 'project:test',
       revision: 1,
       task: '过期修订。',
+      materials: [],
       ...binding,
     });
     expect(stale).toEqual({ ok: false, code: 'STALE_REVISION' });
@@ -294,6 +301,7 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       projectId: 'project:test',
       revision: 1,
       task: '未授权的真实模型任务。',
+      materials: [],
       ...binding,
     });
     expect(reply).toEqual({ ok: false, code: 'AUTHORIZATION_REQUIRED' });
@@ -312,6 +320,7 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       projectId: 'project:test',
       revision: 1,
       task: '日志不可用。',
+      materials: [],
       ...binding,
     });
     expect(authorization.ok).toBe(true);
@@ -327,6 +336,134 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       binding,
     );
     expect(started).toEqual({ ok: false, code: 'JOURNAL_UNAVAILABLE' });
+  });
+
+  it('binds the egress manifest to the grant and rejects unlisted file content', async () => {
+    const { manager, projectRoot } = await createManager({
+      steps: [
+        {
+          action: 'tool',
+          request: {
+            tool: 'read_file',
+            arguments: { path: 'notes/allowed.txt' },
+          },
+        },
+        {
+          action: 'tool',
+          request: {
+            tool: 'read_file',
+            arguments: { path: 'notes/other.txt' },
+          },
+        },
+        { action: 'complete' },
+      ],
+    });
+    await mkdir(join(projectRoot, 'notes'), { recursive: true });
+    await writeFile(
+      join(projectRoot, 'notes', 'allowed.txt'),
+      'allowed-body',
+      'utf-8',
+    );
+    await writeFile(
+      join(projectRoot, 'notes', 'other.txt'),
+      'other-body',
+      'utf-8',
+    );
+    const { runId } = await launchRun(manager, {
+      materials: ['notes/allowed.txt'],
+    });
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+    const results = (pageOf(manager, runId)?.events ?? [])
+      .filter((event) => event.body.type === 'tool.result')
+      .map((event) => event.body);
+    expect(results[0]).toMatchObject({
+      type: 'tool.result',
+      result: { status: 'succeeded', text: 'allowed-body' },
+    });
+    expect(results[1]).toMatchObject({
+      type: 'tool.result',
+      result: { status: 'rejected', code: 'MATERIAL_NOT_ALLOWED' },
+    });
+  });
+
+  it('revokes the grant and stops when a listed material changed after authorization', async () => {
+    let file = '';
+    const { manager, projectRoot } = await createManager(
+      {
+        steps: [
+          {
+            action: 'tool',
+            request: {
+              tool: 'read_file',
+              arguments: { path: 'notes/changing.txt' },
+            },
+          },
+          { action: 'complete' },
+        ],
+      },
+      {
+        executeTool: async (root, request, signal, materials) => {
+          // Change the file after authorize hashed it, then use the real
+          // executor so the manifest check is the code under test.
+          await writeFile(file, 'after-authorization', 'utf-8');
+          return executeReadOnlyTool(root, request, signal, materials);
+        },
+      },
+    );
+    await mkdir(join(projectRoot, 'notes'), { recursive: true });
+    file = join(projectRoot, 'notes', 'changing.txt');
+    await writeFile(file, 'before-authorization', 'utf-8');
+    const authorization = await manager.authorize({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      revision: 1,
+      task: '读取 fixture 并回答。',
+      materials: ['notes/changing.txt'],
+      ...binding,
+    });
+    expect(authorization.ok).toBe(true);
+    if (!authorization.ok) return;
+    const started = await manager.start(
+      {
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:changed-material',
+        grantId: authorization.authorization.grantId,
+      },
+      binding,
+    );
+    expect(started.ok).toBe(true);
+    if (!started.ok) return;
+    await waitFor(() => pageOf(manager, started.runId)?.status === 'failed');
+    const events = pageOf(manager, started.runId)?.events ?? [];
+    expect(events.at(-1)?.body).toEqual({
+      type: 'run.failed',
+      code: 'AUTHORIZATION_REVOKED',
+    });
+    expect(
+      events.some(
+        (event) =>
+          event.body.type === 'tool.result' &&
+          event.body.result.status !== 'succeeded' &&
+          event.body.result.code === 'CONTENT_NOT_ALLOWED',
+      ),
+    ).toBe(true);
+  });
+
+  it('rejects an authorization whose material path escapes the project', async () => {
+    const { manager } = await createManager({
+      steps: [{ action: 'complete' }],
+    });
+    const reply = await manager.authorize({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      revision: 1,
+      task: '读取 fixture 并回答。',
+      materials: ['../outside.txt'],
+      ...binding,
+    });
+    expect(reply).toEqual({ ok: false, code: 'INVALID_REQUEST' });
   });
 
   it('executes a read-only tool through the #11 policy and publishes its result', async () => {
@@ -348,7 +485,9 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       'fixture-answer',
       'utf-8',
     );
-    const { runId } = await launchRun(manager);
+    const { runId } = await launchRun(manager, {
+      materials: ['notes/readme.txt'],
+    });
     await waitFor(() => pageOf(manager, runId)?.status === 'completed');
     const events = pageOf(manager, runId)?.events ?? [];
     const requested = events.find(
@@ -403,6 +542,9 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
     const journalStore = memoryStore();
     const { journal } = await RunJournal.open(journalStore);
     const sender = collectSender();
+    const emptyRoot = await realpath(
+      await mkdtemp(join(tmpdir(), 'pioneer-run-')),
+    );
     const manager = new RunManager({
       journal,
       adapterFactory: stuckFactory,
@@ -410,7 +552,7 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       adapterAvailable: true,
       modelName: null,
       resolveProject: () =>
-        Promise.resolve({ root: 'D:\\unused', projectName: 'x' }),
+        Promise.resolve({ root: emptyRoot, projectName: 'x' }),
       windowBindings: { epochFor: () => windowEpoch },
       sender,
       limits: fastLimits,
@@ -433,6 +575,85 @@ describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => 
       false,
     );
     expect(journalStore.content()).toContain('"code":"STOP_TIMEOUT"');
+    const terminal = (journalStore.content() ?? '')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line) as Record<string, unknown>)
+      .find((record) => record.kind === 'terminal');
+    expect(terminal?.stopRequestedAt).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+    );
+  });
+
+  it('an adapter transport disconnect force-ends with ADAPTER_DISCONNECTED', async () => {
+    const { manager, journalStore } = await createManager({
+      steps: [{ action: 'disconnect' }],
+    });
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'failed');
+    const events = pageOf(manager, runId)?.events ?? [];
+    expect(events.at(-1)?.body).toEqual({
+      type: 'run.failed',
+      code: 'ADAPTER_DISCONNECTED',
+    });
+    const terminal = (journalStore.content() ?? '')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line) as Record<string, unknown>)
+      .find((record) => record.kind === 'terminal');
+    expect(terminal).toMatchObject({
+      kind: 'terminal',
+      status: 'failed',
+      code: 'ADAPTER_DISCONNECTED',
+    });
+    expect(terminal?.stopRequestedAt).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+    );
+  });
+
+  it('drops a late real tool result after stop and keeps one cancelled pair', async () => {
+    let resolveTool: (outcome: ToolOutcome) => void = () => undefined;
+    const toolPromise = new Promise<ToolOutcome>((resolve) => {
+      resolveTool = resolve;
+    });
+    const { manager } = await createManager(
+      {
+        steps: [
+          {
+            action: 'tool',
+            request: { tool: 'read_file', arguments: { path: 'README.md' } },
+          },
+          { action: 'complete' },
+        ],
+      },
+      { executeTool: () => toolPromise },
+    );
+    const { runId } = await launchRun(manager);
+    await waitFor(() =>
+      (pageOf(manager, runId)?.events ?? []).some(
+        (event) => event.body.type === 'tool.requested',
+      ),
+    );
+    manager.stop({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      ...binding,
+    });
+    resolveTool({ status: 'succeeded', text: 'late body', truncated: false });
+    await waitFor(() => pageOf(manager, runId)?.status === 'stopped');
+    const events = pageOf(manager, runId)?.events ?? [];
+    const results = events.filter((event) => event.body.type === 'tool.result');
+    expect(results).toHaveLength(1);
+    expect(results[0]?.body).toMatchObject({
+      type: 'tool.result',
+      result: { status: 'cancelled', code: 'CANCELLED' },
+    });
+    expect(
+      events.some((event) => JSON.stringify(event).includes('late body')),
+    ).toBe(false);
+    expect(events.at(-1)?.body.type).toBe('run.stopped');
   });
 
   it('the run deadline fails the run with RUN_DEADLINE', async () => {
@@ -594,6 +815,7 @@ async function authorizeGrant(
     projectId: 'project:test',
     revision,
     task: '读取 fixture 并回答。',
+    materials: [],
     ...binding,
   });
   if (!reply.ok) throw new Error(`authorize failed: ${reply.code}`);
@@ -1048,6 +1270,7 @@ describe('P2 run manager edge hardening', () => {
       projectId: 'project:test',
       revision: 1,
       task: 'again',
+      materials: [],
       ...binding,
     });
     expect(reply).toEqual({ ok: false, code: 'JOURNAL_UNAVAILABLE' });

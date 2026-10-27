@@ -2,6 +2,7 @@ import { _electron as electron, expect, test } from '@playwright/test';
 import { spawn } from 'node:child_process';
 import { mkdir, stat, readFile } from 'node:fs/promises';
 import { SESSION_STATE_FILE_NAME } from '../../apps/desktop/src/main/session-state-store';
+import { SESSION_STATE_VERSION } from '../../apps/desktop/src/shared/session-state';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import {
@@ -265,7 +266,7 @@ test('closing without retry after timeout still waits for an accepted atomic wri
     const record = JSON.parse(
       await readFile(path.join(userData, SESSION_STATE_FILE_NAME), 'utf8'),
     ) as { version: number; state: { sessions: unknown[] } };
-    expect(record.version).toBe(5);
+    expect(record.version).toBe(SESSION_STATE_VERSION);
     expect(record.state.sessions).toHaveLength(1);
   } finally {
     await app.close();

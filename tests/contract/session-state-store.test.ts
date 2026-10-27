@@ -63,6 +63,7 @@ function stateWith(
         savedDock: null,
         layoutHistory: null,
         outputTab: 'preview',
+        runHistory: [],
       },
     ],
     openSessionIds: [id],
@@ -77,10 +78,11 @@ function legacyV3State(): LegacySessionWorkspaceState {
   return {
     ...current,
     sessions: current.sessions.map(
-      ({ dock, savedDock, layoutHistory, ...base }) => {
+      ({ dock, savedDock, layoutHistory, runHistory, ...base }) => {
         expect(dock).toEqual(createDockLayout('focus'));
         expect(savedDock).toBeNull();
         expect(layoutHistory).toBeNull();
+        expect(runHistory).toEqual([]);
         return {
           ...base,
           layout: 'focus',
@@ -202,6 +204,34 @@ describe('session state store', () => {
       ),
     ).toEqual({ version: SESSION_STATE_VERSION, state });
     await expect(store.load()).resolves.toEqual(state);
+  });
+
+  it('round-trips a bounded per-session run history', async () => {
+    const userDataPath = await createUserDataDirectory();
+    const store = createSessionStateStore(userDataPath);
+    const state = stateWith();
+    firstSession(state).runHistory = [
+      {
+        runId: 'run:one',
+        task: '读取 README 并总结。',
+        status: 'completed',
+        failureCode: null,
+        startedAt: '2026-10-27T04:20:57.101Z',
+        endedAt: '2026-10-27T04:21:00.735Z',
+        stopRequestedAt: null,
+        resultText: '这是一个 alpha fixture。',
+        truncated: false,
+      },
+    ];
+    await store.save(state);
+    const loaded = await store.load();
+    expect(loaded?.sessions[0]?.runHistory).toHaveLength(1);
+    expect(loaded?.sessions[0]?.runHistory[0]).toMatchObject({
+      runId: 'run:one',
+      task: '读取 README 并总结。',
+      status: 'completed',
+      resultText: '这是一个 alpha fixture。',
+    });
   });
 
   it('captures a validated snapshot before callers can mutate the input', async () => {
@@ -334,7 +364,7 @@ describe('session state migration', () => {
       SessionStateRecordSchema.parse(
         JSON.parse(await readFile(statePath, 'utf8')),
       ).version,
-    ).toBe(5);
+    ).toBe(SESSION_STATE_VERSION);
   });
   function legacyRecord(): Record<string, unknown> {
     const current = firstSession();
@@ -364,7 +394,8 @@ describe('session state migration', () => {
   it('migrates a strict v1 record without losing session content', () => {
     const migrated = loadRecord(legacyRecord());
     const session = migrated.state.sessions[0];
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(SESSION_STATE_VERSION);
+    expect(session?.runHistory).toEqual([]);
     expect(session?.lastActivityAt).toBeNull();
     expect(session?.draft).toBe('legacy draft');
     expect(session?.messages).toEqual(['legacy message']);
@@ -441,7 +472,7 @@ describe('session state migration', () => {
     ).toThrow();
   });
 
-  it('reads v1 without rewriting it, then writes v5 on the next save', async () => {
+  it('reads v1 without rewriting it, then writes the current version on the next save', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
     const legacy = JSON.stringify(legacyRecord());
@@ -452,10 +483,12 @@ describe('session state migration', () => {
     });
     await expect(readFile(statePath, 'utf8')).resolves.toBe(legacy);
     await store.save(stateWith());
-    expect(await readFile(statePath, 'utf8')).toContain('"version":5');
+    expect(await readFile(statePath, 'utf8')).toContain(
+      `"version":${String(SESSION_STATE_VERSION)}`,
+    );
   });
 
-  it('migrates v2 activity as unknown without rewriting content, then writes v5 explicitly', async () => {
+  it('migrates v2 activity as unknown without rewriting content, then writes the current version explicitly', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
     const state = legacyV3State();
@@ -481,7 +514,7 @@ describe('session state migration', () => {
     if (!loaded) throw new Error('Expected migrated state');
     await store.save(loaded);
     expect(JSON.parse(await readFile(statePath, 'utf8'))).toEqual({
-      version: 5,
+      version: SESSION_STATE_VERSION,
       state: loaded,
     });
   });
@@ -508,13 +541,26 @@ describe('session state migration', () => {
 
 describe('session state v5 migration (#41 stage 2)', () => {
   function v4Record(session: SessionWorkspaceState['sessions'][number]) {
+    const legacySession = {
+      id: session.id,
+      project: session.project,
+      title: session.title,
+      customTitle: session.customTitle,
+      lastActivityAt: session.lastActivityAt,
+      draft: session.draft,
+      messages: session.messages,
+      dock: session.dock,
+      savedDock: session.savedDock,
+      layoutHistory: session.layoutHistory,
+      outputTab: session.outputTab,
+    };
     return {
       version: 4,
       state: {
         ...stateWith(),
         sessions: [
           {
-            ...session,
+            ...legacySession,
             draft: '继续定位缓存键冲突',
             messages: ['读取缓存模块'],
             intentState: {
@@ -570,7 +616,7 @@ describe('session state v5 migration (#41 stage 2)', () => {
       outputTab: session.outputTab,
     };
     const bytes = JSON.stringify({
-      version: SESSION_STATE_VERSION,
+      version: 5,
       state: { ...state, sessions: [withoutIntentState] },
     });
     await writeFile(statePath, bytes, 'utf8');
@@ -579,6 +625,7 @@ describe('session state v5 migration (#41 stage 2)', () => {
     const restored = loaded?.sessions[0];
     expect(restored?.draft).toBe('缺字段也要能打开');
     expect(restored?.messages).toEqual(['读取缓存模块']);
+    expect(restored?.runHistory).toEqual([]);
     expect(restored).not.toHaveProperty('intentState');
     expect(await readFile(statePath, 'utf8')).toBe(bytes);
   });
