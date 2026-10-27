@@ -153,7 +153,7 @@ test('retries loading a repaired record without replacing the damaged original',
     await writeFile(
       file,
       JSON.stringify({
-        version: 4,
+        version: 5,
         state: {
           sessions: [],
           openSessionIds: [],
@@ -245,7 +245,7 @@ test('persists a moved panel and keyboard-resized single layout without changing
   }
 });
 
-test('opens an old record without restoring its intent card and keeps draft, messages and dock layout', async ({}, info) => {
+test('migrates a v4 record without restoring its intent card and keeps draft, messages and dock layout', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);
   const userData = info.outputPath('user-data');
   await mkdir(userData, { recursive: true });
@@ -331,18 +331,15 @@ test('opens an old record without restoring its intent card and keeps draft, mes
       '继续定位缓存键冲突，仅做只读分析',
     );
     expect(record.state.sessions[0]?.messages).toEqual(['读取缓存模块']);
-    expect(record.state.sessions[0]?.intentState).toMatchObject({
-      phase: 'compose',
-      intent: null,
-      runtime: null,
-    });
+    expect(record.version).toBe(5);
+    expect(record.state.sessions[0]).not.toHaveProperty('intentState');
   } finally {
     await app.close();
     expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(before);
   }
 });
 
-test('reads a v3 active layout without rewriting it, then preserves its history when UI edits save v4', async ({}, info) => {
+test('reads a v3 active layout without rewriting it, then preserves its history when UI edits save v5', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);
   const userData = info.outputPath('user-data');
   await mkdir(userData, { recursive: true });
@@ -409,7 +406,7 @@ test('reads a v3 active layout without rewriting it, then preserves its history 
     const record = SessionStateRecordSchema.parse(
       JSON.parse(await readFile(file, 'utf8')),
     );
-    expect(record.version).toBe(4);
+    expect(record.version).toBe(5);
     expect(record.state.sessions[0]?.layoutHistory).toEqual({
       layout: 'review',
       dockLayouts: layouts,

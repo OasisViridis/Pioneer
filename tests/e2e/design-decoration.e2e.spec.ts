@@ -112,7 +112,7 @@ test('S1 decoration follows the current single-workspace pool, geometry and empt
         title: `S1 theme ${String(i)}`,
       });
     }
-    const record = SessionStateRecordSchema.parse({ version: 4, state });
+    const record = SessionStateRecordSchema.parse({ version: 5, state });
     await writeFile(
       path.join(userData, 'pioneer-session-state.json'),
       JSON.stringify(record),

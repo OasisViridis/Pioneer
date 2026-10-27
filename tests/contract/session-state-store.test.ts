@@ -1,4 +1,3 @@
-import { initialIntentWorkspaceState } from '../../apps/desktop/src/shared/contracts/intent-workspace';
 import {
   mkdir,
   mkdtemp,
@@ -63,7 +62,6 @@ function stateWith(
         dock: createDockLayout('focus'),
         savedDock: null,
         layoutHistory: null,
-        intentState: initialIntentWorkspaceState(),
         outputTab: 'preview',
       },
     ],
@@ -79,11 +77,10 @@ function legacyV3State(): LegacySessionWorkspaceState {
   return {
     ...current,
     sessions: current.sessions.map(
-      ({ dock, savedDock, layoutHistory, intentState, ...base }) => {
+      ({ dock, savedDock, layoutHistory, ...base }) => {
         expect(dock).toEqual(createDockLayout('focus'));
         expect(savedDock).toBeNull();
         expect(layoutHistory).toBeNull();
-        expect(intentState.phase).toBe('compose');
         return {
           ...base,
           layout: 'focus',
@@ -305,7 +302,7 @@ describe('session state store', () => {
 });
 
 describe('session state migration', () => {
-  it('loads v3 without rewriting bytes and retains dormant layouts through v4 save and restart', async () => {
+  it('loads v3 without rewriting bytes and retains dormant layouts through v5 save and restart', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
     const state = legacyV3State();
@@ -337,7 +334,7 @@ describe('session state migration', () => {
       SessionStateRecordSchema.parse(
         JSON.parse(await readFile(statePath, 'utf8')),
       ).version,
-    ).toBe(4);
+    ).toBe(5);
   });
   function legacyRecord(): Record<string, unknown> {
     const current = firstSession();
@@ -367,7 +364,7 @@ describe('session state migration', () => {
   it('migrates a strict v1 record without losing session content', () => {
     const migrated = loadRecord(legacyRecord());
     const session = migrated.state.sessions[0];
-    expect(migrated.version).toBe(4);
+    expect(migrated.version).toBe(5);
     expect(session?.lastActivityAt).toBeNull();
     expect(session?.draft).toBe('legacy draft');
     expect(session?.messages).toEqual(['legacy message']);
@@ -444,7 +441,7 @@ describe('session state migration', () => {
     ).toThrow();
   });
 
-  it('reads v1 without rewriting it, then writes v4 on the next save', async () => {
+  it('reads v1 without rewriting it, then writes v5 on the next save', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
     const legacy = JSON.stringify(legacyRecord());
@@ -455,10 +452,10 @@ describe('session state migration', () => {
     });
     await expect(readFile(statePath, 'utf8')).resolves.toBe(legacy);
     await store.save(stateWith());
-    expect(await readFile(statePath, 'utf8')).toContain('"version":4');
+    expect(await readFile(statePath, 'utf8')).toContain('"version":5');
   });
 
-  it('migrates v2 activity as unknown without rewriting content, then writes v4 explicitly', async () => {
+  it('migrates v2 activity as unknown without rewriting content, then writes v5 explicitly', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
     const state = legacyV3State();
@@ -484,7 +481,7 @@ describe('session state migration', () => {
     if (!loaded) throw new Error('Expected migrated state');
     await store.save(loaded);
     expect(JSON.parse(await readFile(statePath, 'utf8'))).toEqual({
-      version: 4,
+      version: 5,
       state: loaded,
     });
   });
@@ -509,54 +506,52 @@ describe('session state migration', () => {
   });
 });
 
-describe('session state without the intent card (#41 stage 1)', () => {
-  function stateWithStoredIntent(): SessionWorkspaceState {
-    const state = stateWith();
-    const session = firstSession(state);
+describe('session state v5 migration (#41 stage 2)', () => {
+  function v4Record(session: SessionWorkspaceState['sessions'][number]) {
     return {
-      ...state,
-      sessions: [
-        {
-          ...session,
-          draft: '继续定位缓存键冲突',
-          messages: ['读取缓存模块'],
-          intentState: {
-            phase: 'ready',
-            draftInstruction: '定位缓存键冲突',
-            intent: {
-              id: `intent:${session.id}`,
-              projectId: session.project.id,
-              revision: 3,
-              instruction: '定位缓存键冲突，不修改文件',
-              steps: [{ id: 'step:1', summary: '读取缓存模块' }],
-              status: 'ready',
+      version: 4,
+      state: {
+        ...stateWith(),
+        sessions: [
+          {
+            ...session,
+            draft: '继续定位缓存键冲突',
+            messages: ['读取缓存模块'],
+            intentState: {
+              phase: 'ready',
+              draftInstruction: '定位缓存键冲突',
+              intent: {
+                id: `intent:${session.id}`,
+                projectId: session.project.id,
+                revision: 3,
+                instruction: '定位缓存键冲突，不修改文件',
+                steps: [{ id: 'step:1', summary: '读取缓存模块' }],
+                status: 'ready',
+              },
+              runtime: null,
+              error: null,
             },
-            runtime: null,
-            error: null,
           },
-        },
-      ],
+        ],
+      },
     };
   }
 
-  it('ignores a stored intent state and leaves the file untouched until a save', async () => {
+  it('drops a stored v4 intent state on load and leaves the file untouched until a save', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
-    const bytes = JSON.stringify({
-      version: SESSION_STATE_VERSION,
-      state: stateWithStoredIntent(),
-    });
+    const bytes = JSON.stringify(v4Record(firstSession(stateWith())));
     await writeFile(statePath, bytes, 'utf8');
 
     const loaded = await createSessionStateStore(userDataPath).load();
     const session = loaded?.sessions[0];
     expect(session?.draft).toBe('继续定位缓存键冲突');
     expect(session?.messages).toEqual(['读取缓存模块']);
-    expect(session?.intentState).toEqual(initialIntentWorkspaceState());
+    expect(session).not.toHaveProperty('intentState');
     expect(await readFile(statePath, 'utf8')).toBe(bytes);
   });
 
-  it('loads a v4 record whose session omits intentState', async () => {
+  it('loads a v5 record whose session omits intentState', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
     const state = stateWith();
@@ -584,7 +579,7 @@ describe('session state without the intent card (#41 stage 1)', () => {
     const restored = loaded?.sessions[0];
     expect(restored?.draft).toBe('缺字段也要能打开');
     expect(restored?.messages).toEqual(['读取缓存模块']);
-    expect(restored?.intentState).toEqual(initialIntentWorkspaceState());
+    expect(restored).not.toHaveProperty('intentState');
     expect(await readFile(statePath, 'utf8')).toBe(bytes);
   });
 });
