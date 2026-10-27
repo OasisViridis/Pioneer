@@ -308,13 +308,13 @@ export function planRecovery(input: {
   const actions: RecoveryAction[] = [];
   const outOfScope: string[] = [];
   for (const target of input.approval.targets) {
-    const applied = input.records.some(
+    const applied = input.records.find(
       (record) =>
         record.kind === 'applied' &&
         record.approvalId === input.approval.approvalId &&
         record.path === target.path,
     );
-    if (!applied) {
+    if (applied === undefined) {
       outOfScope.push(target.path);
       continue;
     }
@@ -333,10 +333,15 @@ export function planRecovery(input: {
       });
       continue;
     }
+    // The file object the run's bytes landed on, not the pre-image object: a
+    // temp-file + rename writer replaces the object, so comparing against the
+    // pre-image identity would turn every recovery into a conflict.
+    const appliedIdentity =
+      applied.kind === 'applied' ? applied.observedIdentity : null;
     const identityMatches =
-      target.identity === null ||
+      appliedIdentity === null ||
       observation.identity === null ||
-      sameIdentity(target.identity, observation.identity);
+      sameIdentity(appliedIdentity, observation.identity);
     if (
       observation.state === 'changed' &&
       observation.observed !== null &&

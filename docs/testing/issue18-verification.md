@@ -1,6 +1,6 @@
 # Issue #18 验证记录：P4-D1 写入授权与恢复决策
 
-核对日期：2026-10-27。来源：[Issue #18](https://github.com/OasisViridis/Pioneer/issues/18)。基线：`origin/main` `b93d8e9`（PR #52 合并后）。分支：`docs/issue18-write-authorization`（自该基线检出）。
+核对日期：2026-10-27。来源：[Issue #18](https://github.com/OasisViridis/Pioneer/issues/18)。基线：`origin/main` `b93d8e9`（PR #52 合并后）。分支：`docs/issue18-write-authorization`（自该基线检出）。交付：[PR #56](https://github.com/OasisViridis/Pioneer/pull/56)。
 
 本记录只证明决策规格与规格探针的可执行结果，不证明写入功能已实现、已接线或已获人类确认。写入能力在本记录发布时仍为关闭状态。
 
@@ -13,7 +13,7 @@
 | 目标观察 | [`apps/desktop/src/main/write-approval/observe-targets.ts`](../../apps/desktop/src/main/write-approval/observe-targets.ts)：只读句柄读取、内容哈希、文件身份；不写、不删、不改名 |
 | 共享读取 | [`apps/desktop/src/main/harness/bounded-read.ts`](../../apps/desktop/src/main/harness/bounded-read.ts)：外发清单与写入观察共用的有界稳定读取；`egress-materials.ts` 改为调用它，错误码映射不变 |
 | 纯决策 | [`apps/desktop/src/main/write-approval/decision.ts`](../../apps/desktop/src/main/write-approval/decision.ts)：批准判定、保留内容核对、撤销、完成标记、逐路径结果、恢复计划；不触碰文件系统 |
-| 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：79 项 Contract Tests |
+| 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：83 项 Contract Tests |
 | 词表 | [`GLOSSARY.md`](../../GLOSSARY.md)：新增「写入批准（Write Approval）」「变更日志（Change Journal）」 |
 
 没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段；`run-ipc.ts` 与 `pioneer-run.ts` 未改动。`egress-materials.ts` 只改了内部读取实现，对外错误码与行为不变。
@@ -23,7 +23,7 @@
 | 项 | 命令/位置 | 结果 |
 | --- | --- | --- |
 | 仓库规范化 | `pnpm verify:repository` | 6/6 通过 |
-| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 79/79 通过 |
+| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 83/83 通过 |
 | 受影响既有测试 | `egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` | 123/123 通过 |
 | 完整门禁 | `pnpm check` | 见下方"门禁结果" |
 | 类型 | `pnpm typecheck`、`pnpm test:contract:types` | 通过 |
@@ -32,14 +32,18 @@
 
 ### 门禁结果
 
-最终 `pnpm check`（日志 `tmp/issue18/full-check-5.log`，2026-10-27）退出码 0：
+最终 `pnpm check`（日志 `tmp/issue18/full-check-6.log`，2026-10-27）退出码 0：
 
-- Contract Tests：427/427 通过（37 个测试文件，含本票 79 项）；
+- Contract Tests：431/431 通过（37 个测试文件，含本票 83 项）；
 - Prototype Tests：210/210 通过；
 - Real Electron E2E：27/27 通过（先 build 再运行）；
 - 最终 package smoke：Electron Forge 打包完成，`Packaging for x64 on win32` 与 postPackage hook 均成功。
 
-该门禁覆盖加入身份、批准窗口、保留内容、撤销、`restored` 状态与共享读取重构之后的最终代码树。之后的改动只有 Markdown 规格与验证记录文本，不进入 `pnpm check`；仓库规范化的最终结果在下文单独记录。
+该门禁覆盖第二轮复核修复（内容优先的陈旧判定、`applied.observedIdentity`、两目标重建探针、重复保留内容探针）之后的最终代码树。之后的改动只有 Markdown 规格与验证记录文本，不进入 `pnpm check`；仓库规范化的最终结果见上方"验证证据"表。
+
+### 编辑过程事故与修复
+
+工作过程中有一次用 PowerShell `Get-Content`/`Set-Content` 改写 Markdown，因该终端按本地代码页读写 UTF-8，导致规格文件被写入损坏内容并带上 BOM。修复方式：从 `HEAD` 取回完整版本、用 UTF-8 无 BOM 重写受影响文件、逐条重新施加待改内容，并用 `[System.IO.File]::ReadAllText` 核对关键中文短语。最终确认：`docs/specs/`、`docs/testing/`、`apps/desktop/src/` 与 `tests/contract/` 的本票文件均为无 BOM 的 UTF-8，提交对象 `aefad34` 的 `egress-materials.ts` 首字节不是 BOM。此事故不影响代码与探针结果，但记录在此，避免后续读者把编辑中间态当成交付内容。
 
 ## 环境差异与失败记录
 
@@ -51,7 +55,7 @@
 | 完成条件 | 规格位置 | 探针或证据 |
 | --- | --- | --- |
 | 文档列出只读、外发、写入和发布各自的授权关系与明确拒绝情形 | §1 四类许可表 + 四条不可推导规则 | 规格文档 |
-| 授权信息能让用户核对 Run、相对目标、待写入变化和许可有效范围 | §2.1 字段表、§2.3 六项必须显示（含写入后字节/哈希与完整 Diff） | 摘要 schema 探针（无绝对路径、无窗口绑定字段）、保留内容核对探针 |
+| 授权信息能让用户核对 Run、相对目标、待写入变化和许可有效范围 | §2.1 字段表、§2.3 六项必须显示（含写入后字节/哈希与完整 Diff）、§2.5 diffDigest 编码 | 摘要 schema 探针（含 after 字节/哈希、无绝对路径、无窗口绑定字段）与保留内容核对探针；完整 Diff 是 §2.3 的界面要求，由 #19 的预览实现验收 |
 | 说明目标文件在批准后发生变化、移动或消失时如何阻止旧 Diff 落盘 | §3.1 身份依据、§3.2 两段判定与优先级、§3.3 整体拒绝 | `target observation`、`write approval decision` 组 |
 | 说明写入部分完成、进程停止和验证失败时如何呈现实际文件状态 | §4.1 变更日志、§4.2 七种状态、§4.3 场景表、§4.5 拒绝留痕 | `write outcomes` 组 |
 | 提供用户并发修改的冲突例子及保留现场的恢复规则 | §5.1 三个例子、§5.2 判定、§5.3 幂等、§5.5 恢复授权 | `recovery planning` 组 |
@@ -59,7 +63,7 @@
 
 ## 独立审阅
 
-两轮独立审阅均在只读模式下进行，覆盖规格、契约、观察、决策与探针。
+三轮独立审阅（两份首轮 + 一轮修复后复核）均在只读模式下进行，覆盖规格、契约、观察、决策与探针。
 
 ### 第一轮：标准审阅（子代理）
 
@@ -94,7 +98,7 @@
 | I2 | 恢复完成被报成 `unchanged` | 采纳：新增 `restored`，`preserve` 映射为 `failed(RECOVERY_CONFLICT)` |
 | B3 | §5.1 例 3 的 `outOfScope` 表述错误 | 采纳：§5.1 改为"`outOfScope` 只列批准了但本 Run 未应用的目标，批准集合之外更外层" |
 | B5/B6 | `APPROVAL_REQUIRED` 与 `revoked` 无写入者 | 采纳：补 `checkRetainedPostImages` 与 `revokeWriteApproval`，并补探针 |
-| B1/B2 | 计数不一致、决定条数自相矛盾 | 采纳：探针 79 项、决定 12 项、验证记录重写 |
+| B1/B2 | 计数不一致、决定条数自相矛盾 | 采纳：探针 83 项、决定 12 项、验证记录重写 |
 | B4 | "四个 userData 写入点"高估写面扫描 | 采纳：§7 写明扫描是文本级门槛、按文件放行、不检查目的地 |
 | B7 | 摘要清单漏 `operation` 与 `identity` | 采纳：§2.1/§2.3 补齐，身份只显示"已记录/不可用" |
 | B8 | 二进制/截断排除不可判定 | 采纳：§2.4 写明批准生成前由 main 验证 UTF-8，批准隐含文本 |
@@ -108,9 +112,23 @@
 | E | §7 多处高估探针 | 采纳：重写 §7 并逐条写明边界（伪造/真实、schema 复验范围、无写路径、计划级幂等、文本级扫描） |
 | D 项 | 9 类实现前决定 | 采纳：新增 §9.1，给出默认方向并交给 #19/#20 落地 |
 
-### 第二轮：修复后复核
+### 第二轮：修复后复核（子代理）
 
-复核方式与结论见文末更新；未完成复核前，本规格不构成人类确认。
+对第一轮修复后的快照再次只读复核。结论 `changes-requested`：13 项原阻塞中 10 项 resolved、2 项 partial、1 项带悬空引用；另有 2 个新阻塞项。处理结果：
+
+| 编号 | 发现 | 处理 |
+| --- | --- | --- |
+| 新阻塞 1 | `replaced` 判定在内容与身份同时变化时仍报 `replaced`，与规格"内容不同即 `changed`"冲突 | 采纳：观察改为内容优先（不同 → `changed`，相同但身份不同 → `replaced`），补"内容与身份同时变"探针 |
+| 新阻塞 2 | 恢复比较批准时的写入前身份，临时文件 + rename 写入后必然落 `conflict` | 采纳：`applied` 日志新增 `observedIdentity`，恢复比较"写入后"的身份；补 rename 写入后仍可恢复的探针 |
+| partial #9 | 规格把"纯决策"放在观察之前，与代码先观察后判定不符；`APPROVAL_REQUIRED` 未进优先级 | 采纳：§3.2 改为"记录与保留内容 → 观察 → 纯判定"三层，并说明观察无副作用、先观察不构成授权 |
+| partial #12 | 设备名缺上标形式（`com¹²³`/`lpt¹²³`） | 采纳：契约正则与只读策略对齐（含上标） |
+| 悬空引用 | 第二轮章节与"下文单独记录"指向不存在的内容 | 采纳：补齐本轮结论，门禁指针改为上方证据表 |
+| 非阻塞 | "13 个写函数名"实为 14；两目标重建无判定探针；摘要探针被当作完整 Diff 证据；保留内容"匹配"探针直接回传批准哈希；重复保留内容无探针 | 采纳：改为 15 个写函数名（含 `writeFileSync`）、补两目标重建探针、完成条件表改写证据边界、匹配探针改用内容哈希、补重复保留内容探针 |
+| 非阻塞 | `egress-materials.ts` 出现 BOM | 已确认：提交 `aefad34` 的首字节不是 BOM；复核看到的是编辑中间态。该中间态已在本轮修复前移除，事故与修复见上文"编辑过程事故与修复" |
+
+第二轮复核认可的项（不再复述证据）：待写入变化可见、重复应用语义统一、保留内容归属、`restored` 状态、`outOfScope` 表述、`APPROVAL_REQUIRED`/`revoked` 生产者、计数一致、写面探针边界、恢复身份显式比较、`unstable` 探针、审阅章节内容。
+
+复核后本票的规格与探针已全部对应；独立审阅的最终判定与人类确认仍是两件事：前者见本节，后者仍为 `PENDING`。
 
 ## 人类确认状态
 

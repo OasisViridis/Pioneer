@@ -103,22 +103,22 @@ renderer 只能看到序列化的 `WriteApprovalSummary`：批准编号、操作
 | `nlink` | 拒绝多链接文件 | 硬链接可能来自同权限进程 | 是（与只读策略一致，直接拒绝） |
 | `realpath` 与逐段链接检查 | 拒绝链接、别名与项目外解析 | 祖先目录可在检查后被替换 | 是（拒绝），但不构成原子句柄 |
 
-结论：**批准有效性由内容哈希与文件身份共同决定**。
+结论：**批准有效性由内容哈希与文件身份共同决定**，判定按内容优先：
 
 - 内容相同、身份相同：`unchanged`，可以继续。
+- 内容不同：`changed`，拒绝；即使文件对象同时也变了，报告的首要事实仍是"内容被改"。
 - 内容相同、身份不同：`replaced`，拒绝并要求重新审阅。编辑器的原子保存（临时文件 + rename）、`git restore`/`git checkout` 同位文件都会替换文件对象；这是有意的保守规则：用户批准的是当时那个文件，不是一个恰好同字节的新文件。
-- 内容不同：`changed`，拒绝。
 - 身份不可用（平台不报告，批准记 `identity: null`）：只能依据内容哈希；该降级必须在批准摘要显示"身份不可用"，并在验收记录中写明，不能默认它是安全的。
 
 ### 3.2 判定顺序与主进程组合方式
 
-判定分两段，顺序固定：
+一次应用由 main 按固定顺序组合三层，每层只做自己的事：
 
-第一段是纯决策（不需要文件系统）：绑定 → 撤销 → 已用 → 过期 → 确认的 Diff 摘要 → 目标集合 → 目标状态。这个顺序也决定多个条件同时成立时返回哪个码：窗口绑定不符最先返回，不让外来窗口读到记录状态；撤销先于已用，已用先于过期。
+1. **记录与保留内容**：先按 `approvalId` 查批准记录；没有记录，或对应目标的待写入内容没有保留，返回 `APPROVAL_REQUIRED`；保留内容哈希不符返回 `APPROVAL_DIGEST_MISMATCH`；保留内容的目标集合不符返回 `APPROVAL_TARGET_MISMATCH`。
+2. **观察（只读，无副作用）**：main 以自己在目录册里的项目根为起点，对每个目标执行只读路径策略（拒绝绝对路径、`..`、隐藏与凭证类名称、链接、项目外解析、非普通文件与多链接），再用共享的有界稳定读取（上限 `targetBytes`）读取一次，读取前后核对 `size`/`mtimeMs`/`ino` 一致，不一致记 `unstable`；随后按 §3.1 得出每个目标的 `changed`/`replaced`/`missing` 等状态与内容哈希、文件身份。
+3. **纯判定**：拿观察结果做判定，顺序是 绑定 → 撤销 → 已用 → 过期 → 确认的 Diff 摘要 → 目标集合 → 目标状态。这个顺序也决定多个条件同时成立时返回哪个码：窗口绑定不符最先返回，不让外来窗口读到记录状态；撤销先于已用，已用先于过期。
 
-第二段是观察：main 以自己在目录册里的项目根为起点，对每个目标执行只读路径策略（拒绝绝对路径、`..`、隐藏与凭证类名称、链接、项目外解析、非普通文件与多链接），再用共享的有界稳定读取（上限 `targetBytes`）读取一次，读取前后核对 `size`/`mtimeMs`/`ino` 一致，不一致记 `unstable`；随后比较内容哈希与文件身份。
-
-两段之间没有"检查过就不用再查"的缓存：每次应用都必须重新观察。全部目标 `unchanged` 才允许进入写入阶段，并把批准标记为 `consumed`。
+观察必须发生在判定之前，因为判定需要观察结果；观察本身不改任何东西，所以先观察不构成授权。两段之间没有"检查过就不用再查"的缓存：每次应用都必须重新观察。全部目标 `unchanged` 才允许进入写入阶段，并把批准标记为 `consumed`。
 
 失败返回的对象是固定的：
 
@@ -157,7 +157,7 @@ renderer 只能看到序列化的 `WriteApprovalSummary`：批准编号、操作
 main 为每份写后结果保留追加式变更日志，记录四类：
 
 - `intent`：准备写某个目标，记批准编号、路径与 `beforeSha256`；这是"已经开始"的唯一证据。
-- `applied`：写入后重新读取的结果，记 `afterSha256`、实际观察到的 `observedSha256` 与 `verification`（`verified`/`unverified`）。
+- `applied`：写入后重新读取的结果，记 `afterSha256`、实际观察到的 `observedSha256`、`observedIdentity`（写入后字节落在哪个文件对象上）与 `verification`（`verified`/`unverified`）。
 - `failed`：该目标没有写成，记固定失败码（`WRITE_FAILED`、`VERIFY_FAILED`、`CANCELLED`、`RECOVERY_CONFLICT`、`UNKNOWN`）。
 - `recovery`：后来的恢复动作，记 `restore`/`preserve`/`already_restored` 与当时观察到的哈希。
 
@@ -210,7 +210,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 1. 该目标必须有本批准的 `applied` 记录；没有记录的目标一律进 `outOfScope`，不恢复。
 2. 当前观察结果等于 `before`（`unchanged`）→ `already_restored`，不做任何事。
-3. 当前观察结果等于 `after`（字节与哈希都相同，且批准与观察两侧都记录了文件身份时身份也相同）→ `restore`，可以写回 `before`。
+3. 当前观察结果等于 `after`（字节与哈希都相同），并且当前文件身份等于 `applied` 记录里的 `observedIdentity`（任一侧为 `null` 时不做身份比较）→ `restore`，可以写回 `before`。这里比较的是**写入后**的身份，不是批准时的写入前身份：`applied` 记录保存的是这次写入实际落到的文件对象，因此"临时文件 + rename"这种替换对象的写法不会让恢复永远落进冲突。
 4. 其余情况（内容不同、文件缺失、同名重建、类型改变、链接、无法读取、读取不稳定）→ `conflict`，保留现场并要求人工处理。
 
 判定依赖内容哈希与文件身份而不是时间戳：用户"只是保存、内容没变、文件对象也没变"（例如只更新时间戳）不会造成假冲突；内容变了或文件被同名重建才会。恢复前同样要重新观察目标，不能复用批准时的观察结果。
@@ -248,7 +248,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 ## 7. 负向探针矩阵（本票已执行）
 
-[探针测试](../../tests/contract/write-approval.test.ts)共 79 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
+[探针测试](../../tests/contract/write-approval.test.ts)共 83 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
 
 | 组 | 输入 | 期望 | 位置 |
 | --- | --- | --- | --- |
@@ -256,9 +256,9 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 | 路径语法 | `../`、绝对路径、盘符、UNC、空组件、尾点、NTFS ADS | schema 解析失败 | 同上 |
 | 目标观察 | 未变、同尺寸改动、增长、截断、读取期间被改、移走、目录、符号链接、硬链接、隐藏凭证名、超预算、同名重建 | `unchanged`/`changed`/`unstable`/`missing`/`not_regular_file`/`link_not_allowed`/`unreadable`/`too_large`/`replaced` | `target observation` |
 | 批准有效性 | 已消费、已撤销、已过期、六种绑定不符、Diff 摘要不符、目标集合不符 | 对应 `APPROVAL_*` 拒绝码 | `write approval decision` |
-| 整体拒绝 | 两个目标中第二个被改、被删或被同名重建 | 整份拒绝，`targets` 只列异常目标；另一个目标的判定结果仍为未写 | 同上 |
+| 整体拒绝 | 两个目标中第二个被改、被删或被同名重建（含两目标重建探针） | 整份拒绝，`targets` 只列异常目标；另一个目标的判定结果仍为未写 | 同上 |
 | 时间容错 | 只改 mtime、字节与身份不变 | 仍然批准 | 同上 |
-| 内容保留 | 缺失、哈希不符、多余目标、完整匹配 | `APPROVAL_REQUIRED`/`APPROVAL_DIGEST_MISMATCH`/`APPROVAL_TARGET_MISMATCH`/通过 | 同上 |
+| 内容保留 | 缺失、哈希不符、多余目标、重复目标、完整匹配 | `APPROVAL_REQUIRED`/`APPROVAL_DIGEST_MISMATCH`/`APPROVAL_TARGET_MISMATCH`/通过 | 同上 |
 | 撤销与完成 | 撤销记录、标记完成后再次应用 | schema 复验通过；`APPROVAL_REVOKED`/`APPROVAL_CONSUMED` | 同上 |
 | 逐路径结果 | 无记录、已校验、未校验、失败、只有 `intent`、恢复完成、恢复冲突 | `unchanged`/`applied`/`verification_failed`/`failed`/`unknown`/`restored`/`failed(RECOVERY_CONFLICT)` | `write outcomes` |
 | 恢复 | 当前等于 `after`、等于 `before`、用户改动、文件被删、类型改变、身份不同、未应用目标、重复计划 | `restore`/`already_restored`/`conflict`/`outOfScope` | `recovery planning` |
@@ -270,7 +270,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 - "拒绝对象通过 schema 复验"只对已用/撤销/过期三个生命周期码调用 `WriteApprovalRejectionSchema.safeParse`；其余拒绝码断言具体 `code` 与目标状态。
 - "整体拒绝"里"另一个目标不写"是判定结果断言：本票没有写路径，无法观测磁盘副作用。
 - "恢复"的重复计划是计划层幂等：两次 `planRecovery` 之间测试手工把文件写回 `before`，验证判定为 `already_restored`；执行层幂等留 #20。
-- "能力关闭"是文本级门槛：扫描 13 个写函数名、`FileHandle.write` 调用与 `open(...,'w')` 形式，按文件整体放行四个既有写入文件，不检查这些文件的写入目的地；它证明"没有出现新的写调用字面量"，不是沙箱证明，也不检查运行时动态构造的文件名。
+- "能力关闭"是文本级门槛：扫描 15 个写函数名、`FileHandle.write` 调用与 `open(...,'w')` 形式，按文件整体放行四个既有写入文件，不检查这些文件的写入目的地；它证明"没有出现新的写调用字面量"，不是沙箱证明，也不检查运行时动态构造的文件名。
 
 未覆盖、明确留待后续：真实 Electron 用户流程里的批准与拒绝（#19）、真实磁盘写入后的停止与崩溃（#20）、Windows 人工验收（#19/#20 另记）、真实 Provider（与本票无关）。这些是 `NOT_RUN`，不以本轮 Contract 结果顶替。
 
@@ -306,7 +306,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 1. **批准存储与保留内容**：主进程内存或 `userData` 下的独立存储，键为 `approvalId`；应用前必须重新核对保留内容哈希。
 2. **批准记录的持久化**：`consumed`、`appliedAt`、`revoked`/`revocationReason` 的写入者与时机；窗口关闭与会话新修订号是默认撤销触发点。
 3. **renderer 确认请求的形状**：只允许 `{ approvalId, diffDigest }` 一类最小载荷，main 重新读取自己的记录；renderer 不提交目标、哈希、路径或"已批准"。
-4. **落盘原语与窗口压缩**：临时文件 + rename、写前重读、独占句柄的取舍与失败语义；必须说明核对到写入之间的窗口如何被压缩或检测。
+4. **落盘原语与窗口压缩**：临时文件 + rename、写前重读、独占句柄的取舍与失败语义；必须说明核对到写入之间的窗口如何被压缩或检测。注意 rename 会替换文件对象，所以 `applied` 记录必须保存写入后的 `observedIdentity`，恢复比较的是它。
 5. **变更日志的存放与保留**：位置、格式、容量；未解决的 `unknown` 与冲突记录不得被淘汰。
 6. **恢复的执行入口**：恢复请求字段、逐目标选择、执行期停止语义与恢复自身的副作用记录。
 7. **部分写入后的自动检查**：写入后重读、哈希核对与失败码映射的实现位置。
@@ -315,7 +315,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 2026-10-27 在 `docs/issue18-write-authorization`（自 `origin/main` `b93d8e9`）执行：
 
-- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 79/79 通过。
+- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 83/83 通过。
 - 受影响既有测试：`egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` 共 123 项通过（共享读取重构未改变行为）。
 - `pnpm typecheck`、`pnpm test:contract:types` 通过；新文件 ESLint 0 问题；Prettier 检查通过。
 - 完整 `pnpm check` 与 `pnpm verify:repository` 记录见[验证记录](../testing/issue18-verification.md)；本文件的证据范围仅到 Contract Tests，不代表写入功能已实现。

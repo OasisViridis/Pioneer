@@ -124,6 +124,15 @@ export async function observeWriteTarget(
     sha256: digest(read.buffer.subarray(0, read.bytesRead)),
   };
   const identity = identityOf(read.before);
+  // Content is the primary signal: a different byte stream is `changed` even
+  // when the file object also changed. Only identical content with a different
+  // file object is `replaced`.
+  const unchanged =
+    observed.bytes === target.before.bytes &&
+    observed.sha256 === target.before.sha256;
+  if (!unchanged) {
+    return { path: target.path, state: 'changed', observed, identity };
+  }
   if (
     target.identity !== null &&
     identity !== null &&
@@ -131,15 +140,7 @@ export async function observeWriteTarget(
   ) {
     return { path: target.path, state: 'replaced', observed, identity };
   }
-  const unchanged =
-    observed.bytes === target.before.bytes &&
-    observed.sha256 === target.before.sha256;
-  return {
-    path: target.path,
-    state: unchanged ? 'unchanged' : 'changed',
-    observed,
-    identity,
-  };
+  return { path: target.path, state: 'unchanged', observed, identity };
 }
 
 /** Observes the whole approved target set in approval order. */
