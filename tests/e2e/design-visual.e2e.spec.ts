@@ -61,8 +61,8 @@ test('reviewed Windows application pixels: normal, narrow, long text, focus and 
       exact: true,
     });
     await draft.fill('长文本验证：换行、可见焦点、减少动态效果。'.repeat(30));
-    await draft.press('Tab');
-    await draft.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Shift+Tab');
     await expect(draft).toBeFocused();
     await expect(page.locator('.save-status')).toHaveText('已保存到本机');
     await expectNoOverflow(page);

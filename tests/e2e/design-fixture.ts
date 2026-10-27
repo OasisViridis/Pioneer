@@ -8,7 +8,10 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import type { PioneerDesktopApi } from '../../apps/desktop/src/shared/contracts/ipc';
-import { SessionStateRecordSchema } from '../../apps/desktop/src/shared/session-state';
+import {
+  SessionStateRecordSchema,
+  SESSION_STATE_VERSION,
+} from '../../apps/desktop/src/shared/session-state';
 import {
   initialSessionWorkspaceState,
   sessionWorkspaceReducer,
@@ -62,7 +65,12 @@ export async function designApp(info: TestInfo) {
     });
     await writeFile(
       path.join(userData, 'pioneer-session-state.json'),
-      JSON.stringify(SessionStateRecordSchema.parse({ version: 5, state })),
+      JSON.stringify(
+        SessionStateRecordSchema.parse({
+          version: SESSION_STATE_VERSION,
+          state,
+        }),
+      ),
     );
     app = await launch();
     page = await app.firstWindow();

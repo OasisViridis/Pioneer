@@ -28,8 +28,8 @@ test('current Hazel conversation supports narrow windows, long text, keyboard fo
       30,
     );
     await draft.fill(longText);
-    await draft.press('Tab');
-    await draft.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Shift+Tab');
     await expect(draft).toBeFocused();
     expect(await draft.evaluate((node) => node.matches(':focus-visible'))).toBe(
       true,
