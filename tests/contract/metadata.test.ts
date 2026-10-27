@@ -40,7 +40,7 @@ describe('project metadata package technology detection', () => {
         Promise.resolve({
           mtime: new Date('2026-09-13T00:00:00.000Z'),
           isDirectory: () => path === project,
-          isFile: () => path === packagePath,
+          isFile: () => path === packagePath || path.endsWith('README.md'),
         }),
       access: () => Promise.resolve(),
     };
@@ -56,5 +56,48 @@ describe('project metadata package technology detection', () => {
       'zod',
     ]);
     expect(result.hasGitRepository).toBe(false);
+  });
+
+  it('renders a poster summary without markdown or HTML source', async () => {
+    const root = resolve('workspace');
+    const project = join(root, 'gamma-app');
+    const packagePath = join(project, 'package.json');
+    const readmePath = join(project, 'README.md');
+    const packageText = JSON.stringify({ name: 'gamma-app' });
+    const readme = [
+      '<!-- internal banner comment -->',
+      '# gamma',
+      '',
+      '> **Gamma workbench** · 为本地任务设计的桌面工作区',
+      '> 第二行引用',
+      '',
+      '<div align="center">',
+      '  <picture>raw html block</picture>',
+      '</div>',
+    ].join('\n');
+
+    const fs: CatalogFs = {
+      readdir: () => Promise.resolve([]),
+      realpath: (path) => Promise.resolve(path),
+      readTextPrefix: (path) => {
+        if (path.endsWith('README.md')) return Promise.resolve(readme);
+        if (path.endsWith('package.json')) return Promise.resolve(packageText);
+        return Promise.reject(missing());
+      },
+      stat: (path) =>
+        Promise.resolve({
+          mtime: new Date('2026-09-13T00:00:00.000Z'),
+          isDirectory: () => path === project,
+          isFile: () => path === packagePath || path.endsWith('README.md'),
+        }),
+      access: () => Promise.resolve(),
+    };
+
+    const result = await readProjectMetadata(project, fs, root);
+
+    expect(result.description).toBe(
+      'Gamma workbench · 为本地任务设计的桌面工作区 第二行引用',
+    );
+    expect(result.description ?? '').not.toMatch(/\*\*|^>|<!--|<div/);
   });
 });
