@@ -3,6 +3,12 @@ import type {
   RunAuthorizeReply,
   RunEventBatch,
 } from '../../shared/contracts/run-ipc';
+import {
+  MAX_SESSION_RUN_RESULT,
+  type SessionRunRecord,
+  type SessionRunStatus,
+} from '../../shared/contracts/session-run-history';
+import type { EgressCandidate } from '../../shared/contracts/egress';
 
 /**
  * Per-session run view state for the workbench. The five user-visible
@@ -45,7 +51,14 @@ export interface RunPort {
     projectId: string;
     expectedRevision: number;
     task: string;
+    materials: string[];
   }): Promise<RunAuthorizeReply>;
+  listRunMaterials(request: {
+    projectId: string;
+  }): Promise<
+    | { ok: true; materials: EgressCandidate[] }
+    | { ok: false; code: 'INVALID_REQUEST' }
+  >;
   startRun(request: {
     sessionId: string;
     projectId: string;
@@ -217,10 +230,27 @@ const IDLE_STATE: RunViewState = {
 };
 
 /** Tiny per-session store; the workbench reads it via useSyncExternalStore. */
+interface RunMeta {
+  task: string;
+  startedAt: string;
+  stopRequestedAt: string | null;
+  endedAt: string | null;
+  status: SessionRunStatus | null;
+  failureCode: string | null;
+  resultText: string;
+  truncated: boolean;
+  recorded: boolean;
+}
+
 export class RunViewStore {
   private readonly states = new Map<string, RunViewState>();
   private readonly listeners = new Set<() => void>();
   private readonly lastSeqByRun = new Map<string, number>();
+  private readonly runMeta = new Map<string, RunMeta>();
+  private readonly terminalRecorders = new Map<
+    string,
+    (record: SessionRunRecord) => void
+  >();
   private port: RunPort;
   private batchUnsubscribe: (() => void) | null = null;
   private readonly boundSessions = new Set<string>();
@@ -269,6 +299,7 @@ export class RunViewStore {
     if (batch.page.gap) {
       this.update(sessionId, { omittedHistory: true });
     }
+    this.captureRunMeta(identity.runId, fresh);
     this.applyEvents(sessionId, fresh);
     const status = batch.page.status;
     const terminal =
@@ -277,6 +308,7 @@ export class RunViewStore {
       status,
       phase: terminal ? 'terminal' : this.get(sessionId).phase,
     });
+    if (terminal) this.recordTerminal(sessionId, identity.runId);
     this.advanceCursor(identity.runId, batch.page.nextAfterSeq);
     await this.port.acknowledgeRunPage({
       sessionId: identity.sessionId,
@@ -285,6 +317,69 @@ export class RunViewStore {
       revision: identity.revision,
       afterSeq: batch.page.nextAfterSeq,
     });
+  }
+
+  /** Captures the durable task/result summary while wire events are fresh. */
+  private captureRunMeta(runId: string, events: RunEvent[]): void {
+    const meta = this.runMeta.get(runId);
+    if (meta === undefined) return;
+    for (const event of events) {
+      const body = event.body;
+      switch (body.type) {
+        case 'run.accepted':
+        case 'run.started':
+          if (meta.startedAt.length === 0) meta.startedAt = event.at;
+          break;
+        case 'text.delta': {
+          if (meta.resultText.length >= MAX_SESSION_RUN_RESULT) {
+            meta.truncated = true;
+            break;
+          }
+          const remaining = MAX_SESSION_RUN_RESULT - meta.resultText.length;
+          const text = body.text.slice(0, remaining);
+          if (text.length < body.text.length) meta.truncated = true;
+          meta.resultText += text;
+          break;
+        }
+        case 'run.stop_requested':
+          meta.stopRequestedAt ??= event.at;
+          break;
+        case 'run.completed':
+          meta.status = 'completed';
+          meta.endedAt = event.at;
+          break;
+        case 'run.stopped':
+          meta.status = 'stopped';
+          meta.endedAt = event.at;
+          break;
+        case 'run.failed':
+          meta.status = 'failed';
+          meta.failureCode = body.code;
+          meta.endedAt = event.at;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  private recordTerminal(sessionId: string, runId: string): void {
+    const meta = this.runMeta.get(runId);
+    if (meta === undefined || meta.recorded || meta.status === null) return;
+    meta.recorded = true;
+    const record: SessionRunRecord = {
+      runId,
+      task: meta.task,
+      status: meta.status,
+      failureCode: meta.failureCode,
+      startedAt: meta.startedAt || new Date().toISOString(),
+      endedAt: meta.endedAt ?? new Date().toISOString(),
+      stopRequestedAt: meta.stopRequestedAt,
+      resultText: meta.resultText,
+      truncated: meta.truncated,
+    };
+    this.terminalRecorders.get(sessionId)?.(record);
+    this.runMeta.delete(runId);
   }
 
   /**
@@ -319,12 +414,19 @@ export class RunViewStore {
     });
   }
 
+  async materials(projectId: string): Promise<EgressCandidate[]> {
+    const reply = await this.port.listRunMaterials({ projectId });
+    return reply.ok ? reply.materials : [];
+  }
+
   async launch(input: {
     sessionId: string;
     projectId: string;
     revision: number;
     task: string;
+    materials: string[];
     summaryText?: string;
+    onTerminal?: (record: SessionRunRecord) => void;
   }): Promise<void> {
     this.ensureBatchListener();
     if (this.boundSessions.has(input.sessionId)) return;
@@ -344,6 +446,7 @@ export class RunViewStore {
         projectId: input.projectId,
         expectedRevision: input.revision,
         task: input.task,
+        materials: input.materials,
       });
       if (!authorization.ok) {
         this.update(input.sessionId, {
@@ -368,6 +471,22 @@ export class RunViewStore {
         return;
       }
       this.lastSeqByRun.delete(started.runId);
+      this.runMeta.set(started.runId, {
+        task: input.task,
+        startedAt: '',
+        stopRequestedAt: null,
+        endedAt: null,
+        status: null,
+        failureCode: null,
+        resultText: '',
+        truncated: false,
+        recorded: false,
+      });
+      if (input.onTerminal !== undefined) {
+        this.terminalRecorders.set(input.sessionId, input.onTerminal);
+      } else {
+        this.terminalRecorders.delete(input.sessionId);
+      }
       this.update(input.sessionId, {
         phase: 'active',
         runId: started.runId,
@@ -390,9 +509,17 @@ export class RunViewStore {
         afterSeq: 0,
       });
       if (page !== null) {
+        this.captureRunMeta(started.runId, page.events);
         this.applyEvents(input.sessionId, page.events);
         this.advanceCursor(started.runId, page.nextAfterSeq);
         this.update(input.sessionId, { status: page.status });
+        if (
+          page.status === 'completed' ||
+          page.status === 'failed' ||
+          page.status === 'stopped'
+        ) {
+          this.recordTerminal(input.sessionId, started.runId);
+        }
       }
     } finally {
       this.boundSessions.delete(input.sessionId);

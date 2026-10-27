@@ -50,7 +50,13 @@ export function Conversation({
               <summary>运行日志</summary>
               <div>
                 <h3>运行日志</h3>
-                <RunPanel session={session} project={session.project} />
+                <RunPanel
+                  session={session}
+                  project={session.project}
+                  onRunTerminal={(record) => {
+                    dispatch({ type: 'RECORD_RUN', id: session.id, record });
+                  }}
+                />
               </div>
             </details>
           </div>

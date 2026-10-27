@@ -26,7 +26,7 @@ main 是运行状态与授权的唯一写入者。它持有 SessionRecord、Proj
 | execution | 用户针对当前任务显式启动/确认，由 main 记录；任务或材料变更后需新授权 |
 | read-only | 仅单个项目的既定三个工具和本次批准材料；没有 shell、写入、浏览器或网络工具 |
 | model | 明确 provider id、model id、HTTPS endpoint（禁止凭证放 URL）、受限内存凭证引用。传输仅该 endpoint，重定向到其他 origin 拒绝，不探测环境/全局 auth 文件 |
-| egress | 明确提示文本及文件材料清单；每项具有 materialId、相对路径引用、SHA-256、字节数与允许用途。工具可读不代表结果可发往模型 |
+| egress | 明确提示文本及文件材料清单；每项具有相对路径（作为 materialId）、SHA-256、字节数；空清单表示不发送任何文件正文。工具可读不代表结果可发往模型 |
 | mutation / publication | P2 永远不授予；独立后续决策，不从 READY、模型或读权限派生 |
 
 授权 UI 在 #13 使用可信主窗口的固定动作；main 从自己的任务/目录/模型目录生成待确认摘要并保存确认记录，不接受 renderer 上传 `approved:true`、根路径、密钥、工具集合或任意 endpoint 作为已授权对象。权限不是防御已完全被控制的可信 renderer 的 OS 安全边界；不可信页面、子 frame、导航后的旧 sender 必须被 IPC 层拒绝。
@@ -93,7 +93,7 @@ main 串行 reducer 的处理顺序决定竞态：终态先提交，后到 stop 
 
 关闭 panel/tab 只隐藏内容，不停止 run；关闭真正所属窗口或 renderer 崩溃则撤销授权和订阅、请求停止。正常应用退出先走最多 5 秒停止等待；仍未收敛即由主进程强制结束并记 failed(STOP_TIMEOUT)，不能阻塞到无限等待或声称成功。窗口重建增加 epoch，旧窗口不能订阅/控制，新窗口通过 main 显式恢复只读历史访问。
 
-main 在 userData 中单独存有界运行日志，接受记录在 adapter start 前完成原子写入；终态也是原子写入。日志保存失败时不再接受新运行，当前 run 停止并显示错误。启动恢复凡没有已提交收敛终态的 run 一律标注 unknown/host_restarted 墓碑，清除所有授权、SDK、订阅和自动执行计划；只恢复历史材料。墓碑不占资源槽、不等待、不自动重跑。新 host 无旧资源，但必须提示上次未知并由用户重新授权新 run；绝不重放旧 request/grant。未知 schema/坏档沿用保留原件与显式恢复原则。
+main 在 userData 中单独存有界运行日志，接受记录在 adapter start 前完成原子写入；终态也是原子写入。终态记录另存首次停止请求的 main UTC 时间 `stopRequestedAt`（未请求停止为 null），供恢复后的历史展示与证据核对。日志保存失败时不再接受新运行，当前 run 停止并显示错误。启动恢复凡没有已提交收敛终态的 run 一律标注 unknown/host_restarted 墓碑，清除所有授权、SDK、订阅和自动执行计划；只恢复历史材料。墓碑不占资源槽、不等待、不自动重跑。新 host 无旧资源，但必须提示上次未知并由用户重新授权新 run；绝不重放旧 request/grant。未知 schema/坏档沿用保留原件与显式恢复原则。
 
 ## 5. 预算、背压与材料复检
 
@@ -108,6 +108,10 @@ schema 的 RUN_LIMITS 是默认硬上限，renderer/模型不得覆盖。单工�
 使用只读 handle 核对普通文件、identity/nlink/大小；读取前后 metadata 与清单 hash 不一致时不发布结果、使旧材料授权失效。每次访问、每个遍历条目及发布前复检 root、路径、链接、内容类型、预算与材料清单。执行期间变化即失败；这仍不能防御敌对进程反复替换祖先路径。P2 首条任务限定执行期间不变的隔离 fixture；敌对并发工作区需另行验证 OS 句柄隔离或不可变副本后才能支持。
 
 原始参数、OS/Provider 异常不进入事件；固定 code 对应 UI 文案。输出仅来自批准材料，已知本次凭证值及认证头内容必须在 main 投影前移除，不能依赖 renderer 日志脱敏。材料本身可能含敏感信息，只有明确清单和范围才构成外发授权；字符串脱敏不是任意秘密识别保证。未授权正文拒绝为 MATERIAL_NOT_ALLOWED，不静默扩大清单，不以只读权限绕过外发确认。
+
+授权时 main 对每个选中文件重新解析、复检普通单链接文件与大小，并记录 SHA-256；grant 绑定该清单。工具的 read_file 对未列入清单的文件或读取前 hash 已变化的文件返回 rejected/MATERIAL_NOT_ALLOWED，不发布正文；list_directory 只列出清单覆盖的文件与祖先目录，search_in_files 只搜索清单文件。清单为空时三个工具都不返回文件正文。renderer 只提交相对路径，绝对路径、`..`、敏感名和超过 64 KiB 的文件在授权阶段被拒绝。
+
+会话级历史与运行日志分开：终态后 renderer 把任务文本（最多 8,000 字符）和有界结果摘要（最多 16,384 字符）写入 session state v6，每会话最多 20 条；重启后按会话恢复。日志仍只保存 runId/taskDigest/状态/时间，不保存完整正文。v5 记录加载时补空历史，源文件在用户保存前不改写。
 
 ## 6. #13 验收清单与独立真实记录
 

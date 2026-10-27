@@ -1,4 +1,5 @@
 import type { ProjectSummary } from './catalog';
+import type { SessionRunRecord } from './session-run-history';
 import { LIBRARY_TAB_ID, SETTINGS_TAB_ID } from './tabs';
 
 export { LIBRARY_TAB_ID, SETTINGS_TAB_ID } from './tabs';
@@ -40,6 +41,8 @@ export interface Session extends Omit<
     LegacySession,
     'layout' | 'dockLayouts' | 'savedLayouts'
   > | null;
+  /** Bounded per-session run task/result history (Issue #13 item 1). */
+  runHistory: SessionRunRecord[];
 }
 export interface LegacySessionWorkspaceState extends Omit<
   SessionWorkspaceState,
