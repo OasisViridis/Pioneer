@@ -296,7 +296,7 @@
     "apps/desktop/design/component-examples.tsx": "eff2447744389d9dc531222ed992b64b92f91b34",
     "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "2d39cd9aeeeb35137a6813016a4cf1e8dce9fcf1",
     "apps/desktop/src/renderer/components/Conversation.tsx": "a79b55f282bc81c76ab9de900f94af7de3869539",
-    "apps/desktop/src/renderer/styles/app.css": "164cb6a3149f2b5bbe7e61a8cbbe6f11629cc69b",
+    "apps/desktop/src/renderer/styles/app.css": "cfce7cf1c923f3e0b4febc85b49a3d1e96b15658",
     "apps/desktop/src/renderer/styles/session-workbench.css": "19a4ba5407092232ee43d82bdbc278568f94b89c",
     "tests/e2e/design-mappings.e2e.spec.ts": "41968a251c1e44c8b29d1ffb704e6dd23815f7e6",
     "tests/e2e/p2-run.e2e.spec.ts": "08363406bd9129bc9891b472a6a95fd3ea952393",

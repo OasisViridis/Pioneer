@@ -91,6 +91,7 @@ input:focus-visible {
 }
 
 .library,
+.project-overview,
 .settings-view,
 .empty-state {
   margin-inline: auto;

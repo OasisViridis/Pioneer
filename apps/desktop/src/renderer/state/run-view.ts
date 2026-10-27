@@ -20,7 +20,7 @@ import {
   type SessionRunStatus,
 } from '../../shared/contracts/session-run-history';
 import type { EgressCandidate } from '../../shared/contracts/egress';
-import { approvedMaterials, capabilityCalls } from './run-panels';
+import { approvedMaterials, eventContextCalls } from './run-panels';
 
 /**
  * Per-session run view state for the workbench. The five user-visible
@@ -341,24 +341,40 @@ export class RunViewStore {
   }
 
   private async ingestBatch(batch: RunEventBatch): Promise<void> {
-    const identity = batch.page.identity;
-    const sessionId = this.sessionForRun(identity.runId);
+    const received = batch.page.identity;
+    const sessionId = this.sessionForRun(received.runId);
     if (sessionId === undefined) return;
     const state = this.get(sessionId);
-    // A page for any other run/session/revision never reaches this view.
-    if (state.runId !== identity.runId || state.revision !== identity.revision)
+    // Compare against the locally bound identity, not the page's own claim:
+    // a page reusing the runId/revision but naming another session or project
+    // must not reach this session's panels.
+    if (
+      state.runId !== received.runId ||
+      state.revision !== received.revision ||
+      state.projectId === null ||
+      received.sessionId !== sessionId ||
+      received.projectId !== state.projectId
+    )
       return;
-    const lastSeq = this.lastSeqByRun.get(identity.runId) ?? 0;
+    const identity = {
+      sessionId,
+      projectId: state.projectId,
+      runId: received.runId,
+      revision: received.revision,
+    };
+    let cursor = this.lastSeqByRun.get(identity.runId) ?? 0;
     let ignored = 0;
     const fresh: RunEvent[] = [];
     for (const event of batch.page.events) {
-      const verdict = classifyRunEvent(identity, lastSeq, event);
+      const verdict = classifyRunEvent(identity, cursor, event);
       if (verdict === 'duplicate') continue;
       if (verdict === 'foreign' || verdict === 'invalid') {
         ignored += 1;
         continue;
       }
+      if (verdict === 'gap') this.update(sessionId, { omittedHistory: true });
       fresh.push(event);
+      cursor = event.seq;
     }
     if (batch.page.gap) {
       this.update(sessionId, { omittedHistory: true });
@@ -482,15 +498,7 @@ export class RunViewStore {
     if (status !== 'completed' && status !== 'failed' && status !== 'stopped')
       return;
     const calls: RunContextCall[] =
-      state.context?.calls ??
-      capabilityCalls(state.events).map((call) => ({
-        callId: call.callId,
-        tool: call.tool as RunContextCall['tool'],
-        target: null,
-        state: call.state,
-        code: call.code,
-        at: call.at,
-      }));
+      state.context?.calls ?? eventContextCalls(state.events);
     record({
       identity: {
         sessionId,
@@ -521,15 +529,18 @@ export class RunViewStore {
     if (events.length === 0) return;
     this.update(sessionId, (state) => {
       const existing = new Set(state.events.map((event) => event.seq));
-      const merged = [
-        ...state.events,
-        ...events.filter((event) => !existing.has(event.seq)),
-      ]
+      const incoming = events.filter((event) => !existing.has(event.seq));
+      // The display cap drops the oldest events; say so instead of silently
+      // serving a short list as if it were complete.
+      const overflow =
+        state.events.length + incoming.length > MAX_DISPLAY_EVENTS;
+      const merged = [...state.events, ...incoming]
         .sort((a, b) => a.seq - b.seq)
         .slice(-MAX_DISPLAY_EVENTS);
       const failure = events.find((event) => event.body.type === 'run.failed');
       return {
         events: merged,
+        omittedHistory: state.omittedHistory || overflow,
         failureCode:
           failure?.body.type === 'run.failed'
             ? failure.body.code

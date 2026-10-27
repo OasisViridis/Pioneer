@@ -6,6 +6,8 @@ export const ReadOnlyToolNameSchema = z.enum([
   'search_in_files',
 ]);
 
+export type ReadOnlyToolName = z.infer<typeof ReadOnlyToolNameSchema>;
+
 const path = z.string().min(1).max(1024);
 
 export const ReadOnlyToolRequestSchema = z.discriminatedUnion('tool', [

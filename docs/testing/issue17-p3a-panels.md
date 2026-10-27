@@ -10,9 +10,10 @@
 | 范围 | 实现 |
 | --- | --- |
 | RunLog 面板 | 新增 Dock 面板 `runlog`（显示名“运行日志”），按 `seq` 排序展示当前 Run 的已校验事件；事件流仍在原 `run:events` 通道，不新增第二套总线。 |
-| 上下文面板 | 读取 main 的只读投影 `run:context`：授权清单、实际读取/扫描/变化/不可用状态与原因；未取得上下文时只显示已批准清单，并明确标注“不推断已读取”。 |
-| 能力面板 | 固定只读能力清单（`read_file`／`list_directory`／`search_in_files`），写入与命令显示“未提供”；按 `callId` 合并 `tool.requested`／`tool.result`，区分请求中、完成、拒绝、失败、取消与固定错误码。 |
-| 身份绑定 | 面板标题显示会话名、`runId`、`revision` 与状态；批次身份（runId／revision）不符时整页忽略；单条事件用 `classifyRunEvent` 校验 Session／Project／Run／Revision，foreign/invalid 事件跳过并计数提示，同批次合法事件照常按序落地。 |
+| 上下文面板 | 读取 main 的只读投影 `run:context`：授权清单、实际读取/扫描/变化/不可用状态与原因；未取得上下文时只显示已批准清单，并明确标注“不推断已读取”。上下文查询失败或记录过期时只显示失败原因，不回退成“已批准 · 未读取”。 |
+| 能力面板 | 固定只读能力清单（`read_file`／`list_directory`／`search_in_files`），写入与命令显示“未提供”；按 `callId` 合并 `tool.requested`／`tool.result`，区分请求中、完成、拒绝、失败、取消，失败/拒绝附中文解释与固定错误码。授权状态写作“本次运行已授权 · 只读”，不宣称授权过期后仍可用。 |
+| 材料事实 | 只有执行器在读取并校验哈希后调用的观察回调才把材料标为 `read`；后续工具失败不会把已确认的 `read` 降级为 `missing`，失败留在调用记录里。 |
+| 身份绑定 | 面板标题显示会话名、`runId`、`revision` 与状态；批次还要与本地绑定的 `sessionId`／`projectId` 相符，整页忽略只认 runId/revision 的伪造批次；单条事件用本地身份和逐事件游标调用 `classifyRunEvent`，gap 会标记省略历史，foreign/invalid 事件跳过并计数，同批次合法事件照常按序落地。 |
 | 修订 | 会话新增单调 `runRevision`；启动运行时使用 `runRevision + 1`，成功启动后回写；编辑草稿不改变历史 Run 的修订。 |
 | 重启摘要 | 终态 Run 的 `identity`、状态、工具清单、材料状态与调用记录以有界摘要存入会话（`lastRunView`）；只有 main 已确认的上下文才会被存为摘要，重启后面板显示同一 Session/Run 的摘要，并注明事件流未持久化。 |
 | 持久化 | 会话状态升到 v7：每个 `dock`、`savedDock`、`layoutHistory` 布局插入隐藏的 `runlog` 面板；v6、v5、v4 与 v1–v3 迁移路径都经过升级函数。旧文件在用户保存前不改写。 |
@@ -24,7 +25,7 @@
 
 - 事件 wire 仍为 `RunEvent.version = 1`，`tool.requested` 只含 `callId` 与工具名，`tool.result` 只含文本/截断或固定错误码；不反射工具参数。
 - 新查询 `run:context`（`RUN_IPC_CHANNELS.context`）复用可信 sender、窗口 epoch 与完整 Run 身份检查；找不到运行或身份不符返回 `RUN_NOT_FOUND`，不泄漏其他会话是否存在。
-- main 只在工具执行器确认后记录材料事实：`read_file` 成功记 `read`，`search_in_files` 校验哈希后记 `scanned`，哈希不符记 `changed`，路径/读取失败记 `missing` 并附固定原因码。
+- main 只在工具执行器确认后记录材料事实：`read_file` 成功由观察回调记 `read`，`search_in_files` 校验哈希后记 `scanned`，哈希不符记 `changed`，路径/读取失败记 `missing` 并附固定原因码；已确认的 `read` 不因后续失败被改写。
 - 目标路径只在 main 内归一化为项目相对路径后才回传；绝对路径、`..`、敏感名段与空路径返回 `null`。
 - `RunContext` / `RunSnapshot` 使用严格 Zod schema 与长度上限（材料 64、调用 32），未知字段拒绝。
 
@@ -36,16 +37,16 @@
 | --- | --- |
 | `pnpm --filter @pioneer/desktop typecheck` | PASS（无错误输出） |
 | `pnpm test:contract:types` | PASS |
-| `pnpm test:contract` | PASS：38 文件 / 376 测试（含新增 `run-context`、`run-panels`、run-manager 上下文投影与取消/脱敏用例、v6→v7 迁移、reducer 修订与摘要用例） |
+| `pnpm test:contract` | PASS：38 文件 / 381 测试（含新增 `run-context`、`run-panels`、run-manager 上下文投影与取消/脱敏用例、v6→v7 迁移、reducer 修订与摘要用例） |
 | `pnpm verify:repository` | PASS：6 测试 |
 | `pnpm exec eslint apps/desktop/src tests/contract` | PASS |
 | `pnpm build:desktop` | PASS（Electron Forge 打包完成） |
 | `pnpm exec playwright test --config tests/e2e/playwright.config.ts tests/e2e/p2-run.e2e.spec.ts tests/e2e/p3-panels.e2e.spec.ts` | PASS：12/12（P2 5 + P3 7），24.0s |
-| `pnpm check` | PASS（exit 0）：design:check、format、lint、typecheck、Contract 376/376、Prototype 210/210、Real Electron 34/34、package smoke |
+| `pnpm check` | PASS（exit 0）：design:check、format、lint、typecheck、Contract 381/381、Prototype 210/210、Real Electron 34/34、package smoke |
 
 补充说明：`pnpm check` 的输出包含改动的 `contract`、`prototype`、`e2e` 与 package smoke；本记录不把 Contract 测试当作 Electron 证据，也不把受控适配器当作真实 Provider 证据。验证日志保存在本地 `logs/issue17-check-6.log`（`logs/` 被 `.gitignore` 忽略，不入库）。
 
-绑定提交：实现提交 `a7852af`（分支 `feat/issue17-p3a-panels`，基于 `main` `b93d8e9`），随后是独立审阅后的清理提交与设计证据哈希更新。上表门禁在工作树内容与 PR head 一致时执行；PR 页面记录最终 head SHA 与 CI 结果，本记录不复制会随提交变化的 SHA 链。
+绑定提交：实现提交 `a7852af`（分支 `feat/issue17-p3a-panels`，基于 `main` `b93d8e9`）；本轮代码审阅基线为 `f4dadd7`（修复前 PR head），修复提交与设计证据哈希更新随 PR 追加。独立审阅来源：仓库内独立 reviewer 两轮（首轮 2 P1、7 P2，增量复审确认修复）、ChatGPT 双轴审阅（[对话](https://chatgpt.com/c/6ae0a117-37e4-83e9-97fc-5660e61d5227)）、code-review 的 Standards / Spec 两轴。上表门禁在修复后的工作树上重跑，日志保存在本地 `logs/issue17-check-7.log`；PR 页面记录最终 head SHA 与 CI 结果。
 
 ## 4. Real Electron 证据
 

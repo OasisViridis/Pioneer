@@ -3,8 +3,11 @@ import { describe, expect, it } from 'vitest';
 import type { RunEvent } from '../../apps/desktop/src/shared/contracts/pioneer-run';
 import type { RunSnapshot } from '../../apps/desktop/src/shared/contracts/run-context';
 import {
+  callCodeText,
   callStateText,
   capabilityCalls,
+  eventContextCalls,
+  formatUtcTime,
   materialReasonText,
   materialStateText,
   toolLabel,
@@ -214,5 +217,22 @@ describe('run panel projections (#17)', () => {
     expect(materialReasonText('READ_FAILED')).toContain('失败');
     expect(toolLabel(null)).toBe('未知工具');
     expect(toolLabel('search_in_files')).toBe('搜索文本');
+  });
+
+  it('projects event calls without targets and formats shared copy', () => {
+    const calls = eventContextCalls([requested, succeeded]);
+    expect(calls).toEqual([
+      {
+        callId: 'call:1',
+        tool: 'read_file',
+        target: null,
+        state: 'succeeded',
+        code: null,
+        at: '2026-10-27T10:00:02.000Z',
+      },
+    ]);
+    expect(callCodeText('MATERIAL_NOT_ALLOWED')).toContain('批准清单');
+    expect(callCodeText('UNKNOWN_CODE')).toBe('UNKNOWN_CODE');
+    expect(formatUtcTime('2026-10-27T10:00:02.000Z')).toBe('10:00:02');
   });
 });

@@ -231,9 +231,7 @@ function migrateV6(input: unknown): SessionStateRecord {
     version: SESSION_STATE_VERSION,
     state: {
       ...old.state,
-      sessions: old.state.sessions.map((session) =>
-        upgradeSession(session as never),
-      ),
+      sessions: old.state.sessions.map((session) => upgradeSession(session)),
     },
   });
 }

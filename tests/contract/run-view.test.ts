@@ -250,6 +250,98 @@ describe('run view identity isolation', () => {
     expect(store.get(SESSION_ID).runId).toBe(RUN_ID);
   });
 
+  it('drops a page whose identity names another session or project', async () => {
+    const page = pageOf({
+      status: 'running',
+      events: sequence(1, 1),
+      lastSeq: 1,
+      nextAfterSeq: 1,
+      hasMore: false,
+    });
+    const port = createFakeRunPort({
+      getRunPage: page,
+      stopReply: { ok: true, status: 'running' },
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+    expect(store.get(SESSION_ID).events).toHaveLength(1);
+
+    port.emit({
+      page: { ...page, identity: { ...IDENTITY, sessionId: 'session:beta' } },
+    });
+    await flushBatches();
+    expect(store.get(SESSION_ID).events).toHaveLength(1);
+
+    port.emit({
+      page: { ...page, identity: { ...IDENTITY, projectId: 'project:beta' } },
+    });
+    await flushBatches();
+    expect(store.get(SESSION_ID).events).toHaveLength(1);
+    expect(store.get(SESSION_ID).runId).toBe(RUN_ID);
+  });
+
+  it('marks omitted history when a page skips sequence numbers', async () => {
+    const page = pageOf({
+      status: 'running',
+      events: sequence(1, 1),
+      lastSeq: 1,
+      nextAfterSeq: 1,
+      hasMore: false,
+    });
+    const port = createFakeRunPort({
+      getRunPage: page,
+      stopReply: { ok: true, status: 'running' },
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+
+    port.emit({
+      page: {
+        ...page,
+        events: sequence(3, 3),
+        lastSeq: 3,
+        nextAfterSeq: 3,
+      },
+    });
+    await flushBatches();
+
+    const state = store.get(SESSION_ID);
+    expect(state.events.map((event) => event.seq)).toEqual([1, 3]);
+    expect(state.omittedHistory).toBe(true);
+  });
+
+  it('reports omitted history when the display cap drops the oldest event', async () => {
+    const page = pageOf({
+      status: 'running',
+      events: sequence(1, 500),
+      lastSeq: 500,
+      nextAfterSeq: 500,
+      hasMore: false,
+    });
+    const port = createFakeRunPort({
+      getRunPage: page,
+      stopReply: { ok: true, status: 'running' },
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+    expect(store.get(SESSION_ID).events).toHaveLength(500);
+
+    port.emit({
+      page: {
+        ...page,
+        events: sequence(501, 501),
+        lastSeq: 501,
+        nextAfterSeq: 501,
+      },
+    });
+    await flushBatches();
+
+    const state = store.get(SESSION_ID);
+    expect(state.events).toHaveLength(500);
+    expect(state.events[0]?.seq).toBe(2);
+    expect(state.omittedHistory).toBe(true);
+  });
+
   it('counts foreign events as ignored and never applies their text', async () => {
     const page = pageOf({
       status: 'running',

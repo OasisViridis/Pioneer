@@ -217,7 +217,6 @@ function taskDigestOf(task: string): string {
  * record; the call log carries them instead.
  */
 const MATERIAL_REASON_BY_TOOL_CODE: Record<string, RunMaterialReason> = {
-  MATERIAL_NOT_ALLOWED: 'TRUNCATED',
   PATH_UNAVAILABLE: 'PATH_UNAVAILABLE',
   PATH_TYPE_NOT_ALLOWED: 'PATH_TYPE_NOT_ALLOWED',
   LINK_NOT_ALLOWED: 'LINK_NOT_ALLOWED',
@@ -897,16 +896,21 @@ export class RunManager {
     outcome: ToolOutcome,
   ): void {
     if (outcome.status === 'succeeded') {
-      if (request.tool === 'read_file' && target !== null)
-        this.trackMaterial(run, target, 'read');
+      // A successful read is already reported by the executor's observer,
+      // which fires only after the bytes were read and hash-checked. Inferring
+      // it here would also mark a replaced executor that never read anything.
       return;
     }
     if (outcome.status === 'failed') {
-      // A read that failed left no trustworthy content: keep the material
-      // visible but mark it unavailable instead of leaving it "approved".
+      // A later failure must not erase an earlier confirmed read: keep the
+      // read fact and let the call log carry the failure.
       if (request.tool === 'read_file' && target !== null) {
         const record = run.trackedMaterials.get(target);
-        if (record !== undefined && record.state !== 'changed') {
+        if (
+          record !== undefined &&
+          record.state !== 'read' &&
+          record.state !== 'changed'
+        ) {
           record.state = 'missing';
           record.reason = 'READ_FAILED';
         }

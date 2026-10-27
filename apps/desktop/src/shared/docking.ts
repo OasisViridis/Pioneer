@@ -103,7 +103,9 @@ export function addRunlogPanel(dock: LegacyDockShape): DockLayout {
   ];
   const column = columns.findIndex((entry) => entry.includes('capabilities'));
   const target = columns[column === -1 ? 0 : column];
-  if (target === undefined) return dock as DockLayout;
+  if (target === undefined) {
+    throw new Error('dock layout is missing its first column');
+  }
   const at = target.indexOf('capabilities');
   target.splice(at === -1 ? target.length : at + 1, 0, 'runlog');
   return {

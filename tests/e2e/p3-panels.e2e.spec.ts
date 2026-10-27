@@ -208,7 +208,7 @@ test('context panel shows only approved materials and marks the actually-read fi
       capabilities
         .locator('.capability-list > div', { hasText: '读取文件' })
         .locator('dd'),
-    ).toHaveText('可用 · 只读');
+    ).toHaveText('本次运行已授权 · 只读');
     await expect(capabilities.locator('.capability-call')).toHaveCount(1);
     await expect(capabilities.locator('.capability-state')).toHaveText(
       '已完成',

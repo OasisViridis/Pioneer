@@ -9,8 +9,10 @@ import type { SessionRunStatus } from '../../shared/contracts/session-run-histor
 import { runViews } from '../state/run-view-instance';
 import { describe, visibleStatus, type RunViewState } from '../state/run-view';
 import {
+  callCodeText,
   callStateText,
-  capabilityCalls,
+  eventContextCalls,
+  formatUtcTime,
   materialReasonText,
   materialStateText,
   toolLabel,
@@ -45,22 +47,17 @@ const SNAPSHOT_STATUS: Record<SessionRunStatus, string> = {
 
 function panelRun(session: Session, state: RunViewState): PanelRun {
   if (state.runId !== null) {
+    // When main cannot answer, do not fall back to the approved list: marking
+    // materials "未读取" would be a conclusion the query did not confirm.
+    const materials =
+      state.contextState === 'unavailable' ? [] : visibleMaterials(state);
     return {
       runId: state.runId,
       revision: state.revision,
       status: visibleStatus(state),
       tools: state.authorization?.tools ?? [],
-      materials: visibleMaterials(state),
-      calls:
-        state.context?.calls ??
-        capabilityCalls(state.events).map((call) => ({
-          callId: call.callId,
-          tool: call.tool as RunContextCall['tool'],
-          target: null,
-          state: call.state,
-          code: call.code,
-          at: call.at,
-        })),
+      materials,
+      calls: state.context?.calls ?? eventContextCalls(state.events),
       fromSnapshot: false,
       contextState: state.contextState,
     };
@@ -157,7 +154,9 @@ export function RunContextPanel({
           正在读取 main 的运行上下文…
         </p>
       ) : null}
-      {run.runId !== null && run.materials.length === 0 ? (
+      {run.runId !== null &&
+      run.contextState !== 'unavailable' &&
+      run.materials.length === 0 ? (
         <p className="metadata">本次运行没有批准任何外发材料。</p>
       ) : null}
       {run.materials.length > 0 ? (
@@ -177,7 +176,7 @@ export function RunContextPanel({
                 <p className="metadata">
                   {material.bytes} B · SHA-256 {material.sha256.slice(0, 12)}…
                   {material.readAt
-                    ? ` · ${material.state === 'scanned' ? '扫描于' : '读取于'} ${material.readAt.replace('T', ' ').slice(11, 19)} UTC`
+                    ? ` · ${material.state === 'scanned' ? '扫描于' : '读取于'} ${formatUtcTime(material.readAt)} UTC`
                     : ''}
                 </p>
                 {reason ? <p className="form-error">{reason}</p> : null}
@@ -236,8 +235,8 @@ export function RunCapabilitiesPanel({
               {run.runId === null
                 ? '尚未授权'
                 : authorized.includes(tool)
-                  ? '可用 · 只读'
-                  : '未授权'}
+                  ? '本次运行已授权 · 只读'
+                  : '本次未授权'}
             </dd>
           </div>
         ))}
@@ -280,7 +279,9 @@ export function RunCapabilitiesPanel({
               <p className="metadata">
                 {call.callId}
                 {call.target === null ? '' : ` · ${call.target}`}
-                {call.code === null ? '' : ` · ${call.code}`}
+                {call.code === null
+                  ? ''
+                  : ` · ${callCodeText(call.code)}（${call.code}）`}
               </p>
             </li>
           ))}
@@ -332,7 +333,7 @@ export function RunLogPanel({
               className={`run-event run-event--${display.tone}`}
             >
               <p className="run-event__meta metadata">
-                {`#${String(event.seq)} · ${event.at.replace('T', ' ').slice(11, 19)} UTC · ${event.source}`}
+                {`#${String(event.seq)} · ${formatUtcTime(event.at)} UTC · ${event.source}`}
                 {event.body.type === 'tool.result'
                   ? ` · ${event.body.result.status}`
                   : ''}
@@ -358,11 +359,13 @@ export function RunLogPanel({
             {run.calls.map((call) => (
               <li key={call.callId} className="run-event run-event--tool">
                 <p className="run-event__meta metadata">
-                  {`${call.callId} · ${call.at.replace('T', ' ').slice(11, 19)} UTC`}
+                  {`${call.callId} · ${formatUtcTime(call.at)} UTC`}
                 </p>
                 <span>
                   {`${toolLabel(call.tool)} · ${callStateText(call.state)}`}
-                  {call.code === null ? '' : ` · ${call.code}`}
+                  {call.code === null
+                    ? ''
+                    : ` · ${callCodeText(call.code)}（${call.code}）`}
                 </span>
               </li>
             ))}

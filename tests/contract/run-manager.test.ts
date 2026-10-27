@@ -23,8 +23,10 @@ import type {
   HarnessAdapterFactory,
 } from '../../apps/desktop/src/main/harness/adapter-seam';
 import { createControlledAdapterFactory } from '../../apps/desktop/src/main/harness/controlled-adapter';
-import type { ToolOutcome } from '../../apps/desktop/src/main/harness/read-only-tools';
-import { executeReadOnlyTool } from '../../apps/desktop/src/main/harness/read-only-tools';
+import {
+  executeReadOnlyTool,
+  type ToolOutcome,
+} from '../../apps/desktop/src/main/harness/read-only-tools';
 
 const webContentsId = 7;
 const windowEpoch = 3;
@@ -1785,5 +1787,76 @@ describe('P3-A cancelled tool call projection (#17)', () => {
       code: 'CANCELLED',
     });
     release();
+  });
+});
+
+describe('P3-A read fact survives a later failure (#17)', () => {
+  it('keeps the confirmed read state when a second read fails', async () => {
+    let calls = 0;
+    const { manager, projectRoot } = await createManager(
+      {
+        steps: [
+          {
+            action: 'tool',
+            request: {
+              tool: 'read_file',
+              arguments: { path: 'notes/readme.txt' },
+            },
+          },
+          {
+            action: 'tool',
+            request: {
+              tool: 'read_file',
+              arguments: { path: 'notes/readme.txt' },
+            },
+          },
+          { action: 'complete' },
+        ],
+      },
+      {
+        executeTool: async (root, request, signal, materials, observer) => {
+          calls += 1;
+          if (calls === 1) {
+            return executeReadOnlyTool(
+              root,
+              request,
+              signal,
+              materials,
+              observer,
+            );
+          }
+          return { status: 'failed', code: 'TOOL_FAILED' };
+        },
+      },
+    );
+    await mkdir(join(projectRoot, 'notes'), { recursive: true });
+    await writeFile(
+      join(projectRoot, 'notes', 'readme.txt'),
+      'fixture-answer',
+      'utf-8',
+    );
+    const { runId } = await launchRun(manager, {
+      materials: ['notes/readme.txt'],
+    });
+    await waitFor(() => {
+      const status = pageOf(manager, runId)?.status;
+      return status === 'completed' || status === 'failed';
+    });
+    const context = manager.getContext({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      ...binding,
+    });
+    expect(context).not.toBeNull();
+    expect(context?.materials[0]).toMatchObject({
+      path: 'notes/readme.txt',
+      state: 'read',
+    });
+    expect(context?.calls.map((call) => call.state)).toEqual([
+      'succeeded',
+      'failed',
+    ]);
   });
 });
