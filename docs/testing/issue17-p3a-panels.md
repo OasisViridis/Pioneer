@@ -43,9 +43,9 @@
 | `pnpm exec playwright test --config tests/e2e/playwright.config.ts tests/e2e/p2-run.e2e.spec.ts tests/e2e/p3-panels.e2e.spec.ts` | PASS：12/12（P2 5 + P3 7），24.0s |
 | `pnpm check` | PASS（exit 0）：design:check、format、lint、typecheck、Contract 376/376、Prototype 210/210、Real Electron 34/34、package smoke |
 
-补充说明：`pnpm check` 的输出包含改动的 `contract`、`prototype`、`e2e` 与 package smoke；本记录不把 Contract 测试当作 Electron 证据，也不把受控适配器当作真实 Provider 证据。验证日志保存在本地 `logs/issue17-check-4.log`（`logs/` 被 `.gitignore` 忽略，不入库）。
+补充说明：`pnpm check` 的输出包含改动的 `contract`、`prototype`、`e2e` 与 package smoke；本记录不把 Contract 测试当作 Electron 证据，也不把受控适配器当作真实 Provider 证据。验证日志保存在本地 `logs/issue17-check-6.log`（`logs/` 被 `.gitignore` 忽略，不入库）。
 
-绑定提交：实现提交 `a7852af`（分支 `feat/issue17-p3a-panels`，基于 `main` `b93d8e9`）；上表门禁在工作树内容与该提交一致时执行。证据文档随后单独提交（`b44e083`）：追加版本绑定行并把验证日志文件名从 `check-2` 更正为 `check-4`，不改变任何测试结论。
+绑定提交：实现提交 `a7852af`（分支 `feat/issue17-p3a-panels`，基于 `main` `b93d8e9`），随后是独立审阅后的清理提交与设计证据哈希更新。上表门禁在工作树内容与 PR head 一致时执行；PR 页面记录最终 head SHA 与 CI 结果，本记录不复制会随提交变化的 SHA 链。
 
 ## 4. Real Electron 证据
 
