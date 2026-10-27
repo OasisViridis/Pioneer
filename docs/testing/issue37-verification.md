@@ -4,7 +4,7 @@
 
 ## 当前交付边界
 
-代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后只读回填清单。**本票尚未完成**：Windows 基线还未经审阅，真实 Figma 回传与命名版本事件均未发生。不得用这份准备工作的 PR 自动关闭 #37。
+代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后只读回填清单。真实 Windows 候选已经逐张查看，并作为独立的[初始基线提案](../../tests/e2e/visual-baselines/README.md)提交供人审。**本票尚未完成**：基线尚未获得人类批准，真实 Figma 回传与命名版本事件均未发生。不得用这份准备工作的 PR 自动关闭 #37。
 
 S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook 接收器、scoped REST 凭证、Dev Resources 写入或 Code Connect 发布权益。当前连接工具未暴露 Webhook/Dev Resources REST 操作。S2 已合并，但实际路线是当前 Codex 会话 + 发布工具，并没有 `repository_dispatch` 事件消费者，也没有获准的无人值守模型执行环境。不能把一个只打印 payload 的 workflow 当作已接通 S2。
 
@@ -29,12 +29,12 @@ S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook �
 
 - Windows CI 固定 `windows-2025`，依赖由 lockfile 固定，Electron 44.2.0、Playwright 1.62.1。托管镜像仍会更新，因此截图旁记录并比较 ImageVersion、OS build、Electron/Chromium、字体 SHA-256、语言和 devicePixelRatio；漂移会失败，需要单独审阅。
 - 使用真实保存记录和确定的 Session ID，固定 renderer 时间、1440/900/640 × 1000 内容尺寸、DPR 1、Light、减少动态效果；等待本地字体加载和保存完成，不运行外部模型。截图断言关闭动画和光标闪烁。主进程真实定时器保持正常，避免冻结停止/保存逻辑。
-- `pnpm test:visual` 在独立 Windows job 中比较经审阅应用截图，`updateSnapshots: none`。缺图/环境记录时失败，不写入基线、不静默跳过。当前缺少基线是明确阻塞，首次 CI 不会全绿。
+- `pnpm test:visual` 在独立 Windows job 中比较固定应用截图，`updateSnapshots: none`。缺图/环境记录时失败，不写入基线、不静默跳过。初始提案已包含在本 PR，是否接受为正式基线由人工审阅决定；CI 通过只证明与提案一致。
 - 首次 PR 没有 `environment.txt` 时，quality 的视觉 job 先抓取候选再执行严格比较；缺少已审阅基线仍失败。这样无需先合并新 workflow 就能取到待审图。候选只上传，不写基线。后续 `visual-candidate.yml` 只能手动调度，调用 `pnpm design:visual:candidate`，输出到被忽略的 `test-output/visual/candidates`。它不会提交、发布或修改 `visual-baselines`。候选工作流成功只表示抓图成功。
 - 审阅人需检查正常/窄窗/长文本与焦点四张图及 `environment.txt`，把接受的文件通过单独 Diff 放入 `tests/e2e/visual-baselines/`，记录候选 run URL、源 SHA 和审阅结论。不能拿历史 Figma 导出或 Linux 图充当 Windows 基线。
 - 比较测试临时反色制造一个明显变化，要求同一基线断言失败；移除样式后必须再次通过。该预期失败也保留差异附件。比较工作流以 SHA 命名上传 HTML/JSON、expected/actual/diff 和失败 trace。
 
-真实 Windows 基线、故障注入产物和恢复通过证据尚待上述运行；测试文件存在不等于证据已取得。
+真实 Windows 候选来自 [run 130](https://github.com/OasisViridis/Pioneer/actions/runs/40447866725)，三种宽度及长文本/焦点截图齐全，已逐张目视检查。该次严格比较按预期拒绝缺失基线。加入提案后的故障注入与恢复结果以 PR 所列最终 SHA 的真实运行结果为准；测试文件存在不等于证据已取得。
 
 ## 合并后回填准备
 
@@ -62,7 +62,7 @@ pnpm design:delivery writeback-plan <PR编号> <已登记featureId>
 
 ## 验证记录
 
-本地 Linux 执行结果（复用已有 checkout 的依赖目录，不是干净 Windows 安装）：
+本地 Linux 初次执行结果（基于最初 main；复用已有 checkout 的依赖目录，不是干净 Windows 安装）：
 
 - `pnpm verify:repository`：6/6 通过。
 - `pnpm design:check`：token/映射/类型/素材检查及 51 项设计同步测试通过，含新增回填清单与旧 SHA/缺视觉 job/越界/无关 PR 反例。
@@ -70,5 +70,5 @@ pnpm design:delivery writeback-plan <PR编号> <已登记featureId>
 - `pnpm test:prototype`：通过；Prototype Tests 210/210，不是 Electron proof。
 - `pnpm check`：未通过；Contract Tests 351 通过、24 失败，失败集中在 `ipc`、`path-policy`、`scanner` 的 Windows 盘符路径假设。未改这些文件，也没有放宽断言。
 - `pnpm package:smoke`：Webpack 编译完成，但复用依赖中的 extract-zip 带有 win32 bsdtar 补丁，在 Linux 打包被拒绝；不能声称打包成功。
-- Playwright 实际入口发现 29 项行为测试（12 文件），视觉入口发现 1 项组合比较。新增行为用例尝试启动 Electron 失败，窗口用例因 max-failures 未运行；没有将 list 或 trace 生成当作 Real E2E 通过。
-- Windows CI、候选图审阅、真实 Figma 回填/事件：待执行。此记录不作为关闭 #37 的依据。
+- 最初 Playwright 入口发现 29 项行为测试（12 文件）；同步 main 移除意图功能后为 27 项（11 文件），视觉入口为 1 项组合比较。Linux 新增行为用例尝试启动 Electron 失败，窗口用例因 max-failures 未运行；没有将 list 或 trace 生成当作 Real E2E 通过。
+- Windows run 130 的仓库规范、设计同步、格式、lint、类型、Contract Tests 和 Prototype Tests 步骤通过，候选截图成功；其严格比较因缺少基线失败。新增基线提交及最终 Windows 全门禁结果记录在 [PR #51](https://github.com/OasisViridis/Pioneer/pull/51)。真实 Figma 回填/事件尚待接入。此记录不作为关闭 #37 的依据。
