@@ -36,7 +36,7 @@ const bytes = z
   .max(WRITE_APPROVAL_LIMITS.targetBytes);
 
 const RESERVED_DEVICE_NAME =
-  /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9]|conin\$|conout\$)(?:\.|$)/i;
+  /^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³]|conin\$|conout\$)(?:\.|$)/i;
 
 /**
  * Shape-only check: plain project-relative components with no traversal,
@@ -308,6 +308,8 @@ export const WriteChangeJournalRecordSchema = z.discriminatedUnion('kind', [
       path: WriteTargetPathSchema,
       afterSha256: sha256,
       observedSha256: sha256,
+      /** Identity the applied bytes landed on; null when the platform has none. */
+      observedIdentity: WriteFileIdentitySchema.nullable(),
       verification: z.enum(['verified', 'unverified']),
       at: z.iso.datetime(),
     })

@@ -401,6 +401,16 @@ describe('target observation', () => {
     });
   });
 
+  it('reports a file whose content and identity both changed as changed', async () => {
+    const target = await seed('src/index.ts', 'content\n');
+    await rm(join(projectRoot, 'src/index.ts'));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    await writeFile(join(projectRoot, 'src/index.ts'), 'different content\n');
+    expect((await observeWriteTarget(projectRoot, target)).state).toBe(
+      'changed',
+    );
+  });
+
   it('reports a deleted and re-created file with identical bytes as replaced', async (context) => {
     const target = await seed('src/index.ts', 'content\n');
     await rm(join(projectRoot, 'src/index.ts'));
@@ -649,17 +659,26 @@ describe('write approval decision', () => {
   it('rejects retained content for an unapproved target', () => {
     const approval = approvalOf([targetOf('src/a.ts', 'a', 'a2')]);
     const decision = checkRetainedPostImages(approval, [
-      { path: 'src/a.ts', sha256: approval.targets[0]?.after.sha256 ?? '' },
+      { path: 'src/a.ts', sha256: sha256Of('a2') },
       { path: 'src/b.ts', sha256: sha256Of('b') },
     ]);
     expect(rejectionOf(decision).error.code).toBe('APPROVAL_TARGET_MISMATCH');
   });
 
-  it('accepts retained content that matches every approved target', () => {
+  it('rejects duplicated retained content for one target', () => {
+    const approval = approvalOf([targetOf('src/a.ts', 'a', 'a2')]);
+    const decision = checkRetainedPostImages(approval, [
+      { path: 'src/a.ts', sha256: sha256Of('a2') },
+      { path: 'src/a.ts', sha256: sha256Of('a2') },
+    ]);
+    expect(rejectionOf(decision).error.code).toBe('APPROVAL_TARGET_MISMATCH');
+  });
+
+  it('accepts retained content whose digest matches the reviewed bytes', () => {
     const approval = approvalOf([targetOf('src/a.ts', 'a', 'a2')]);
     expect(
       checkRetainedPostImages(approval, [
-        { path: 'src/a.ts', sha256: approval.targets[0]?.after.sha256 ?? '' },
+        { path: 'src/a.ts', sha256: sha256Of('a2') },
       ]),
     ).toEqual({ ok: true });
   });
@@ -741,6 +760,26 @@ describe('write approval decision', () => {
     ]);
   });
 
+  it('names only the replaced target in a two-target approval', async () => {
+    const first = await seed('src/a.ts', 'a\n');
+    const replaced: WriteTarget = {
+      ...(await seed('src/b.ts', 'b\n')),
+      identity: { fileId: 'another-file-id', birthtimeMs: 1 },
+    };
+    const observations = await observeWriteTargets(projectRoot, [
+      first,
+      replaced,
+    ]);
+    const decision = evaluateWriteApproval(
+      approvalOf([first, replaced]),
+      contextOf(),
+      observations,
+    );
+    expect(rejectionOf(decision).error.targets).toEqual([
+      { path: 'src/b.ts', state: 'replaced' },
+    ]);
+  });
+
   it('rejects the whole approval when one target disappeared', async () => {
     const first = await seed('src/a.ts', 'a\n');
     const second = await seed('src/b.ts', 'b\n');
@@ -819,6 +858,7 @@ describe('write outcomes', () => {
         ? {
             afterSha256: sha256Of('after'),
             observedSha256: sha256Of('after'),
+            observedIdentity: null,
             verification: 'verified',
           }
         : {}),
@@ -913,13 +953,18 @@ describe('write outcomes', () => {
 });
 
 describe('recovery planning', () => {
-  function appliedRecord(approval: WriteApproval, path: string) {
+  function appliedRecord(
+    approval: WriteApproval,
+    path: string,
+    observedIdentity: WriteFileIdentity | null = null,
+  ) {
     return WriteChangeJournalRecordSchema.parse({
       kind: 'applied',
       approvalId: approval.approvalId,
       path,
-      afterSha256: sha256Of('after'),
-      observedSha256: sha256Of('after'),
+      afterSha256: sha256Of(`after\n`),
+      observedSha256: sha256Of(`after\n`),
+      observedIdentity,
       verification: 'verified',
       at: new Date(AT + 2_000).toISOString(),
     });
@@ -948,6 +993,31 @@ describe('recovery planning', () => {
       },
     ]);
     expect(plan.conflicts).toEqual([]);
+  });
+
+  it('restores a file whose object changed when the run wrote it', async () => {
+    const target = await seed('src/index.ts', 'before\n');
+    // A temp-file + rename writer replaces the file object; the applied record
+    // records the identity the bytes landed on, not the pre-image identity.
+    await writeFile(join(projectRoot, 'src/index.ts.tmp'), 'after\n');
+    await rename(
+      join(projectRoot, 'src/index.ts.tmp'),
+      join(projectRoot, 'src/index.ts'),
+    );
+    const appliedIdentity = await identityFor('src/index.ts');
+    const actual: WriteTarget = { ...target, after: stateOf('after\n') };
+    const approval = approvalOf([actual]);
+    const observations = await observeWriteTargets(projectRoot, [actual]);
+    const plan = planRecovery({
+      approval,
+      records: [appliedRecord(approval, 'src/index.ts', appliedIdentity)],
+      observations,
+    });
+    expect(plan.actions[0]).toMatchObject({
+      path: 'src/index.ts',
+      action: 'restore',
+      state: 'changed',
+    });
   });
 
   it('treats an already-restored file as a no-op', async () => {
@@ -1049,7 +1119,12 @@ describe('recovery planning', () => {
     const approval = approvalOf([{ ...target, after: stateOf('after\n') }]);
     const plan = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/index.ts')],
+      records: [
+        appliedRecord(approval, 'src/index.ts', {
+          fileId: 'run-applied-file-id',
+          birthtimeMs: 2,
+        }),
+      ],
       observations: [
         {
           path: 'src/index.ts',
@@ -1090,7 +1165,7 @@ describe('recovery planning', () => {
 
 describe('write surface stays closed', () => {
   const writeCall =
-    /\b(?:writeFile|appendFile|createWriteStream|copyFile|unlink|rmdir|rm|mkdir|rename|truncate|utimes|chmod|writeSync|appendFileSync)\s*\(|\.write(?:v)?\s*\(|open\s*\([^)]*['"](?:w|a|r\+|w\+|a\+)/;
+    /\b(?:writeFile|appendFile|createWriteStream|copyFile|unlink|rmdir|rm|mkdir|rename|truncate|utimes|chmod|writeSync|writeFileSync|appendFileSync)\s*\(|\.write(?:v)?\s*\(|open\s*\([^)]*['"](?:w|a|r\+|w\+|a\+)/;
   const allowlist = new Set([
     'main/index.ts',
     'main/run-host.ts',
