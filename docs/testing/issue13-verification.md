@@ -2,6 +2,8 @@
 
 核对日期：2026-10-27。来源：[Issue #13](https://github.com/OasisViridis/Pioneer/issues/13)。基线为 PR #15 运行合同 v1 及其 2026-10-24 停止语义修订（`stopping → stopped/failed(固定错误码)`，`unknown` 仅作崩溃/重启墓碑）。分支：`codex/issue13-remaining`（自 `origin/main` `c12a20a`）。
 
+最后复核：2026-10-27，在 `main` `c12a20a` 的 `electron-forge package` 成品上完成真实 Provider 问答与中途停止，见[打包成品运行记录](issue13-packaged-run.md)。
+
 ## 交付范围
 
 | 模块 | 内容 |
@@ -33,19 +35,35 @@
 
 `electron-forge package` 在本机 Node 24.17.0 下静默退出且不产出 `out/`，最小复现为 `extract-zip@2.0.1`（`yauzl@2.10.0` 的 `openReadStream` 回调在 Node 24 永不触发，`fs.open`/`fd-slicer` 单测均正常）。修复：pnpm `patchedDependencies` 将 win32 平台的 zip 解压委托给系统自带 bsdtar（`patches/extract-zip@2.0.1.patch`，可经 `PIONEER_BSDTAR_PATH` 覆盖路径；非 win32 平台显式报错提示移除补丁）。上游修复后应移除该补丁。
 
+### 打包成品验收（2026-10-27）
+
+在 `main` `c12a20a` 上执行 `pnpm --filter @pioneer/desktop build`，把 `apps/desktop/out/@pioneer-desktop-win32-x64` 整体复制到源码树之外的 `%TEMP%\pioneer-issue13-package`，用隔离 `userData` 启动并以 CDP 驱动真实界面。完整固定字段见[打包成品运行记录](issue13-packaged-run.md)。
+
+| 项 | 结果 |
+| --- | --- |
+| `app.asar` | SHA-256 `5550f60af664c8d627cc780318316a85efc4d52ddbb11448fb322b4102bfe097`（33,884,214 字节） |
+| Pi 成品探针 | `{"ok":true,"stage":"release","piAiVersion":"1.4.0","nodeVersion":"v24.20.0"}` |
+| 真实 Provider 运行 1 | `completed`，4 次真实只读工具调用（含 `PATH_UNAVAILABLE` 拒绝后自行恢复），`lastSeq` 15 |
+| 真实 Provider 运行 2 | `stopped`，点击停止后主进程收敛，`lastSeq` 4 |
+| 会话与日志 | `pioneer-session-state.json` 版本 5、2 个会话；`runs/journal.jsonl` 2 条 accept + 2 条 terminal，`adapter` 均为 `pi` |
+| 文件不变量 | fixture 副本清单哈希 `1bceca98…46c5` 前后一致 |
+| 渲染入口 | `%TEMP%\pioneer-issue13-package\resources\app.asar\.webpack\renderer\main_window\index.html`（未从源码目录加载） |
+
+该记录补齐 Issue #13 的五项完成标准：界面与运行程序接通、两个会话的任务与终态分别落在 journal 与 session state、只读工具按 #11 限制执行、进度/工具结果/错误与停止反馈可见、模拟模型与真实模型及打包成品都有记录；重复启动与重启不重放路线由 Contract/E2E 覆盖。原生目录选择器与安装器目标不在本次范围，边界见记录第 8 节。
+
 ## A01—A09 状态
 
 | 编号 | 状态 | 证据 |
 | --- | --- | --- |
 | A01 admission/容量/幂等/墓碑 | PASS（Contract） | `tests/contract/run-manager.test.ts`；墓碑恢复与 RUN_ACTIVE/REQUEST_CONFLICT/JOURNAL_UNAVAILABLE/STALE_REVISION 路径 |
-| A02 Pi 加载/构造/释放 | 见运行记录 | 开发入口与打包成品探针；依赖精确 1.4.0 + 锁文件 |
+| A02 Pi 加载/构造/释放 | PASS（开发入口 + 打包成品） | 开发入口与打包成品探针；依赖精确 1.4.0 + 锁文件；2026-10-27 成品探针在 `c12a20a` 上复跑通过（`tmp/issue13/a02-packaged-probe.json`） |
 | A03 事件顺序/订阅/分页 | PASS（Contract + E2E） | 事件序列、早到缓冲（started 前的适配器消息）、32 条分批、ACK 续推、gap 标记 |
 | A04 停止/竞态/故障 | PASS（Contract + E2E） | 成功先于停止、停止先于成功、STOP_TIMEOUT 强制结束、RUN_DEADLINE、无活 unknown；适配器断连强制结束 `ADAPTER_DISCONNECTED`；在途工具停止后迟到正文丢弃且只保留 cancelled 配对 |
 | A05 三工具真实 IO | PASS（Contract + E2E） | read_file/list_directory/search 真实临时目录与 fixture IO、预算/truncation、敏感/二进制/链接拒绝；外发材料清单（授权清单、未列出拒绝、内容变化撤销）Contract + p2-run E2E |
 | A06 文件不变量 | PASS（E2E） | fixture 前后哈希一致；E2E userData 隔离（PIONEER_E2E_ROOT/USER_DATA 不相交）；不读用户全局凭证 |
 | A07 P1 整合 | PASS（Contract + E2E） | 344+ 合同测试含 P1 会话/持久化/意图流；E2E 覆盖会话恢复、意图修订与运行历史重启恢复；按需面板，不自动导航 |
 | A08 门禁 | 见门禁记录 | `pnpm verify:repository`、完整 `pnpm check`、独立审阅 |
-| A09 真实 Provider | **PASS**（开发入口） | 2026-10-25 用户授权后完成：DeepSeek `deepseek-flash` 两次真实运行——completed（含 4 次真实只读工具调用与拒绝恢复）+ stopped（运行中途停止）；fixture 前后哈希一致。完整固定字段见 [A09 记录](issue13-real-provider.md)。打包成品内的真实 Provider 运行因 E2E 隔离缝仅限非打包构建而未自动化，留作人工后续项 |
+| A09 真实 Provider | **PASS**（开发入口 + 打包成品） | 2026-10-25 用户授权后完成：DeepSeek `deepseek-flash` 两次真实运行——completed（含 4 次真实只读工具调用与拒绝恢复）+ stopped（运行中途停止）；fixture 前后哈希一致。完整固定字段见 [A09 记录](issue13-real-provider.md)。2026-10-27 在同一成品的源码树外副本上补测通过：completed（4 次真实只读工具调用）+ stopped，文件哈希不变，见[打包成品记录](issue13-packaged-run.md) |
 
 ## A09 记录
 
@@ -172,6 +190,8 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 
 | 项 | 命令 | 结果 |
 | --- | --- | --- |
+| 完整门禁（验收复核） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `c12a20a` | 退出码 0（2026-10-27）：格式 / lint / 类型、Contract **335/335**（35 文件）、Prototype **210/210**、Real E2E **25/25**、package smoke；日志 `tmp/issue13/check.log` |
+| 打包成品验收 | 同一 `c12a20a` 的 `electron-forge package` 成品复制到源码树外 + 真实 Provider 两轮运行 | 见[打包成品运行记录](issue13-packaged-run.md)：completed + stopped、哈希不变、journal 2 accept + 2 terminal |
 | 完整门禁（第七轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `0bfd5de` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **375/375**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
 | A08 干净检出（第七轮） | `0bfd5de` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
 | 定向套件（第七轮） | `vitest run` run-manager（32）/ controlled-adapter（12）/ pi-adapter-tools（2）/ read-only-tools-exec（14）/ run-view（2） | 全绿 |
@@ -186,7 +206,7 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 | 完整门禁（第二轮） | `pnpm check`，提交 `8328bdc` | 退出码 0（2026-10-26）：Contract **363/363**、Prototype **210/210**、Real E2E **24/24**、package smoke |
 | A08 干净检出（第二轮） | `8328bdc` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26） |
 | 完整门禁（第一轮） | `pnpm check`，提交 `de0e0f1` | 退出码 0（2026-10-26）：Contract **361/361**、Prototype **210/210**、Real E2E **24/24**、package smoke |
-| 仓库规范化 | `pnpm verify:repository`（文档改动后复跑） | 6/6 |
+| 仓库规范化 | `pnpm verify:repository`（2026-10-27 文档改动后复跑） | 6/6 |
 | 定向套件（第五轮） | `vitest run` run-manager（31）/ controlled-adapter（12）/ pi-adapter-tools（2）/ read-only-tools-exec（14）/ run-view（2） | 全绿 |
 
 **环境注意**：本机 DSH 会话会继承 `ELECTRON_RUN_AS_NODE=1`，此时 Electron 按 Node 解释并拒绝 `--remote-debugging-port`，E2E 全红；这不是代码回归，跑 E2E 或 `pnpm check` 前需清除该变量（CI 无此变量）。
@@ -202,3 +222,4 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 - **大目录的过滤成本无上限**：`list_directory` 的流式提前停止只计「通过复检」的条目；一个塞满敏感名的目录仍会被完整枚举（`opendir` 逐项但无上限），只是不发布。
 - **打包真实 Provider 记录早于本次改动**：PR #52 的成品记录来自 `24df6fc`，早于会话历史、外发清单与断连生产者；A02 的打包加载结论仍适用，本次 `pnpm check` 的 package smoke 只证明新 asar 可构建与启动，成品 UI 新行为未重录。
 - **P1 资产仍与 P2 同 PR**（463 文件、+75,619 行）：拆分属人工决策。
+- **打包成品验收的覆盖边界**：本次只运行 `electron-forge package` 目录成品，仓库没有 `make`／安装器目标；原生目录选择器按 [M2 人工记录](m2-native-picker-smoke.md) 验收，未在打包成品中自动化（本次以预置 `pioneer-settings.json` 加载工作区）。

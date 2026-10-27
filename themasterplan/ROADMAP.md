@@ -67,9 +67,9 @@ P2 真实只读 Harness 经 PR #16 合并进 `main`（merge commit `3f262fe`）�
 
 分支 `codex/issue13-remaining` 补齐 Issue #13 的剩余产品项：终态任务/结果写入 session state v6（每会话最多 20 条，重启恢复）；journal 终态记录首次停止请求的 main UTC 时间；受控与 Pi 适配器新增断连消息，宽限到期落 `failed(ADAPTER_DISCONNECTED)`；停止后在途工具的真实结果不再发布，只保留 cancelled 配对；授权阶段生成外发材料清单（相对路径、字节数、SHA-256），未列入清单返回 `MATERIAL_NOT_ALLOWED`，内容变化返回 `CONTENT_NOT_ALLOWED` 并停止为 `AUTHORIZATION_REVOKED`。
 
-该分支完整 `pnpm check` 退出码 0（2026-10-27）：Contract 348/348（36 文件）、Prototype 210/210、Real Electron 27/27、package smoke。打包真实 Provider 记录仍来自 `24df6fc`，早于上述 UI 与运行层改动。详见 [Issue #13 验证记录](../docs/testing/issue13-verification.md)。
+PR #54 合并前的完整 `pnpm check` 退出码 0（2026-10-27）：Contract 348/348（36 文件）、Prototype 210/210、Real Electron 27/27、package smoke。打包真实 Provider 记录来自 `main` `c12a20a` 的成品副本（PR #52，源码树之外），早于上述 UI 与运行层改动，见 [Issue #13 打包成品运行记录](../docs/testing/issue13-packaged-run.md) 与 [验证记录](../docs/testing/issue13-verification.md)。
 
-M3 仍为 **IN PROGRESS**：P3 为下一前沿（#17 面板接真实数据、#41 移除意图卡、#42 修正运行提示），#13 的验收收口另计。详见 [Issue #13 验证记录](../docs/testing/issue13-verification.md)。
+M3 仍为 **IN PROGRESS**：P3 为下一前沿（#17 面板接真实数据、#41 移除意图卡、#42 修正运行提示）。#13 已于 2026-10-27 随 PR #54 关闭。
 
 ### 2026-10-02 工作副本核对（历史）
 

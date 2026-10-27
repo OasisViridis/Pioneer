@@ -42,7 +42,7 @@ Pioneer 的设计前提是：项目、会话与运行状态都应当是可操作
 
 - 写入项目文件、执行命令、可逆快照与回滚
 - 插件库、会话分支与历史回退
-- 打包成品内的真实 Provider 运行尚未自动化，仍靠人工授权验收
+- 打包成品内的真实 Provider 运行仍是人工授权流程（2026-10-27 已在 `electron-forge package` 成品上留证，见 [Issue #13 打包成品运行记录](docs/testing/issue13-packaged-run.md)），尚未纳入自动门禁
 
 ## Harness 目前接到哪一步
 

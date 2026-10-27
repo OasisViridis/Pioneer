@@ -8,7 +8,7 @@ evidenceKind = **real-provider**（合同 §6 固定字段）
 | --- | --- |
 | 软件 commit | `627f22b5c891c035051a5a40422929de1484dbd3`（运行时工作树的受跟踪文件与该提交一致；运行所用 `.webpack` 构建产自该提交） |
 | dirty 状态 | 受跟踪文件干净；仅本地忽略目录（tmp/logs 等）存在 |
-| 运行入口 | 开发入口（`electron apps/desktop`，forge webpack 产物）。打包成品内的真实 Provider 运行未自动化：`PIONEER_E2E` 隔离缝按设计仅在非打包构建生效，打包成品需原生目录选择器人工授权，留作后续人工项 |
+| 运行入口 | 开发入口（`electron apps/desktop`，forge webpack 产物）。打包成品的真实 Provider 运行已在 2026-10-27 单独补测，见[打包成品运行记录](issue13-packaged-run.md)；本记录只覆盖开发入口 |
 | 开发入口构建摘要 | `.webpack/main/index.js` SHA-256 `4d8c55d2d8514eea13f033dff3eb05c68f9ad81cbb017d7deef2ed84bef62ebf`；此前 A02 打包成品 `app.asar` SHA-256 `5de73088…8b57` 为工具接线前构建，不代表本次运行 |
 | 平台 | Windows 11 x64（10.0.26200） |
 | Node / Electron / pnpm / Pi | 终端 Node 24.17.0；Electron 44.2.0（应用内嵌 Node 24.20.0）；pnpm 11.7.0；`@earendil-works/pi-agent-core` 与 `pi-ai` 精确 1.4.0 |
