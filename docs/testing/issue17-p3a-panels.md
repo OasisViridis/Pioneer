@@ -43,7 +43,9 @@
 | `pnpm exec playwright test --config tests/e2e/playwright.config.ts tests/e2e/p2-run.e2e.spec.ts tests/e2e/p3-panels.e2e.spec.ts` | PASS：12/12（P2 5 + P3 7），24.0s |
 | `pnpm check` | PASS（exit 0）：design:check、format、lint、typecheck、Contract 375/375、Prototype 210/210、Real Electron 34/34、package smoke |
 
-补充说明：`pnpm check` 的输出包含改动的 `contract`、`prototype`、`e2e` 与 package smoke；本记录不把 Contract 测试当作 Electron 证据，也不把受控适配器当作真实 Provider 证据。验证日志保存在本地 `logs/issue17-check-2.log`（`logs/` 被 `.gitignore` 忽略，不入库）。
+补充说明：`pnpm check` 的输出包含改动的 `contract`、`prototype`、`e2e` 与 package smoke；本记录不把 Contract 测试当作 Electron 证据，也不把受控适配器当作真实 Provider 证据。验证日志保存在本地 `logs/issue17-check-4.log`（`logs/` 被 `.gitignore` 忽略，不入库）。
+
+绑定提交：实现提交 `a7852af`（分支 `feat/issue17-p3a-panels`，基于 `main` `b93d8e9`）；上表门禁在工作树内容与该提交一致时执行，本证据文档随后单独提交，只追加版本绑定行。
 
 ## 4. Real Electron 证据
 
