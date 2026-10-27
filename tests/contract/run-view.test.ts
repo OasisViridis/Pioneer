@@ -612,5 +612,7 @@ describe('run view context refresh', () => {
     expect(state.rejectionCode).toBe('RUN_ACTIVE');
     expect(state.authorization).toBeNull();
     expect(state.runId).toBeNull();
+    // A refused start must not adopt the attempted project either.
+    expect(state.projectId).toBeNull();
   });
 });

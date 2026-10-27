@@ -25,7 +25,7 @@
 
 - 事件 wire 仍为 `RunEvent.version = 1`，`tool.requested` 只含 `callId` 与工具名，`tool.result` 只含文本/截断或固定错误码；不反射工具参数。
 - 新查询 `run:context`（`RUN_IPC_CHANNELS.context`）复用可信 sender、窗口 epoch 与完整 Run 身份检查；找不到运行或身份不符返回 `RUN_NOT_FOUND`，不泄漏其他会话是否存在。
-- main 只在工具执行器确认后记录材料事实：`read_file` 成功由观察回调记 `read`，`search_in_files` 校验哈希后记 `scanned`，哈希不符记 `changed`，路径/读取失败记 `missing` 并附固定原因码；已确认的 `read` 不因后续失败被改写。
+- main 只在工具执行器确认后记录材料事实：`read_file` 成功由观察回调记 `read`，`search_in_files` 校验哈希后记 `scanned`，哈希不符记 `changed`，路径/读取失败记 `missing` 并附固定原因码；已确认的 `read`／`scanned` 不因后续失败或内容变化被抹掉，后到的变化只附原因。
 - 目标路径只在 main 内归一化为项目相对路径后才回传；绝对路径、`..`、敏感名段与空路径返回 `null`。
 - `RunContext` / `RunSnapshot` 使用严格 Zod schema 与长度上限（材料 64、调用 32），未知字段拒绝。
 
@@ -37,16 +37,16 @@
 | --- | --- |
 | `pnpm --filter @pioneer/desktop typecheck` | PASS（无错误输出） |
 | `pnpm test:contract:types` | PASS |
-| `pnpm test:contract` | PASS：38 文件 / 381 测试（含新增 `run-context`、`run-panels`、run-manager 上下文投影与取消/脱敏用例、v6→v7 迁移、reducer 修订与摘要用例） |
+| `pnpm test:contract` | PASS：38 文件 / 382 测试（含新增 `run-context`、`run-panels`、run-manager 上下文投影与取消/脱敏用例、v6→v7 迁移、reducer 修订与摘要用例） |
 | `pnpm verify:repository` | PASS：6 测试 |
 | `pnpm exec eslint apps/desktop/src tests/contract` | PASS |
 | `pnpm build:desktop` | PASS（Electron Forge 打包完成） |
 | `pnpm exec playwright test --config tests/e2e/playwright.config.ts tests/e2e/p2-run.e2e.spec.ts tests/e2e/p3-panels.e2e.spec.ts` | PASS：12/12（P2 5 + P3 7），24.0s |
-| `pnpm check` | PASS（exit 0）：design:check、format、lint、typecheck、Contract 381/381、Prototype 210/210、Real Electron 34/34、package smoke |
+| `pnpm check` | PASS（exit 0）：design:check、format、lint、typecheck、Contract 382/382、Prototype 210/210、Real Electron 34/34、package smoke |
 
 补充说明：`pnpm check` 的输出包含改动的 `contract`、`prototype`、`e2e` 与 package smoke；本记录不把 Contract 测试当作 Electron 证据，也不把受控适配器当作真实 Provider 证据。验证日志保存在本地 `logs/issue17-check-6.log`（`logs/` 被 `.gitignore` 忽略，不入库）。
 
-绑定提交：实现提交 `a7852af`（分支 `feat/issue17-p3a-panels`，基于 `main` `b93d8e9`）；本轮代码审阅基线为 `f4dadd7`（修复前 PR head），修复提交与设计证据哈希更新随 PR 追加。独立审阅来源：仓库内独立 reviewer 两轮（首轮 2 P1、7 P2，增量复审确认修复）、ChatGPT 双轴审阅（[对话](https://chatgpt.com/c/6ae0a117-37e4-83e9-97fc-5660e61d5227)）、code-review 的 Standards / Spec 两轴。上表门禁在修复后的工作树上重跑，日志保存在本地 `logs/issue17-check-7.log`；PR 页面记录最终 head SHA 与 CI 结果。
+绑定提交：实现提交 `a7852af`（分支 `feat/issue17-p3a-panels`，基于 `main` `b93d8e9`）；本轮代码审阅基线为 `f4dadd7`（修复前 PR head），修复提交与设计证据哈希更新随 PR 追加。独立审阅来源：仓库内独立 reviewer 两轮（首轮 2 P1、7 P2，增量复审确认修复）、ChatGPT 双轴审阅（[对话](https://chatgpt.com/c/6ae0a117-37e4-83e9-97fc-5660e61d5227)）、code-review 的 Standards / Spec 两轴。上表门禁在修复后的工作树上重跑，日志保存在本地 `logs/issue17-check-8.log`；PR 页面记录最终 head SHA 与 CI 结果。
 
 ## 4. Real Electron 证据
 

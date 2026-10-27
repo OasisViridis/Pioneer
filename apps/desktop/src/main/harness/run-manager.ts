@@ -884,6 +884,12 @@ export class RunManager {
       record.readAt = new Date().toISOString();
       return;
     }
+    // A later change must not erase a confirmed read or scan: keep the fact
+    // and attach the reason so the panel can show both.
+    if (record.state === 'read' || record.state === 'scanned') {
+      record.reason = reason ?? 'CONTENT_NOT_ALLOWED';
+      return;
+    }
     record.state = 'changed';
     record.reason = reason ?? 'CONTENT_NOT_ALLOWED';
     record.readAt = null;
@@ -909,6 +915,7 @@ export class RunManager {
         if (
           record !== undefined &&
           record.state !== 'read' &&
+          record.state !== 'scanned' &&
           record.state !== 'changed'
         ) {
           record.state = 'missing';
@@ -929,6 +936,7 @@ export class RunManager {
     if (
       record === undefined ||
       record.state === 'read' ||
+      record.state === 'scanned' ||
       record.state === 'changed'
     )
       return;

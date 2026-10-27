@@ -634,7 +634,6 @@ export class RunViewStore {
     try {
       this.update(input.sessionId, {
         phase: 'authorizing',
-        projectId: input.projectId,
         rejectionCode: null,
         failureCode: null,
         summaryText: input.summaryText ?? null,
@@ -697,6 +696,7 @@ export class RunViewStore {
       }
       this.update(input.sessionId, {
         phase: 'active',
+        projectId: input.projectId,
         runId: started.runId,
         revision: input.revision,
         status: 'starting',

@@ -37,6 +37,8 @@ interface PanelRun {
   /** True when the data comes from the persisted terminal summary. */
   fromSnapshot: boolean;
   contextState: RunViewState['contextState'];
+  /** True when earlier events were dropped by the display cap or a gap. */
+  omittedHistory: boolean;
 }
 
 const SNAPSHOT_STATUS: Record<SessionRunStatus, string> = {
@@ -60,6 +62,7 @@ function panelRun(session: Session, state: RunViewState): PanelRun {
       calls: state.context?.calls ?? eventContextCalls(state.events),
       fromSnapshot: false,
       contextState: state.contextState,
+      omittedHistory: state.omittedHistory,
     };
   }
   const snapshot = session.lastRunView;
@@ -73,6 +76,7 @@ function panelRun(session: Session, state: RunViewState): PanelRun {
       calls: [],
       fromSnapshot: false,
       contextState: 'idle',
+      omittedHistory: false,
     };
   }
   return {
@@ -84,6 +88,7 @@ function panelRun(session: Session, state: RunViewState): PanelRun {
     calls: snapshot.calls,
     fromSnapshot: true,
     contextState: 'ready',
+    omittedHistory: false,
   };
 }
 
@@ -128,7 +133,9 @@ export function RunContextPanel({
     ? '摘要来自本机保存的上次运行；没有补造未记录的材料。'
     : run.contextState === 'ready'
       ? '读取状态来自 main 对本次运行的实际记录。'
-      : '尚未取得运行上下文；只显示已批准的清单，不推断已读取。';
+      : run.contextState === 'unavailable'
+        ? '上下文不可用；不显示材料清单，避免把未确认状态当成已读取。'
+        : '尚未取得运行上下文；只显示已批准的清单，不推断已读取。';
   return (
     <div className="module-content run-detail">
       <RunIdentity session={session} run={run} />
@@ -259,33 +266,42 @@ export function RunCapabilitiesPanel({
         <p className="metadata">
           {run.runId === null
             ? '还没有运行，因此没有工具调用。'
-            : '本次运行尚未请求工具。'}
+            : run.omittedHistory
+              ? '事件已截断，无法确认本次运行是否请求过工具。'
+              : '本次运行尚未请求工具。'}
         </p>
       ) : (
-        <ol className="capability-calls" aria-label="工具调用记录">
-          {run.calls.map((call) => (
-            <li
-              key={call.callId}
-              className={`capability-call capability-call--${call.state}`}
-            >
-              <div className="capability-call__head">
-                <span>{toolLabel(call.tool)}</span>
-                <span
-                  className={`capability-state capability-state--${call.state}`}
-                >
-                  {callStateText(call.state)}
-                </span>
-              </div>
-              <p className="metadata">
-                {call.callId}
-                {call.target === null ? '' : ` · ${call.target}`}
-                {call.code === null
-                  ? ''
-                  : ` · ${callCodeText(call.code)}（${call.code}）`}
-              </p>
-            </li>
-          ))}
-        </ol>
+        <>
+          <ol className="capability-calls" aria-label="工具调用记录">
+            {run.calls.map((call) => (
+              <li
+                key={call.callId}
+                className={`capability-call capability-call--${call.state}`}
+              >
+                <div className="capability-call__head">
+                  <span>{toolLabel(call.tool)}</span>
+                  <span
+                    className={`capability-state capability-state--${call.state}`}
+                  >
+                    {callStateText(call.state)}
+                  </span>
+                </div>
+                <p className="metadata">
+                  {call.callId}
+                  {call.target === null ? '' : ` · ${call.target}`}
+                  {call.code === null
+                    ? ''
+                    : ` · ${callCodeText(call.code)}（${call.code}）`}
+                </p>
+              </li>
+            ))}
+          </ol>
+          {run.omittedHistory ? (
+            <p className="metadata" role="status">
+              事件已截断，调用记录可能不完整。
+            </p>
+          ) : null}
+        </>
       )}
       <p className="metadata">
         拒绝、失败与取消分别标注，不会显示成空结果；未提供的写入与命令能力不会被猜测为可用。

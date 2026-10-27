@@ -1859,4 +1859,76 @@ describe('P3-A read fact survives a later failure (#17)', () => {
       'failed',
     ]);
   });
+
+  it('keeps the read fact when a later read finds changed content', async () => {
+    let calls = 0;
+    const { manager, projectRoot } = await createManager(
+      {
+        steps: [
+          {
+            action: 'tool',
+            request: {
+              tool: 'read_file',
+              arguments: { path: 'notes/readme.txt' },
+            },
+          },
+          {
+            action: 'tool',
+            request: {
+              tool: 'read_file',
+              arguments: { path: 'notes/readme.txt' },
+            },
+          },
+          { action: 'complete' },
+        ],
+      },
+      {
+        executeTool: async (root, request, signal, materials, observer) => {
+          calls += 1;
+          if (calls === 2) {
+            await writeFile(
+              join(root, 'notes', 'readme.txt'),
+              'rewritten-after-read',
+              'utf-8',
+            );
+          }
+          return executeReadOnlyTool(
+            root,
+            request,
+            signal,
+            materials,
+            observer,
+          );
+        },
+      },
+    );
+    await mkdir(join(projectRoot, 'notes'), { recursive: true });
+    await writeFile(
+      join(projectRoot, 'notes', 'readme.txt'),
+      'fixture-answer',
+      'utf-8',
+    );
+    const { runId } = await launchRun(manager, {
+      materials: ['notes/readme.txt'],
+    });
+    // The changed hash is a run failure, but the earlier read stays recorded.
+    await waitFor(() => pageOf(manager, runId)?.status === 'failed');
+    const context = manager.getContext({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      ...binding,
+    });
+    expect(context?.materials[0]).toMatchObject({
+      path: 'notes/readme.txt',
+      state: 'read',
+      reason: 'CONTENT_NOT_ALLOWED',
+    });
+    expect(context?.materials[0]?.readAt).not.toBeNull();
+    expect(context?.calls.map((call) => call.state)).toEqual([
+      'succeeded',
+      'rejected',
+    ]);
+  });
 });
