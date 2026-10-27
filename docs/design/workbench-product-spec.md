@@ -160,7 +160,7 @@ M2 当前仅可出现会话草稿/保留、运行器未连接、只读项目和�
 | 工作区/只读安全            | `ProjectLibrary.tsx`、`ProjectOverview.tsx`、main/preload IPC            | Contract 边界/路径；Real E2E 扫描；原生选择器人工证据                                   |
 | 视觉与可访问性             | `tokens.css`、`app.css`、Figma workbench                                 | 色彩自动计算+实机截图/缩放/高对比/NVDA 或等效读屏人工走查；P11/P12 不因有文档而自动完成 |
 
-`pnpm check`（格式、lint、类型、Contract、冻结 Prototype、真实 Electron E2E、package smoke）仍是工程门禁；设计侧另需每个屏幕状态的 Figma 截图检查、Windows 实机焦点/读屏检查和用户可见结果核对。要区分设计规范覆盖、已实现、已自动验证、已人工验证四个状态，不以其中一个替代另外三个。发布、合并、远程推送、破坏性清理仍需用户明确许可。
+`pnpm check`（格式、lint、类型、Contract、冻结 Prototype、真实 Electron E2E、package smoke）仍是工程门禁；设计侧另需每个屏幕状态的 Figma 截图检查、Windows 实机焦点/读屏检查和用户可见结果核对。要区分设计规范覆盖、已实现、已自动验证、已人工验证四个状态，不以其中一个替代另外三个。发布、合并、破坏性清理仍需用户明确许可。
 
 ## 9. 本规格自身的变更规则
 

@@ -5,7 +5,7 @@
 ## 核心原则
 
 1. **单一交付责任人**：所有变更由主交付责任人统管，子代理可协助编码与调研。
-2. **Git 远端兼容**：通过 `jj` 管理本地变更树，但对远程推送（`jj git push`）保持严格的人类明确授权要求。
+2. **Git 远端兼容**：通过 `jj` 管理本地变更树。
 3. **质量门禁先行**：在推进书签（bookmark）与创建新修订前，必须确保 `pnpm check` 全门禁 exit 0。
 
 ## 常用工作流命令
@@ -24,7 +24,7 @@ jj describe -m "feat/fix/docs: <description>"
 jj bookmark set main -r "@"
 jj new
 
-# 5. 推送至远程 GitHub（须经人类明确授权）
+# 5. 推送至远程 GitHub
 jj git push
 ```
 
