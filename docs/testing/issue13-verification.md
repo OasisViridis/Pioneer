@@ -44,12 +44,12 @@
 | `app.asar` | SHA-256 `5550f60af664c8d627cc780318316a85efc4d52ddbb11448fb322b4102bfe097`（33,884,214 字节） |
 | Pi 成品探针 | `{"ok":true,"stage":"release","piAiVersion":"1.4.0","piAgentCoreVersion":null,"nodeVersion":"v24.20.0","error":null}`；探针对象与 `app.asar` hash 见 `tmp/issue13/a02-packaged-probe-context.json` |
 | 真实 Provider 运行 1 | `completed`，4 次真实只读工具调用（含 `PATH_UNAVAILABLE` 拒绝后自行恢复），`lastSeq` 15 |
-| 真实 Provider 运行 2 | `stopped`，点击停止后主进程收敛，`lastSeq` 4 |
-| 会话与日志 | `pioneer-session-state.json` 版本 5、2 个会话；`runs/journal.jsonl` 2 条 accept + 2 条 terminal，`adapter` 均为 `pi` |
+| 真实 Provider 运行 2 | `stopped`，按钮点击返回前主进程已收敛为 `stopped`，`lastSeq` 4 |
+| 会话与日志 | `pioneer-session-state.json` 版本 5、2 个会话（`messages` 为空）；`runs/journal.jsonl` 2 条 accept + 2 条 terminal，accept 带 `sessionId`，terminal 按 `runId` 与 accept 配对，`adapter` 均为 `pi` |
 | 文件不变量 | fixture 副本清单哈希 `1bceca98…46c5` 前后一致 |
 | 渲染入口 | `%TEMP%\pioneer-issue13-package\resources\app.asar\.webpack\renderer\main_window\index.html`（未从源码目录加载） |
 
-该记录覆盖 Issue #13 的打包成品部分：界面与运行程序接通（两轮真实运行）、只读工具按 #12 的权限与大小限制执行、进度/工具结果/错误与停止反馈可见、模拟模型与真实模型及打包成品都有记录；journal 按 `sessionId` 分记 accept/terminal，`pioneer-session-state.json` 持久化两个会话。第 4 项里的断连分支与停止在途真实结果路径仍按文末边界记录为未实现/未自动化；原生目录选择器与安装器目标不在本次范围，边界见记录第 8 节。
+该记录覆盖 Issue #13 的打包成品部分：界面与运行程序接通（两轮真实运行），只读工具的路径与权限预检按 #12 执行（预算、截断、敏感/二进制拒绝由 Contract 覆盖，本次真实运行未触发），进度、工具结果、错误与停止反馈可见，模拟模型、真实模型与打包成品都有记录。journal 以 `runId` 关联 accept 与 terminal；只有 accept 带 `sessionId` 与 `taskDigest`，terminal 只有状态与 `lastSeq`，均不含任务原文与回答正文；`pioneer-session-state.json` 只持久化两个空会话。Issue #13「检查断连、重复启动、停止时收到结果等情况」中的断连分支与停止在途真实结果路径仍按文末边界记录为未实现/未自动化；原生目录选择器与安装器目标不在本次范围，边界见记录第 8 节。
 
 ## A01—A09 状态
 
@@ -63,7 +63,7 @@
 | A06 文件不变量 | PASS（E2E） | fixture 前后哈希一致；E2E userData 隔离（PIONEER_E2E_ROOT/USER_DATA 不相交）；不读用户全局凭证 |
 | A07 P1 整合 | PASS（Contract + E2E） | 344+ 合同测试含 P1 会话/持久化/意图流；E2E 覆盖会话恢复、意图修订与运行历史重启恢复；按需面板，不自动导航 |
 | A08 门禁 | 见门禁记录 | `pnpm verify:repository`、完整 `pnpm check`、独立审阅 |
-| A09 真实 Provider | **PASS**（开发入口 + 打包成品） | 2026-10-25 用户授权后完成：DeepSeek `deepseek-flash` 两次真实运行，completed（含 4 次真实只读工具调用与拒绝恢复）与 stopped（运行中途停止）；fixture 前后哈希一致。完整固定字段见 [A09 记录](issue13-real-provider.md)。2026-10-27 在同一成品的源码树外副本上补测通过：completed（4 次真实只读工具调用）与 stopped，文件哈希不变，见[打包成品记录](issue13-packaged-run.md) |
+| A09 真实 Provider | **PASS**（开发入口 + 打包成品） | 2026-10-25 用户授权后完成：DeepSeek `deepseek-flash` 两次真实运行，completed（含 4 次真实只读工具调用与拒绝恢复）与 stopped（运行中途停止）；fixture 前后哈希一致。完整固定字段见 [A09 记录](issue13-real-provider.md)。2026-10-27 在成品副本上补测通过：completed（4 次真实只读工具调用）与 stopped，文件哈希不变；入口位于源码树外，工作区与 userData 位于仓库 `tmp/`，见[打包成品记录](issue13-packaged-run.md) |
 
 ## A09 记录
 
@@ -190,9 +190,10 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 
 | 项 | 命令 | 结果 |
 | --- | --- | --- |
-| 完整门禁（验收复核） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `c12a20a` | 命令返回 0（2026-10-27）：格式 / lint / 类型、Contract **335/335**（35 文件）、Prototype **210/210**、Real E2E **25/25**、package smoke；日志 `tmp/issue13/check.log` |
-| CI 门禁（PR #52） | GitHub Actions `Pioneer Quality Gate`，运行 40449457336（`a7e958d`）与 40450369422（`06cb6e9`） | SUCCESS；含 `pnpm verify:repository`、`design:check` 与完整 `pnpm check` |
-| 打包成品验收 | 同一 `c12a20a` 的 `electron-forge package` 成品复制到源码树外 + 真实 Provider 两轮运行 | 见[打包成品运行记录](issue13-packaged-run.md)：completed + stopped、哈希不变、journal 2 accept + 2 terminal |
+| 完整门禁（验收复核） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `c12a20a` | 命令返回 0（2026-10-27）：格式 / lint / 类型、Contract **335/335**（35 文件）、Prototype **210/210**、Real E2E **25/25**、package smoke；日志 `tmp/issue13/check.log`。Contract 数量较 `0bfd5de` 的 375 下降，源于 PR #50 删除意图契约与运行时快照测试，不是本 PR 删除测试 |
+| 干净检出（验收复核） | worktree 自 `origin/main` `c12a20a` 新建 + `pnpm install --frozen-lockfile` + `pnpm --filter @pioneer/desktop build` + `pnpm check` | 退出码 0（2026-10-27；本记录所在 worktree，未复用主工作区依赖） |
+| CI 门禁（PR #52） | GitHub Actions `Pioneer Quality Gate`，运行 40449457336（`a7e958d`）、40450369422（`06cb6e9`）与 40452608757（`f43150f`） | SUCCESS；含 `pnpm verify:repository`、`design:check` 与完整 `pnpm check` |
+| 打包成品验收 | 同一 `c12a20a` 的 `electron-forge package` 成品复制到源码树外 + 真实 Provider 两轮运行 | completed + stopped，`lastSeq` 15/4，journal 2 accept + 2 terminal，fixture 哈希前后一致；见[打包成品运行记录](issue13-packaged-run.md) |
 | 完整门禁（第七轮） | `pnpm check`（先清除环境继承的 `ELECTRON_RUN_AS_NODE`），提交 `0bfd5de` | 退出码 0（2026-10-26）：格式 / lint / 类型、Contract **375/375**（39 文件）、Prototype **210/210**、Real E2E **24/24**、package smoke |
 | A08 干净检出（第七轮） | `0bfd5de` 的 detached worktree + `pnpm install --frozen-lockfile` + `pnpm check` | 退出码 0（2026-10-26，独立于开发 worktree） |
 | 定向套件（第七轮） | `vitest run` run-manager（32）/ controlled-adapter（12）/ pi-adapter-tools（2）/ read-only-tools-exec（14）/ run-view（2） | 全绿 |
@@ -224,3 +225,6 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 - **打包真实 Provider 记录早于本次改动**：PR #52 的成品记录来自 `24df6fc`，早于会话历史、外发清单与断连生产者；A02 的打包加载结论仍适用，本次 `pnpm check` 的 package smoke 只证明新 asar 可构建与启动，成品 UI 新行为未重录。
 - **P1 资产仍与 P2 同 PR**（463 文件、+75,619 行）：拆分属人工决策。
 - **打包成品验收的覆盖边界**：本次只运行 `electron-forge package` 目录成品，仓库没有 `make`／安装器目标；原生目录选择器按 [M2 人工记录](m2-native-picker-smoke.md) 验收，未在打包成品中自动化（本次以预置 `pioneer-settings.json` 加载工作区）。
+- **打包运行没有主进程侧停止请求时间**：记录的是脚本按钮点击返回时间，晚于 journal terminal；合同 §6 的该字段没有独立采样。
+- **任务原文与回答正文不持久化**：journal 只有 `taskDigest` 与终态，`pioneer-session-state.json` 的两个会话 `messages` 为空；第 1 项只能按运行层解释为「会话各自持有 run 身份与终态」。若要求正文持久化，当前实现不满足。
+- **「正在停止」过渡未在打包运行中观察到**：run 2 停止发生得很快；等待收敛的顺序由 E2E `p2-run` 的受控等待用例覆盖。

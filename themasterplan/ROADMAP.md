@@ -61,7 +61,7 @@
 
 ### 2026-10-26 P2 合并
 
-P2 真实只读 Harness 经 PR #16 合并进 `main`（merge commit `3f262fe`），随后合入七轮复审修复与 PR #40（`fd26d06`）。最后一次完整门禁记录在提交 `0bfd5de`：Contract 375/375（39 文件）、Prototype 210/210、Real Electron 24/24、package smoke，退出码 0；合并后 CI 的一次 200/201 目录边界用例超时已在 `474fb16` 修复。真实 Provider 由 A09 记录留证：一次 completed（含四次真实只读工具调用与路径拒绝后的自行恢复），一次运行中停止并收敛为 `stopped`。
+P2 真实只读 Harness 经 PR #16 合并进 `main`（merge commit `3f262fe`），随后合入七轮复审修复与 PR #40（`fd26d06`）。PR #16 合并时的完整门禁记录在提交 `0bfd5de`：Contract 375/375（39 文件）、Prototype 210/210、Real Electron 24/24、package smoke，退出码 0；合并后 CI 的一次 200/201 目录边界用例超时已在 `474fb16` 修复。PR #50 删除意图契约后 Contract 数为 335/335（35 文件）。真实 Provider 由 A09 记录留证：一次 completed（含四次真实只读工具调用与路径拒绝后的自行恢复），一次运行中停止并收敛为 `stopped`。
 
 ### 2026-10-27 P2 收口补全
 
