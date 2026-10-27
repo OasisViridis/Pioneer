@@ -69,3 +69,42 @@
 1. **能力状态不再是「三项关闭」**：P2 只读 Harness 已通过 PR #16 合并进 `main`（`3f262fe`，2026-10-26）。模型接入与三只只读工具 `read_file`／`list_directory`／`search_in_files` 在显式一次性授权下可用；仍关闭的是文件写入、命令执行、通用文件系统 IPC 与 Runtime 子进程。真实 Provider 有 A09 记录（一次 completed 含四次工具调用，一次 stopped）。
 2. **测试数字需要刷新**：10-24 的 200／210／21 已被后续记录替代。最后一次完整门禁在提交 `0bfd5de`：Contract 375/375（39 文件）、Prototype 210/210、Real Electron 24/24、package smoke，退出码 0；合并后 CI 的一次用例超时在 `474fb16` 修复。引用时仍须带日期与提交。
 3. **「运行底座未接通」「面板仍为占位」这两条问题描述**与合并后的代码不一致：底座已接通（见 `docs/testing/issue13-verification.md`），面板仍为占位只对改动与产物面板成立。
+
+## 八、2026-10-27 基线复核：材料已按 main 重做
+
+本节记录仓库基线核对后的结论，覆盖第三、四、七节的旧口径。
+
+### 基线
+
+- 核对对象：`origin/main` 的 `c12a20a`（PR #50）。此前 PR #46 下线意图摘要、PR #50 删除意图契约并把会话状态升到 v5，main 上已无 `SessionIntent`。
+- 对比：本机长期使用的 `codex/issue13-readonly-harness`（`395df15`）落后 main 43 个提交，按它写的 339/210/21 已作废。
+- 地点：为不污染本机工作区扫描结果，在 `D:\Pioneer-main-wt` 建 linked worktree 核对与构建，依赖在该 worktree 内安装。
+
+### 门禁（2026-10-27）
+
+| 层级 | 结果 |
+| ---- | ---- |
+| Contract | 336/336（含新增 README 摘要清洗用例） |
+| Prototype | 210/210 |
+| Real Electron E2E | 25/25 |
+| `pnpm check` | 退出码 0 |
+
+### 本次新增的产品修复
+
+- `apps/desktop/src/main/catalog/metadata.ts`：海报卡片摘要原先直接输出 README 原文，带 `>`、`**`、`<!-- -->` 与 `<div>`。改为先删 HTML 注释、跳过 HTML 段落，再清洗引用与强调标记；新增 `tests/contract/metadata.test.ts` 用例。
+- 分支 `fix/readme-summary-sanitize`，提交 `e52899a`、`1ddbeff`，已 push 到 origin，未合并。
+
+### 材料状态
+
+| 材料 | 状态 |
+| ---- | ---- |
+| 汇总 PPT | 12 页，按「选题 → 目标 → 路线 → 完成情况 → 交互 → 运行底座 → 成果 → 录屏 → 过程与证据 → 问题与措施 → 计划」重排；P10 增加 6 节点工程时间轴；测试表写 336/210/25 |
+| 录屏 | 2 分 34 秒、1920×1080、30fps，本机真实 DeepSeek 运行两轮（一次 completed、一次 stopped），截图取自 main + 上述修复的构建 |
+| 附件7 / 附件9 / 论文框架 | 测试数字已改 336/210/25；「三进程隔离」改为「主进程、预加载桥接层与渲染层」；意图摘要相关表述移出 |
+
+### 仍未解决
+
+- 开题报告正式版仍缺（需从维普/教务系统导出）。
+- 打包成品内的真实 Provider 运行未纳入自动化验收。
+- 论文正文与对比实验数据未开始。
+
