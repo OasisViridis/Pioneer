@@ -58,12 +58,48 @@ export interface SessionStateRecord {
   state: SessionWorkspaceState;
 }
 
+/**
+ * #41 stage 1 keeps the intent contracts but removes them from the session UI,
+ * so a stored intentState is no longer restored. Records written before the
+ * removal carry the field, records written after it may omit it, and both load
+ * with a fresh intent workspace. Changing a record here never rewrites the
+ * source file; only an explicit UI save writes it back.
+ */
+function withFreshIntentState(input: unknown): unknown {
+  if (typeof input !== 'object' || input === null || !('version' in input))
+    return input;
+  if (input.version !== SESSION_STATE_VERSION) return input;
+  if (!('state' in input) || typeof input.state !== 'object') return input;
+  const state = input.state;
+  if (
+    state === null ||
+    !('sessions' in state) ||
+    !Array.isArray(state.sessions)
+  )
+    return input;
+  const sessions: unknown[] = state.sessions;
+  return {
+    ...input,
+    state: {
+      ...state,
+      sessions: sessions.map((session) =>
+        typeof session === 'object' && session !== null
+          ? {
+              ...(session as Record<string, unknown>),
+              intentState: initialIntentWorkspaceState(),
+            }
+          : session,
+      ),
+    },
+  };
+}
+
 /** Loading is pure: unknown or corrupt records throw, never clear or rewrite the source. */
 export function loadRecord(input: unknown): SessionStateRecord {
   if (typeof input !== 'object' || input === null || !('version' in input))
     throw new Error('Unsupported session state record.');
   if (input.version === SESSION_STATE_VERSION)
-    return SessionStateRecordSchema.parse(input);
+    return SessionStateRecordSchema.parse(withFreshIntentState(input));
   const legacy = loadLegacyRecord(input);
   return SessionStateRecordSchema.parse({
     version: SESSION_STATE_VERSION,

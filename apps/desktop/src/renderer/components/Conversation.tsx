@@ -3,7 +3,6 @@ import type { Session } from '../../shared/contracts/session-workspace';
 import type { SessionWorkspaceAction } from '../state/session-workspace-reducer';
 import { workspaceIdentity } from './workspace-identity';
 import { HazelCompanion } from './HazelCompanion';
-import { SessionIntent } from './SessionIntent';
 import { RunPanel } from './RunPanel';
 import { runViews } from '../state/run-view-instance';
 export function Conversation({
@@ -19,12 +18,7 @@ export function Conversation({
   const run = useSyncExternalStore(runViews.subscribe, () =>
     runViews.get(session.id),
   );
-  const showDecoration =
-    allowDecoration &&
-    run.phase === 'idle' &&
-    session.intentState.phase === 'compose' &&
-    session.intentState.intent === null &&
-    session.intentState.error === null;
+  const showDecoration = allowDecoration && run.phase === 'idle';
   useEffect(() => {
     if (transcript.current)
       transcript.current.scrollTop = transcript.current.scrollHeight;
@@ -102,7 +96,6 @@ export function Conversation({
               </p>
             </>
           )}
-          <SessionIntent session={session} dispatch={dispatch} />
         </div>
       </div>
       <form

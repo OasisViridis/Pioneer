@@ -263,6 +263,24 @@
   justify-content: space-between;
   gap: 8px;
 }
+.run-panel__task {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--hazel-secondary);
+}
+.run-panel__task textarea {
+  border: 1px solid #858d92;
+  border-radius: 8px;
+  background: var(--hazel-surface);
+  color: var(--hazel-ink);
+  font: inherit;
+  padding: 8px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
 .run-status {
   font-weight: 600;
 }

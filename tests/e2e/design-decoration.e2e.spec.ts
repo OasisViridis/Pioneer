@@ -221,12 +221,12 @@ test('S1 decoration follows the current single-workspace pool, geometry and empt
     if (sessionIndex === 0)
       await page.getByRole('tab', { name: 'S1 theme 1', exact: true }).click();
     await expect(page.locator('.hazel-companion')).toHaveCount(1);
-    await page.getByRole('button', { name: '澄清任务', exact: true }).click();
-    await page
-      .getByRole('button', { name: '生成意图摘要', exact: true })
-      .click();
-    await expect(page.locator('.form-error')).toBeVisible();
-    await expect(page.locator('.hazel-companion')).toHaveCount(0);
+    await expect(
+      page.getByRole('button', { name: '澄清任务', exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole('heading', { name: '意图摘要', exact: true }),
+    ).toHaveCount(0);
   } finally {
     try {
       await app.close();

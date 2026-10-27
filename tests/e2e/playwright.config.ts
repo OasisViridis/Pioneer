@@ -8,7 +8,6 @@ export default defineConfig({
     'design-decoration.e2e.spec.ts',
     'tab-strip.e2e.spec.ts',
     'catalog-state.e2e.spec.ts',
-    'm3-intent.e2e.spec.ts',
     'offline-fonts.e2e.spec.ts',
     'p1-session.e2e.spec.ts',
     'session-lifecycle.e2e.spec.ts',

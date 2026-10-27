@@ -295,11 +295,11 @@
   "evidenceFiles": {
     "apps/desktop/design/component-examples.tsx": "eff2447744389d9dc531222ed992b64b92f91b34",
     "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "2d39cd9aeeeb35137a6813016a4cf1e8dce9fcf1",
-    "apps/desktop/src/renderer/components/Conversation.tsx": "f395a2fe2ce5ec8333596c161289b0634c923d25",
+    "apps/desktop/src/renderer/components/Conversation.tsx": "5483e10d85f06e619539ab8900b07bde727923ea",
     "apps/desktop/src/renderer/styles/app.css": "9328955da08caabddb2437f934e5c021d65dbe29",
-    "apps/desktop/src/renderer/styles/session-workbench.css": "5ecf0dd83e7770337724833bb9814609de3cf1ab",
+    "apps/desktop/src/renderer/styles/session-workbench.css": "b2d909edb8abf4ada3a9b121817d3f1c43e75068",
     "tests/e2e/design-mappings.e2e.spec.ts": "41968a251c1e44c8b29d1ffb704e6dd23815f7e6",
-    "tests/e2e/p2-run.e2e.spec.ts": "1a754a3d80c1155134794d48b8d62a5b30efc536",
-    "tests/e2e/design-decoration.e2e.spec.ts": "f45e80ff9e357a194a7262a4f3c2069b39fdbaeb"
+    "tests/e2e/p2-run.e2e.spec.ts": "bd6dd92e3309539a1e8ecab1e86ac98ac6370f8e",
+    "tests/e2e/design-decoration.e2e.spec.ts": "6da7f0d7b1495393d729178ced145ec13218359e"
   }
 }
