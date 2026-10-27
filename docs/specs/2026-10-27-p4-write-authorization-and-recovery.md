@@ -319,7 +319,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 - 受影响既有测试：`egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` 共 123 项通过（共享读取重构未改变行为）。
 - `pnpm typecheck`、`pnpm test:contract:types` 通过；新文件 ESLint 0 问题；Prettier 检查通过。
 - 完整 `pnpm check` 与 `pnpm verify:repository` 记录见[验证记录](../testing/issue18-verification.md)；本文件的证据范围仅到 Contract Tests，不代表写入功能已实现。
-- 独立审阅：两份独立审阅报告与处理结果见验证记录的审阅章节；人类确认仍为待办。
+- 独立审阅：三份独立审阅报告、一份外部第二意见（voyager / ChatGPT）及其处理结果见验证记录的审阅章节；人类确认仍为待办。
 
 ## 仍未完成
 
