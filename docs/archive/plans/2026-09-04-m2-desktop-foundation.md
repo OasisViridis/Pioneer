@@ -17,7 +17,7 @@
 - Keep `nodeIntegration: false`, `contextIsolation: true`, `sandbox: true`, a restrictive CSP, denied navigation/new windows, narrow `contextBridge` methods, and validated IPC sender/input.
 - Do not import from `demos/` into `apps/desktop`. Do not modify the Figma file. CSS in this phase is semantic and minimal; approved Figma geometry, typography, color, spacing, icons, and motion wait for explicit handoff.
 - Do not add agent execution, terminals, workspace mutation, recursive/multi-root scan, network poster scraping, installers, signing, auto-update, or releases.
-- Use Jujutsu snapshots per task. Do not push, merge, publish, release, or rename the live checkout until the explicit closing gate.
+- Use Jujutsu snapshots per task. Do not merge, publish, release, or rename the live checkout until the explicit closing gate.
 
 ---
 
@@ -619,7 +619,7 @@ Configure ESLint flat config for strict TypeScript, React Hooks, browser rendere
 - `TEST_INFRA.md`: replace “reserved” wording for Contract and Real E2E with their executable commands and covered evidence.
 - `themasterplan/ROADMAP.md`: M1.5 `COMPLETE`, M2 `IN PROGRESS` until the full gate and review pass.
 
-Create `docs/runbooks/m2-push-and-checkout-rename.md` as a non-executing post-delivery runbook. It must require: explicit push authorization; fresh remote verification; closing processes that hold the checkout; renaming only the exact sibling path `D:\Projects\Pioneer` to `D:\Projects\Pioneer`; reopening from the new path; then `jj status`, `git remote -v`, and `pnpm check`. State that this implementation plan must not execute the runbook automatically.
+Create `docs/runbooks/m2-push-and-checkout-rename.md` as a non-executing post-delivery runbook. It must require: fresh remote verification; closing processes that hold the checkout; renaming only the exact sibling path `D:\Projects\Pioneer` to `D:\Projects\Pioneer`; reopening from the new path; then `jj status`, `git remote -v`, and `pnpm check`. State that this implementation plan must not execute the runbook automatically.
 
 - [ ] **Step 4: Run the full authoritative gate**
 
@@ -645,7 +645,7 @@ Use `superpowers:requesting-code-review` against the complete M2 diff. Require r
 
 After the full gate and review pass, change `themasterplan/ROADMAP.md` from M2 `IN PROGRESS` to `M2 FOUNDATION COMPLETE`; leave all M3 work planned.
 
-- [ ] **Step 8: Seal the local change without pushing**
+- [ ] **Step 8: Seal the local change**
 
 ```powershell
 jj status
@@ -655,4 +655,4 @@ jj bookmark set codex/m15-m2-foundation -r "@"
 jj new
 ```
 
-Expected: a new empty working change and a local bookmark pointing to the reviewed implementation. Stop for human push authorization.
+Expected: a new empty working change and a local bookmark pointing to the reviewed implementation.

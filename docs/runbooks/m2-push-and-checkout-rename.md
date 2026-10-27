@@ -8,10 +8,9 @@ This document now records only the post-review remote push and local verificatio
 
 ## Remote push preconditions
 
-1. Obtain explicit human authorization for the remote push or merge.
-2. Fetch and verify the fresh remote state immediately before delivery. Confirm the intended remote, target branch/bookmark, and absence of an unexpected remote advance.
-3. Push only the reviewed and locally sealed change. Stop if remote verification differs from the reviewed baseline.
-4. Confirm that the expected remote revision is visible before marking the delivery complete.
+1. Fetch and verify the fresh remote state immediately before delivery. Confirm the intended remote, target branch/bookmark, and absence of an unexpected remote advance.
+2. Push only the reviewed and locally sealed change. Stop if remote verification differs from the reviewed baseline.
+3. Confirm that the expected remote revision is visible before marking the delivery complete.
 
 ## Canonical checkout
 
@@ -39,4 +38,4 @@ Require all three to finish successfully. This checkout is Git-only; do not init
 
 ## Stop conditions
 
-Stop without improvising if authorization is missing, the remote moved, the canonical checkout differs from `D:\Project\GitProject\Pioneer`, or any post-delivery command fails. Do not perform destructive cleanup, force-push, remote history rewriting, or an alternate-path rename as a workaround.
+Stop without improvising if the remote moved, the canonical checkout differs from `D:\Project\GitProject\Pioneer`, or any post-delivery command fails. Do not perform destructive cleanup, force-push, remote history rewriting, or an alternate-path rename as a workaround.
