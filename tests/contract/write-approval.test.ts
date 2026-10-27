@@ -32,6 +32,8 @@ import {
 } from '../../apps/desktop/src/shared/contracts/write-approval';
 import {
   checkRetainedPostImages,
+  computeDiffDigest,
+  consumeWriteApproval,
   evaluateWriteApproval,
   markApprovalApplied,
   planRecovery,
@@ -194,10 +196,47 @@ describe('write approval contract', () => {
       createdAt: approval.createdAt,
       expiresAt: approval.expiresAt,
       diffDigest: approval.diffDigest,
-      targets: approval.targets,
+      targets: approval.targets.map((item) => ({
+        path: item.path,
+        before: item.before,
+        after: item.after,
+        identityRecorded: item.identity !== null,
+      })),
     });
-    expect(summary.targets).toEqual([target]);
+    expect(summary.targets).toEqual([
+      {
+        path: 'src/index.ts',
+        before: stateOf('before'),
+        after: stateOf('after'),
+        identityRecorded: false,
+      },
+    ]);
     expect(JSON.stringify(summary)).not.toContain(projectRoot);
+    expect(JSON.stringify(summary)).not.toContain('fileId');
+    expect(JSON.stringify(summary)).not.toContain('birthtimeMs');
+  });
+
+  it('reports identityRecorded when the approval recorded an identity', async () => {
+    const target = await seed('src/index.ts', 'before\n');
+    const approval = approvalOf([target]);
+    const summary = WriteApprovalSummarySchema.parse({
+      approvalId: approval.approvalId,
+      operation: approval.operation,
+      sessionId: approval.sessionId,
+      projectId: approval.projectId,
+      runId: approval.runId,
+      revision: approval.revision,
+      createdAt: approval.createdAt,
+      expiresAt: approval.expiresAt,
+      diffDigest: approval.diffDigest,
+      targets: approval.targets.map((item) => ({
+        path: item.path,
+        before: item.before,
+        after: item.after,
+        identityRecorded: item.identity !== null,
+      })),
+    });
+    expect(summary.targets[0]?.identityRecorded).toBe(true);
   });
 
   it('rejects unknown fields on the approval record', () => {
@@ -220,7 +259,12 @@ describe('write approval contract', () => {
       createdAt: approval.createdAt,
       expiresAt: approval.expiresAt,
       diffDigest: approval.diffDigest,
-      targets: approval.targets,
+      targets: approval.targets.map((item) => ({
+        path: item.path,
+        before: item.before,
+        after: item.after,
+        identityRecorded: item.identity !== null,
+      })),
       webContentsId: 7,
     });
     expect(parsed.success).toBe(false);
@@ -241,6 +285,7 @@ describe('write approval contract', () => {
     ['/etc/passwd'],
     ['C:\\private\\secret.txt'],
     ['\\\\server\\share\\secret.txt'],
+    ['src\\index.ts'],
     ['src//index.ts'],
     ['src/'],
     ['src/index.ts.'],
@@ -256,6 +301,16 @@ describe('write approval contract', () => {
   it('rejects duplicate approved targets', () => {
     const targets = [
       targetOf('src/index.ts', 'a', 'b'),
+      targetOf('src/index.ts', 'a', 'b'),
+    ];
+    expect(WriteApprovalSchema.safeParse(rawApproval(targets)).success).toBe(
+      false,
+    );
+  });
+
+  it('rejects targets that differ only by case', () => {
+    const targets = [
+      targetOf('src/Index.ts', 'a', 'b'),
       targetOf('src/index.ts', 'a', 'b'),
     ];
     expect(WriteApprovalSchema.safeParse(rawApproval(targets)).success).toBe(
@@ -351,6 +406,87 @@ describe('write approval contract', () => {
         rawApproval([targetOf(deep.join('/'), 'a', 'b')]),
       ).success,
     ).toBe(false);
+  });
+});
+
+describe('diff digest', () => {
+  const diff = '--- a/src/a.ts\n+++ b/src/a.ts\n@@\n-a\n+a2\n';
+
+  it('follows the canonical encoding exactly', () => {
+    const targets = [targetOf('src/a.ts', 'a', 'a2')];
+    const expected = createHash('sha256')
+      .update(
+        JSON.stringify({
+          version: 1,
+          operation: 'replace_file',
+          targets,
+          diff,
+        }),
+        'utf-8',
+      )
+      .digest('hex');
+    expect(
+      computeDiffDigest({ operation: 'replace_file', targets, diff }),
+    ).toBe(expected);
+  });
+
+  it('is stable for the same input', () => {
+    const targets = [targetOf('src/a.ts', 'a', 'a2')];
+    const first = computeDiffDigest({
+      operation: 'replace_file',
+      targets,
+      diff,
+    });
+    const second = computeDiffDigest({
+      operation: 'replace_file',
+      targets: [targetOf('src/a.ts', 'a', 'a2')],
+      diff,
+    });
+    expect(first).toBe(second);
+  });
+
+  it('changes when the rendered diff changes', () => {
+    const targets = [targetOf('src/a.ts', 'a', 'a2')];
+    expect(
+      computeDiffDigest({
+        operation: 'replace_file',
+        targets,
+        diff: `${diff} `,
+      }),
+    ).not.toBe(computeDiffDigest({ operation: 'replace_file', targets, diff }));
+  });
+
+  it('changes when a target byte hash changes', () => {
+    expect(
+      computeDiffDigest({
+        operation: 'replace_file',
+        targets: [targetOf('src/a.ts', 'a', 'a3')],
+        diff,
+      }),
+    ).not.toBe(
+      computeDiffDigest({
+        operation: 'replace_file',
+        targets: [targetOf('src/a.ts', 'a', 'a2')],
+        diff,
+      }),
+    );
+  });
+
+  it('changes when a recorded identity changes', () => {
+    const base = targetOf('src/a.ts', 'a', 'a2');
+    expect(
+      computeDiffDigest({
+        operation: 'replace_file',
+        targets: [{ ...base, identity: { fileId: 'one', birthtimeMs: 1 } }],
+        diff,
+      }),
+    ).not.toBe(
+      computeDiffDigest({
+        operation: 'replace_file',
+        targets: [{ ...base, identity: { fileId: 'two', birthtimeMs: 1 } }],
+        diff,
+      }),
+    );
   });
 });
 
@@ -651,7 +787,15 @@ describe('write approval decision', () => {
   it('rejects retained content that does not match the reviewed bytes', () => {
     const approval = approvalOf([targetOf('src/a.ts', 'a', 'a2')]);
     const decision = checkRetainedPostImages(approval, [
-      { path: 'src/a.ts', sha256: sha256Of('different') },
+      { path: 'src/a.ts', content: Buffer.from('different', 'utf-8') },
+    ]);
+    expect(rejectionOf(decision).error.code).toBe('APPROVAL_DIGEST_MISMATCH');
+  });
+
+  it('rejects retained content whose length differs but whose prefix matches', () => {
+    const approval = approvalOf([targetOf('src/a.ts', 'a', 'a2')]);
+    const decision = checkRetainedPostImages(approval, [
+      { path: 'src/a.ts', content: Buffer.from('a2 extra', 'utf-8') },
     ]);
     expect(rejectionOf(decision).error.code).toBe('APPROVAL_DIGEST_MISMATCH');
   });
@@ -659,8 +803,8 @@ describe('write approval decision', () => {
   it('rejects retained content for an unapproved target', () => {
     const approval = approvalOf([targetOf('src/a.ts', 'a', 'a2')]);
     const decision = checkRetainedPostImages(approval, [
-      { path: 'src/a.ts', sha256: sha256Of('a2') },
-      { path: 'src/b.ts', sha256: sha256Of('b') },
+      { path: 'src/a.ts', content: Buffer.from('a2', 'utf-8') },
+      { path: 'src/b.ts', content: Buffer.from('b', 'utf-8') },
     ]);
     expect(rejectionOf(decision).error.code).toBe('APPROVAL_TARGET_MISMATCH');
   });
@@ -668,17 +812,17 @@ describe('write approval decision', () => {
   it('rejects duplicated retained content for one target', () => {
     const approval = approvalOf([targetOf('src/a.ts', 'a', 'a2')]);
     const decision = checkRetainedPostImages(approval, [
-      { path: 'src/a.ts', sha256: sha256Of('a2') },
-      { path: 'src/a.ts', sha256: sha256Of('a2') },
+      { path: 'src/a.ts', content: Buffer.from('a2', 'utf-8') },
+      { path: 'src/a.ts', content: Buffer.from('a2', 'utf-8') },
     ]);
     expect(rejectionOf(decision).error.code).toBe('APPROVAL_TARGET_MISMATCH');
   });
 
-  it('accepts retained content whose digest matches the reviewed bytes', () => {
+  it('accepts retained content whose digest really matches the reviewed bytes', () => {
     const approval = approvalOf([targetOf('src/a.ts', 'a', 'a2')]);
     expect(
       checkRetainedPostImages(approval, [
-        { path: 'src/a.ts', sha256: sha256Of('a2') },
+        { path: 'src/a.ts', content: Buffer.from('a2', 'utf-8') },
       ]),
     ).toEqual({ ok: true });
   });
@@ -708,6 +852,40 @@ describe('write approval decision', () => {
       rejectionOf(evaluateWriteApproval(applied, contextOf(), observations))
         .error.code,
     ).toBe('APPROVAL_CONSUMED');
+  });
+
+  it('consumes the approval before the write stage without completing it', () => {
+    const approval = approvalOf([targetOf('src/a.ts', 'a', 'a2')]);
+    const consumed = consumeWriteApproval(approval);
+    expect(consumed.consumed).toBe(true);
+    expect(consumed.appliedAt).toBeNull();
+    expect(WriteApprovalSchema.safeParse(consumed).success).toBe(true);
+    expect(
+      rejectionOf(
+        evaluateWriteApproval(consumed, contextOf(), [
+          {
+            path: 'src/a.ts',
+            state: 'unchanged',
+            observed: stateOf('a'),
+            identity: null,
+          },
+        ]),
+      ).error.code,
+    ).toBe('APPROVAL_CONSUMED');
+  });
+
+  it('rejects a verified journal record that observes a different hash', () => {
+    const parsed = WriteChangeJournalRecordSchema.safeParse({
+      kind: 'applied',
+      approvalId: 'approval:one',
+      path: 'src/a.ts',
+      afterSha256: sha256Of('after'),
+      observedSha256: sha256Of('other'),
+      observedIdentity: null,
+      verification: 'verified',
+      at: new Date(AT).toISOString(),
+    });
+    expect(parsed.success).toBe(false);
   });
 
   it('rejects an observation set that does not match the approved targets', async () => {
@@ -757,6 +935,24 @@ describe('write approval decision', () => {
     );
     expect(rejectionOf(decision).error.targets).toEqual([
       { path: 'src/a.ts', state: 'replaced' },
+    ]);
+  });
+
+  it('rejects a target whose approved identity the platform cannot confirm', () => {
+    const target: WriteTarget = {
+      ...targetOf('src/a.ts', 'a', 'a2'),
+      identity: { fileId: 'recorded-id', birthtimeMs: 1 },
+    };
+    const decision = evaluateWriteApproval(approvalOf([target]), contextOf(), [
+      {
+        path: 'src/a.ts',
+        state: 'identity_unavailable',
+        observed: stateOf('a'),
+        identity: null,
+      },
+    ]);
+    expect(rejectionOf(decision).error.targets).toEqual([
+      { path: 'src/a.ts', state: 'identity_unavailable' },
     ]);
   });
 
@@ -1138,6 +1334,32 @@ describe('recovery planning', () => {
       path: 'src/index.ts',
       action: 'conflict',
       state: 'changed',
+    });
+  });
+
+  it('keeps a file whose identity cannot be confirmed as a conflict', async () => {
+    const target = await seed('src/index.ts', 'before\n');
+    const approval = approvalOf([{ ...target, after: stateOf('after\n') }]);
+    const plan = planRecovery({
+      approval,
+      records: [
+        appliedRecord(approval, 'src/index.ts', {
+          fileId: 'run-applied-file-id',
+          birthtimeMs: 2,
+        }),
+      ],
+      observations: [
+        {
+          path: 'src/index.ts',
+          state: 'changed',
+          observed: stateOf('after\n'),
+          identity: null,
+        },
+      ],
+    });
+    expect(plan.actions[0]).toMatchObject({
+      path: 'src/index.ts',
+      action: 'conflict',
     });
   });
 

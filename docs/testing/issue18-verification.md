@@ -13,7 +13,7 @@
 | 目标观察 | [`apps/desktop/src/main/write-approval/observe-targets.ts`](../../apps/desktop/src/main/write-approval/observe-targets.ts)：只读句柄读取、内容哈希、文件身份；不写、不删、不改名 |
 | 共享读取 | [`apps/desktop/src/main/harness/bounded-read.ts`](../../apps/desktop/src/main/harness/bounded-read.ts)：外发清单与写入观察共用的有界稳定读取；`egress-materials.ts` 改为调用它，错误码映射不变 |
 | 纯决策 | [`apps/desktop/src/main/write-approval/decision.ts`](../../apps/desktop/src/main/write-approval/decision.ts)：批准判定、保留内容核对、撤销、完成标记、逐路径结果、恢复计划；不触碰文件系统 |
-| 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：83 项 Contract Tests |
+| 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：96 项 Contract Tests |
 | 词表 | [`GLOSSARY.md`](../../GLOSSARY.md)：新增「写入批准（Write Approval）」「变更日志（Change Journal）」 |
 
 没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段；`run-ipc.ts` 与 `pioneer-run.ts` 未改动。`egress-materials.ts` 只改了内部读取实现，对外错误码与行为不变。
@@ -23,7 +23,7 @@
 | 项 | 命令/位置 | 结果 |
 | --- | --- | --- |
 | 仓库规范化 | `pnpm verify:repository` | 6/6 通过 |
-| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 83/83 通过 |
+| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 96/96 通过 |
 | 受影响既有测试 | `egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` | 123/123 通过 |
 | 完整门禁 | `pnpm check` | 见下方"门禁结果" |
 | 类型 | `pnpm typecheck`、`pnpm test:contract:types` | 通过 |
@@ -32,14 +32,14 @@
 
 ### 门禁结果
 
-最终 `pnpm check`（日志 `tmp/issue18/full-check-6.log`，2026-10-27）退出码 0：
+最终 `pnpm check`（日志 `tmp/issue18/full-check-7.log`，2026-10-27）退出码 0：
 
-- Contract Tests：431/431 通过（37 个测试文件，含本票 83 项）；
+- Contract Tests：444/444 通过（37 个测试文件，含本票 96 项）；
 - Prototype Tests：210/210 通过；
 - Real Electron E2E：27/27 通过（先 build 再运行）；
 - 最终 package smoke：Electron Forge 打包完成，`Packaging for x64 on win32` 与 postPackage hook 均成功。
 
-该门禁覆盖第二轮复核修复（内容优先的陈旧判定、`applied.observedIdentity`、两目标重建探针、重复保留内容探针）之后的最终代码树。之后的改动只有 Markdown 规格与验证记录文本，不进入 `pnpm check`；仓库规范化的最终结果见上方"验证证据"表。
+该门禁覆盖第三轮修复（消费时机、保留内容按真实字节重算、日志不变量、路径规范化与大小写去重、`identity_unavailable`、`computeDiffDigest`、摘要去身份）之后的最终代码树。之后的改动只有 Markdown 规格与验证记录文本，不进入 `pnpm check`；仓库规范化的最终结果见上方"验证证据"表。受影响既有测试（egress、read-only 执行/策略、run manager）在修复后重跑为 123/123。
 
 ### 编辑过程事故与修复
 
@@ -135,7 +135,26 @@
 - 请求方式：`voyager ask --model current`，把 Issue #18 原文与仓库既有契约事实（运行 Grant、外发清单、只读策略、测试分层）作为上下文发给用户自己的 ChatGPT。首次发送返回 `send-unverified`（"The send was pressed but could not be confirmed."）；按技能约定不重发，改用 `voyager read --json <conversationUrl>` 取回已完成的回复。
 - 采纳的要点：文件身份（同名重建、字节相同也要拒绝）、待写入内容必须由 main 保留并按哈希核对、变更日志独立于 `RunJournal`、逐路径结果不得聚合成"部分成功"、恢复需用户显式发起、`diffDigest` 必须覆盖完整字节而不是只哈希 Diff 文本、首切片只允许 `replace_file`。
 - 未采纳或改写的要点：建议 120 秒有效期与 8 目标/4 MiB/16 MiB 预算 → 写成 §9 的可选项，默认仍是 10 分钟与 16 目标/1 MiB/4 MiB；建议新增 `WRITE_RACE_UNSAFE` 一类错误码并在无法证明安全提交时拒绝 → 写进 §3.4 对 #19 的硬要求与 §9 第 7 条，不新增当前没有生产者的错误码；建议拆成 WriteProposal/WriteGrant/WriteOperation 三段记录 → 本票用"批准记录 + 变更日志"两段，理由与可再拆分点写在 §2.4 与 §9.1。
-- 该回复是外部内容，按数据审阅，未按其文字直接执行任何命令或采纳其文档结构。
+- 该回复是外部内容，按数据审阅，未按其文字直接执行任何命令或采纳其文档结构。其 blocking / should-fix 项的处理见下一节。
+
+### 第三轮：按 GPT 审查修复（本轮）
+
+用户要求按外部审查建议修复。逐条处理：
+
+| 外部结论 | 发现 | 处理 |
+| --- | --- | --- |
+| blocking 1 | 批准消费时机与 §2.2 冲突，没有"写入开始即消费"的独立转换 | 采纳：新增 `consumeWriteApproval`（只置 `consumed`，`appliedAt` 保持 `null`），`markApprovalApplied` 只在完成后写 `appliedAt`；补"消费后仍未完成"探针，验证 `appliedAt` 为 `null`、记录合法、再次应用返回 `APPROVAL_CONSUMED` |
+| blocking 2 | 保留内容核对只比调用方给的摘要，不重算字节 | 采纳：`RetainedPostImage` 改为 `{ path, content }`，`checkRetainedPostImages` 重新计算长度与 SHA-256；补"长度不符"与"真实字节匹配"探针 |
+| blocking 3 | 日志允许 `verified` 但观察哈希与 `after` 不同，仍报 `applied` | 采纳：`applied` 记录的 schema 增加不变量（`verified` 必须 `observedSha256 === afterSha256`），`summarizeWriteOutcomes` 再做一次防御性判定；补"schem 拒绝自相矛盾记录"探针 |
+| blocking 4 | Windows 同一文件的 `src/a.ts` 与 `src\a.ts`、大小写变体可重复进批准 | 采纳：路径只接受 `/` 并拒绝 `\`；目标去重按小写折叠；补"反斜杠路径"与"仅大小写不同"探针 |
+| blocking 5 | 人类确认未完成 | 保持 `PENDING`；本票不关闭，写入能力保持关闭（无法由 Agent 代替） |
+| should-fix 1 | 内容相同、批准有身份、本次观察无身份时被当作 `unchanged` | 采纳：新增目标状态 `identity_unavailable`，观察在该情形返回它，判定按陈旧拒绝；恢复侧同样把"写入后身份无法报告"判为 `conflict`；补两条探针（判定分支用伪造观察，观察函数分支在 NTFS 上无法稳定制造，边界写入 §7） |
+| should-fix 2 | `diffDigest` 规范编码没有生产者与探针 | 采纳：新增 `computeDiffDigest`（规范 JSON 的 SHA-256），补 5 条探针：编码复算、同输入稳定、改 Diff / 改 after 哈希 / 改身份各自变化 |
+| should-fix 3 | 摘要把原始 `fileId`、`birthtimeMs` 暴露给 renderer | 采纳：摘要改用 `WriteApprovalSummaryTarget`（`path`、`before`、`after`、`identityRecorded` 布尔），补探针断言摘要 JSON 不含 `fileId` / `birthtimeMs` |
+| should-fix 4 | 写面探针只做文本级扫描 | 不改变：规格 §7 已如实写明边界；本轮未再扩大扫描范围 |
+| 认可项 | 内容优先判定、`applied.observedIdentity`、数值上限与 `superRefine`、未新增写入面、计数一致 | 保持不变 |
+
+本轮后 `issue18-verification.md` 的计数改为 96 项探针；规格 §7 的行与边界说明同步更新。仍待人类确认的决定仍是 12 项，本轮没有替用户同意任何一项。
 
 ## 人类确认状态
 

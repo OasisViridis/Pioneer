@@ -133,12 +133,20 @@ export async function observeWriteTarget(
   if (!unchanged) {
     return { path: target.path, state: 'changed', observed, identity };
   }
-  if (
-    target.identity !== null &&
-    identity !== null &&
-    !sameIdentity(target.identity, identity)
-  ) {
-    return { path: target.path, state: 'replaced', observed, identity };
+  if (target.identity !== null) {
+    // Approval recorded an identity but this read could not: neither "same
+    // file" nor "replaced" is proven, so refuse instead of guessing.
+    if (identity === null) {
+      return {
+        path: target.path,
+        state: 'identity_unavailable',
+        observed,
+        identity,
+      };
+    }
+    if (!sameIdentity(target.identity, identity)) {
+      return { path: target.path, state: 'replaced', observed, identity };
+    }
   }
   return { path: target.path, state: 'unchanged', observed, identity };
 }
