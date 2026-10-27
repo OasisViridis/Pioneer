@@ -225,6 +225,6 @@ PR #16 经双轴代码审查（Standards / Spec，并做第三方复核）后补
 - **打包真实 Provider 记录早于本次改动**：PR #52 的成品记录来自 `24df6fc`，早于会话历史、外发清单与断连生产者；A02 的打包加载结论仍适用，本次 `pnpm check` 的 package smoke 只证明新 asar 可构建与启动，成品 UI 新行为未重录。
 - **P1 资产仍与 P2 同 PR**（463 文件、+75,619 行）：拆分属人工决策。
 - **打包成品验收的覆盖边界**：本次只运行 `electron-forge package` 目录成品，仓库没有 `make`／安装器目标；原生目录选择器按 [M2 人工记录](m2-native-picker-smoke.md) 验收，未在打包成品中自动化（本次以预置 `pioneer-settings.json` 加载工作区）。
-- **打包运行没有主进程侧停止请求时间**：记录的是脚本按钮点击返回时间，晚于 journal terminal；合同 §6 的该字段没有独立采样。
-- **任务原文与回答正文不持久化**：journal 只有 `taskDigest` 与终态，`pioneer-session-state.json` 的两个会话 `messages` 为空；第 1 项只能按运行层解释为「会话各自持有 run 身份与终态」。若要求正文持久化，当前实现不满足。
+- **打包记录未覆盖新的会话历史/外发清单 UI**：该记录来自 `24df6fc`，session state 为 v5 且无材料清单；v6 与清单行为由 PR #54 的 Contract/E2E 覆盖，成品新 UI 未重录。
+- **打包记录未记录 stopRequestedAt**：该记录写于 journal 新增字段之前；当前代码由 run-manager 合同测试覆盖，成品未重录。
 - **「正在停止」过渡未在打包运行中观察到**：run 2 停止发生得很快；等待收敛的顺序由 E2E `p2-run` 的受控等待用例覆盖。
