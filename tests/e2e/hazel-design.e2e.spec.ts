@@ -387,7 +387,7 @@ test('Hazel stays decorative, loads offline, and leaves the local workflow usabl
       await expectLayoutDecoration(companion, 'focus', width);
       await expect(page.locator('.hazel-companion:visible')).toHaveCount(1);
       await expect(
-        page.getByText('运行器尚未连接', { exact: true }),
+        page.getByText('运行器默认不启动', { exact: true }),
       ).toBeVisible();
       await expect(
         page.getByRole('textbox', { name: '给 Agent 的消息' }),
@@ -451,7 +451,7 @@ test('Hazel stays decorative, loads offline, and leaves the local workflow usabl
     await expect(page.locator('.hazel-companion')).toHaveCount(0);
     await page.getByRole('tab', { name: '专注', exact: true }).click();
     await expect(
-      page.getByText('等待连接运行器。没有生成回复，也没有执行任何操作。'),
+      page.getByText('消息已保存在本机，尚未启动运行。', { exact: true }),
     ).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath('active-1440.png') });
     await page.getByRole('button', { name: '设置', exact: true }).click();

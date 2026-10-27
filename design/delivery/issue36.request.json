@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "featureId": "s2-design-delivery",
+  "issue": 36,
+  "changeType": "infrastructure",
+  "baseSha": "232c8ab13e73bea912bfe5fc625b805032ede4cd",
+  "design": {
+    "commit": "a1b96bb0902f03392e36d3812e9a7deda927ad76",
+    "path": "docs/research/design-sync-s0/design-snapshot.json",
+    "sha256": "a6b28d7cb42a1c384d0b381aeee81d91bbbba81717950319f9a296d95c6619aa",
+    "kind": "snapshot-only",
+    "version": null,
+    "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+    "nodes": ["921:706", "921:648", "921:632"]
+  },
+  "behaviorChanges": []
+}

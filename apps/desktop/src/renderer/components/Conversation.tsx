@@ -71,9 +71,9 @@ export function Conversation({
               <div className="connection-notice">
                 <span className="status-dot" aria-hidden="true" />
                 <div>
-                  <strong>运行器尚未连接</strong>
+                  <strong>运行器默认不启动</strong>
                   <p>
-                    可以先整理任务。消息仅保存在本机，不会发送给模型或执行操作。
+                    先整理任务并保存。点击运行日志里的「启动运行」后才会调用模型，工具仅限只读；过程与结果都在运行日志里。
                   </p>
                 </div>
               </div>
@@ -90,7 +90,9 @@ export function Conversation({
                 ))}
               </ol>
               <p className="connection-notice" role="status">
-                等待连接运行器。没有生成回复，也没有执行任何操作。
+                {run.phase === 'idle'
+                  ? '消息已保存在本机，尚未启动运行。'
+                  : '消息已保存在本机；运行状态与工具结果见运行日志。'}
               </p>
             </>
           )}

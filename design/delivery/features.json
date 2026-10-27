@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "features": {
+    "s2-design-delivery": {
+      "issue": 36,
+      "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+      "nodes": ["921:706", "921:648", "921:632"],
+      "changeTypes": ["infrastructure"],
+      "allowedPaths": [
+        "tools/design-delivery.mjs",
+        "tools/design-delivery-cli.mjs",
+        "tests/design-sync/delivery.test.mjs",
+        "design/delivery/",
+        "docs/workflow/design-delivery.md",
+        "docs/testing/issue36-verification.md",
+        "package.json",
+        ".github/workflows/quality.yml"
+      ],
+      "basis": [
+        "docs/specs/2026-10-24-p2-run-contract.md",
+        "design/sync/component-mappings.json",
+        "design/sync/mapping-acceptance.md",
+        "design/tokens/pioneer.tokens.json",
+        "tests/e2e/design-mappings.e2e.spec.ts",
+        "tests/e2e/p2-run.e2e.spec.ts"
+      ]
+    }
+  }
+}

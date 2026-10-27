@@ -28,7 +28,8 @@
     "design:check": "pnpm tokens:check && pnpm design:types && pnpm design:assets && node tools/design-mappings.mjs && node --test tests/design-sync/*.test.mjs",
     "design:acceptance": "pnpm check && node tools/design-mappings.mjs --require-complete",
     "design:types": "tsc --noEmit -p apps/desktop/design/tsconfig.json",
-    "design:assets": "node tools/design-assets.mjs"
+    "design:assets": "node tools/design-assets.mjs",
+    "design:delivery": "node tools/design-delivery-cli.mjs"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.1",
