@@ -455,6 +455,27 @@ describe('run view context refresh', () => {
     expect(state.context).toBeNull();
   });
 
+  it('marks the context unavailable when main no longer has the run', async () => {
+    const port = createFakeRunPort({
+      getRunPage: pageOf({
+        status: 'completed',
+        events: sequence(1, 1),
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+      stopReply: { ok: true, status: 'completed' },
+      getRunContext: () =>
+        Promise.resolve({ ok: false, code: 'RUN_NOT_FOUND' }),
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+    const state = store.get(SESSION_ID);
+    expect(state.contextState).toBe('unavailable');
+    expect(state.contextError).toBe(false);
+    expect(state.context).toBeNull();
+  });
+
   it('captures the terminal snapshot from the last ready context read', async () => {
     const port = createFakeRunPort({
       getRunPage: pageOf({

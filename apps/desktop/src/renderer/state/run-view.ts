@@ -629,8 +629,6 @@ export class RunViewStore {
         summaryText: input.summaryText ?? null,
         omittedHistory: false,
         ignoredEvents: 0,
-        context: null,
-        contextState: 'idle',
       });
       const authorization = await this.port.authorizeRun({
         sessionId: input.sessionId,
@@ -655,9 +653,8 @@ export class RunViewStore {
         grantId: authorization.summary.grantId,
       });
       if (!started.ok) {
-        // A rejected start creates no run: keep the previous run's panels and
-        // do not show this attempt's unused authorization as if it belonged to
-        // the run the identity line still names.
+        // A rejected start creates no run: keep the previous run's identity,
+        // context and summary; only the rejection is new.
         this.update(input.sessionId, {
           phase: 'error',
           rejectionCode: started.code,
@@ -776,23 +773,6 @@ export class RunViewStore {
         rejectionCode: reply.code,
       });
     }
-  }
-
-  /** Called by React when the workbench unmounts a session view. */
-  reset(sessionId: string): void {
-    this.update(sessionId, {
-      phase: 'idle',
-      runId: null,
-      revision: null,
-      status: null,
-      events: [],
-      context: null,
-      contextState: 'idle',
-      contextError: false,
-      authorization: null,
-      ignoredEvents: 0,
-      omittedHistory: false,
-    });
   }
 }
 

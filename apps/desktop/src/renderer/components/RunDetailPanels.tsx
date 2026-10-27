@@ -316,7 +316,7 @@ export function RunLogPanel({
       <RunIdentity session={session} run={run} />
       {state.ignoredEvents > 0 ? (
         <p role="alert" className="form-error">
-          {`已忽略 ${String(state.ignoredEvents)} 条不属于该会话或该运行的事件。`}
+          {`已忽略 ${String(state.ignoredEvents)} 条不属于当前运行身份的事件（来源或格式校验不通过）。`}
         </p>
       ) : null}
       {state.omittedHistory ? (
