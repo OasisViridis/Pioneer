@@ -63,7 +63,7 @@
 | A06 文件不变量 | PASS（E2E） | fixture 前后哈希一致；E2E userData 隔离（PIONEER_E2E_ROOT/USER_DATA 不相交）；不读用户全局凭证 |
 | A07 P1 整合 | PASS（Contract + E2E） | 344+ 合同测试含 P1 会话/持久化/意图流；E2E 覆盖会话恢复、意图修订与运行历史重启恢复；按需面板，不自动导航 |
 | A08 门禁 | 见门禁记录 | `pnpm verify:repository`、完整 `pnpm check`、独立审阅 |
-| A09 真实 Provider | **PASS**（开发入口 + 打包成品） | 2026-10-25 用户授权后完成：DeepSeek `deepseek-flash` 两次真实运行——completed（含 4 次真实只读工具调用与拒绝恢复）+ stopped（运行中途停止）；fixture 前后哈希一致。完整固定字段见 [A09 记录](issue13-real-provider.md)。2026-10-27 在同一成品的源码树外副本上补测通过：completed（4 次真实只读工具调用）+ stopped，文件哈希不变，见[打包成品记录](issue13-packaged-run.md) |
+| A09 真实 Provider | **PASS**（开发入口 + 打包成品） | 2026-10-25 用户授权后完成：DeepSeek `deepseek-flash` 两次真实运行，completed（含 4 次真实只读工具调用与拒绝恢复）与 stopped（运行中途停止）；fixture 前后哈希一致。完整固定字段见 [A09 记录](issue13-real-provider.md)。2026-10-27 在同一成品的源码树外副本上补测通过：completed（4 次真实只读工具调用）与 stopped，文件哈希不变，见[打包成品记录](issue13-packaged-run.md) |
 
 ## A09 记录
 
