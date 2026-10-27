@@ -296,10 +296,10 @@
     "apps/desktop/design/component-examples.tsx": "eff2447744389d9dc531222ed992b64b92f91b34",
     "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "2d39cd9aeeeb35137a6813016a4cf1e8dce9fcf1",
     "apps/desktop/src/renderer/components/Conversation.tsx": "5483e10d85f06e619539ab8900b07bde727923ea",
-    "apps/desktop/src/renderer/styles/app.css": "9328955da08caabddb2437f934e5c021d65dbe29",
-    "apps/desktop/src/renderer/styles/session-workbench.css": "b2d909edb8abf4ada3a9b121817d3f1c43e75068",
+    "apps/desktop/src/renderer/styles/app.css": "cfce7cf1c923f3e0b4febc85b49a3d1e96b15658",
+    "apps/desktop/src/renderer/styles/session-workbench.css": "f50b57eaf8e17d9a02a48c28215b26f9364bf4db",
     "tests/e2e/design-mappings.e2e.spec.ts": "41968a251c1e44c8b29d1ffb704e6dd23815f7e6",
     "tests/e2e/p2-run.e2e.spec.ts": "bd6dd92e3309539a1e8ecab1e86ac98ac6370f8e",
-    "tests/e2e/design-decoration.e2e.spec.ts": "6da7f0d7b1495393d729178ced145ec13218359e"
+    "tests/e2e/design-decoration.e2e.spec.ts": "ca2fa08a436d9ed010aac714c715e1f531182bf1"
   }
 }

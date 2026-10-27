@@ -265,7 +265,7 @@ test('closing without retry after timeout still waits for an accepted atomic wri
     const record = JSON.parse(
       await readFile(path.join(userData, SESSION_STATE_FILE_NAME), 'utf8'),
     ) as { version: number; state: { sessions: unknown[] } };
-    expect(record.version).toBe(4);
+    expect(record.version).toBe(5);
     expect(record.state.sessions).toHaveLength(1);
   } finally {
     await app.close();

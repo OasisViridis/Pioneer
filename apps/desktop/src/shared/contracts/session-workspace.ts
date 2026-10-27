@@ -1,4 +1,3 @@
-import type { IntentWorkspaceState } from './intent-workspace';
 import type { ProjectSummary } from './catalog';
 import { LIBRARY_TAB_ID, SETTINGS_TAB_ID } from './tabs';
 
@@ -41,7 +40,6 @@ export interface Session extends Omit<
     LegacySession,
     'layout' | 'dockLayouts' | 'savedLayouts'
   > | null;
-  intentState: IntentWorkspaceState;
 }
 export interface LegacySessionWorkspaceState extends Omit<
   SessionWorkspaceState,

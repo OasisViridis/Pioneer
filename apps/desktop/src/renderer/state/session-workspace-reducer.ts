@@ -1,8 +1,3 @@
-import { initialIntentWorkspaceState } from '../../shared/contracts/intent-workspace';
-import {
-  intentWorkspaceReducer,
-  type IntentWorkspaceAction,
-} from './intent-workspace';
 import type { ProjectSummary } from '../../shared/contracts/catalog';
 import {
   LIBRARY_TAB_ID,
@@ -31,12 +26,6 @@ type SessionOperation =
   | { type: 'UPDATE_DRAFT'; id: SessionId; value: string }
   | { type: 'SAVE_MESSAGE'; id: SessionId }
   | { type: 'RENAME_SESSION'; id: SessionId; title: string }
-  | {
-      type: 'INTENT_ACTION';
-      id: SessionId;
-      action:
-        Exclude<IntentWorkspaceAction, { type: 'SUBMIT' }> | { type: 'SUBMIT' };
-    }
   | { type: 'TOGGLE_PANEL'; id: SessionId; panel: DockPanelId }
   | {
       type: 'DOCK_PANEL';
@@ -136,21 +125,6 @@ function editSession(session: Session, action: SessionOperation): Session {
         return session;
       return { ...session, title, customTitle: true };
     }
-    case 'INTENT_ACTION': {
-      const next = intentWorkspaceReducer(
-        session.intentState,
-        action.action.type === 'SUBMIT'
-          ? {
-              type: 'SUBMIT',
-              projectId: session.project.id,
-              ownerId: session.id,
-            }
-          : action.action,
-      );
-      return next === session.intentState
-        ? session
-        : { ...session, intentState: next };
-    }
     case 'TOGGLE_PANEL':
       return changeDock(
         session,
@@ -227,7 +201,6 @@ function reduce(
         dock: createDockLayout('focus'),
         savedDock: null,
         layoutHistory: null,
-        intentState: initialIntentWorkspaceState(),
         outputTab: 'preview',
       };
       return activate(
@@ -311,12 +284,9 @@ function reduce(
         let next = editSession(session, action);
         if (next === session) return session;
         if (
-          [
-            'UPDATE_DRAFT',
-            'SAVE_MESSAGE',
-            'RENAME_SESSION',
-            'INTENT_ACTION',
-          ].includes(action.type)
+          ['UPDATE_DRAFT', 'SAVE_MESSAGE', 'RENAME_SESSION'].includes(
+            action.type,
+          )
         )
           next = activity(next, state, action.occurredAt);
         return next;
