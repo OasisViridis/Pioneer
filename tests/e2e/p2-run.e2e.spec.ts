@@ -91,6 +91,15 @@ test('completes a controlled read-only run with a real tool result and unchanged
     await page.getByRole('button', { name: '启动运行' }).click();
     await expect(page.locator('.hazel-companion')).toHaveCount(0);
 
+    // P3-A (#17) moved the live event list out of the run controls into the
+    // RunLog dock panel; open it before asserting on streamed events.
+    await page.getByLabel('模块', { exact: true }).click();
+    await page.getByRole('button', { name: '+ 运行日志', exact: true }).click();
+    await page.getByLabel('模块', { exact: true }).press('Escape');
+    await expect(
+      page.locator('.dock-panel[data-panel-id="runlog"]'),
+    ).toBeVisible();
+
     await expect(
       page.getByText('工具请求：read_file', { exact: true }),
     ).toBeVisible();
@@ -186,13 +195,20 @@ test('rejects file content the user did not add to the egress manifest', async (
       .locator('input')
       .uncheck();
     await page.getByRole('button', { name: '启动运行' }).click();
+    // The refusal is rendered by the RunLog panel, not the run controls.
+    await page.getByLabel('模块', { exact: true }).click();
+    await page.getByRole('button', { name: '+ 运行日志', exact: true }).click();
+    await page.getByLabel('模块', { exact: true }).press('Escape');
+    await expect(
+      page.locator('.dock-panel[data-panel-id="runlog"]'),
+    ).toBeVisible();
     await expect(
       page.locator('.run-status', { hasText: '已完成' }),
     ).toBeVisible({
       timeout: 10_000,
     });
     await expect(
-      page.locator('.run-event', {
+      page.locator('.dock-panel[data-panel-id="runlog"] .run-event', {
         hasText: 'rejected · MATERIAL_NOT_ALLOWED',
       }),
     ).toBeVisible();

@@ -4,7 +4,7 @@ import type {
   LegacySessionWorkspaceState as SessionWorkspaceState,
 } from './contracts/session-workspace';
 import { LIBRARY_TAB_ID, SETTINGS_TAB_ID } from './contracts/session-workspace';
-import { DOCK_PANELS, createDockLayout } from './docking';
+import { DOCK_PANELS, LEGACY_DOCK_PANELS, createDockLayout } from './docking';
 import { ProjectSummarySchema } from './validation';
 import { MAX_ACTIVITY_TIMESTAMP } from './session-activity';
 
@@ -28,28 +28,24 @@ const SessionIdSchema = z
 const LayoutSchema = z.enum(layouts);
 const PanelIdSchema = z.enum(['context', 'capabilities', 'diff', 'outputs']);
 const DockPanelIdSchema = z.enum(DOCK_PANELS);
-const OutputTabSchema = z.enum(['preview', 'files', 'verification']);
-const TabIdSchema = z.union([
-  z.literal(LIBRARY_TAB_ID),
-  z.literal(SETTINGS_TAB_ID),
-  SessionIdSchema,
-]);
+const weight = z
+  .number()
+  .refine(Number.isFinite, 'Weight must be finite.')
+  .min(0.2)
+  .max(8);
 
-const PanelListSchema = z
-  .array(PanelIdSchema)
-  .max(4)
-  .superRefine((panels, context) => {
-    if (new Set(panels).size !== panels.length)
-      context.addIssue({
-        code: 'custom',
-        message: 'Panel lists must not contain duplicates.',
-      });
-  });
-
-const DockColumnSchema = z.array(DockPanelIdSchema).max(DOCK_PANELS.length);
-export const DockLayoutSchema = z
+/**
+ * v1–v6 layouts predate the RunLog panel. Their files contain the five legacy
+ * panels and no `runlog` weight; `addRunlogPanel` upgrades them on load. A
+ * layout that already carries `runlog` is accepted too, so an already-migrated
+ * record parses through the same legacy path.
+ */
+export const LegacyDockLayoutSchema = z
   .object({
-    columns: z.tuple([DockColumnSchema, DockColumnSchema]),
+    columns: z.tuple([
+      z.array(DockPanelIdSchema).max(DOCK_PANELS.length),
+      z.array(DockPanelIdSchema).max(DOCK_PANELS.length),
+    ]),
     hidden: z.array(DockPanelIdSchema).max(DOCK_PANELS.length),
     ratio: z
       .number()
@@ -58,41 +54,32 @@ export const DockLayoutSchema = z
       .max(75),
     weights: z
       .object({
-        conversation: z
-          .number()
-          .refine(Number.isFinite, 'Weight must be finite.')
-          .min(0.2)
-          .max(8),
-        context: z
-          .number()
-          .refine(Number.isFinite, 'Weight must be finite.')
-          .min(0.2)
-          .max(8),
-        capabilities: z
-          .number()
-          .refine(Number.isFinite, 'Weight must be finite.')
-          .min(0.2)
-          .max(8),
-        diff: z
-          .number()
-          .refine(Number.isFinite, 'Weight must be finite.')
-          .min(0.2)
-          .max(8),
-        outputs: z
-          .number()
-          .refine(Number.isFinite, 'Weight must be finite.')
-          .min(0.2)
-          .max(8),
+        conversation: weight,
+        context: weight,
+        capabilities: weight,
+        diff: weight,
+        outputs: weight,
+        /**
+         * Defaulted for v1–v6 layouts that predate the RunLog panel; the load
+         * path inserts the panel with the same weight, so the default never
+         * disagrees with the upgraded layout.
+         */
+        runlog: weight.default(1),
       })
       .strict(),
   })
   .strict()
   .superRefine((dock, context) => {
     const columns = dock.columns.flat();
+    const currentComplete =
+      columns.length === DOCK_PANELS.length &&
+      DOCK_PANELS.every((id) => columns.includes(id));
+    const legacyComplete =
+      columns.length === LEGACY_DOCK_PANELS.length &&
+      LEGACY_DOCK_PANELS.every((id) => columns.includes(id));
     if (
       new Set(columns).size !== columns.length ||
-      columns.length !== DOCK_PANELS.length ||
-      DOCK_PANELS.some((id) => !columns.includes(id))
+      !(currentComplete || legacyComplete)
     ) {
       context.addIssue({
         code: 'custom',
@@ -116,6 +103,23 @@ export const DockLayoutSchema = z
     }
   });
 
+const OutputTabSchema = z.enum(['preview', 'files', 'verification']);
+const TabIdSchema = z.union([
+  z.literal(LIBRARY_TAB_ID),
+  z.literal(SETTINGS_TAB_ID),
+  SessionIdSchema,
+]);
+const PanelListSchema = z
+  .array(PanelIdSchema)
+  .max(4)
+  .superRefine((panels, context) => {
+    if (new Set(panels).size !== panels.length)
+      context.addIssue({
+        code: 'custom',
+        message: 'Panel lists must not contain duplicates.',
+      });
+  });
+
 const V2SessionSchema = z
   .object({
     id: SessionIdSchema,
@@ -134,16 +138,16 @@ const V2SessionSchema = z
     layout: LayoutSchema,
     dockLayouts: z
       .object({
-        focus: DockLayoutSchema,
-        review: DockLayoutSchema,
-        delivery: DockLayoutSchema,
+        focus: LegacyDockLayoutSchema,
+        review: LegacyDockLayoutSchema,
+        delivery: LegacyDockLayoutSchema,
       })
       .strict(),
     savedLayouts: z
       .object({
-        focus: DockLayoutSchema.optional(),
-        review: DockLayoutSchema.optional(),
-        delivery: DockLayoutSchema.optional(),
+        focus: LegacyDockLayoutSchema.optional(),
+        review: LegacyDockLayoutSchema.optional(),
+        delivery: LegacyDockLayoutSchema.optional(),
       })
       .strict(),
     outputTab: OutputTabSchema,

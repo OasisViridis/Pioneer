@@ -11,7 +11,13 @@ import { SessionTitle } from './SessionTitle';
 import { Conversation } from './Conversation';
 import { DockSurface } from './DockSurface';
 import { panelNames, WorkbenchPanel } from './WorkbenchPanels';
-const panels: PanelId[] = ['context', 'capabilities', 'diff', 'outputs'];
+const panels: PanelId[] = [
+  'context',
+  'capabilities',
+  'runlog',
+  'diff',
+  'outputs',
+];
 export function SessionWorkbench({
   session,
   dispatch,

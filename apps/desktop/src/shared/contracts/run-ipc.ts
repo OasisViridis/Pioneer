@@ -6,6 +6,7 @@ import {
   type ListRunMaterialsRequest,
   type ListRunMaterialsReply,
 } from './egress';
+import type { RunContextReply } from './run-context';
 import {
   RunCursorRequestSchema,
   RunEventSchema,
@@ -27,6 +28,7 @@ export const RUN_IPC_CHANNELS = {
   unsubscribe: 'run:unsubscribe',
   events: 'run:events',
   materials: 'run:materials',
+  context: 'run:context',
 } as const;
 
 export const RUN_ADMISSION_CODES = [
@@ -156,6 +158,10 @@ export interface RunDesktopApi {
   startRun(request: RunStartRequest): Promise<RunStartReply>;
   stopRun(request: RunStopRequest): Promise<RunStopReply>;
   getRun(request: RunCursorRequest): Promise<RunPage | null>;
+  /** Read-only context projection: approved/read materials and the call log. */
+  getRunContext(
+    request: z.infer<typeof RunIdentitySchema>,
+  ): Promise<RunContextReply>;
   subscribeRun(request: RunCursorRequest): Promise<boolean>;
   acknowledgeRunPage(request: RunCursorRequest): Promise<void>;
   unsubscribeRun(

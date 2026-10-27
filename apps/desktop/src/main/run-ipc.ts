@@ -1,8 +1,10 @@
 import {
   RunCursorRequestSchema,
+  RunIdentitySchema,
   RunStartRequestSchema,
   RunStopRequestSchema,
 } from '../shared/contracts/pioneer-run';
+import { RunContextReplySchema } from '../shared/contracts/run-context';
 import {
   ListRunMaterialsReplySchema,
   ListRunMaterialsRequestSchema,
@@ -182,6 +184,25 @@ export function registerRunIpc(dependencies: RunIpcDependencies): void {
         : null;
     return Promise.resolve(
       page === null ? { ok: false, code: 'RUN_NOT_FOUND' } : { ok: true, page },
+    );
+  });
+
+  dependencies.ipcMain.handle(RUN_IPC_CHANNELS.context, (event, ...args) => {
+    const trusted = guard(event);
+    const parsed = RunIdentitySchema.safeParse(args[0]);
+    const context =
+      trusted.ok && parsed.success
+        ? dependencies.manager.getContext({
+            ...parsed.data,
+            ...binding(event),
+          })
+        : null;
+    return Promise.resolve(
+      RunContextReplySchema.parse(
+        context === null
+          ? { ok: false, code: 'RUN_NOT_FOUND' }
+          : { ok: true, context },
+      ),
     );
   });
 

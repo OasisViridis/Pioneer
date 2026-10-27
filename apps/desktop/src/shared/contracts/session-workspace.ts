@@ -1,4 +1,5 @@
 import type { ProjectSummary } from './catalog';
+import type { RunSnapshot } from './run-context';
 import type { SessionRunRecord } from './session-run-history';
 import { LIBRARY_TAB_ID, SETTINGS_TAB_ID } from './tabs';
 
@@ -8,7 +9,8 @@ export type SessionTabId =
   typeof LIBRARY_TAB_ID | typeof SETTINGS_TAB_ID | SessionId;
 /** v1-v3 persistence vocabulary only. P1 migrates this to one session layout. */
 export type Layout = 'focus' | 'review' | 'delivery';
-export type PanelId = 'context' | 'capabilities' | 'diff' | 'outputs';
+export type PanelId =
+  'context' | 'capabilities' | 'runlog' | 'diff' | 'outputs';
 export type DockPanelId = 'conversation' | PanelId;
 export type DockColumn = 0 | 1;
 export type OutputTab = 'preview' | 'files' | 'verification';
@@ -43,6 +45,10 @@ export interface Session extends Omit<
   > | null;
   /** Bounded per-session run task/result history (Issue #13 item 1). */
   runHistory: SessionRunRecord[];
+  /** Revision of the newest started run; edits never renumber past runs. */
+  runRevision: number;
+  /** Bounded summary of the newest run, kept across restarts (Issue #17). */
+  lastRunView: RunSnapshot | null;
 }
 export interface LegacySessionWorkspaceState extends Omit<
   SessionWorkspaceState,

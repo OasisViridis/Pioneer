@@ -316,14 +316,121 @@
 .run-status--failed {
   color: #b3541e;
 }
-.run-log__list ol {
-  margin: 8px 0 0;
+.run-detail {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.module-run-identity {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hazel-line);
+}
+.run-detail__heading {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+.run-material-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.run-material {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--hazel-line);
+  border-radius: 8px;
+  background: var(--hazel-surface);
+}
+.run-material p {
+  margin: 0;
+}
+.run-material__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.run-material__path {
+  font-size: 13px;
+  word-break: break-all;
+}
+.run-material__state {
+  font-size: 12px;
+  padding: 1px 6px;
+  border: 1px solid var(--hazel-line);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.run-material__state--read {
+  color: #2f6b3a;
+  border-color: #9fc9a7;
+}
+.run-material__state--scanned {
+  color: #3f5f8a;
+  border-color: #a7bcd4;
+}
+.run-material__state--changed,
+.run-material__state--missing {
+  color: #b3541e;
+  border-color: #e0b19a;
+}
+.run-authorization summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--hazel-secondary);
+}
+.capability-calls {
+  margin: 0;
   padding: 0;
   list-style: none;
   display: grid;
   gap: 6px;
-  max-height: 260px;
-  overflow-y: auto;
+}
+.capability-call {
+  padding: 6px 8px;
+  border: 1px solid var(--hazel-line);
+  border-radius: 8px;
+}
+.capability-call p {
+  margin: 2px 0 0;
+}
+.capability-call__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+.capability-state {
+  font-size: 12px;
+}
+.capability-state--succeeded {
+  color: #2f6b3a;
+}
+.capability-state--rejected,
+.capability-state--failed {
+  color: #b3541e;
+}
+.capability-state--requested,
+.capability-state--cancelled {
+  color: var(--hazel-secondary);
+}
+.run-log-entries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.run-event p {
+  margin: 0;
+}
+.run-event__meta {
+  margin: 0 0 2px;
 }
 .run-event {
   font-size: 12px;

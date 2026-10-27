@@ -8,6 +8,7 @@ import {
   sessionWorkspaceReducer,
 } from '../../apps/desktop/src/renderer/state/session-workspace-reducer';
 import { SessionStateSchema } from '../../apps/desktop/src/shared/session-state';
+import type { RunSnapshot } from '../../apps/desktop/src/shared/contracts/run-context';
 
 const project = {
   id: 'alpha',
@@ -132,5 +133,129 @@ describe('separate project and session workspaces', () => {
         record: record(20),
       }),
     ).toBe(before);
+  });
+});
+
+describe('P3-A run revision and persisted summary (#17)', () => {
+  const snapshotOf = (
+    runId: string,
+    revision: number,
+    recordedAt = '2026-10-27T10:00:01.000Z',
+    state: 'read' | 'approved' = 'read',
+  ): RunSnapshot => ({
+    identity: {
+      sessionId: 'session:a' as const,
+      projectId: 'alpha',
+      runId,
+      revision,
+    },
+    status: 'completed' as const,
+    tools: ['read_file'],
+    materials: [
+      {
+        path: 'README.md',
+        bytes: 12,
+        sha256: 'd'.repeat(64),
+        state,
+        reason: null,
+        readAt: state === 'read' ? '2026-10-27T10:00:00.000Z' : null,
+      },
+    ],
+    calls: [],
+    recordedAt,
+  });
+
+  it('increments the session revision monotonically and keeps the newest snapshot', () => {
+    let state = sessionWorkspaceReducer(initialSessionWorkspaceState, {
+      type: 'CREATE_SESSION',
+      id: 'session:a',
+      project,
+    });
+    expect(state.sessions[0]?.runRevision).toBe(0);
+    expect(state.sessions[0]?.lastRunView).toBeNull();
+
+    state = sessionWorkspaceReducer(state, {
+      type: 'BUMP_RUN_REVISION',
+      id: 'session:a',
+      revision: 1,
+    });
+    expect(state.sessions[0]?.runRevision).toBe(1);
+    const afterFirst = state;
+    state = sessionWorkspaceReducer(state, {
+      type: 'BUMP_RUN_REVISION',
+      id: 'session:a',
+      revision: 1,
+    });
+    expect(state).toBe(afterFirst);
+    state = sessionWorkspaceReducer(state, {
+      type: 'BUMP_RUN_REVISION',
+      id: 'session:a',
+      revision: 2,
+    });
+    expect(state.sessions[0]?.runRevision).toBe(2);
+
+    state = sessionWorkspaceReducer(state, {
+      type: 'RECORD_RUN_SNAPSHOT',
+      id: 'session:a',
+      snapshot: snapshotOf('run:2', 2),
+    });
+    expect(state.sessions[0]?.lastRunView?.identity.runId).toBe('run:2');
+    const recorded = state;
+    state = sessionWorkspaceReducer(state, {
+      type: 'RECORD_RUN_SNAPSHOT',
+      id: 'session:a',
+      snapshot: snapshotOf('run:2', 2),
+    });
+    expect(state).toBe(recorded);
+    // A newer capture of the same run replaces an earlier, less complete one.
+    state = sessionWorkspaceReducer(state, {
+      type: 'RECORD_RUN_SNAPSHOT',
+      id: 'session:a',
+      snapshot: snapshotOf('run:2', 2, '2026-10-27T10:00:05.000Z', 'approved'),
+    });
+    expect(state.sessions[0]?.lastRunView?.recordedAt).toBe(
+      '2026-10-27T10:00:05.000Z',
+    );
+    expect(state.sessions[0]?.lastRunView?.materials[0]?.state).toBe(
+      'approved',
+    );
+    // An older capture must not roll the summary back.
+    const newest = state;
+    state = sessionWorkspaceReducer(state, {
+      type: 'RECORD_RUN_SNAPSHOT',
+      id: 'session:a',
+      snapshot: snapshotOf('run:2', 2, '2026-10-27T09:00:00.000Z'),
+    });
+    expect(state).toBe(newest);
+    state = sessionWorkspaceReducer(state, {
+      type: 'RECORD_RUN_SNAPSHOT',
+      id: 'session:a',
+      snapshot: snapshotOf('run:3', 3),
+    });
+    expect(state.sessions[0]?.lastRunView?.identity.runId).toBe('run:3');
+    expect(SessionStateSchema.safeParse(state).success).toBe(true);
+  });
+
+  it('shows the RunLog panel without hiding an already visible panel', () => {
+    let state = sessionWorkspaceReducer(initialSessionWorkspaceState, {
+      type: 'CREATE_SESSION',
+      id: 'session:a',
+      project,
+    });
+    expect(state.sessions[0]?.dock.hidden).toContain('runlog');
+    state = sessionWorkspaceReducer(state, {
+      type: 'SHOW_PANEL',
+      id: 'session:a',
+      panel: 'runlog',
+    });
+    expect(state.sessions[0]?.dock.hidden).not.toContain('runlog');
+    const shown = state;
+    state = sessionWorkspaceReducer(state, {
+      type: 'SHOW_PANEL',
+      id: 'session:a',
+      panel: 'runlog',
+    });
+    expect(state).toBe(shown);
+    expect(state.sessions[0]?.dock.columns.flat()).toContain('runlog');
   });
 });

@@ -47,14 +47,35 @@ export function Conversation({
               上下文
             </button>
             <details className="run-log">
-              <summary>运行日志</summary>
+              <summary>运行控制</summary>
               <div>
-                <h3>运行日志</h3>
+                <h3>运行控制</h3>
                 <RunPanel
                   session={session}
                   project={session.project}
                   onRunTerminal={(record) => {
                     dispatch({ type: 'RECORD_RUN', id: session.id, record });
+                  }}
+                  onRunSnapshot={(snapshot) => {
+                    dispatch({
+                      type: 'RECORD_RUN_SNAPSHOT',
+                      id: session.id,
+                      snapshot,
+                    });
+                  }}
+                  onRunStarted={(revision) => {
+                    dispatch({
+                      type: 'BUMP_RUN_REVISION',
+                      id: session.id,
+                      revision,
+                    });
+                  }}
+                  onOpenLog={() => {
+                    dispatch({
+                      type: 'SHOW_PANEL',
+                      id: session.id,
+                      panel: 'runlog',
+                    });
                   }}
                 />
               </div>
@@ -79,7 +100,7 @@ export function Conversation({
                 <div>
                   <strong>运行器默认不启动</strong>
                   <p>
-                    先整理任务并保存。点击运行日志里的「启动运行」后才会调用模型，工具仅限只读；过程与结果都在运行日志里。
+                    先整理任务并保存。点击「运行控制」里的启动按钮后才会调用模型，工具仅限只读；过程与结果在「运行日志」面板里。
                   </p>
                 </div>
               </div>

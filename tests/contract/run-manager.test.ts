@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile, mkdir, realpath } from 'node:fs/promises';
+import { mkdtemp, writeFile, mkdir, realpath, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -15,6 +15,7 @@ import {
 } from '../../apps/desktop/src/main/harness/run-journal';
 import {
   RunManager,
+  normalizedToolTarget,
   type RunSenderPort,
 } from '../../apps/desktop/src/main/harness/run-manager';
 import type {
@@ -1455,5 +1456,334 @@ describe('P2 run manager edge hardening', () => {
       type: 'run.completed',
       usage: { inputTokens: null, outputTokens: null },
     });
+  });
+});
+
+describe('P3-A run context projection (#17)', () => {
+  function contextOf(
+    manager: RunManager,
+    runId: string,
+    overrides: {
+      windowEpoch?: number;
+      revision?: number;
+      sessionId?: string;
+    } = {},
+  ) {
+    return manager.getContext({
+      sessionId: overrides.sessionId ?? 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: overrides.revision ?? 1,
+      webContentsId,
+      windowEpoch: overrides.windowEpoch ?? windowEpoch,
+    });
+  }
+
+  it('reports approved, read and scanned materials plus normalized call targets', async () => {
+    const { manager, projectRoot } = await createManager({
+      steps: [
+        {
+          action: 'tool',
+          request: {
+            tool: 'read_file',
+            arguments: { path: 'notes/readme.txt' },
+          },
+        },
+        {
+          action: 'tool',
+          request: {
+            tool: 'search_in_files',
+            arguments: { path: 'notes', query: 'fixture' },
+          },
+        },
+        { action: 'text', text: 'done' },
+        { action: 'complete' },
+      ],
+    });
+    await mkdir(join(projectRoot, 'notes'), { recursive: true });
+    await writeFile(
+      join(projectRoot, 'notes', 'readme.txt'),
+      'fixture-answer',
+      'utf-8',
+    );
+    await writeFile(
+      join(projectRoot, 'notes', 'other.txt'),
+      'fixture-other',
+      'utf-8',
+    );
+    await writeFile(
+      join(projectRoot, 'notes', 'unused.txt'),
+      'nothing here',
+      'utf-8',
+    );
+    const { runId } = await launchRun(manager, {
+      materials: ['notes/readme.txt', 'notes/other.txt', 'notes/unused.txt'],
+    });
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+
+    const context = contextOf(manager, runId);
+    expect(context).not.toBeNull();
+    if (context === null) return;
+    const byPath = new Map(context.materials.map((item) => [item.path, item]));
+    expect(byPath.get('notes/readme.txt')?.state).toBe('read');
+    expect(byPath.get('notes/readme.txt')?.readAt).not.toBeNull();
+    expect(byPath.get('notes/other.txt')?.state).toBe('scanned');
+    expect(byPath.get('notes/unused.txt')?.state).toBe('scanned');
+    expect(context.calls).toHaveLength(2);
+    expect(context.calls[0]).toMatchObject({
+      tool: 'read_file',
+      target: 'notes/readme.txt',
+      state: 'succeeded',
+      code: null,
+    });
+    expect(context.calls[1]).toMatchObject({
+      tool: 'search_in_files',
+      target: 'notes',
+      state: 'succeeded',
+    });
+    // The event wire still carries no tool arguments; provenance lives only here.
+    const events = pageOf(manager, runId)?.events ?? [];
+    const requestedBodies = events
+      .filter((event) => event.body.type === 'tool.requested')
+      .map((event) => event.body);
+    expect(JSON.stringify(requestedBodies)).not.toContain('notes/');
+  });
+
+  it('marks a material whose bytes changed as changed instead of read', async () => {
+    let file = '';
+    const { manager, projectRoot } = await createManager(
+      {
+        steps: [
+          {
+            action: 'tool',
+            request: {
+              tool: 'read_file',
+              arguments: { path: 'notes/changing.txt' },
+            },
+          },
+          { action: 'complete' },
+        ],
+      },
+      {
+        executeTool: async (root, request, signal, materials) => {
+          await writeFile(file, 'after-authorization', 'utf-8');
+          return executeReadOnlyTool(root, request, signal, materials);
+        },
+      },
+    );
+    await mkdir(join(projectRoot, 'notes'), { recursive: true });
+    file = join(projectRoot, 'notes', 'changing.txt');
+    await writeFile(file, 'before-authorization', 'utf-8');
+    const authorization = await manager.authorize({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      revision: 1,
+      task: '读取 fixture 并回答。',
+      materials: ['notes/changing.txt'],
+      ...binding,
+    });
+    if (!authorization.ok) throw new Error('authorize failed');
+    const started = await manager.start(
+      {
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:changed',
+        grantId: authorization.authorization.grantId,
+      },
+      binding,
+    );
+    if (!started.ok) throw new Error('start failed');
+    await waitFor(() => pageOf(manager, started.runId)?.status === 'failed');
+    const context = contextOf(manager, started.runId);
+    expect(context?.materials[0]).toMatchObject({
+      path: 'notes/changing.txt',
+      state: 'changed',
+      reason: 'CONTENT_NOT_ALLOWED',
+    });
+    expect(context?.calls[0]).toMatchObject({
+      tool: 'read_file',
+      target: 'notes/changing.txt',
+      state: 'rejected',
+      code: 'CONTENT_NOT_ALLOWED',
+    });
+  });
+
+  it('marks a failed read as unavailable with a fixed reason', async () => {
+    let file = '';
+    const { manager, projectRoot } = await createManager(
+      {
+        steps: [
+          {
+            action: 'tool',
+            request: {
+              tool: 'read_file',
+              arguments: { path: 'notes/lost.txt' },
+            },
+          },
+          { action: 'complete' },
+        ],
+      },
+      {
+        executeTool: async (root, request, signal, materials) => {
+          await rm(file, { force: true });
+          return executeReadOnlyTool(root, request, signal, materials);
+        },
+      },
+    );
+    await mkdir(join(projectRoot, 'notes'), { recursive: true });
+    file = join(projectRoot, 'notes', 'lost.txt');
+    await writeFile(file, 'lost-body', 'utf-8');
+    const authorization = await manager.authorize({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      revision: 1,
+      task: '读取 fixture 并回答。',
+      materials: ['notes/lost.txt'],
+      ...binding,
+    });
+    if (!authorization.ok) throw new Error('authorize failed');
+    const started = await manager.start(
+      {
+        sessionId: 'session:test',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:lost',
+        grantId: authorization.authorization.grantId,
+      },
+      binding,
+    );
+    if (!started.ok) throw new Error('start failed');
+    await waitFor(() => pageOf(manager, started.runId)?.status === 'completed');
+    const context = contextOf(manager, started.runId);
+    expect(context?.materials[0]).toMatchObject({
+      path: 'notes/lost.txt',
+      state: 'missing',
+      reason: 'PATH_UNAVAILABLE',
+    });
+    expect(context?.calls[0]).toMatchObject({
+      tool: 'read_file',
+      target: 'notes/lost.txt',
+      state: 'rejected',
+      code: 'PATH_UNAVAILABLE',
+    });
+  });
+
+  it('refuses context for another window epoch, revision or session', async () => {
+    const { manager } = await createManager({
+      steps: [{ action: 'complete' }],
+    });
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+    expect(contextOf(manager, runId)).not.toBeNull();
+    expect(
+      contextOf(manager, runId, { windowEpoch: windowEpoch + 1 }),
+    ).toBeNull();
+    expect(contextOf(manager, runId, { revision: 2 })).toBeNull();
+    expect(
+      contextOf(manager, runId, { sessionId: 'session:other' }),
+    ).toBeNull();
+  });
+});
+
+describe('normalizedToolTarget sanitization (#17)', () => {
+  const root = 'C:/workspace/project';
+  const read = (value: string) =>
+    ({ tool: 'read_file', arguments: { path: value } }) as const;
+
+  it('keeps only normalized project-relative targets', () => {
+    expect(normalizedToolTarget(root, read('README.md'))).toBe('README.md');
+    expect(normalizedToolTarget(root, read('./notes/a.txt'))).toBe(
+      'notes/a.txt',
+    );
+    expect(normalizedToolTarget(root, read('notes/../README.md'))).toBe(
+      'README.md',
+    );
+    expect(
+      normalizedToolTarget(root, {
+        tool: 'list_directory',
+        arguments: { path: 'notes' },
+      }),
+    ).toBe('notes');
+    expect(
+      normalizedToolTarget(root, {
+        tool: 'search_in_files',
+        arguments: { path: 'notes', query: 'needle' },
+      }),
+    ).toBe('notes');
+  });
+
+  it('returns null for traversal, absolute, UNC and sensitive targets', () => {
+    expect(normalizedToolTarget(root, read('../outside.txt'))).toBeNull();
+    expect(normalizedToolTarget(root, read('C:/Windows/win.ini'))).toBeNull();
+    expect(
+      normalizedToolTarget(root, read('\\\\server\\share\\file.txt')),
+    ).toBeNull();
+    expect(normalizedToolTarget(root, read('.env'))).toBeNull();
+    expect(normalizedToolTarget(root, read('notes/.env.local'))).toBeNull();
+    expect(normalizedToolTarget(root, read('notes/..'))).toBeNull();
+  });
+});
+
+describe('P3-A cancelled tool call projection (#17)', () => {
+  it('marks an in-flight call cancelled in the context projection', async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const { manager } = await createManager(
+      {
+        steps: [
+          {
+            action: 'tool',
+            request: {
+              tool: 'read_file',
+              arguments: { path: 'README.md' },
+            },
+          },
+          { action: 'complete' },
+        ],
+      },
+      {
+        executeTool: async (_root, _request, signal) => {
+          await Promise.race([
+            gate,
+            new Promise<void>((resolve) => {
+              signal.addEventListener('abort', () => {
+                resolve();
+              });
+            }),
+          ]);
+          return { status: 'cancelled', code: 'CANCELLED' };
+        },
+      },
+    );
+    const { runId } = await launchRun(manager);
+    await waitFor(() =>
+      (pageOf(manager, runId)?.events ?? []).some(
+        (event) => event.body.type === 'tool.requested',
+      ),
+    );
+    manager.stop({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      ...binding,
+    });
+    await waitFor(() => pageOf(manager, runId)?.status === 'stopped');
+    const context = manager.getContext({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      ...binding,
+    });
+    expect(context?.calls[0]).toMatchObject({
+      tool: 'read_file',
+      state: 'cancelled',
+      code: 'CANCELLED',
+    });
+    release();
   });
 });

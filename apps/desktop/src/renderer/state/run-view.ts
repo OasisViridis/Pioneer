@@ -1,21 +1,35 @@
-import type { RunEvent, RunStatus } from '../../shared/contracts/pioneer-run';
+import {
+  classifyRunEvent,
+  type RunEvent,
+  type RunStatus,
+} from '../../shared/contracts/pioneer-run';
 import type {
   RunAuthorizeReply,
+  RunAuthorizationSummary,
   RunEventBatch,
 } from '../../shared/contracts/run-ipc';
+import type {
+  RunContext,
+  RunContextCall,
+  RunContextReply,
+  RunSnapshot,
+} from '../../shared/contracts/run-context';
 import {
   MAX_SESSION_RUN_RESULT,
   type SessionRunRecord,
   type SessionRunStatus,
 } from '../../shared/contracts/session-run-history';
 import type { EgressCandidate } from '../../shared/contracts/egress';
+import { approvedMaterials, capabilityCalls } from './run-panels';
 
 /**
  * Per-session run view state for the workbench. The five user-visible
  * outcomes (运行中/正在停止/已停止/已完成/失败) come from the run layer's
- * status; the stop button's "停止中…" feedback is local to the view. This
- * module keeps no transcript persistence — durable history lives in main's
- * bounded run journal.
+ * status; the stop button's "停止中…" feedback is local to the view. Events stay
+ * as validated raw `RunEvent`s so the Context / Capabilities / RunLog panels
+ * can read callIds and statuses without a lossy display projection. Every
+ * applied event is re-checked against the bound session and run identity, so a
+ * foreign run can never leak into this session's panels.
  */
 
 export type RunPhase =
@@ -34,15 +48,28 @@ export interface RunDisplayEvent {
   tone: 'model' | 'tool' | 'host' | 'error';
 }
 
+export type RunContextState = 'idle' | 'loading' | 'ready' | 'unavailable';
+
 export interface RunViewState {
   phase: RunPhase;
   runId: string | null;
+  projectId: string | null;
+  revision: number | null;
   status: RunStatus | null;
   failureCode: string | null;
   rejectionCode: string | null;
   summaryText: string | null;
-  events: RunDisplayEvent[];
+  /** Main-generated authorization summary: approved materials and tools. */
+  authorization: RunAuthorizationSummary | null;
+  /** Main-generated context projection for the current run. */
+  context: RunContext | null;
+  contextState: RunContextState;
+  /** The last context query failed (IPC or main error), not merely unavailable. */
+  contextError: boolean;
+  events: RunEvent[];
   omittedHistory: boolean;
+  /** Events rejected by identity/schema checks; shown so nothing is silent. */
+  ignoredEvents: number;
 }
 
 export interface RunPort {
@@ -94,6 +121,12 @@ export interface RunPort {
     nextAfterSeq: number;
     hasMore: boolean;
   } | null>;
+  getRunContext(request: {
+    sessionId: string;
+    projectId: string;
+    runId: string;
+    revision: number;
+  }): Promise<RunContextReply>;
   subscribeRun(request: {
     sessionId: string;
     projectId: string;
@@ -144,7 +177,7 @@ export const rejectionText = (code: string): string =>
 
 const MAX_DISPLAY_EVENTS = 500;
 
-function describe(event: RunEvent): RunDisplayEvent | null {
+export function describe(event: RunEvent): RunDisplayEvent | null {
   const body = event.body;
   switch (body.type) {
     case 'run.accepted':
@@ -221,12 +254,19 @@ function describe(event: RunEvent): RunDisplayEvent | null {
 const IDLE_STATE: RunViewState = {
   phase: 'idle',
   runId: null,
+  projectId: null,
+  revision: null,
   status: null,
   failureCode: null,
   rejectionCode: null,
   summaryText: null,
+  authorization: null,
+  context: null,
+  contextState: 'idle',
+  contextError: false,
   events: [],
   omittedHistory: false,
+  ignoredEvents: 0,
 };
 
 /** Tiny per-session store; the workbench reads it via useSyncExternalStore. */
@@ -251,9 +291,15 @@ export class RunViewStore {
     string,
     (record: SessionRunRecord) => void
   >();
+  private readonly snapshotRecorders = new Map<
+    string,
+    (snapshot: RunSnapshot) => void
+  >();
   private port: RunPort;
   private batchUnsubscribe: (() => void) | null = null;
   private readonly boundSessions = new Set<string>();
+  /** Serialized per-session context refreshes: the last queued read wins. */
+  private readonly contextChains = new Map<string, Promise<void>>();
 
   constructor(port: RunPort) {
     this.port = port;
@@ -288,16 +334,39 @@ export class RunViewStore {
     });
   }
 
+  private sessionForRun(runId: string): string | undefined {
+    return [...this.states.entries()]
+      .filter(([, value]) => value.runId === runId)
+      .map(([key]) => key)[0];
+  }
+
   private async ingestBatch(batch: RunEventBatch): Promise<void> {
     const identity = batch.page.identity;
-    const sessionId = [...this.states.entries()]
-      .filter(([, value]) => value.runId === identity.runId)
-      .map(([key]) => key)[0];
+    const sessionId = this.sessionForRun(identity.runId);
     if (sessionId === undefined) return;
+    const state = this.get(sessionId);
+    // A page for any other run/session/revision never reaches this view.
+    if (state.runId !== identity.runId || state.revision !== identity.revision)
+      return;
     const lastSeq = this.lastSeqByRun.get(identity.runId) ?? 0;
-    const fresh = batch.page.events.filter((event) => event.seq > lastSeq);
+    let ignored = 0;
+    const fresh: RunEvent[] = [];
+    for (const event of batch.page.events) {
+      const verdict = classifyRunEvent(identity, lastSeq, event);
+      if (verdict === 'duplicate') continue;
+      if (verdict === 'foreign' || verdict === 'invalid') {
+        ignored += 1;
+        continue;
+      }
+      fresh.push(event);
+    }
     if (batch.page.gap) {
       this.update(sessionId, { omittedHistory: true });
+    }
+    if (ignored > 0) {
+      this.update(sessionId, (current) => ({
+        ignoredEvents: current.ignoredEvents + ignored,
+      }));
     }
     this.captureRunMeta(identity.runId, fresh);
     this.applyEvents(sessionId, fresh);
@@ -308,7 +377,17 @@ export class RunViewStore {
       status,
       phase: terminal ? 'terminal' : this.get(sessionId).phase,
     });
-    if (terminal) this.recordTerminal(sessionId, identity.runId);
+    if (terminal) {
+      this.recordTerminal(sessionId, identity.runId);
+      void this.refreshContext(sessionId).then(() => {
+        // Only a main-verified projection may become the restart summary; a
+        // failed or missing query leaves the previous snapshot untouched.
+        if (this.get(sessionId).contextState === 'ready')
+          this.captureSnapshot(sessionId);
+      });
+    } else if (fresh.some((event) => event.body.type.startsWith('tool.'))) {
+      void this.refreshContext(sessionId);
+    }
     this.advanceCursor(identity.runId, batch.page.nextAfterSeq);
     await this.port.acknowledgeRunPage({
       sessionId: identity.sessionId,
@@ -383,6 +462,52 @@ export class RunViewStore {
   }
 
   /**
+   * Persists a bounded summary of the terminal run with the session, so the
+   * panels can still name the right Session/Run after a restart. Uses main's
+   * context when available; otherwise falls back to the authorization list
+   * (approved, not read) and the event-derived call log, never invented data.
+   */
+  private captureSnapshot(sessionId: string): void {
+    const record = this.snapshotRecorders.get(sessionId);
+    if (record === undefined) return;
+    const state = this.get(sessionId);
+    if (
+      state.runId === null ||
+      state.projectId === null ||
+      state.revision === null ||
+      state.status === null
+    )
+      return;
+    const status = state.status;
+    if (status !== 'completed' && status !== 'failed' && status !== 'stopped')
+      return;
+    const calls: RunContextCall[] =
+      state.context?.calls ??
+      capabilityCalls(state.events).map((call) => ({
+        callId: call.callId,
+        tool: call.tool as RunContextCall['tool'],
+        target: null,
+        state: call.state,
+        code: call.code,
+        at: call.at,
+      }));
+    record({
+      identity: {
+        sessionId,
+        projectId: state.projectId,
+        runId: state.runId,
+        revision: state.revision,
+      },
+      status,
+      tools: state.authorization?.tools ?? [],
+      materials:
+        state.context?.materials ?? approvedMaterials(state.authorization),
+      calls,
+      recordedAt: new Date().toISOString(),
+    });
+  }
+
+  /**
    * Track what main actually delivered, not its newest seq: a partly filled
    * page (hasMore) must leave the cursor at `nextAfterSeq`, otherwise the
    * follow-up page is filtered out as already seen.
@@ -396,11 +521,10 @@ export class RunViewStore {
     if (events.length === 0) return;
     this.update(sessionId, (state) => {
       const existing = new Set(state.events.map((event) => event.seq));
-      const described = events
-        .map((event) => describe(event))
-        .filter((item): item is RunDisplayEvent => item !== null)
-        .filter((item) => !existing.has(item.seq));
-      const merged = [...state.events, ...described]
+      const merged = [
+        ...state.events,
+        ...events.filter((event) => !existing.has(event.seq)),
+      ]
         .sort((a, b) => a.seq - b.seq)
         .slice(-MAX_DISPLAY_EVENTS);
       const failure = events.find((event) => event.body.type === 'run.failed');
@@ -419,6 +543,67 @@ export class RunViewStore {
     return reply.ok ? reply.materials : [];
   }
 
+  /**
+   * Fetches main's context projection for the current run, if one is bound.
+   * Refreshes are serialized per session so two overlapping tool-result batches
+   * cannot drop the later read; every caller's promise resolves after its own
+   * fetch, which keeps the terminal snapshot from capturing an older context.
+   */
+  refreshContext(sessionId: string): Promise<void> {
+    const prior = this.contextChains.get(sessionId) ?? Promise.resolve();
+    const next = prior
+      .catch(() => undefined)
+      .then(() => this.doRefreshContext(sessionId));
+    this.contextChains.set(sessionId, next);
+    return next.finally(() => {
+      if (this.contextChains.get(sessionId) === next)
+        this.contextChains.delete(sessionId);
+    });
+  }
+
+  private async doRefreshContext(sessionId: string): Promise<void> {
+    const state = this.get(sessionId);
+    const runId = state.runId;
+    const revision = state.revision;
+    const projectId = state.projectId;
+    if (runId === null || revision === null || projectId === null) return;
+    // Keep the last successful projection visible while refreshing; only the
+    // very first read shows the loading copy.
+    if (state.contextState !== 'ready')
+      this.update(sessionId, { contextState: 'loading' });
+    try {
+      const reply = await this.port.getRunContext({
+        sessionId,
+        projectId,
+        runId,
+        revision,
+      });
+      const current = this.get(sessionId);
+      if (current.runId !== runId) return;
+      if (reply.ok) {
+        this.update(sessionId, {
+          context: reply.context,
+          contextState: 'ready',
+          contextError: false,
+        });
+      } else {
+        this.update(sessionId, {
+          context: null,
+          contextState: 'unavailable',
+          contextError: false,
+        });
+      }
+    } catch {
+      const current = this.get(sessionId);
+      if (current.runId !== runId) return;
+      this.update(sessionId, {
+        context: null,
+        contextState: 'unavailable',
+        contextError: true,
+      });
+    }
+  }
+
   async launch(input: {
     sessionId: string;
     projectId: string;
@@ -427,6 +612,8 @@ export class RunViewStore {
     materials: string[];
     summaryText?: string;
     onTerminal?: (record: SessionRunRecord) => void;
+    onSnapshot?: (snapshot: RunSnapshot) => void;
+    onStarted?: (revision: number) => void;
   }): Promise<void> {
     this.ensureBatchListener();
     if (this.boundSessions.has(input.sessionId)) return;
@@ -436,10 +623,14 @@ export class RunViewStore {
     try {
       this.update(input.sessionId, {
         phase: 'authorizing',
+        projectId: input.projectId,
         rejectionCode: null,
         failureCode: null,
         summaryText: input.summaryText ?? null,
         omittedHistory: false,
+        ignoredEvents: 0,
+        context: null,
+        contextState: 'idle',
       });
       const authorization = await this.port.authorizeRun({
         sessionId: input.sessionId,
@@ -464,6 +655,9 @@ export class RunViewStore {
         grantId: authorization.summary.grantId,
       });
       if (!started.ok) {
+        // A rejected start creates no run: keep the previous run's panels and
+        // do not show this attempt's unused authorization as if it belonged to
+        // the run the identity line still names.
         this.update(input.sessionId, {
           phase: 'error',
           rejectionCode: started.code,
@@ -471,6 +665,7 @@ export class RunViewStore {
         return;
       }
       this.lastSeqByRun.delete(started.runId);
+      input.onStarted?.(input.revision);
       this.runMeta.set(started.runId, {
         task: input.task,
         startedAt: '',
@@ -487,12 +682,22 @@ export class RunViewStore {
       } else {
         this.terminalRecorders.delete(input.sessionId);
       }
+      if (input.onSnapshot !== undefined) {
+        this.snapshotRecorders.set(input.sessionId, input.onSnapshot);
+      } else {
+        this.snapshotRecorders.delete(input.sessionId);
+      }
       this.update(input.sessionId, {
         phase: 'active',
         runId: started.runId,
+        revision: input.revision,
         status: 'starting',
         events: [],
         failureCode: null,
+        authorization: authorization.summary,
+        context: null,
+        contextState: 'loading',
+        contextError: false,
       });
       await this.port.subscribeRun({
         sessionId: input.sessionId,
@@ -521,6 +726,11 @@ export class RunViewStore {
           this.recordTerminal(input.sessionId, started.runId);
         }
       }
+      // One final read after all queued refreshes; captureSnapshot is a no-op
+      // for a run that is still live and for a context that is not ready.
+      await this.refreshContext(input.sessionId);
+      if (this.get(input.sessionId).contextState === 'ready')
+        this.captureSnapshot(input.sessionId);
     } finally {
       this.boundSessions.delete(input.sessionId);
     }
@@ -538,9 +748,9 @@ export class RunViewStore {
     this.update(input.sessionId, { phase: 'stopping', rejectionCode: null });
     const reply = await this.port.stopRun({
       sessionId: input.sessionId,
-      projectId: input.projectId,
+      projectId: state.projectId ?? input.projectId,
       runId: state.runId,
-      revision: input.revision,
+      revision: state.revision ?? input.revision,
       requestId: `stop:${state.runId}`,
     });
     if (reply.ok) {
@@ -570,7 +780,19 @@ export class RunViewStore {
 
   /** Called by React when the workbench unmounts a session view. */
   reset(sessionId: string): void {
-    this.update(sessionId, { phase: 'idle', events: [] });
+    this.update(sessionId, {
+      phase: 'idle',
+      runId: null,
+      revision: null,
+      status: null,
+      events: [],
+      context: null,
+      contextState: 'idle',
+      contextError: false,
+      authorization: null,
+      ignoredEvents: 0,
+      omittedHistory: false,
+    });
   }
 }
 

@@ -24,14 +24,18 @@ import {
   MAX_SESSION_RUN_HISTORY,
   type SessionRunRecord,
 } from '../../shared/contracts/session-run-history';
+import type { RunSnapshot } from '../../shared/contracts/run-context';
 import { SessionStateSchema } from '../../shared/session-state';
 
 type SessionOperation =
   | { type: 'UPDATE_DRAFT'; id: SessionId; value: string }
   | { type: 'SAVE_MESSAGE'; id: SessionId }
   | { type: 'RECORD_RUN'; id: SessionId; record: SessionRunRecord }
+  | { type: 'RECORD_RUN_SNAPSHOT'; id: SessionId; snapshot: RunSnapshot }
+  | { type: 'BUMP_RUN_REVISION'; id: SessionId; revision: number }
   | { type: 'RENAME_SESSION'; id: SessionId; title: string }
   | { type: 'TOGGLE_PANEL'; id: SessionId; panel: DockPanelId }
+  | { type: 'SHOW_PANEL'; id: SessionId; panel: DockPanelId }
   | {
       type: 'DOCK_PANEL';
       id: SessionId;
@@ -128,6 +132,22 @@ function editSession(session: Session, action: SessionOperation): Session {
         history.splice(0, history.length - MAX_SESSION_RUN_HISTORY);
       return { ...session, runHistory: history };
     }
+    case 'RECORD_RUN_SNAPSHOT': {
+      const existing = session.lastRunView;
+      // The terminal capture may race an earlier, less complete context read;
+      // a newer capture of the same run must be able to replace it.
+      if (
+        existing !== null &&
+        existing.identity.runId === action.snapshot.identity.runId &&
+        existing.recordedAt >= action.snapshot.recordedAt
+      )
+        return session;
+      return { ...session, lastRunView: action.snapshot };
+    }
+    case 'BUMP_RUN_REVISION': {
+      if (action.revision <= session.runRevision) return session;
+      return { ...session, runRevision: action.revision };
+    }
     case 'RENAME_SESSION': {
       const title = action.title.trim();
       if (
@@ -145,6 +165,8 @@ function editSession(session: Session, action: SessionOperation): Session {
           ? showDockPanel(dock, action.panel)
           : hideDockPanel(dock, action.panel),
       );
+    case 'SHOW_PANEL':
+      return changeDock(session, showDockPanel(dock, action.panel));
     case 'DOCK_PANEL':
       return changeDock(
         session,
@@ -216,6 +238,8 @@ function reduce(
         layoutHistory: null,
         outputTab: 'preview',
         runHistory: [],
+        runRevision: 0,
+        lastRunView: null,
       };
       return activate(
         {

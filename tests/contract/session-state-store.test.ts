@@ -64,6 +64,8 @@ function stateWith(
         layoutHistory: null,
         outputTab: 'preview',
         runHistory: [],
+        runRevision: 0,
+        lastRunView: null,
       },
     ],
     openSessionIds: [id],
@@ -78,11 +80,21 @@ function legacyV3State(): LegacySessionWorkspaceState {
   return {
     ...current,
     sessions: current.sessions.map(
-      ({ dock, savedDock, layoutHistory, runHistory, ...base }) => {
+      ({
+        dock,
+        savedDock,
+        layoutHistory,
+        runHistory,
+        runRevision,
+        lastRunView,
+        ...base
+      }) => {
         expect(dock).toEqual(createDockLayout('focus'));
         expect(savedDock).toBeNull();
         expect(layoutHistory).toBeNull();
         expect(runHistory).toEqual([]);
+        expect(runRevision).toBe(0);
+        expect(lastRunView).toBeNull();
         return {
           ...base,
           layout: 'focus',
@@ -455,7 +467,7 @@ describe('session state migration', () => {
       SessionStateRecordSchema.parse(
         withFocus({
           ...hiddenConversation,
-          hidden: [...hiddenConversation.hidden, 'context'],
+          hidden: [...hiddenConversation.hidden, 'context', 'runlog'],
         }),
       ),
     ).toThrow();
@@ -628,5 +640,100 @@ describe('session state v5 migration (#41 stage 2)', () => {
     expect(restored?.runHistory).toEqual([]);
     expect(restored).not.toHaveProperty('intentState');
     expect(await readFile(statePath, 'utf8')).toBe(bytes);
+  });
+});
+
+describe('session v6 migration (#17 RunLog panel)', () => {
+  function legacyDock() {
+    return {
+      columns: [
+        ['context', 'capabilities', 'diff', 'outputs'],
+        ['conversation'],
+      ],
+      hidden: ['context', 'capabilities', 'diff', 'outputs'],
+      ratio: 60,
+      weights: {
+        conversation: 2,
+        context: 1,
+        capabilities: 1,
+        diff: 1,
+        outputs: 1,
+      },
+    };
+  }
+
+  it('inserts the hidden RunLog panel into every stored layout', () => {
+    const session = firstSession(stateWith());
+    const legacy = {
+      id: session.id,
+      project: session.project,
+      title: session.title,
+      customTitle: session.customTitle,
+      lastActivityAt: session.lastActivityAt,
+      draft: '保留草稿',
+      messages: ['读取缓存模块'],
+      dock: legacyDock(),
+      savedDock: { ...legacyDock(), ratio: 38 },
+      layoutHistory: {
+        layout: 'focus',
+        dockLayouts: {
+          focus: legacyDock(),
+          review: { ...legacyDock(), ratio: 40 },
+          delivery: legacyDock(),
+        },
+        savedLayouts: { review: { ...legacyDock(), ratio: 42 } },
+      },
+      outputTab: 'preview',
+      runHistory: [],
+    };
+    const migrated = loadRecord({
+      version: 6,
+      state: { ...stateWith(), sessions: [legacy] },
+    });
+    expect(migrated.version).toBe(7);
+    const restored = migrated.state.sessions[0];
+    if (!restored) throw new Error('Expected migrated session');
+    expect(restored.draft).toBe('保留草稿');
+    expect(restored.dock).toEqual(createDockLayout('focus'));
+    expect(restored.dock.columns.flat()).toContain('runlog');
+    expect(restored.dock.hidden).toContain('runlog');
+    expect(restored.dock.weights.runlog).toBe(1);
+    expect(restored.savedDock?.columns.flat()).toContain('runlog');
+    expect(restored.savedDock?.ratio).toBe(38);
+    expect(restored.layoutHistory?.dockLayouts.review.columns.flat()).toContain(
+      'runlog',
+    );
+    expect(restored.layoutHistory?.dockLayouts.review.ratio).toBe(40);
+    expect(
+      restored.layoutHistory?.savedLayouts.review?.columns.flat(),
+    ).toContain('runlog');
+    expect(restored.layoutHistory?.savedLayouts.review?.ratio).toBe(42);
+  });
+
+  it('rejects a five-panel dock in a current v7 record', () => {
+    const state = stateWith();
+    const session = state.sessions[0];
+    if (!session) throw new Error('Expected a stored session.');
+    const legacyDock = {
+      columns: [
+        ['context', 'capabilities', 'diff', 'outputs'],
+        ['conversation'],
+      ],
+      hidden: ['context', 'capabilities', 'diff', 'outputs'],
+      ratio: 60,
+      weights: {
+        conversation: 2,
+        context: 1,
+        capabilities: 1,
+        diff: 1,
+        outputs: 1,
+      },
+    };
+    expect(() =>
+      SessionStateRecordSchema.parse({
+        version: SESSION_STATE_VERSION,
+        state: { ...state, sessions: [{ ...session, dock: legacyDock }] },
+      }),
+    ).toThrow();
   });
 });
