@@ -88,3 +88,4 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 - 本机 `pnpm test:visual` 在像素比较前因环境指纹不匹配失败：本机 OS build `10.0.26200`、`local-windows`；已审阅 CI 基线为 `10.0.26100`、镜像 `20261021.278.1`。没有更新基线；本地修复尚无最终 head 的 Windows CI 视觉结果。
 - PR #48 的 merge SHA `1cbface10f24667b8babc1b9d427f64d29588536` 对应 [quality run](https://github.com/OasisViridis/Pioneer/actions/runs/40367977047) 只有 Windows 质量作业，没有视觉作业，不能作为当前真实回填试点。当前 registry 仅有已关闭的 #36 交付；新试点仍待登记与验收。
 - Figma MCP 对 `921:706` 的 Code Connect 探测仍拒绝，当前身份报告学生套餐 Full seat；文件所属团队、组件发布状态与实际权限尚未确认。[Figma 当前帮助文档](https://help.figma.com/hc/en-us/articles/23920389749655-Code-Connect) 与 MCP 返回的套餐提示不一致，不能据此断言必须购买。未发布 Code Connect，也未执行真实回填或接收器验收。
+- 复审发现共用 Figma 传输层原先接受任意 `/v1/` GET；未发现事件可以控制该路径，但能力范围超过现有调用需要。现限定为文件版本、固定节点和 Dev Resources 三类 GET 及 Dev Resources POST；受控传输测试确认拒绝其他路径，不代表真实 Figma 集成通过。修改后再次运行 `pnpm check`：设计同步 76/76、Contract Tests 348/348、Prototype Tests 210/210、真实 Electron E2E 29/29 和 package smoke 通过；视觉比较仍在上述环境指纹处停止。

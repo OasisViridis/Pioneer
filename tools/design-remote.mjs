@@ -37,6 +37,13 @@ export function figmaApi(token, fetcher = fetch) {
       url.hash
     )
       throw new Error('Untrusted Figma URL');
+    if (
+      method === 'GET' &&
+      !/^\/v1\/files\/[A-Za-z0-9]+\/(versions|nodes|dev_resources)$/.test(
+        url.pathname,
+      )
+    )
+      throw new Error('Unsupported Figma operation');
     // Never retry POST automatically: the caller must reconcile by reading first.
     const response = await fetcher(url, {
       method,

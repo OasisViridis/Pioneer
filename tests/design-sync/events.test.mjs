@@ -299,6 +299,29 @@ test('Figma transport uses fixed origin and environment token, redacts errors an
   assert.equal(calls.length, 1);
 });
 
+test('Figma transport only sends requests to the delivery endpoints', async () => {
+  const calls = [];
+  const api = figmaApi('secret', async (url, options) => {
+    calls.push({ url: url.pathname, method: options.method });
+    return { ok: true, json: async () => ({}) };
+  });
+  for (const endpoint of [
+    '/v1/files/TestFile/versions?before=old',
+    '/v1/files/TestFile/nodes?ids=1%3A2&version=fixed',
+    '/v1/files/TestFile/dev_resources?node_ids=1%3A2',
+  ])
+    await api('GET', endpoint);
+  await api('POST', '/v1/dev_resources', { dev_resources: [] });
+  for (const endpoint of [
+    '/v1/users/me',
+    '/v1/files/TestFile',
+    '/v1/files/TestFile/comments',
+    '/v1/files/TestFile/dev_resources/other',
+  ])
+    await assert.rejects(api('GET', endpoint), /Unsupported Figma operation/);
+  assert.equal(calls.length, 4);
+});
+
 test('a reviewed snapshot committed in Git becomes a valid S2 request; edited hash is rejected', async () => {
   const original = JSON.parse(
     await readFile('design/delivery/issue36.request.json', 'utf8'),
