@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
 import {
+  EGRESS_MATERIAL_LIMIT,
+  EgressMaterialSchema,
+  type ListRunMaterialsRequest,
+  type ListRunMaterialsReply,
+} from './egress';
+import {
   RunCursorRequestSchema,
   RunEventSchema,
   RunIdentitySchema,
@@ -20,6 +26,7 @@ export const RUN_IPC_CHANNELS = {
   ack: 'run:ack',
   unsubscribe: 'run:unsubscribe',
   events: 'run:events',
+  materials: 'run:materials',
 } as const;
 
 export const RUN_ADMISSION_CODES = [
@@ -48,6 +55,8 @@ export const RunAuthorizeRequestSchema = z
     expectedRevision: RunIdentitySchema.shape.revision,
     /** The task text itself is the egress material; main computes its digest. */
     task: z.string().min(1).max(16_384),
+    /** Explicit file materials whose content may be sent to the model. */
+    materials: z.array(z.string().min(1).max(1024)).max(EGRESS_MATERIAL_LIMIT),
   })
   .strict();
 
@@ -61,6 +70,7 @@ export const RunAuthorizationSummarySchema = z
     adapter: z.enum(['controlled', 'pi']),
     model: z.string().min(1).max(256).nullable(),
     expiresAt: z.iso.datetime(),
+    materials: z.array(EgressMaterialSchema).max(EGRESS_MATERIAL_LIMIT),
   })
   .strict();
 
@@ -140,6 +150,9 @@ export type RunGetReply = z.infer<typeof RunGetReplySchema>;
 /** Fixed renderer port. It grants no direct adapter, Node, or file access. */
 export interface RunDesktopApi {
   authorizeRun(request: RunAuthorizeRequest): Promise<RunAuthorizeReply>;
+  listRunMaterials(
+    request: ListRunMaterialsRequest,
+  ): Promise<ListRunMaterialsReply>;
   startRun(request: RunStartRequest): Promise<RunStartReply>;
   stopRun(request: RunStopRequest): Promise<RunStopReply>;
   getRun(request: RunCursorRequest): Promise<RunPage | null>;

@@ -61,9 +61,15 @@
 
 ### 2026-10-26 P2 合并
 
-P2 真实只读 Harness 经 PR #16 合并进 `main`（merge commit `3f262fe`），随后合入七轮复审修复与 PR #40（`fd26d06`）。最后一次完整门禁记录在提交 `0bfd5de`：Contract 375/375（39 文件）、Prototype 210/210、Real Electron 24/24、package smoke，退出码 0；合并后 CI 的一次 200/201 目录边界用例超时已在 `474fb16` 修复。真实 Provider 由 A09 记录留证：一次 completed（含四次真实只读工具调用与路径拒绝后的自行恢复），一次运行中停止并收敛为 `stopped`。
+P2 真实只读 Harness 经 PR #16 合并进 `main`（merge commit `3f262fe`），随后合入七轮复审修复与 PR #40（`fd26d06`）。PR #16 合并时的完整门禁记录在提交 `0bfd5de`：Contract 375/375（39 文件）、Prototype 210/210、Real Electron 24/24、package smoke，退出码 0；合并后 CI 的一次 200/201 目录边界用例超时已在 `474fb16` 修复。PR #50 删除意图契约后 Contract 数为 335/335（35 文件）。真实 Provider 由 A09 记录留证：一次 completed（含四次真实只读工具调用与路径拒绝后的自行恢复），一次运行中停止并收敛为 `stopped`。
 
-M3 仍为 **IN PROGRESS**：P3 为下一前沿（#17 面板接真实数据、#41 移除意图卡、#42 修正运行提示），#13 的验收收口另计。详见 [Issue #13 验证记录](../docs/testing/issue13-verification.md)。
+### 2026-10-27 P2 收口补全
+
+分支 `codex/issue13-remaining` 补齐 Issue #13 的剩余产品项：终态任务/结果写入 session state v6（每会话最多 20 条，重启恢复）；journal 终态记录首次停止请求的 main UTC 时间；受控与 Pi 适配器新增断连消息，宽限到期落 `failed(ADAPTER_DISCONNECTED)`；停止后在途工具的真实结果不再发布，只保留 cancelled 配对；授权阶段生成外发材料清单（相对路径、字节数、SHA-256），未列入清单返回 `MATERIAL_NOT_ALLOWED`，内容变化返回 `CONTENT_NOT_ALLOWED` 并停止为 `AUTHORIZATION_REVOKED`。
+
+PR #54 合并前的完整 `pnpm check` 退出码 0（2026-10-27）：Contract 348/348（36 文件）、Prototype 210/210、Real Electron 27/27、package smoke。打包真实 Provider 记录来自 `main` `c12a20a` 的成品副本（PR #52，源码树之外），早于上述 UI 与运行层改动，见 [Issue #13 打包成品运行记录](../docs/testing/issue13-packaged-run.md) 与 [验证记录](../docs/testing/issue13-verification.md)。
+
+M3 仍为 **IN PROGRESS**：P3 为下一前沿（#17 面板接真实数据、#41 移除意图卡、#42 修正运行提示）。#13 已于 2026-10-27 随 PR #54 关闭；其余边界以 [验证记录](../docs/testing/issue13-verification.md) 为准。
 
 ### 2026-10-02 工作副本核对（历史）
 

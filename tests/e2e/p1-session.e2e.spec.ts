@@ -9,7 +9,10 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import type { PioneerDesktopApi } from '../../apps/desktop/src/shared/contracts/ipc';
 import { createDockLayout } from '../../apps/desktop/src/shared/docking';
-import { SessionStateRecordSchema } from '../../apps/desktop/src/shared/session-state';
+import {
+  SessionStateRecordSchema,
+  SESSION_STATE_VERSION,
+} from '../../apps/desktop/src/shared/session-state';
 import {
   captureFixtureHash,
   captureFixtureHashAfterClose,
@@ -331,7 +334,7 @@ test('migrates a v4 record without restoring its intent card and keeps draft, me
       '继续定位缓存键冲突，仅做只读分析',
     );
     expect(record.state.sessions[0]?.messages).toEqual(['读取缓存模块']);
-    expect(record.version).toBe(5);
+    expect(record.version).toBe(SESSION_STATE_VERSION);
     expect(record.state.sessions[0]).not.toHaveProperty('intentState');
   } finally {
     await app.close();
@@ -339,7 +342,7 @@ test('migrates a v4 record without restoring its intent card and keeps draft, me
   }
 });
 
-test('reads a v3 active layout without rewriting it, then preserves its history when UI edits save v5', async ({}, info) => {
+test('reads a v3 active layout without rewriting it, then preserves its history when UI edits save the current version', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);
   const userData = info.outputPath('user-data');
   await mkdir(userData, { recursive: true });
@@ -406,7 +409,7 @@ test('reads a v3 active layout without rewriting it, then preserves its history 
     const record = SessionStateRecordSchema.parse(
       JSON.parse(await readFile(file, 'utf8')),
     );
-    expect(record.version).toBe(5);
+    expect(record.version).toBe(SESSION_STATE_VERSION);
     expect(record.state.sessions[0]?.layoutHistory).toEqual({
       layout: 'review',
       dockLayouts: layouts,

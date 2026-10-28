@@ -117,6 +117,94 @@ test('completes a controlled read-only run with a real tool result and unchanged
   }
 });
 
+test('persists each session task and result across an app restart', async ({}, testInfo) => {
+  const beforeHash = await captureFixtureHash(fixtureRoot);
+  const outputDir = testInfo.outputPath('run');
+  await mkdir(outputDir, { recursive: true });
+  const userDataDir = testInfo.outputPath('user-data');
+  await mkdir(userDataDir, { recursive: true });
+  const taskText = '读取 alpha-app 的 README 并总结内容。';
+  const resultText = '受控结果：alpha fixture 已读取。';
+  const scriptPath = await writeRunScript(outputDir, {
+    steps: [{ action: 'text', text: resultText }, { action: 'complete' }],
+  });
+
+  let application = await launchApplication(userDataDir, scriptPath);
+  try {
+    let page = await application.firstWindow();
+    await newSessionForProject(page, 'alpha-app');
+    await prepareTask(page);
+    await page.getByRole('button', { name: '启动运行' }).click();
+    await expect(
+      page.locator('.run-status', { hasText: '已完成' }),
+    ).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.locator('.run-history')).toContainText(taskText);
+    await expect(page.locator('.run-history')).toContainText(resultText);
+    await application.close();
+
+    application = await launchApplication(userDataDir, scriptPath);
+    page = await application.firstWindow();
+    await page.getByRole('tab', { name: 'alpha-app', exact: true }).click();
+    await page.locator('details.run-log summary').click();
+    await expect(page.locator('.run-history')).toContainText(taskText);
+    await expect(page.locator('.run-history')).toContainText(resultText);
+  } finally {
+    try {
+      await application.close();
+    } finally {
+      expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(beforeHash);
+    }
+  }
+});
+
+test('rejects file content the user did not add to the egress manifest', async ({}, testInfo) => {
+  const beforeHash = await captureFixtureHash(fixtureRoot);
+  const outputDir = testInfo.outputPath('run');
+  await mkdir(outputDir, { recursive: true });
+  const userDataDir = testInfo.outputPath('user-data');
+  await mkdir(userDataDir, { recursive: true });
+  const scriptPath = await writeRunScript(outputDir, {
+    steps: [
+      {
+        action: 'tool',
+        request: { tool: 'read_file', arguments: { path: 'package.json' } },
+      },
+      { action: 'text', text: '读取结束。' },
+      { action: 'complete' },
+    ],
+  });
+
+  const application = await launchApplication(userDataDir, scriptPath);
+  try {
+    const page = await application.firstWindow();
+    await newSessionForProject(page, 'alpha-app');
+    await prepareTask(page);
+    await page
+      .locator('.run-materials label', { hasText: 'package.json' })
+      .locator('input')
+      .uncheck();
+    await page.getByRole('button', { name: '启动运行' }).click();
+    await expect(
+      page.locator('.run-status', { hasText: '已完成' }),
+    ).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(
+      page.locator('.run-event', {
+        hasText: 'rejected · MATERIAL_NOT_ALLOWED',
+      }),
+    ).toBeVisible();
+  } finally {
+    try {
+      await application.close();
+    } finally {
+      expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(beforeHash);
+    }
+  }
+});
+
 test('stops mid-run and shows 已停止 only after background convergence', async ({}, testInfo) => {
   const beforeHash = await captureFixtureHash(fixtureRoot);
   const outputDir = testInfo.outputPath('run');

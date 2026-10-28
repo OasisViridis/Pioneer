@@ -95,4 +95,42 @@ describe('separate project and session workspaces', () => {
       sessionWorkspaceReducer(state, { type: 'CLOSE_TAB', tabId: 'library' }),
     ).toBe(state);
   });
+
+  it('records per-session run history, dedupes by runId, and trims to 20', () => {
+    const record = (index: number) => ({
+      runId: `run:${String(index)}`,
+      task: `task ${String(index)}`,
+      status: 'completed' as const,
+      failureCode: null,
+      startedAt: '2026-10-25T00:00:00.000Z',
+      endedAt: '2026-10-25T00:00:01.000Z',
+      stopRequestedAt: null,
+      resultText: `result ${String(index)}`,
+      truncated: false,
+    });
+    let state = sessionWorkspaceReducer(initialSessionWorkspaceState, {
+      type: 'CREATE_SESSION',
+      id: 'session:a',
+      project,
+    });
+    for (let index = 0; index < 21; index += 1) {
+      state = sessionWorkspaceReducer(state, {
+        type: 'RECORD_RUN',
+        id: 'session:a',
+        record: record(index),
+      });
+    }
+    const history = state.sessions[0]?.runHistory ?? [];
+    expect(history).toHaveLength(20);
+    expect(history[0]?.runId).toBe('run:1');
+    expect(history.at(-1)?.runId).toBe('run:20');
+    const before = state;
+    expect(
+      sessionWorkspaceReducer(state, {
+        type: 'RECORD_RUN',
+        id: 'session:a',
+        record: record(20),
+      }),
+    ).toBe(before);
+  });
 });

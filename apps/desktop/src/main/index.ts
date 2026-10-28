@@ -22,6 +22,7 @@ import {
 } from '../shared/contracts/run-ipc';
 import { RUN_LIMITS } from '../shared/contracts/pioneer-run';
 import { assembleRunHost, type AssembledRunHost } from './run-host';
+import { listProjectMaterials } from './harness/egress-materials';
 import { registerRunIpc } from './run-ipc';
 import { probePiRuntime } from './harness/pi-adapter';
 import {
@@ -273,6 +274,20 @@ const openMainWindow = (service: CatalogService): void => {
           ? MAIN_WINDOW_WEBPACK_ENTRY
           : new URL(MAIN_WINDOW_WEBPACK_ENTRY).origin,
       manager: runHost.manager,
+      listMaterials: async (projectId) => {
+        const service = catalogService;
+        if (service === null) return null;
+        const catalog = await service.getCatalog();
+        const project = catalog.projects.find(
+          (candidate) => candidate.id === projectId,
+        );
+        if (project === undefined) return null;
+        try {
+          return await listProjectMaterials(project.absolutePath);
+        } catch {
+          return null;
+        }
+      },
       windowEpoch: () => activeWindowBinding?.epoch ?? windowEpochCounter,
     });
   }

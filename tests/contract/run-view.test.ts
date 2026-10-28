@@ -92,8 +92,10 @@ function createFakeRunPort(options: {
           adapter: 'controlled',
           model: null,
           expiresAt: '2026-10-25T00:00:00.000Z',
+          materials: [],
         },
       }),
+    listRunMaterials: () => Promise.resolve({ ok: true, materials: [] }),
     startRun: () => Promise.resolve({ ok: true, runId: RUN_ID }),
     stopRun: () => Promise.resolve(options.stopReply),
     getRun: () => Promise.resolve(options.getRunPage),
@@ -124,6 +126,7 @@ function launch(store: RunViewStore): Promise<void> {
     projectId: PROJECT_ID,
     revision: REVISION,
     task: '读取 fixture 并回答。',
+    materials: [],
   });
 }
 
@@ -194,5 +197,72 @@ describe('run view stop rejection', () => {
       '窗口绑定不一致，请重试',
     );
     expect(visibleStatus(state)).toBe('运行中');
+  });
+});
+
+describe('run view terminal record', () => {
+  it('builds one bounded task/result record for the session recorder', async () => {
+    const accepted: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 1,
+      at: '2026-10-25T00:00:00.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: { type: 'run.accepted' },
+    };
+    const stopRequested: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 2,
+      at: '2026-10-25T00:00:01.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: { type: 'run.stop_requested', reason: 'user' },
+    };
+    const stopped: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 4,
+      at: '2026-10-25T00:00:02.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: { type: 'run.stopped' },
+    };
+    const page = pageOf({
+      status: 'stopped',
+      events: [accepted, stopRequested, textEvent(3), stopped],
+      lastSeq: 4,
+      nextAfterSeq: 4,
+      hasMore: false,
+    });
+    const port = createFakeRunPort({
+      getRunPage: page,
+      stopReply: { ok: true, status: 'stopped' },
+    });
+    const records: unknown[] = [];
+    const store = new RunViewStore(port);
+    await store.launch({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+      task: '读取 fixture 并回答。',
+      materials: [],
+      onTerminal: (record) => records.push(record),
+    });
+    port.emit({ page });
+    await flushBatches();
+
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      runId: RUN_ID,
+      task: '读取 fixture 并回答。',
+      status: 'stopped',
+      startedAt: '2026-10-25T00:00:00.000Z',
+      endedAt: '2026-10-25T00:00:02.000Z',
+      stopRequestedAt: '2026-10-25T00:00:01.000Z',
+      resultText: '事件 3',
+      truncated: false,
+    });
   });
 });

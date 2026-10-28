@@ -20,11 +20,16 @@ import {
   visibleDockPanels,
 } from '../../shared/docking';
 import { advanceActivityAt } from '../../shared/session-activity';
+import {
+  MAX_SESSION_RUN_HISTORY,
+  type SessionRunRecord,
+} from '../../shared/contracts/session-run-history';
 import { SessionStateSchema } from '../../shared/session-state';
 
 type SessionOperation =
   | { type: 'UPDATE_DRAFT'; id: SessionId; value: string }
   | { type: 'SAVE_MESSAGE'; id: SessionId }
+  | { type: 'RECORD_RUN'; id: SessionId; record: SessionRunRecord }
   | { type: 'RENAME_SESSION'; id: SessionId; title: string }
   | { type: 'TOGGLE_PANEL'; id: SessionId; panel: DockPanelId }
   | {
@@ -115,6 +120,14 @@ function editSession(session: Session, action: SessionOperation): Session {
             : session.title,
       };
     }
+    case 'RECORD_RUN': {
+      if (session.runHistory.some((item) => item.runId === action.record.runId))
+        return session;
+      const history = [...session.runHistory, action.record];
+      if (history.length > MAX_SESSION_RUN_HISTORY)
+        history.splice(0, history.length - MAX_SESSION_RUN_HISTORY);
+      return { ...session, runHistory: history };
+    }
     case 'RENAME_SESSION': {
       const title = action.title.trim();
       if (
@@ -202,6 +215,7 @@ function reduce(
         savedDock: null,
         layoutHistory: null,
         outputTab: 'preview',
+        runHistory: [],
       };
       return activate(
         {
@@ -284,9 +298,12 @@ function reduce(
         let next = editSession(session, action);
         if (next === session) return session;
         if (
-          ['UPDATE_DRAFT', 'SAVE_MESSAGE', 'RENAME_SESSION'].includes(
-            action.type,
-          )
+          [
+            'UPDATE_DRAFT',
+            'SAVE_MESSAGE',
+            'RECORD_RUN',
+            'RENAME_SESSION',
+          ].includes(action.type)
         )
           next = activity(next, state, action.occurredAt);
         return next;

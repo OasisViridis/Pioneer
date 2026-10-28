@@ -7,6 +7,7 @@ const desktop = (): PioneerDesktopApi =>
 
 const port: RunPort = {
   authorizeRun: (request) => desktop().authorizeRun(request),
+  listRunMaterials: (request) => desktop().listRunMaterials(request),
   startRun: (request) => desktop().startRun(request),
   stopRun: (request) => desktop().stopRun(request),
   getRun: (request) => desktop().getRun(request),

@@ -14,6 +14,7 @@ import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { executeReadOnlyTool } from '../../apps/desktop/src/main/harness/read-only-tools';
+import { buildEgressManifest } from '../../apps/desktop/src/main/harness/egress-materials';
 
 const never = new AbortController().signal;
 
@@ -325,4 +326,96 @@ describe('P2 read-only list_directory budget boundary', () => {
     expect(over.truncated).toBe(true);
     expect(over.text.split('\n')).toHaveLength(200);
   }, 30_000);
+});
+
+describe('explicit egress manifest (contract §1/§5)', () => {
+  let root: string;
+
+  beforeAll(async () => {
+    root = await realpath(await mkdtemp(join(tmpdir(), 'pioneer-egress-')));
+    await writeFile(join(root, 'readme.txt'), 'alpha\nbeta\n', 'utf-8');
+    await mkdir(join(root, 'docs'), { recursive: true });
+    await writeFile(
+      join(root, 'docs', 'guide.md'),
+      'needle here\nplain line\nneedle again\n',
+      'utf-8',
+    );
+  });
+
+  it('allows only listed bytes and rejects an unlisted or changed file', async () => {
+    const manifest = await buildEgressManifest(root, ['readme.txt']);
+    const allowed = await executeReadOnlyTool(
+      root,
+      { tool: 'read_file', arguments: { path: 'readme.txt' } },
+      never,
+      manifest,
+    );
+    expect(allowed).toEqual({
+      status: 'succeeded',
+      text: 'alpha\nbeta\n',
+      truncated: false,
+    });
+    const denied = await executeReadOnlyTool(
+      root,
+      { tool: 'read_file', arguments: { path: 'docs/guide.md' } },
+      never,
+      manifest,
+    );
+    expect(denied).toEqual({
+      status: 'rejected',
+      code: 'MATERIAL_NOT_ALLOWED',
+    });
+
+    await writeFile(join(root, 'readme.txt'), 'changed\n', 'utf-8');
+    const changed = await executeReadOnlyTool(
+      root,
+      { tool: 'read_file', arguments: { path: 'readme.txt' } },
+      never,
+      manifest,
+    );
+    expect(changed).toEqual({
+      status: 'rejected',
+      code: 'CONTENT_NOT_ALLOWED',
+    });
+    await writeFile(join(root, 'readme.txt'), 'alpha\nbeta\n', 'utf-8');
+  });
+
+  it('rejects an empty manifest and filters listings and searches', async () => {
+    const empty = await buildEgressManifest(root, []);
+    const noContent = await executeReadOnlyTool(
+      root,
+      { tool: 'read_file', arguments: { path: 'readme.txt' } },
+      never,
+      empty,
+    );
+    expect(noContent).toEqual({
+      status: 'rejected',
+      code: 'MATERIAL_NOT_ALLOWED',
+    });
+
+    const manifest = await buildEgressManifest(root, ['docs/guide.md']);
+    const listing = await executeReadOnlyTool(
+      root,
+      { tool: 'list_directory', arguments: { path: '.' } },
+      never,
+      manifest,
+    );
+    expect(listing.status).toBe('succeeded');
+    if (listing.status !== 'succeeded') return;
+    expect(listing.text.split('\n')).toEqual(['docs/']);
+
+    const search = await executeReadOnlyTool(
+      root,
+      {
+        tool: 'search_in_files',
+        arguments: { path: '.', query: 'needle' },
+      },
+      never,
+      manifest,
+    );
+    expect(search.status).toBe('succeeded');
+    if (search.status !== 'succeeded') return;
+    expect(search.text).toContain('docs/guide.md');
+    expect(search.text).not.toContain('docs/deep/note.txt');
+  });
 });

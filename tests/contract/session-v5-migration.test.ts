@@ -47,7 +47,7 @@ describe('single-layout session migration', () => {
       },
     };
     const result = loadRecord(input);
-    expect(result.version).toBe(5);
+    expect(result.version).toBe(6);
     expect(result.state.sessions[0]).toMatchObject({
       draft: '修复重复请求',
       messages: ['读取请求缓存模块'],
@@ -55,6 +55,7 @@ describe('single-layout session migration', () => {
       dock: dockLayouts.review,
       savedDock: null,
       layoutHistory: { layout: 'review', dockLayouts, savedLayouts },
+      runHistory: [],
     });
     expect(result.state.sessions[0]).not.toHaveProperty('intentState');
     expect(result.state.sessions[0]).not.toHaveProperty('layout');

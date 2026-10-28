@@ -41,6 +41,9 @@ export const ControlledStepSchema = z.discriminatedUnion('action', [
       ms: z.number().int().min(0).max(60_000),
     })
     .strict(),
+  /** Emits a transport disconnect and then never settles, so the host's stop
+   * grace owns the terminal state instead of the adapter faking quiescence. */
+  z.object({ action: z.literal('disconnect') }).strict(),
   z.object({ action: z.literal('complete') }).strict(),
   z
     .object({
@@ -149,6 +152,12 @@ export function createControlledAdapterFactory(
               break;
             case 'wait':
               await track(abortableDelay(step.ms, context.abort));
+              break;
+            case 'disconnect':
+              emit({ type: 'disconnect' });
+              // Never settle: the disconnect itself is the last adapter fact,
+              // and the host's stop grace must decide the fixed outcome.
+              await new Promise<never>(() => undefined);
               break;
             case 'complete':
               return { status: 'success', usage: noUsage };

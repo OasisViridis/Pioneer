@@ -243,6 +243,45 @@ function buildReadOnlyTools(
   ];
 }
 
+const TRANSPORT_ERROR_CODES = new Set([
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'ENOTFOUND',
+  'EAI_AGAIN',
+  'ETIMEDOUT',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_HEADERS_TIMEOUT',
+  'UND_ERR_BODY_TIMEOUT',
+  'UND_ERR_SOCKET',
+]);
+
+/**
+ * Separates a lost transport from a model/API failure: only network-level
+ * errors make main take the disconnect stop path (contract §4). HTTP and
+ * auth errors stay MODEL_FAILED so they are not disguised as disconnects.
+ */
+function isTransportError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false;
+  const candidate = error as {
+    name?: unknown;
+    message?: unknown;
+    code?: unknown;
+    cause?: unknown;
+  };
+  if (
+    typeof candidate.code === 'string' &&
+    TRANSPORT_ERROR_CODES.has(candidate.code)
+  )
+    return true;
+  if (
+    candidate.name === 'TypeError' &&
+    typeof candidate.message === 'string' &&
+    /fetch failed|network|socket hang up|terminated/i.test(candidate.message)
+  )
+    return true;
+  return candidate.cause !== undefined && isTransportError(candidate.cause);
+}
+
 /** Pi run loop with the three read-only tools bridged to the harness executor. */
 export function createPiAdapterFactory(
   config: PiRuntimeConfig,
@@ -355,8 +394,12 @@ export function createPiAdapterFactory(
             status: 'success',
             usage: { inputTokens: null, outputTokens: null },
           };
-        } catch {
+        } catch (error) {
           if (stopped || context.abort.aborted) {
+            return { status: 'aborted' };
+          }
+          if (isTransportError(error)) {
+            emit({ type: 'disconnect' });
             return { status: 'aborted' };
           }
           return { status: 'failure', code: 'MODEL_FAILED' };

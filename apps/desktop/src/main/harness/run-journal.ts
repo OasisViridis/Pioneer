@@ -34,6 +34,8 @@ export const RunJournalTerminalSchema = z
     code: z.string().max(64).nullable(),
     at,
     lastSeq: z.number().int().nonnegative(),
+    /** Main-side wall-clock stamp of the first stop request, when one occurred. */
+    stopRequestedAt: at.nullable().optional(),
   })
   .strict();
 

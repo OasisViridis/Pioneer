@@ -14,7 +14,10 @@ import {
   initialSessionWorkspaceState,
   sessionWorkspaceReducer,
 } from '../../apps/desktop/src/renderer/state/session-workspace-reducer';
-import { SessionStateRecordSchema } from '../../apps/desktop/src/shared/session-state';
+import {
+  SessionStateRecordSchema,
+  SESSION_STATE_VERSION,
+} from '../../apps/desktop/src/shared/session-state';
 import {
   captureFixtureHash,
   captureFixtureHashAfterClose,
@@ -112,7 +115,10 @@ test('S1 decoration follows the current single-workspace pool, geometry and empt
         title: `S1 theme ${String(i)}`,
       });
     }
-    const record = SessionStateRecordSchema.parse({ version: 5, state });
+    const record = SessionStateRecordSchema.parse({
+      version: SESSION_STATE_VERSION,
+      state,
+    });
     await writeFile(
       path.join(userData, 'pioneer-session-state.json'),
       JSON.stringify(record),

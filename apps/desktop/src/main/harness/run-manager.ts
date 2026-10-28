@@ -11,6 +11,8 @@ import {
 } from '../../shared/contracts/pioneer-run';
 import type { RunEventBatch, RunPage } from '../../shared/contracts/run-ipc';
 import type { ReadOnlyToolRequest } from '../../shared/contracts/read-only-tools';
+import type { EgressMaterial } from '../../shared/contracts/egress';
+import { buildEgressManifest } from './egress-materials';
 import type { RunJournal } from './run-journal';
 import type {
   AdapterMessage,
@@ -45,6 +47,7 @@ export interface RunAuthorizationRequest {
   projectId: string;
   revision: number;
   task: string;
+  materials: readonly string[];
   webContentsId: number;
   windowEpoch: number;
 }
@@ -57,6 +60,7 @@ export interface RunAuthorization {
   adapter: 'controlled' | 'pi';
   model: string | null;
   expiresAt: string;
+  materials: EgressMaterial[];
 }
 
 export interface ProjectBinding {
@@ -82,6 +86,7 @@ interface GrantRecord {
   revision: number;
   taskDigest: string;
   task: string;
+  materials: EgressMaterial[];
   webContentsId: number;
   windowEpoch: number;
   createdAt: number;
@@ -108,6 +113,8 @@ interface ActiveRun {
   webContentsId: number;
   windowEpoch: number;
   taskDigest: string;
+  /** Explicit egress manifest bound to this run's grant. */
+  materials: EgressMaterial[];
   requestId: string;
   requestPayload: string;
   events: RunEvent[];
@@ -125,6 +132,10 @@ interface ActiveRun {
   handle: HarnessHandle | null;
   startedAt: number;
   stopRequestedAt: number | null;
+  /** Wall-clock stop stamp for the journal; monotonic timing stays in stopRequestedAt. */
+  stopRequestedWallAt: string | null;
+  /** Adapter reported a transport disconnect; the forced end uses its fixed code. */
+  disconnected: boolean;
   stopReason:
     | 'user'
     | 'window_closed'
@@ -163,6 +174,8 @@ export interface RunManagerDependencies {
   limits?: RunLimits;
   now?: () => number;
   randomId?: (prefix: string) => string;
+  /** Test seam for the tool executor; defaults to the real read-only executor. */
+  executeTool?: typeof executeReadOnlyTool;
 }
 
 const encoder = new TextEncoder();
@@ -244,6 +257,14 @@ export class RunManager {
     if (request.revision < lastRevision)
       return { ok: false, code: 'STALE_REVISION' };
 
+    let materials: EgressMaterial[];
+    try {
+      materials = await buildEgressManifest(project.root, request.materials);
+    } catch {
+      // Invalid, sensitive or oversized material lists never reach a grant.
+      return { ok: false, code: 'INVALID_REQUEST' };
+    }
+
     const grantId = this.randomId('grant');
     const createdAt = this.now();
     const grant: GrantRecord = {
@@ -253,6 +274,7 @@ export class RunManager {
       revision: request.revision,
       taskDigest: taskDigestOf(request.task),
       task: request.task,
+      materials,
       webContentsId: request.webContentsId,
       windowEpoch: request.windowEpoch,
       createdAt,
@@ -273,6 +295,7 @@ export class RunManager {
         adapter: this.dependencies.adapterKind,
         model: this.dependencies.modelName,
         expiresAt: new Date(grant.expiresAt).toISOString(),
+        materials: grant.materials,
       },
     };
   }
@@ -394,6 +417,7 @@ export class RunManager {
       webContentsId: context.webContentsId,
       windowEpoch: context.windowEpoch,
       taskDigest: grant.taskDigest,
+      materials: grant.materials,
       requestId: request.requestId,
       requestPayload: payload,
       events: [],
@@ -412,6 +436,8 @@ export class RunManager {
       handle: null,
       startedAt: this.now(),
       stopRequestedAt: null,
+      stopRequestedWallAt: null,
+      disconnected: false,
       stopReason: null,
       pendingFailure: null,
       subscribers: new Map(),
@@ -633,9 +659,25 @@ export class RunManager {
         );
         return;
       }
+      case 'disconnect': {
+        // The adapter lost its channel. Contract §4 sends this through the
+        // normal stop path; the grace expiry is what turns it into the fixed
+        // ADAPTER_DISCONNECTED failure instead of STOP_TIMEOUT.
+        if (run.stopRequestedAt !== null) return;
+        run.disconnected = true;
+        this.requestStop(run, 'host_failure');
+        return;
+      }
       default:
         return;
     }
+  }
+
+  /** A material changed after authorization: the stale grant stops the run. */
+  private revokeAuthorization(run: ActiveRun): void {
+    if (run.stopRequestedAt !== null || this.isTerminal(run)) return;
+    run.grant.revoked = true;
+    this.requestStop(run, 'authorization_revoked');
   }
 
   private async executeTool(
@@ -669,15 +711,27 @@ export class RunManager {
       );
       run.pendingToolCalls.add(callId);
       try {
-        const outcome = await executeReadOnlyTool(
-          project.root,
-          request,
-          run.abort.signal,
-        );
+        const outcome = await (
+          this.dependencies.executeTool ?? executeReadOnlyTool
+        )(project.root, request, run.abort.signal, run.materials);
         // terminate() already published the cancelled pair for a run that
-        // ended while this call was in flight.
+        // ended while this call was in flight. A stop request that landed
+        // while the tool was running must not publish the late real body: the
+        // cancelled pair is published here, before the adapter can finish.
         if (this.isTerminal(run))
           return { status: 'cancelled', code: 'CANCELLED' };
+        if (this.hasStopRequest(run)) {
+          this.emit(
+            run,
+            {
+              type: 'tool.result',
+              callId,
+              result: { status: 'cancelled', code: 'CANCELLED' },
+            },
+            'tool',
+          );
+          return { status: 'cancelled', code: 'CANCELLED' };
+        }
         if (outcome.status === 'succeeded') {
           run.outputBytes += bytesOf(outcome.text);
         }
@@ -686,6 +740,11 @@ export class RunManager {
           { type: 'tool.result', callId, result: outcome },
           'tool',
         );
+        if (
+          outcome.status === 'rejected' &&
+          outcome.code === 'CONTENT_NOT_ALLOWED'
+        )
+          this.revokeAuthorization(run);
         return outcome;
       } finally {
         run.pendingToolCalls.delete(callId);
@@ -705,6 +764,7 @@ export class RunManager {
     if (reason === 'authorization_revoked')
       run.pendingFailure ??= 'AUTHORIZATION_REVOKED';
     run.stopRequestedAt = this.now();
+    run.stopRequestedWallAt = new Date().toISOString();
     run.stopReason = reason;
     if (run.status !== 'starting') run.status = 'stopping';
     this.emit(run, { type: 'run.stop_requested', reason }, 'host');
@@ -720,7 +780,9 @@ export class RunManager {
   /** Stop-grace expiry: the stopping path must converge to a fixed code. */
   private forceEnd(run: ActiveRun): void {
     if (this.isTerminal(run)) return;
-    const code = run.pendingFailure ?? 'STOP_TIMEOUT';
+    const code =
+      run.pendingFailure ??
+      (run.disconnected ? 'ADAPTER_DISCONNECTED' : 'STOP_TIMEOUT');
     run.stopTimer = null;
     // Contract §2: dispose is the normal release after quiescence; the forced
     // end is not quiescent, but §4 still asks for a best-effort release. The
@@ -1032,6 +1094,7 @@ export class RunManager {
         code,
         at: new Date().toISOString(),
         lastSeq: run.events.at(-1)?.seq ?? 0,
+        stopRequestedAt: run.stopRequestedWallAt,
       });
     } catch {
       // Bookkeeping below still runs; the journal marks itself unhealthy.
@@ -1099,6 +1162,15 @@ export class RunManager {
       run.status === 'failed' ||
       run.status === 'stopped'
     );
+  }
+
+  /**
+   * Opaque read for paths after an await: TypeScript narrows a direct
+   * property comparison to the pre-await value, but the stop flag can change
+   * while a tool promise is pending.
+   */
+  private hasStopRequest(run: ActiveRun): boolean {
+    return run.stopRequestedAt !== null;
   }
 
   private activeRunCountForSession(sessionId: string): number {

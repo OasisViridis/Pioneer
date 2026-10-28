@@ -21,7 +21,9 @@ export type AdapterMessage =
   | { type: 'text.delta'; text: string }
   | { type: 'tool.request'; request: ReadOnlyToolRequest }
   | { type: 'tool.unknown'; name: string }
-  | { type: 'usage'; inputTokens: number | null; outputTokens: number | null };
+  | { type: 'usage'; inputTokens: number | null; outputTokens: number | null }
+  /** Transport-level disconnect; main owns the stop path and fixed outcome. */
+  | { type: 'disconnect' };
 
 export interface HarnessContext {
   readonly identity: RunIdentity;
