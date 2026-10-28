@@ -4,7 +4,7 @@
 
 ## 当前交付边界
 
-代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后只读回填清单。真实 Windows 候选已经逐张查看，并作为独立的[初始基线提案](../../tests/e2e/visual-baselines/README.md)提交供人审。**本票尚未完成**：基线尚未获得人类批准，真实 Figma 回传与命名版本事件均未发生。不得用这份准备工作的 PR 自动关闭 #37。
+代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后只读回填清单。2026-10-28 用户委托 Codex 完成剩余视觉核验；已复核原图、修复输入框焦点对比度并接受[当前状态基线](../../tests/e2e/visual-baselines/README.md)，详见[审阅结论](issue37-visual-review.md)。分支已同步 main `b93d8e9832608e26eff7c76e2b3bec0ffa95576a`。**本票尚未完成**：真实 Figma 回传与命名版本事件均未发生，且尚未授权合并。不得用这份准备工作的 PR 自动关闭 #37。
 
 S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook 接收器、scoped REST 凭证、Dev Resources 写入或 Code Connect 发布权益。当前连接工具未暴露 Webhook/Dev Resources REST 操作。S2 已合并，但实际路线是当前 Codex 会话 + 发布工具，并没有 `repository_dispatch` 事件消费者，也没有获准的无人值守模型执行环境。不能把一个只打印 payload 的 workflow 当作已接通 S2。
 
@@ -12,16 +12,16 @@ S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook �
 
 测试入口为 `tests/e2e/playwright.config.ts`；`pnpm test:e2e` 负责构建后启动真实 Electron。窗口、设计检查与 P1/P2 在同一个入口运行，不用截图替代授权/停止/隔离测试。
 
-| 旧文件 / 用例 | 当前适用性与处置 | 实际替代入口 |
-| --- | --- | --- |
-| `hazel-design` 的多主题/重启 | 旧版 v3 record、专注/审阅/交付标签已被单布局替换，当前记录为 v5，原文件不运行 | 已选入的 `design-decoration` 验证 11 个实际素材、hash、重启、窄窗、隐藏边界和错误态 |
-| `hazel-design` 的 onboarding | 当前 ProjectLibrary 没有 Hazel 插画；`PIONEER_E2E_SKIP_INITIAL_ROOT` 也未被主进程读取，不能恢复一个不存在的功能 | `catalog-state` 验证选择目录/错误/重试，`design/sync/asset-policy.json` 明确 organizing 素材 dormant |
-| `hazel-design` 的三宽度与本机草稿 | 旧选择器和布局标签不再存在，迁移仍适用的交互断言 | 新选入 `design-states`：1440/900/640、长文本、键盘可见焦点、减少动态效果、本机保存、消息出现后移除插画 |
-| `window-chrome` 的自定义红黄绿、托盘、全屏、最大化、退出菜单 | `App.tsx` 未挂载 WindowChrome；main 未注册 window-ipc；原测试依赖的 tray/initialize seam 不存在。保留旧文件作历史规格，不计为当前 E2E 覆盖 | `window-controls` / `window-preload` 等 Contract Tests 仅证明独立模块；原生拖动、系统菜单、托盘、自定义 chrome 仍未验收 |
-| `window-chrome` 的单写入者、慢保存、关闭取消、失败重试、损坏保护 | 复用现行 lifecycle，无需恢复未挂载 UI | 已选入 `session-lifecycle` 与 `p1-session`；新增 `window-lifecycle` 检查原生缩放/最小化/恢复后草稿保存与 reload |
-| `window-chrome` 的 renderer crash + quit | 不搬用已经失效的自定义关闭接口 | `app-window-lifecycle` / `window-lifecycle` Contract Tests 覆盖协调器；该原生崩溃组合尚无当前 Real E2E，不能宣称通过 |
-| `session-persistence` | 旧三布局与选择器已失效，不因本票顺便启用 | `p1-session`、`session-lifecycle`、`catalog-state`；历史文件不计入运行数 |
-| `p2-run` / Run Contract | 保持原入口和受控 adapter；没有增加真实 Provider 调用 | 授权拒绝、运行、停止、会话隔离、读取限制及 fixture hash 原有检查继续运行 |
+| 旧文件 / 用例                                                    | 当前适用性与处置                                                                                                                           | 实际替代入口                                                                                                            |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `hazel-design` 的多主题/重启                                     | 旧版 v3 record、专注/审阅/交付标签已被单布局替换，当前记录为 v5，原文件不运行                                                              | 已选入的 `design-decoration` 验证 11 个实际素材、hash、重启、窄窗、隐藏边界和错误态                                     |
+| `hazel-design` 的 onboarding                                     | 当前 ProjectLibrary 没有 Hazel 插画；`PIONEER_E2E_SKIP_INITIAL_ROOT` 也未被主进程读取，不能恢复一个不存在的功能                            | `catalog-state` 验证选择目录/错误/重试，`design/sync/asset-policy.json` 明确 organizing 素材 dormant                    |
+| `hazel-design` 的三宽度与本机草稿                                | 旧选择器和布局标签不再存在，迁移仍适用的交互断言                                                                                           | 新选入 `design-states`：1440/900/640、长文本、键盘可见焦点、减少动态效果、本机保存、消息出现后移除插画                  |
+| `window-chrome` 的自定义红黄绿、托盘、全屏、最大化、退出菜单     | `App.tsx` 未挂载 WindowChrome；main 未注册 window-ipc；原测试依赖的 tray/initialize seam 不存在。保留旧文件作历史规格，不计为当前 E2E 覆盖 | `window-controls` / `window-preload` 等 Contract Tests 仅证明独立模块；原生拖动、系统菜单、托盘、自定义 chrome 仍未验收 |
+| `window-chrome` 的单写入者、慢保存、关闭取消、失败重试、损坏保护 | 复用现行 lifecycle，无需恢复未挂载 UI                                                                                                      | 已选入 `session-lifecycle` 与 `p1-session`；新增 `window-lifecycle` 检查原生缩放/最小化/恢复后草稿保存与 reload         |
+| `window-chrome` 的 renderer crash + quit                         | 不搬用已经失效的自定义关闭接口                                                                                                             | `app-window-lifecycle` / `window-lifecycle` Contract Tests 覆盖协调器；该原生崩溃组合尚无当前 Real E2E，不能宣称通过    |
+| `session-persistence`                                            | 旧三布局与选择器已失效，不因本票顺便启用                                                                                                   | `p1-session`、`session-lifecycle`、`catalog-state`；历史文件不计入运行数                                                |
+| `p2-run` / Run Contract                                          | 保持原入口和受控 adapter；没有增加真实 Provider 调用                                                                                       | 授权拒绝、运行、停止、会话隔离、读取限制及 fixture hash 原有检查继续运行                                                |
 
 `window-lifecycle` 用 Electron 原生 API 操作窗口，再从 renderer 经 preload/main 保存和恢复草稿；它不是未挂载的 WindowDesktopApi 的集成证据。新测试与视觉截图均关闭 HTTP(S)，只使用本机 fixture，关闭应用后仍核对 fixture hash。
 
@@ -29,7 +29,7 @@ S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook �
 
 - Windows CI 固定 `windows-2025`，依赖由 lockfile 固定，Electron 44.2.0、Playwright 1.62.1。托管镜像仍会更新，因此截图旁记录并比较 ImageVersion、OS build、Electron/Chromium、字体 SHA-256、语言和 devicePixelRatio；漂移会失败，需要单独审阅。
 - 使用真实保存记录和确定的 Session ID，固定 renderer 时间、1440/900/640 × 1000 内容尺寸、DPR 1、Light、减少动态效果；等待本地字体加载和保存完成，不运行外部模型。截图断言关闭动画和光标闪烁。主进程真实定时器保持正常，避免冻结停止/保存逻辑。
-- `pnpm test:visual` 在独立 Windows job 中比较固定应用截图，`updateSnapshots: none`。缺图/环境记录时失败，不写入基线、不静默跳过。初始提案已包含在本 PR，是否接受为正式基线由人工审阅决定；CI 通过只证明与提案一致。
+- `pnpm test:visual` 在独立 Windows job 中比较固定应用截图，`updateSnapshots: none`。缺图/环境记录时失败，不写入基线、不静默跳过。基线已由用户委托 Codex 审阅接受；CI 通过只证明与已审阅图一致，不替代整个产品的设计验收。
 - 首次 PR 没有 `environment.txt` 时，quality 的视觉 job 先抓取候选再执行严格比较；缺少已审阅基线仍失败。这样无需先合并新 workflow 就能取到待审图。候选只上传，不写基线。后续 `visual-candidate.yml` 只能手动调度，调用 `pnpm design:visual:candidate`，输出到被忽略的 `test-output/visual/candidates`。它不会提交、发布或修改 `visual-baselines`。候选工作流成功只表示抓图成功。
 - 审阅人需检查正常/窄窗/长文本与焦点四张图及 `environment.txt`，把接受的文件通过单独 Diff 放入 `tests/e2e/visual-baselines/`，记录候选 run URL、源 SHA 和审阅结论。不能拿历史 Figma 导出或 Linux 图充当 Windows 基线。
 - 比较测试临时反色制造一个明显变化，要求同一基线断言失败；移除样式后必须再次通过。该预期失败也保留差异附件。比较工作流以 SHA 命名上传 HTML/JSON、expected/actual/diff 和失败 trace。
@@ -72,3 +72,5 @@ pnpm design:delivery writeback-plan <PR编号> <已登记featureId>
 - `pnpm package:smoke`：Webpack 编译完成，但复用依赖中的 extract-zip 带有 win32 bsdtar 补丁，在 Linux 打包被拒绝；不能声称打包成功。
 - 最初 Playwright 入口发现 29 项行为测试（12 文件）；同步 main 移除意图功能后为 27 项（11 文件），视觉入口为 1 项组合比较。Linux 新增行为用例尝试启动 Electron 失败，窗口用例因 max-failures 未运行；没有将 list 或 trace 生成当作 Real E2E 通过。
 - Windows run 130 的仓库规范、设计同步、格式、lint、类型、Contract Tests 和 Prototype Tests 步骤通过，候选截图成功；其严格比较因缺少基线失败。新增基线提交及最终 Windows 全门禁结果记录在 [PR #51](https://github.com/OasisViridis/Pioneer/pull/51)。真实 Figma 回填/事件尚待接入。此记录不作为关闭 #37 的依据。
+
+2026-10-28 补充：焦点修复后的正常 Windows 原图已独立审阅，三张正常宽度图和环境指纹未变。最终同提交结果以 PR 为准。本地 Linux 的全门禁仍受 Windows 路径假设限制；不将本地失败改写成成功。
