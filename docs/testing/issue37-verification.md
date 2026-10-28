@@ -46,7 +46,7 @@ pnpm design:delivery writeback-plan <PR编号> <已登记featureId>
 
 该命令明确返回 `writeback-blocked`，非成功退出：实际 Dev Resources 写入授权、scoped 凭证、Code Connect 发布能力、同提交人工验收链接尚未确认。验收链接缺失不填假值；Windows/真实 Provider 人工验收保持 pending。清单是只读准备物，重复运行相同证据得到相同清单，没有创建评论、标记 COMPLETED 或改动 Issue 的能力。
 
-后续获准写入时应按节点和固定 URL 读取已有资源，仅补缺项；收到部分成功或超时必须先回读再重试，保留人工链接。此写入/回读/重试逻辑及真实回填验收**尚未实现和验证**，不把只读清单算成已完成回传。Code Connect 须在明确获准后使用官方 CLI，不能以普通节点链接冒充映射发布。
+2026-10-28 已补充 `design:external writeback`：默认预览；显式授权记录与 `--apply` 后，根据新的合并/CI 证据执行 Dev Resources 写入，按节点和固定 URL 仅补缺项，部分成功/超时后先回读，容量不足不删除人工链接。逻辑已通过受控边界测试，**真实写入与重试验收仍未进行**。Code Connect 须另行用官方 CLI 发布，不能以链接回填冒充映射发布。配置、命令和本地接手步骤见[交接入口](../workflow/issue37-local-handoff.md)。
 
 ## Webhook 保留阻塞
 
@@ -74,3 +74,9 @@ pnpm design:delivery writeback-plan <PR编号> <已登记featureId>
 - Windows run 130 的仓库规范、设计同步、格式、lint、类型、Contract Tests 和 Prototype Tests 步骤通过，候选截图成功；其严格比较因缺少基线失败。新增基线提交及最终 Windows 全门禁结果记录在 [PR #51](https://github.com/OasisViridis/Pioneer/pull/51)。真实 Figma 回填/事件尚待接入。此记录不作为关闭 #37 的依据。
 
 2026-10-28 补充：焦点修复后的正常 Windows 原图已独立审阅，三张正常宽度图和环境指纹未变。最终同提交结果以 PR 为准。本地 Linux 的全门禁仍受 Windows 路径假设限制；不将本地失败改写成成功。
+
+## 2026-10-28 本地交接代码
+
+用户要求不能在当前连接中完成的部分交给本地 Codex。新增独立 `design:external` 入口、禁用的路由配置样例和绑定 merge SHA 的审批样例。事件检查器核验 passcode/文件/节点/发布标签、服务端版本历史与固定节点读取，并复用已有 S2 PR 状态；输出确定性快照材料，审阅并提交后可转换为现有 S2 请求。未把它包装成自动消费者，`awaiting-local-agent` 非零退出；没有部署 Webhook、dispatch 工作流或模型调用。
+
+Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或发布映射。当前阶段完整指令、外部条件与真实验收矩阵均在[本地交接入口](../workflow/issue37-local-handoff.md)。新增受控边界测试不替代真实 Figma 写入或投递；最终 head 的本地与 Windows 检查结果继续写入 PR。

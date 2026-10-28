@@ -81,3 +81,7 @@ pnpm design:delivery verify <PR编号>
 S3 增加独立的 Windows 应用像素比较 job。`verify` 现在还要求 `Windows / reviewed visual baseline` 的 `Compare reviewed Windows baseline` 步骤成功，候选抓图、跳过比较和旧 SHA 不能取得 `verified`。
 
 `pnpm design:delivery writeback-plan <PR编号> <已登记featureId>` 只读准备合并提交的节点链接，未验证发布条件时返回 `writeback-blocked`。Windows 基线审阅、回填权限、S2 dispatch 消费者与真实 Figma 事件的待办见 [#37 验证记录](../testing/issue37-verification.md)。本轮没有启用 Webhook 或自动回填，不改变 #33 的 Open 状态和人工验收状态。
+
+## S3 外部工具与本地交接
+
+`pnpm design:external` 提供经过边界测试的 Dev Resources 回填与版本事件材料准备。回填默认预览，只有固定提交审批与 `--apply` 同时存在才写；事件材料经审阅固化后交给本文件的原有 prepare/capture/deliver。没有新增无人值守 Agent 或已启用接收器。完整配置、故障重试、Code Connect 限制、真实验收清单与可直接交给本地 Codex 的提示见 [Issue #37 本地交接](issue37-local-handoff.md)。
