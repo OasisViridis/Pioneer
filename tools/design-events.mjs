@@ -1,4 +1,6 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { mkdir, readFile, rmdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import {
   canonical,
   hash,
@@ -11,6 +13,82 @@ import {
 
 const prefix = `/repos/${repository}`;
 const secretHash = (s) => createHash('sha256').update(s).digest();
+
+// A replay may observe a newer main, but must not change an already reviewed input.
+export async function persistEventMaterial(directory, result) {
+  const { snapshotText, ...material } = result;
+  if (
+    !/^[a-f0-9]{64}$/.test(material.eventKey) ||
+    !/^[a-f0-9]{40}$/.test(material.baseSha) ||
+    typeof snapshotText !== 'string' ||
+    hash(snapshotText) !== material.snapshotSha256
+  )
+    fail('invalid-input', 'Invalid event material');
+  await mkdir(directory, { recursive: true });
+  const lock = path.join(directory, `${material.eventKey}.lock`);
+  try {
+    await mkdir(lock);
+  } catch (error) {
+    if (error.code === 'EEXIST')
+      fail(
+        'review-required',
+        'Event material is being written or needs recovery',
+      );
+    throw error;
+  }
+  try {
+    const snapshotPath = path.join(
+      directory,
+      `${material.eventKey}.snapshot.json`,
+    );
+    const materialPath = path.join(
+      directory,
+      `${material.eventKey}.material.json`,
+    );
+    const readOptional = async (file) => {
+      try {
+        return await readFile(file, 'utf8');
+      } catch (error) {
+        if (error.code === 'ENOENT') return null;
+        throw error;
+      }
+    };
+    const [existingSnapshot, existingText] = await Promise.all([
+      readOptional(snapshotPath),
+      readOptional(materialPath),
+    ]);
+    if (existingSnapshot === null && existingText === null) {
+      await writeFile(snapshotPath, snapshotText, { mode: 0o600, flag: 'wx' });
+      await writeFile(materialPath, JSON.stringify(material, null, 2) + '\n', {
+        mode: 0o600,
+        flag: 'wx',
+      });
+      return material;
+    }
+    let existing;
+    try {
+      existing = JSON.parse(existingText);
+    } catch {
+      fail(
+        'review-required',
+        'Existing event material is incomplete or invalid',
+      );
+    }
+    if (
+      existingSnapshot !== snapshotText ||
+      !/^[a-f0-9]{40}$/.test(existing?.baseSha) ||
+      canonical({ ...existing, baseSha: null }) !==
+        canonical({ ...material, baseSha: null })
+    )
+      fail(
+        'review-required',
+        'Existing event material differs; preserve and review it',
+      );
+    return existing;
+  } finally {
+    await rmdir(lock);
+  }
+}
 
 async function versions(figma, file) {
   const path = `/v1/files/${file}/versions`;

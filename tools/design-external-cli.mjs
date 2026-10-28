@@ -2,7 +2,11 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeback } from './design-writeback-apply.mjs';
-import { inspectEvent, eventRequest } from './design-events.mjs';
+import {
+  inspectEvent,
+  eventRequest,
+  persistEventMaterial,
+} from './design-events.mjs';
 import { figmaApi, githubApi, remoteFailure } from './design-remote.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -43,16 +47,8 @@ try {
       github: githubApi,
     });
     if (result.state === 'awaiting-local-agent') {
-      const { snapshotText, ...material } = result;
       // Deterministic filenames, no remote mutation, no model or shell execution from event text.
-      await mkdir(out, { recursive: true });
-      await writeFile(
-        path.join(out, `${result.eventKey}.snapshot.json`),
-        snapshotText,
-        { mode: 0o600 },
-      );
-      await save(`${result.eventKey}.material.json`, material);
-      result = material;
+      result = await persistEventMaterial(out, result);
     }
   } else if (command === 'event-request') {
     const request = eventRequest(root, await read(args[0]), args[1], policy);
@@ -78,7 +74,8 @@ try {
   )
     process.exitCode = 1;
 } catch (error) {
-  const result = { ...remoteFailure(error), retryable: true };
+  const failure = remoteFailure(error);
+  const result = { ...failure, retryable: failure.state !== 'review-required' };
   await save('receipt.json', result);
   console.log(JSON.stringify(result));
   process.exitCode = 1;

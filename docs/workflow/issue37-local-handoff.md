@@ -76,6 +76,8 @@ pnpm design:external event-inspect tmp/design-external/received-event.json tmp/d
 
 输出同一事件键下的 `<KEY>.snapshot.json` 和 `<KEY>.material.json`。字段含固定 version、节点、base SHA 和 snapshot hash；不会保存事件 passcode/description/user 信息或下载远程图片。三次重放复用键；收到旧版本按 Figma 历史时间忽略，不能依靠事件 timestamp 排序。普通编辑/PING 明确忽略；任意事件自带 nodes/featureId/issue/command/prompt 被拒绝。
 
+首次保存后，即使 main 前进，重放仍保留最初的 base SHA；后续 S2 会独立检查基线是否过期。若材料不完整、内容冲突或同一事件的写入锁仍存在，返回 `review-required`，保留现场供人工检查；确认无进程正在写入并核对材料后，再由操作员处理中断留下的锁或不完整文件。
+
 当状态为 `awaiting-local-agent` 时：
 
 1. 审阅快照范围和设计差异。文件只包含节点结构与部分文字/布局，缺少图像/矢量等视觉输入时补充受审材料，不声称能够离线还原像素。

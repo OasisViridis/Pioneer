@@ -80,3 +80,11 @@ pnpm design:delivery writeback-plan <PR编号> <已登记featureId>
 用户要求不能在当前连接中完成的部分交给本地 Codex。新增独立 `design:external` 入口、禁用的路由配置样例和绑定 merge SHA 的审批样例。事件检查器核验 passcode/文件/节点/发布标签、服务端版本历史与固定节点读取，并复用已有 S2 PR 状态；输出确定性快照材料，审阅并提交后可转换为现有 S2 请求。未把它包装成自动消费者，`awaiting-local-agent` 非零退出；没有部署 Webhook、dispatch 工作流或模型调用。
 
 Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或发布映射。当前阶段完整指令、外部条件与真实验收矩阵均在[本地交接入口](../workflow/issue37-local-handoff.md)。新增受控边界测试不替代真实 Figma 写入或投递；最终 head 的本地与 Windows 检查结果继续写入 PR。
+
+## 2026-10-28 Windows 本地接手
+
+- 以 PR #51 head `b040e11e9523e634fd7c3c96cd0c683d5c64a077` 独立检出，保留原工作副本。修复本地事件重放在 main 前进时覆盖已固定 base SHA 的问题；冲突、半写入和残留锁保留现场并要求审阅。新回归用例检查三次重放、材料篡改、半写入和并发竞争。
+- `pnpm verify:repository` 通过 6/6；`pnpm check` 通过格式、lint、类型、Contract Tests 348/348、Prototype Tests 210/210、真实 Electron E2E 29/29 和 package smoke。门禁运行中补充了并发用例，随后单独重跑最终 `pnpm design:check`，75/75 通过，并单独检查该用例的格式。Prototype Tests 不是 Electron 证据。
+- 本机 `pnpm test:visual` 在像素比较前因环境指纹不匹配失败：本机 OS build `10.0.26200`、`local-windows`；已审阅 CI 基线为 `10.0.26100`、镜像 `20261021.278.1`。没有更新基线；本地修复尚无最终 head 的 Windows CI 视觉结果。
+- PR #48 的 merge SHA `1cbface10f24667b8babc1b9d427f64d29588536` 对应 [quality run](https://github.com/OasisViridis/Pioneer/actions/runs/40367977047) 只有 Windows 质量作业，没有视觉作业，不能作为当前真实回填试点。当前 registry 仅有已关闭的 #36 交付；新试点仍待登记与验收。
+- Figma MCP 对 `921:706` 的 Code Connect 探测仍拒绝，当前身份报告学生套餐 Full seat；文件所属团队、组件发布状态与实际权限尚未确认。[Figma 当前帮助文档](https://help.figma.com/hc/en-us/articles/23920389749655-Code-Connect) 与 MCP 返回的套餐提示不一致，不能据此断言必须购买。未发布 Code Connect，也未执行真实回填或接收器验收。
