@@ -13,6 +13,7 @@
   --hazel-gold: #c6af94;
   --hazel-gold-ink: #76614b;
   --hazel-success-ink: #35644b;
+  --hazel-danger-ink: #934342; /** DESIGN-SYSTEM error ink #934342 for failed, rejected and changed states. */
   --hazel-tool-surface: #eeedea; /** Accepted S1 proposal from native color/surface-muted, #eeedea; replaces runtime #eef1f3. */
   --pioneer-focus: #0071e3;
   --pioneer-radius: 0.75rem;

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  addRunlogPanel,
   createDockLayout,
   dockPanel,
   visibleDockPanels,
@@ -22,6 +23,35 @@ const project: ProjectSummary = {
 };
 
 describe('session docking layout', () => {
+  it('upgrades a v6 five-panel default layout to the canonical v7 layout', () => {
+    const upgraded = addRunlogPanel({
+      columns: [
+        ['context', 'capabilities', 'diff', 'outputs'],
+        ['conversation'],
+      ],
+      hidden: ['context', 'capabilities', 'diff', 'outputs'],
+      ratio: 60,
+      weights: {
+        conversation: 2,
+        context: 1,
+        capabilities: 1,
+        diff: 1,
+        outputs: 1,
+      },
+    });
+    // Equal to the fresh v7 default, so the workbench must not announce a
+    // layout adjustment for an untouched v6 default.
+    expect(upgraded).toEqual(createDockLayout('focus'));
+    expect(addRunlogPanel(upgraded)).toEqual(upgraded);
+    expect(upgraded.hidden).toEqual([
+      'context',
+      'capabilities',
+      'runlog',
+      'diff',
+      'outputs',
+    ]);
+  });
+
   it('moves conversation beside the artifact without duplicating or removing other modules', () => {
     const initial = createDockLayout('review');
     const moved = dockPanel(initial, 'conversation', 0, 'diff');
@@ -29,7 +59,7 @@ describe('session docking layout', () => {
     expect(visibleDockPanels(moved, 1)).toEqual([]);
     expect(visibleDockPanels(initial, 0)).toEqual(['diff']);
     expect(visibleDockPanels(initial, 1)).toEqual(['conversation']);
-    expect(new Set(moved.columns.flat()).size).toBe(5);
+    expect(new Set(moved.columns.flat()).size).toBe(6);
     const hidden = hideDockPanel(moved, 'conversation');
     expect(visibleDockPanels(hidden, 0)).toEqual(['diff']);
     expect(hideDockPanel(hidden, 'diff')).toBe(hidden);

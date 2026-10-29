@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
+import { isAbsolute, relative, resolve } from 'node:path';
 
 import {
   RUN_LIMITS,
@@ -12,6 +13,14 @@ import {
 import type { RunEventBatch, RunPage } from '../../shared/contracts/run-ipc';
 import type { ReadOnlyToolRequest } from '../../shared/contracts/read-only-tools';
 import type { EgressMaterial } from '../../shared/contracts/egress';
+import type {
+  RunContext,
+  RunContextCall,
+  RunContextMaterial,
+  RunMaterialReason,
+} from '../../shared/contracts/run-context';
+import { isSensitiveEntryName } from './read-only-tool-policy';
+import { normalizeRootPath } from '../catalog/path-policy';
 import { buildEgressManifest } from './egress-materials';
 import type { RunJournal } from './run-journal';
 import type {
@@ -106,6 +115,15 @@ interface Subscriber {
   lastActivityAt: number;
 }
 
+interface TrackedMaterial {
+  path: string;
+  bytes: number;
+  sha256: string;
+  state: 'approved' | 'read' | 'scanned' | 'changed' | 'missing';
+  reason: RunMaterialReason | null;
+  readAt: string | null;
+}
+
 interface ActiveRun {
   identity: RunIdentity;
   status: RunStatus;
@@ -115,6 +133,10 @@ interface ActiveRun {
   taskDigest: string;
   /** Explicit egress manifest bound to this run's grant. */
   materials: EgressMaterial[];
+  /** Main-side read/changed state for the context panel (Issue #17). */
+  trackedMaterials: Map<string, TrackedMaterial>;
+  /** Bounded tool-call log; the event wire never carries raw arguments. */
+  calls: RunContextCall[];
   requestId: string;
   requestPayload: string;
   events: RunEvent[];
@@ -187,6 +209,52 @@ function defaultRandomId(prefix: string): string {
 
 function taskDigestOf(task: string): string {
   return createHash('sha256').update(task, 'utf-8').digest('hex');
+}
+
+/**
+ * Fixed rejection codes that explain why an approved material is no longer
+ * readable. Codes that describe an unapproved request create no material
+ * record; the call log carries them instead.
+ */
+const MATERIAL_REASON_BY_TOOL_CODE: Record<string, RunMaterialReason> = {
+  PATH_UNAVAILABLE: 'PATH_UNAVAILABLE',
+  PATH_TYPE_NOT_ALLOWED: 'PATH_TYPE_NOT_ALLOWED',
+  LINK_NOT_ALLOWED: 'LINK_NOT_ALLOWED',
+  SENSITIVE_PATH: 'SENSITIVE_PATH',
+  PATH_OUTSIDE_PROJECT: 'PATH_OUTSIDE_PROJECT',
+  INVALID_PATH: 'INVALID_PATH',
+};
+
+function materialReasonOf(code: string): RunMaterialReason | null {
+  return MATERIAL_REASON_BY_TOOL_CODE[code] ?? null;
+}
+
+/**
+ * Echoes only a normalized project-relative tool target. Absolute paths,
+ * traversal, empty segments and sensitive names resolve to null so the
+ * renderer can show "目标不可显示" instead of a raw argument.
+ */
+export function normalizedToolTarget(
+  projectRoot: string,
+  request: ReadOnlyToolRequest,
+): string | null {
+  const normalized = request.arguments.path.replaceAll('\\', '/');
+  if (normalized.length === 0 || normalized.length > 1024) return null;
+  const absolute = resolve(normalizeRootPath(projectRoot), normalized);
+  const relativePath = relative(normalizeRootPath(projectRoot), absolute)
+    .split('\\')
+    .join('/');
+  if (
+    relativePath.length === 0 ||
+    relativePath.startsWith('../') ||
+    relativePath === '..' ||
+    isAbsolute(relativePath) ||
+    relativePath.startsWith('/')
+  )
+    return null;
+  if (relativePath.split('/').some((segment) => isSensitiveEntryName(segment)))
+    return null;
+  return relativePath;
 }
 
 export class RunManager {
@@ -418,6 +486,20 @@ export class RunManager {
       windowEpoch: context.windowEpoch,
       taskDigest: grant.taskDigest,
       materials: grant.materials,
+      trackedMaterials: new Map(
+        grant.materials.map((material) => [
+          material.path,
+          {
+            path: material.path,
+            bytes: material.bytes,
+            sha256: material.sha256,
+            state: 'approved' as const,
+            reason: null,
+            readAt: null,
+          },
+        ]),
+      ),
+      calls: [],
       requestId: request.requestId,
       requestPayload: payload,
       events: [],
@@ -647,6 +729,14 @@ export class RunManager {
         }
         run.toolCalls += 1;
         const callId = `call:${String(run.toolCalls)}`;
+        run.calls.push({
+          callId,
+          tool: null,
+          target: null,
+          state: 'rejected',
+          code: 'TOOL_NOT_ALLOWED',
+          at: new Date().toISOString(),
+        });
         this.emit(run, { type: 'tool.requested', callId, tool: null }, 'tool');
         this.emit(
           run,
@@ -704,6 +794,16 @@ export class RunManager {
       }
       run.toolCalls += 1;
       const callId = `call:${String(run.toolCalls)}`;
+      const target = normalizedToolTarget(project.root, request);
+      const call: RunContextCall = {
+        callId,
+        tool: request.tool,
+        target,
+        state: 'requested',
+        code: null,
+        at: new Date().toISOString(),
+      };
+      run.calls.push(call);
       this.emit(
         run,
         { type: 'tool.requested', callId, tool: request.tool },
@@ -713,7 +813,13 @@ export class RunManager {
       try {
         const outcome = await (
           this.dependencies.executeTool ?? executeReadOnlyTool
-        )(project.root, request, run.abort.signal, run.materials);
+        )(project.root, request, run.abort.signal, run.materials, {
+          // Main observes what the tool actually read or found changed; the
+          // event wire still carries no arguments.
+          onMaterial: (path, state) => {
+            this.trackMaterial(run, path, state);
+          },
+        });
         // terminate() already published the cancelled pair for a run that
         // ended while this call was in flight. A stop request that landed
         // while the tool was running must not publish the late real body: the
@@ -721,6 +827,8 @@ export class RunManager {
         if (this.isTerminal(run))
           return { status: 'cancelled', code: 'CANCELLED' };
         if (this.hasStopRequest(run)) {
+          call.state = 'cancelled';
+          call.code = 'CANCELLED';
           this.emit(
             run,
             {
@@ -735,6 +843,9 @@ export class RunManager {
         if (outcome.status === 'succeeded') {
           run.outputBytes += bytesOf(outcome.text);
         }
+        call.state = outcome.status;
+        call.code = outcome.status === 'succeeded' ? null : outcome.code;
+        this.trackOutcome(run, request, target, outcome);
         this.emit(
           run,
           { type: 'tool.result', callId, result: outcome },
@@ -752,6 +863,125 @@ export class RunManager {
     } finally {
       release();
     }
+  }
+
+  /** Records a material state observed by a real tool execution (Issue #17). */
+  private trackMaterial(
+    run: ActiveRun,
+    path: string,
+    state: 'read' | 'scanned' | 'changed' | 'unreadable',
+    reason: RunMaterialReason | null = null,
+  ): void {
+    const record = run.trackedMaterials.get(path);
+    if (record === undefined) return;
+    if (record.state === 'changed') return;
+    if (state === 'unreadable') {
+      // The executor read the bytes but could not use them as text. Keep the
+      // approved state and explain why nothing was analysed.
+      if (record.state === 'approved')
+        record.reason = reason ?? 'BINARY_CONTENT';
+      return;
+    }
+    if (state === 'read' || state === 'scanned') {
+      // A full read outranks a search scan; neither downgrades the other.
+      if (record.state === 'read') return;
+      if (record.state === 'scanned' && state === 'scanned') return;
+      record.state = state;
+      record.reason = null;
+      record.readAt = new Date().toISOString();
+      return;
+    }
+    // A later change must not erase a confirmed read or scan: keep the fact
+    // and attach the reason so the panel can show both.
+    if (record.state === 'read' || record.state === 'scanned') {
+      record.reason = reason ?? 'CONTENT_NOT_ALLOWED';
+      return;
+    }
+    record.state = 'changed';
+    record.reason = reason ?? 'CONTENT_NOT_ALLOWED';
+    record.readAt = null;
+  }
+
+  private trackOutcome(
+    run: ActiveRun,
+    request: ReadOnlyToolRequest,
+    target: string | null,
+    outcome: ToolOutcome,
+  ): void {
+    if (outcome.status === 'succeeded') {
+      // A successful read is already reported by the executor's observer,
+      // which fires only after the bytes were read and hash-checked. Inferring
+      // it here would also mark a replaced executor that never read anything.
+      return;
+    }
+    if (outcome.status === 'failed') {
+      // A later failure must not erase an earlier confirmed read: keep the
+      // read fact and let the call log carry the failure.
+      if (request.tool === 'read_file' && target !== null) {
+        const record = run.trackedMaterials.get(target);
+        if (
+          record !== undefined &&
+          record.state !== 'read' &&
+          record.state !== 'scanned' &&
+          record.state !== 'changed'
+        ) {
+          record.state = 'missing';
+          record.reason = 'READ_FAILED';
+        }
+      }
+      return;
+    }
+    if (outcome.status !== 'rejected' || target === null) return;
+    if (run.trackedMaterials.get(target) === undefined) return;
+    if (outcome.code === 'CONTENT_NOT_ALLOWED') {
+      this.trackMaterial(run, target, 'changed', 'CONTENT_NOT_ALLOWED');
+      return;
+    }
+    const reason = materialReasonOf(outcome.code);
+    if (reason === null) return;
+    const record = run.trackedMaterials.get(target);
+    if (
+      record === undefined ||
+      record.state === 'read' ||
+      record.state === 'scanned' ||
+      record.state === 'changed'
+    )
+      return;
+    record.state = 'missing';
+    record.reason = reason;
+  }
+
+  /**
+   * Read-only context projection for the workbench panels. Same ownership and
+   * identity checks as getRun; tombstoned or evicted runs answer RUN_NOT_FOUND
+   * so the panel can say the context is unavailable instead of inventing one.
+   */
+  getContext(input: {
+    sessionId: string;
+    projectId: string;
+    runId: string;
+    revision: number;
+    webContentsId: number;
+    windowEpoch: number;
+  }): RunContext | null {
+    const run = this.runs.get(input.runId);
+    if (run === undefined) return null;
+    if (
+      run.webContentsId !== input.webContentsId ||
+      run.windowEpoch !== input.windowEpoch ||
+      run.identity.sessionId !== input.sessionId ||
+      run.identity.projectId !== input.projectId ||
+      run.identity.revision !== input.revision
+    )
+      return null;
+    return {
+      identity: run.identity,
+      status: run.status,
+      materials: [...run.trackedMaterials.values()].map(
+        (material): RunContextMaterial => ({ ...material }),
+      ),
+      calls: structuredClone(run.calls),
+    };
   }
 
   requestStop(
@@ -1049,6 +1279,11 @@ export class RunManager {
     // tool.requested gets exactly one result before the terminal event; the
     // late real result is dropped instead of rewriting history.
     for (const callId of run.pendingToolCalls) {
+      const pending = run.calls.find((call) => call.callId === callId);
+      if (pending?.state === 'requested') {
+        pending.state = 'cancelled';
+        pending.code = 'CANCELLED';
+      }
       this.emit(
         run,
         {
