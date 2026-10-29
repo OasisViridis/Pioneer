@@ -47,7 +47,7 @@ describe('single-layout session migration', () => {
       },
     };
     const result = loadRecord(input);
-    expect(result.version).toBe(7);
+    expect(result.version).toBe(8);
     expect(result.state.sessions[0]).toMatchObject({
       draft: '修复重复请求',
       messages: ['读取请求缓存模块'],
