@@ -116,6 +116,59 @@ test('disabled intake never reads credentials or makes network calls', async () 
   assert.equal((await f.run()).state, 'event-disabled');
   assert.equal(f.calls.length, 0);
 });
+test('fixed-version material retains instance component identity without unrelated fields', async () => {
+  const f = fixture();
+  f.policy.features['event-pilot'].compositionMappings = { '1:2': '9:0' };
+  f.source.nodes['1:2'].document = {
+    id: '1:2',
+    name: 'Composition',
+    type: 'FRAME',
+    children: [
+      {
+        id: '1:4',
+        name: 'Tab',
+        type: 'INSTANCE',
+        componentId: '9:1',
+        componentProperties: {
+          'Label#9:2': {
+            type: 'TEXT',
+            value: 'branch',
+            boundVariables: { secret: 'excluded' },
+          },
+        },
+        imageRef: 'excluded',
+      },
+    ],
+  };
+  const result = await f.run();
+  const snapshot = JSON.parse(result.snapshotText);
+  assert.equal(snapshot.nodes[0].children[0].componentId, '9:1');
+  assert.deepEqual(snapshot.nodes[0].children[0].componentProperties, {
+    'Label#9:2': { type: 'TEXT', value: 'branch' },
+  });
+  assert.equal(snapshot.nodes[0].children[0].imageRef, undefined);
+  f.source.nodes['1:2'].document.children[0].componentId =
+    'https://example.test';
+  await assert.rejects(f.run(), (error) => error.state === 'invalid-input');
+  f.source.nodes['1:2'].document.children[0].componentId = '9:1';
+  f.source.nodes['1:2'].document.children[0].componentProperties = {
+    Unsafe: { type: 'INSTANCE_SWAP', value: '9:3' },
+  };
+  await assert.rejects(f.run(), (error) => error.state === 'review-required');
+});
+test('ordinary component events do not reject or retain unrelated instance properties', async () => {
+  const f = fixture();
+  f.source.nodes['1:2'].document.children.push({
+    id: '1:4',
+    name: 'Nested',
+    type: 'INSTANCE',
+    componentId: '9:1',
+    componentProperties: { Enabled: { type: 'BOOLEAN', value: true } },
+  });
+  const snapshot = JSON.parse((await f.run()).snapshotText);
+  assert.equal(snapshot.nodes[0].children[1].componentId, undefined);
+  assert.equal(snapshot.nodes[0].children[1].componentProperties, undefined);
+});
 test('bad passcode or wrong webhook identity fails before any remote access', async () => {
   for (const mutate of [
     (f) => {
@@ -389,6 +442,39 @@ test('a reviewed snapshot committed in Git becomes a valid S2 request; edited ha
     assert.equal(request.design.kind, 'version');
     assert.equal(request.design.commit, commit);
     assert.equal(request.design.version, 'fixed-test-version');
+    await writeFile(path.join(dir, 'reviewed-base.txt'), 'reviewed\n');
+    git('add', 'reviewed-base.txt');
+    git(
+      '-c',
+      'user.name=Fixture',
+      '-c',
+      'user.email=fixture@example.invalid',
+      '-c',
+      'commit.gpgSign=false',
+      'commit',
+      '-m',
+      'Reviewed base',
+    );
+    const descendant = git('rev-parse', 'HEAD');
+    const rebound = eventRequest(dir, material, commit, policy, descendant);
+    assert.equal(rebound.baseSha, descendant);
+    assert.equal(material.baseSha, commit);
+    assert.equal(rebound.design.sha256, request.design.sha256);
+    assert.throws(
+      () =>
+        eventRequest(
+          dir,
+          { ...material, baseSha: descendant },
+          commit,
+          policy,
+          commit,
+        ),
+      (error) => error.state === 'review-required',
+    );
+    assert.throws(
+      () => eventRequest(dir, material, commit, policy, 'f'.repeat(40)),
+      (error) => error.state === 'review-required',
+    );
     material.snapshotSha256 = '0'.repeat(64);
     assert.throws(
       () => eventRequest(dir, material, commit, policy),

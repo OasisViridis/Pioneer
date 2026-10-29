@@ -1,4 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, rmdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -121,12 +122,46 @@ async function versions(figma, file) {
 }
 
 // Only retain design data needed by S2, never remote assets, user identities or commands.
-function projectNode(node, budget) {
+function projectNode(node, budget, composition = false) {
   if (++budget.count > 10_000)
     fail('review-required', 'Design subtree exceeds review budget');
   if (!node || typeof node.id !== 'string' || typeof node.type !== 'string')
     fail('invalid-input', 'Invalid design node');
   const result = { id: node.id, type: node.type, name: node.name };
+  // A composed frame can retain its instance's source component identity;
+  // do not retain arbitrary API fields or asset URLs.
+  if (
+    composition &&
+    node.type === 'INSTANCE' &&
+    node.componentId !== undefined
+  ) {
+    if (
+      typeof node.componentId !== 'string' ||
+      !/^\d+:\d+$/.test(node.componentId)
+    )
+      fail('invalid-input', 'Invalid instance component identity');
+    result.componentId = node.componentId;
+  }
+  if (composition && node.type === 'INSTANCE') {
+    const properties = node.componentProperties ?? {};
+    if (typeof properties !== 'object' || Array.isArray(properties))
+      fail('invalid-input', 'Invalid instance properties');
+    result.componentProperties = Object.create(null);
+    for (const [key, property] of Object.entries(properties)) {
+      if (
+        key.length > 200 ||
+        !property ||
+        !['TEXT', 'VARIANT'].includes(property.type) ||
+        typeof property.value !== 'string' ||
+        property.value.length > 1000
+      )
+        fail('review-required', 'Unsupported instance property');
+      result.componentProperties[key] = {
+        type: property.type,
+        value: property.value,
+      };
+    }
+  }
   for (const field of [
     'characters',
     'absoluteBoundingBox',
@@ -141,7 +176,9 @@ function projectNode(node, budget) {
   if (node.componentPropertyDefinitions)
     result.properties = node.componentPropertyDefinitions;
   if (node.children)
-    result.children = node.children.map((child) => projectNode(child, budget));
+    result.children = node.children.map((child) =>
+      projectNode(child, budget, composition),
+    );
   return result;
 }
 
@@ -271,7 +308,11 @@ export async function inspectEvent({
     const node = source.nodes?.[id]?.document;
     if (node?.id !== id)
       fail('missing-input', 'Required node missing from fixed version');
-    return projectNode(node, budget);
+    return projectNode(
+      node,
+      budget,
+      Object.hasOwn(feature.compositionMappings ?? {}, id),
+    );
   });
   const base = await github('GET', `${prefix}/git/ref/heads/main`);
   if (!/^[a-f0-9]{40}$/.test(base.object?.sha))
@@ -315,13 +356,19 @@ export async function inspectEvent({
 }
 
 // After a local agent reviews and commits the snapshot, reuse the real S2 validator.
-export function eventRequest(root, material, snapshotCommit, policy) {
+export function eventRequest(
+  root,
+  material,
+  snapshotCommit,
+  policy,
+  reviewedBaseSha,
+) {
   const request = requestSchema.parse({
     schemaVersion: 1,
     featureId: material.featureId,
     issue: material.issue,
     changeType: material.changeType,
-    baseSha: material.baseSha,
+    baseSha: reviewedBaseSha ?? material.baseSha,
     behaviorChanges: material.behaviorChanges,
     design: {
       commit: snapshotCommit,
@@ -333,6 +380,25 @@ export function eventRequest(root, material, snapshotCommit, policy) {
       nodes: material.nodes,
     },
   });
+  if (reviewedBaseSha !== undefined && reviewedBaseSha !== material.baseSha) {
+    if (!/^[a-f0-9]{40}$/.test(material.baseSha ?? ''))
+      fail('invalid-input', 'Original event base is invalid');
+    try {
+      execFileSync(
+        'git',
+        ['merge-base', '--is-ancestor', material.baseSha, reviewedBaseSha],
+        {
+          cwd: root,
+          stdio: 'ignore',
+        },
+      );
+    } catch {
+      fail(
+        'review-required',
+        'Reviewed base must descend from the original event base',
+      );
+    }
+  }
   prepare(root, request, policy);
   return request;
 }

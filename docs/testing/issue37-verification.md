@@ -86,6 +86,12 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 - 以 PR #51 head `b040e11e9523e634fd7c3c96cd0c683d5c64a077` 独立检出，保留原工作副本。修复本地事件重放在 main 前进时覆盖已固定 base SHA 的问题；冲突、半写入和残留锁保留现场并要求审阅。新回归用例检查三次重放、材料篡改、半写入和并发竞争。
 - `pnpm verify:repository` 通过 6/6；`pnpm check` 通过格式、lint、类型、Contract Tests 348/348、Prototype Tests 210/210、真实 Electron E2E 29/29 和 package smoke。门禁运行中补充了并发用例，随后单独重跑最终 `pnpm design:check`，75/75 通过，并单独检查该用例的格式。Prototype Tests 不是 Electron 证据。
 - 本机 `pnpm test:visual` 在像素比较前因环境指纹不匹配失败：本机 OS build `10.0.26200`、`local-windows`；已审阅 CI 基线为 `10.0.26100`、镜像 `20261021.278.1`。没有更新基线；本地修复尚无最终 head 的 Windows CI 视觉结果。
+
+## 2026-10-29 会话标签试点准备
+
+- #58 已合并，提供真实会话分支数据；#25 保持 Open。候选画板 `1093:1259` 当前由三个 `921:619` 实例组成，均属于现有映射组件集 `921:632`。这是 Figma 当前画布只读检查，不是命名版本或真实事件证据。
+- 本 PR 提议 `session-branch-tabs` 注册范围，并支持受审组成画板：校验实例来源、实例属性、完整固定快照 SHA 和已接受 main 的登记。注册项进入 main 后，没有具体固定快照审批时只能返回 `materials-only`；尚未进入基线时返回 `review-required`。原事件材料的基线不变；明确审阅后可以绑定到其后代基线，再由交付门禁核对当前 main。
+- 受控测试覆盖事件投影、属性及嵌套实例越界、快照变更、未接受登记和独立 Git 快照/后代基线；这些不是 Figma 真实投递、Dev Resources 回填或接收器验收。凭证、固定版本、合格 S2 交付和接收器仍未确认。
 - PR #48 的 merge SHA `1cbface10f24667b8babc1b9d427f64d29588536` 对应 [quality run](https://github.com/OasisViridis/Pioneer/actions/runs/40367977047) 只有 Windows 质量作业，没有视觉作业，不能作为当前真实回填试点。当前 registry 仅有已关闭的 #36 交付；新试点仍待登记与验收。
 - Figma MCP 对 `921:706` 的 Code Connect 探测仍拒绝，当前身份报告学生套餐 Full seat；文件所属团队、组件发布状态与实际权限尚未确认。[Figma 当前帮助文档](https://help.figma.com/hc/en-us/articles/23920389749655-Code-Connect) 与 MCP 返回的套餐提示不一致，不能据此断言必须购买。未发布 Code Connect，也未执行真实回填或接收器验收。
 - 复审发现共用 Figma 传输层原先接受任意 `/v1/` GET；未发现事件可以控制该路径，但能力范围超过现有调用需要。现限定为文件版本、固定节点和 Dev Resources 三类 GET 及 Dev Resources POST；受控传输测试确认拒绝其他路径，不代表真实 Figma 集成通过。修改后再次运行 `pnpm check`：设计同步 76/76、Contract Tests 348/348、Prototype Tests 210/210、真实 Electron E2E 29/29 和 package smoke 通过；视觉比较仍在上述环境指纹处停止。

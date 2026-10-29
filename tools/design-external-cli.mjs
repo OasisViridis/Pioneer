@@ -51,11 +51,21 @@ try {
       result = await persistEventMaterial(out, result);
     }
   } else if (command === 'event-request') {
-    const request = eventRequest(root, await read(args[0]), args[1], policy);
+    if (
+      args.length !== 2 &&
+      (args.length !== 4 || args[2] !== '--reviewed-base')
+    )
+      throw new Error(
+        'Expected material, snapshot commit and optional --reviewed-base SHA',
+      );
+    const material = await read(args[0]);
+    const request = eventRequest(root, material, args[1], policy, args[3]);
     await save(`${request.featureId}.request.json`, request);
     result = {
       state: 'request-prepared',
       request: `tmp/design-external/${request.featureId}.request.json`,
+      originalBaseSha: material.baseSha,
+      reviewedBaseSha: request.baseSha,
       next: 'design:delivery prepare; only ready-for-agent permits implementation',
     };
   } else throw new Error('Unknown external delivery command');
