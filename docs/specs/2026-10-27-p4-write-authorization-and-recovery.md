@@ -161,9 +161,11 @@ renderer 只能看到序列化的 `WriteApprovalSummary`：批准编号、操作
 
 | 模式 | 允许 | 默认用途 |
 | --- | --- | --- |
-| `read_only` | 不写任何文件 | 本票交付期间的默认；写入能力关闭 |
+| `read_only` | 不写项目文件；`userData` 下的设置、会话与运行日志仍由各自模块写入 | 本票交付期间的默认；写入能力关闭 |
 | `workspace_write` | 只写项目根内的普通文件；保护路径只读 | #19 启用写入后的默认 |
-| `full_access` | 不再施加路径限制 | 只能由用户显式开启并单独确认 |
+| `full_access` | 跳过模式与保护路径限制；契约层的相对路径、无反斜杠、无 `..` 与 main 的项目根确认仍然生效 | 只能由用户显式开启并单独确认 |
+
+`full_access` 不等于任意磁盘访问：它只是不再额外施加"只写项目内"与保护路径这两层，路径语法与项目根确认仍然拦在前面；它也不是内核隔离，进程本身仍有宿主权限。
 
 保护路径默认 `.git`（`WRITE_PROTECTED_PATHS`）：`workspace_write` 下即使批准了也拒绝，恢复同样拒绝。按路径段比较，`.github/` 这类近似前缀不算保护路径。
 
@@ -197,7 +199,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 | `restored` | 已按恢复计划回到 `before` | 已恢复，附恢复后哈希 |
 | `unchanged` | 没有本 Run 的写入记录 | 文件未被本次操作改变 |
 | `rejected` | 批准在写入前被整体拒绝 | 未写入；列出拒绝码与异常目标 |
-| `failed` | 尝试过但没有写成，或恢复因冲突被保留 | 未写入；附固定失败码（含 `RECOVERY_CONFLICT`） |
+| `failed` | 没有写成：预检拒绝（`SCOPE_DENIED`，尚未尝试写）或尝试后失败（`WRITE_FAILED` 等），或恢复因冲突被保留 | 未写入；附固定失败码；`SCOPE_DENIED` 要显示"未尝试写入"，不能显示"写入失败" |
 | `unknown` | 崩溃或停机，留下 `intent` 却没有 `applied`/`failed` | 实际状态未知，需人工核对 |
 
 ### 4.3 场景与文件状态
@@ -267,7 +269,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 目标状态 10 个：`unchanged`、`changed`、`missing`、`replaced`、`identity_unavailable`、`not_regular_file`、`link_not_allowed`、`too_large`、`unreadable`、`unstable`。`replaced` 专指「内容与批准一致但文件身份已变」的同名重建；`identity_unavailable` 专指「批准记了身份但本次读取无法报告」，两者都不能与 `changed` 合并：它们分别说明文件对象被换、身份无法证明、内容被改。逐路径结果 7 个：`applied`、`verification_failed`、`restored`、`unchanged`、`rejected`、`failed`、`unknown`。失败码 6 个：`WRITE_FAILED`、`VERIFY_FAILED`、`CANCELLED`、`RECOVERY_CONFLICT`、`SCOPE_DENIED`、`UNKNOWN`。状态描述文件，结果描述这次操作，两者不混用。
 
-沙箱拒绝不是批准拒绝：`SCOPE_READ_ONLY`、`SCOPE_PROTECTED_PATH` 由 `checkWriteScope` 在批准消费之前返回，逐路径结果记 `failed` + `SCOPE_DENIED`，批准记录保持未消费，用户调大权限或换目标后可以重新走一次。
+沙箱拒绝不是批准拒绝：`SCOPE_READ_ONLY`、`SCOPE_PROTECTED_PATH` 由 `checkWriteScope` 在批准消费之前返回，逐路径结果记 `failed` + `SCOPE_DENIED`，批准记录保持未消费，用户调大权限或换目标后可以重新走一次。它表示"没有尝试写入"，界面必须这样呈现，不能与 `WRITE_FAILED` 混为一谈。
 
 ## 7. 负向探针矩阵（本票已执行）
 
