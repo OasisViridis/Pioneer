@@ -18,3 +18,11 @@
 - 环境文件与三张 `NORMAL conversation` 附件均逐字节等于原基线。长文本的 `NORMAL` 附件等于此次比较失败的 actual；失败发生在故障注入之前，因此这张 actual 是正常界面。
 - 原样复制长文本图，SHA-256 `3bb40f3bc81b5ba8c240b3766a6f8d3c773592fb12308dd8e68872d028c34bee`。目视确认蓝色键盘焦点清晰，文本、滚动条与保存按钮可见。所有变化限于输入框区域 `(34, 810)–(606, 895)`；严格像素比较报告 5084 个差异像素，原始 RGB 比较为 6389 个，差异来自抗锯齿阈值。
 - 本次来源 run 因焦点样式与旧图不同而正确失败；接受新图后仍须运行最终同提交 CI，检查四图、故意失败与恢复通过。最终结果记录在 PR，不能拿此来源 run 冒充通过。
+
+## 2026-10-29 main 更新后的复核
+
+- #57 已合并，空会话中的入口从“运行日志”改为“运行控制”，说明文字也随实际交互更新。旧基线在 [quality run 40822616038](https://github.com/OasisViridis/Pioneer/actions/runs/40822616038) 的严格比较中正确报差异。
+- 四张候选来自 [Windows candidate run 40822905201](https://github.com/OasisViridis/Pioneer/actions/runs/40822905201)，[原始 artifact](https://github.com/OasisViridis/Pioneer/actions/runs/40822905201/artifacts/12874988963) 的 ZIP SHA-256 为 `0affefae0ab4f1612dac63e8f1ef1018ec062bd73c510e0bb4388f08ab3bdb28`。候选提交 `89740e20c58041ce4bf8669e679083e9dc545101` 相对待验证 head `7d5501fe2df755eba672a50e9e9fce06da664e48` 仅更改 CI 配置以采集候选，应用代码和测试未变。
+- Codex 逐张检查 1440、900、640 正常图及 640 长文本焦点图；窄窗说明正常换行，焦点、滚动条和保存按钮可见，无重叠或裁切。环境文件与旧基线逐字节相同。逐像素 RGB 比较每张 2503 像素不同，仅落在入口名称和运行说明文字的行内；旧图的故障高亮不是正常界面。
+- 四张 PNG 从原始 artifact 原样复制，未重编码。按上面顺序的 SHA-256 为 `2230a72a40cbbc30a031973454e38a1f01688dedb1555d49af811c0677865ae1`、`a61a956f24231f9d232dd4b95703f2a68432cd5de532b64106a561f4b222924d`、`fe06a0a58e363dd73719b2c6c13245e2e9cc147ecf478e446cc55d755438493c`、`a92d58d4e028b9477aa986027b4551c82015d2507ea837050253a6516f0cc8f3`。
+- 候选截图通过不等于严格回归通过；更新基线后的最终 head 仍需 Windows 质量与视觉检查，包括故意反色失败及恢复。真人 Windows／Provider 验收不在本次范围。
