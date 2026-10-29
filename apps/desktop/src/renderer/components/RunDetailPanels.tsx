@@ -114,6 +114,11 @@ function RunIdentity({
           这是本机保存的上次运行摘要；事件流不持久化，重启后只显示摘要。
         </p>
       ) : null}
+      {run.fromSnapshot && snapshotOutOfDate(session) ? (
+        <p role="alert" className="form-error">
+          {`本会话在本机保存的这次运行之后又启动过运行（会话修订 ${String(session.runRevision)}，摘要修订 ${String(run.revision ?? '—')}），那次运行没有留下摘要；这里显示的是较早运行的摘要，不代表最新结果。`}
+        </p>
+      ) : null}
     </header>
   );
 }
@@ -141,15 +146,6 @@ export function RunContextPanel({
   return (
     <div className="module-content run-detail">
       <RunIdentity session={session} run={run} />
-      {run.fromSnapshot && snapshotOutOfDate(session) ? (
-        <p role="alert" className="form-error">
-          {`本会话在本机保存的这次运行之后又启动过运行（会话修订 ${String(session.runRevision)}，摘要修订 ${String(run.revision ?? '—')}），那次运行没有留下摘要；下面显示的是较早运行的摘要，不代表最新结果。`}
-        </p>
-      ) : null}
-      <details className="run-overview">
-        <summary>项目概览</summary>
-        <ProjectOverview project={session.project} />
-      </details>
       {run.runId === null ? (
         <div className="module-empty">
           <span className="empty-symbol" aria-hidden="true">
@@ -204,6 +200,13 @@ export function RunContextPanel({
         </ul>
       ) : null}
       {run.runId !== null ? <p className="metadata">{sourceNote}</p> : null}
+      <details className="run-overview">
+        <summary>项目元数据（不随运行发送）</summary>
+        <p className="metadata">
+          这里只显示本机项目信息，不是本次运行批准或读取的材料。
+        </p>
+        <ProjectOverview project={session.project} />
+      </details>
       {state.authorization !== null ? (
         <details className="run-authorization">
           <summary>本次授权摘要</summary>

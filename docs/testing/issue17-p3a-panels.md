@@ -48,6 +48,8 @@
 
 绑定提交：实现提交 `a7852af`（分支 `feat/issue17-p3a-panels`，基于 `main` `b93d8e9`）；本轮代码审阅基线为 `f4dadd7`（修复前 PR head），修复提交与设计证据哈希更新随 PR 追加。独立审阅来源：仓库内独立 reviewer 两轮（首轮 2 P1、7 P2，增量复审确认修复）、ChatGPT 双轴审阅（[对话](https://chatgpt.com/c/6ae0a117-37e4-83e9-97fc-5660e61d5227)）、code-review 的 Standards / Spec 两轴。上表门禁在修复后的工作树上重跑，日志保存在本地 `logs/issue17-check-8.log`；PR 页面记录最终 head SHA 与 CI 结果。
 
+本节数字绑定 `a7852af` 与 `f4dadd7` 的首轮工作树；第二轮修复后的数字与提交绑定见第 7 节。
+
 ## 4. Real Electron 证据
 
 由 Playwright 启动真实 Electron（`_electron.launch`），经 `PIONEER_E2E_*` 注入受控运行器；覆盖 main → preload → renderer 与隔离 userData，结束后校验 fixture 树哈希不变。
@@ -104,6 +106,8 @@
 | `pnpm lint`                                    | PASS                                                                                                    |
 | `pnpm design:check`                            | PASS：45 tests                                                                                          |
 | `pnpm test:contract`                           | PASS：38 文件 / 386 测试（新增 4 条：首屏终态、首屏外来身份、上下文失败不写摘要、旧 revision 快照被拒） |
-| `pnpm test:e2e`（清除 `ELECTRON_RUN_AS_NODE`） | PASS：34/34，1.4m                                                                                       |
+| `pnpm test:e2e`（清除 `ELECTRON_RUN_AS_NODE`） | PASS：34/34，1.3m                                                                                       |
 
-仍未处理：`failed` / `cancelled` 能力状态只有 Contract 覆盖，缺 Real Electron 用例；整批被丢弃的 foreign 事件未计入 `ignoredEvents`；Windows 读屏人工验收仍为 NOT RUN。
+绑定提交：`4e27f0d`（主修复）与 `8661489`（收尾：停止请求拒绝伪造修订、重启调用摘要 13px 原因、状态边框改中性 token、失败历史文字改 `danger-ink`），上表为这两个提交之后的工作树结果；同一分支已推到 PR #57。
+
+仍未处理：`failed` / `cancelled` 能力状态只有 Contract 覆盖，缺 Real Electron 用例；整批被丢弃的 foreign 事件未计入 `ignoredEvents`，首屏外来页也不计数；二进制文件在 `isBinaryContent` 判断前就记 `scanned`，没有单独的「内容不可解析」原因码；Windows 读屏人工验收仍为 NOT RUN。
