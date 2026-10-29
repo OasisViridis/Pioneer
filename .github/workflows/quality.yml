@@ -1,94 +1,12 @@
-name: Pioneer Quality Gate
-
+name: Prepare Windows visual candidates (not acceptance)
 on:
-  workflow_dispatch:
   push:
     branches:
-      - main
-      - 'fix/**'
-      - 'feat/**'
-  pull_request:
-    branches:
-      - main
-
+      - 'codex/issue37-visual-candidates-20261029'
 permissions:
   contents: read
-
-concurrency:
-  group: pioneer-quality-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  windows-quality:
-    name: Windows / pnpm check
-    runs-on: windows-2025
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Enable pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify repository normalization
-        run: pnpm verify:repository
-
-      - name: Verify design tokens and mapping evidence
-        run: pnpm design:check
-
-      - name: Check formatting
-        run: pnpm format:check
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Contract tests
-        run: pnpm test:contract
-
-      - name: Prototype tests
-        run: pnpm test:prototype
-
-      - name: Electron E2E
-        run: pnpm test:e2e
-
-      - name: Package smoke
-        run: pnpm package:smoke
-
-      - name: Confirm aggregate quality and S1 acceptance
-        run: pnpm design:acceptance
-
-      - name: Upload Electron behavior and design evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: electron-evidence-${{ github.sha }}
-          path: |
-            tests/e2e/test-output/report/
-            tests/e2e/test-output/results.json
-            tests/e2e/test-output/artifacts/**/*.png
-            tests/e2e/test-output/artifacts/**/trace.zip
-            tests/e2e/test-output/artifacts/**/error-context.md
-          if-no-files-found: ignore
-
-  windows-visual:
-    name: Windows / reviewed visual baseline
+  candidates:
     runs-on: windows-2025
     timeout-minutes: 20
     steps:
@@ -102,15 +20,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:desktop
-      - name: Capture missing baseline candidates (not acceptance)
-        if: hashFiles('tests/e2e/visual-baselines/environment.txt') == ''
+      - name: Capture candidates only
         run: pnpm design:visual:candidate
-      - name: Compare reviewed Windows baseline
-        run: pnpm test:visual
-      - name: Upload visual comparison report
+      - name: Upload candidates for human review
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: visual-comparison-${{ github.sha }}
+          name: visual-candidates-${{ github.sha }}
           path: tests/e2e/test-output/visual/
-          if-no-files-found: warn
+          if-no-files-found: error
