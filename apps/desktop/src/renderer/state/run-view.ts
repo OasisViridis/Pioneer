@@ -7,10 +7,10 @@ import type {
   RunAuthorizeReply,
   RunAuthorizationSummary,
   RunEventBatch,
+  RunPage,
 } from '../../shared/contracts/run-ipc';
 import type {
   RunContext,
-  RunContextCall,
   RunContextReply,
   RunSnapshot,
 } from '../../shared/contracts/run-context';
@@ -20,7 +20,6 @@ import {
   type SessionRunStatus,
 } from '../../shared/contracts/session-run-history';
 import type { EgressCandidate } from '../../shared/contracts/egress';
-import { approvedMaterials, eventContextCalls } from './run-panels';
 
 /**
  * Per-session run view state for the workbench. The five user-visible
@@ -340,6 +339,54 @@ export class RunViewStore {
       .map(([key]) => key)[0];
   }
 
+  /**
+   * The first page of a run is as untrusted as a pushed batch: check its page
+   * identity and every event before anything reaches this session's panels.
+   * Returns null when the page names another session, project, run or revision.
+   */
+  private acceptPage(input: {
+    sessionId: string;
+    projectId: string;
+    runId: string;
+    revision: number;
+    page: RunPage;
+  }): RunEvent[] | null {
+    const identity = {
+      sessionId: input.sessionId,
+      projectId: input.projectId,
+      runId: input.runId,
+      revision: input.revision,
+    };
+    const pageIdentity = input.page.identity;
+    if (
+      pageIdentity.sessionId !== identity.sessionId ||
+      pageIdentity.projectId !== identity.projectId ||
+      pageIdentity.runId !== identity.runId ||
+      pageIdentity.revision !== identity.revision
+    )
+      return null;
+    const fresh: RunEvent[] = [];
+    let cursor = 0;
+    let ignored = 0;
+    for (const event of input.page.events) {
+      const verdict = classifyRunEvent(identity, cursor, event);
+      if (verdict === 'duplicate') continue;
+      if (verdict === 'foreign' || verdict === 'invalid') {
+        ignored += 1;
+        continue;
+      }
+      if (verdict === 'gap')
+        this.update(input.sessionId, { omittedHistory: true });
+      fresh.push(event);
+      cursor = event.seq;
+    }
+    if (ignored > 0)
+      this.update(input.sessionId, (current) => ({
+        ignoredEvents: current.ignoredEvents + ignored,
+      }));
+    return fresh;
+  }
+
   private async ingestBatch(batch: RunEventBatch): Promise<void> {
     const received = batch.page.identity;
     const sessionId = this.sessionForRun(received.runId);
@@ -398,8 +445,7 @@ export class RunViewStore {
       void this.refreshContext(sessionId).then(() => {
         // Only a main-verified projection may become the restart summary; a
         // failed or missing query leaves the previous snapshot untouched.
-        if (this.get(sessionId).contextState === 'ready')
-          this.captureSnapshot(sessionId);
+        this.captureSnapshot(sessionId);
       });
     } else if (fresh.some((event) => event.body.type.startsWith('tool.'))) {
       void this.refreshContext(sessionId);
@@ -479,9 +525,9 @@ export class RunViewStore {
 
   /**
    * Persists a bounded summary of the terminal run with the session, so the
-   * panels can still name the right Session/Run after a restart. Uses main's
-   * context when available; otherwise falls back to the authorization list
-   * (approved, not read) and the event-derived call log, never invented data.
+   * panels can still name the right Session/Run after a restart. Only a
+   * main-confirmed context becomes a summary: a failed or missing query leaves
+   * the previous summary untouched instead of inventing one.
    */
   private captureSnapshot(sessionId: string): void {
     const record = this.snapshotRecorders.get(sessionId);
@@ -491,14 +537,15 @@ export class RunViewStore {
       state.runId === null ||
       state.projectId === null ||
       state.revision === null ||
-      state.status === null
+      state.status === null ||
+      state.context === null ||
+      state.contextState !== 'ready'
     )
       return;
     const status = state.status;
     if (status !== 'completed' && status !== 'failed' && status !== 'stopped')
       return;
-    const calls: RunContextCall[] =
-      state.context?.calls ?? eventContextCalls(state.events);
+    const context = state.context;
     record({
       identity: {
         sessionId,
@@ -508,9 +555,8 @@ export class RunViewStore {
       },
       status,
       tools: state.authorization?.tools ?? [],
-      materials:
-        state.context?.materials ?? approvedMaterials(state.authorization),
-      calls,
+      materials: context.materials,
+      calls: context.calls,
       recordedAt: new Date().toISOString(),
     });
   }
@@ -722,23 +768,36 @@ export class RunViewStore {
         afterSeq: 0,
       });
       if (page !== null) {
-        this.captureRunMeta(started.runId, page.events);
-        this.applyEvents(input.sessionId, page.events);
-        this.advanceCursor(started.runId, page.nextAfterSeq);
-        this.update(input.sessionId, { status: page.status });
-        if (
-          page.status === 'completed' ||
-          page.status === 'failed' ||
-          page.status === 'stopped'
-        ) {
-          this.recordTerminal(input.sessionId, started.runId);
+        // The first page travels the same identity gate as a pushed batch, so
+        // a forged page cannot seed another session's panels.
+        const accepted = this.acceptPage({
+          sessionId: input.sessionId,
+          projectId: input.projectId,
+          runId: started.runId,
+          revision: input.revision,
+          page,
+        });
+        if (accepted !== null) {
+          this.captureRunMeta(started.runId, accepted);
+          this.applyEvents(input.sessionId, accepted);
+          this.advanceCursor(started.runId, page.nextAfterSeq);
+          this.update(input.sessionId, { status: page.status });
+          if (
+            page.status === 'completed' ||
+            page.status === 'failed' ||
+            page.status === 'stopped'
+          ) {
+            // A run that already converged before the first read is terminal
+            // here too; leaving the phase active would keep the stop button.
+            this.update(input.sessionId, { phase: 'terminal' });
+            this.recordTerminal(input.sessionId, started.runId);
+          }
         }
       }
       // One final read after all queued refreshes; captureSnapshot is a no-op
       // for a run that is still live and for a context that is not ready.
       await this.refreshContext(input.sessionId);
-      if (this.get(input.sessionId).contextState === 'ready')
-        this.captureSnapshot(input.sessionId);
+      this.captureSnapshot(input.sessionId);
     } finally {
       this.boundSessions.delete(input.sessionId);
     }

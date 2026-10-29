@@ -15,9 +15,11 @@ import {
   formatUtcTime,
   materialReasonText,
   materialStateText,
+  snapshotOutOfDate,
   toolLabel,
   visibleMaterials,
 } from '../state/run-panels';
+import { ProjectOverview } from './ProjectOverview';
 
 /**
  * P3-A workbench panels: the current run's context, capability use and event
@@ -139,6 +141,15 @@ export function RunContextPanel({
   return (
     <div className="module-content run-detail">
       <RunIdentity session={session} run={run} />
+      {run.fromSnapshot && snapshotOutOfDate(session) ? (
+        <p role="alert" className="form-error">
+          {`本会话在本机保存的这次运行之后又启动过运行（会话修订 ${String(session.runRevision)}，摘要修订 ${String(run.revision ?? '—')}），那次运行没有留下摘要；下面显示的是较早运行的摘要，不代表最新结果。`}
+        </p>
+      ) : null}
+      <details className="run-overview">
+        <summary>项目概览</summary>
+        <ProjectOverview project={session.project} />
+      </details>
       {run.runId === null ? (
         <div className="module-empty">
           <span className="empty-symbol" aria-hidden="true">
@@ -289,10 +300,13 @@ export function RunCapabilitiesPanel({
                 <p className="metadata">
                   {call.callId}
                   {call.target === null ? '' : ` · ${call.target}`}
-                  {call.code === null
-                    ? ''
-                    : ` · ${callCodeText(call.code)}（${call.code}）`}
                 </p>
+                {call.code === null ? null : (
+                  <p className="capability-call__reason">
+                    {callCodeText(call.code)}
+                    <code className="capability-call__code">{call.code}</code>
+                  </p>
+                )}
               </li>
             ))}
           </ol>
