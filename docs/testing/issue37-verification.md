@@ -4,7 +4,7 @@
 
 ## 当前交付边界
 
-代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后只读回填清单。2026-10-28 用户委托 Codex 完成剩余视觉核验；已复核原图、修复输入框焦点对比度并接受[当前状态基线](../../tests/e2e/visual-baselines/README.md)，详见[审阅结论](issue37-visual-review.md)。2026-10-29 #58 已合并，分支同步 main `fef900a70934c6ad63434cf553ad85eed1a1db48`；最终提交的 CI 结果以 PR 记录为准。**本票尚未完成**：真实 Figma 回传与命名版本事件均未发生，且尚未授权合并。不得用这份准备工作的 PR 自动关闭 #37。
+代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后只读回填清单。2026-10-28 用户委托 Codex 完成剩余视觉核验；已复核原图、修复输入框焦点对比度并接受[当前状态基线](../../tests/e2e/visual-baselines/README.md)，详见[审阅结论](issue37-visual-review.md)。2026-10-29 #58 已合并，分支同步 main `fef900a70934c6ad63434cf553ad85eed1a1db48`；最终提交的 CI 结果以 PR 记录为准。**本票尚未完成**：真实 Figma 回传与命名版本事件接收均未验收，且尚未授权合并本 PR。不得用这份准备工作的 PR 自动关闭 #37。
 
 S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook 接收器、scoped REST 凭证、Dev Resources 写入或 Code Connect 发布权益。当前连接工具未暴露 Webhook/Dev Resources REST 操作。S2 已合并，但实际路线是当前 Codex 会话 + 发布工具，并没有 `repository_dispatch` 事件消费者，也没有获准的无人值守模型执行环境。不能把一个只打印 payload 的 workflow 当作已接通 S2。
 
@@ -50,7 +50,7 @@ pnpm design:delivery writeback-plan <PR编号> <已登记featureId>
 
 ## Webhook 保留阻塞
 
-顺序仍是检查 → 获准回传 → Webhook。没有启动 HTTP 服务、安装 n8n、购买服务、添加外部凭证、创建 Figma 命名版本或启用 repository_dispatch。本轮不引入只有受控 payload 通过的假接收器。
+顺序仍是检查 → 获准回传 → Webhook。没有启动 HTTP 服务、安装 n8n、购买服务、添加外部凭证或启用 repository_dispatch。下文记录的 Figma 命名版本是草案，不是事件接收验收。本轮不引入只有受控 payload 通过的假接收器。
 
 后续真实接入必须先具备：获准 HTTPS/n8n 接收器、Figma Webhook 权益与 passcode、固定版本读取凭证、S2 的获准 dispatch 消费者及执行成本边界。按[官方事件字段](https://developers.figma.com/docs/rest-api/webhooks-events/)和[passcode 校验要求](https://developers.figma.com/docs/rest-api/webhooks-security/)处理：
 
@@ -90,8 +90,9 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 ## 2026-10-29 会话标签试点准备
 
 - #58 已合并，提供真实会话分支数据；#25 保持 Open。候选画板 `1093:1259` 当前由三个 `921:619` 实例组成，均属于现有映射组件集 `921:632`。这是 Figma 当前画布只读检查，不是命名版本或真实事件证据。
+- Figma 版本历史显示草案 `Pioneer DRAFT session-branch-tabs`；选中后页面显示版本 ID `2415735911323890660`。这是文件级命名版本的 UI 记录，尚未用 REST API 验证该版本内节点，也没有接收器投递记录或经审阅的固定快照。
 - 本 PR 提议 `session-branch-tabs` 注册范围，并支持受审组成画板：校验实例来源、实例属性、完整固定快照 SHA 和已接受 main 的登记。注册项进入 main 后，没有具体固定快照审批时只能返回 `materials-only`；尚未进入基线时返回 `review-required`。原事件材料的基线不变；明确审阅后可以绑定到其后代基线，再由交付门禁核对当前 main。
-- 受控测试覆盖事件投影、属性及嵌套实例越界、快照变更、未接受登记和独立 Git 快照/后代基线；这些不是 Figma 真实投递、Dev Resources 回填或接收器验收。凭证、固定版本、合格 S2 交付和接收器仍未确认。
+- 受控测试覆盖事件投影、属性及嵌套实例越界、快照变更、未接受登记和独立 Git 快照/后代基线；这些不是 Figma 真实投递、Dev Resources 回填或接收器验收。凭证、固定版本节点核验、合格 S2 交付和接收器仍未确认。
 - PR #48 的 merge SHA `1cbface10f24667b8babc1b9d427f64d29588536` 对应 [quality run](https://github.com/OasisViridis/Pioneer/actions/runs/40367977047) 只有 Windows 质量作业，没有视觉作业，不能作为当前真实回填试点。当前 registry 仅有已关闭的 #36 交付；新试点仍待登记与验收。
 - Figma MCP 对 `921:706` 的 Code Connect 探测仍拒绝，当前身份报告学生套餐 Full seat；文件所属团队、组件发布状态与实际权限尚未确认。[Figma 当前帮助文档](https://help.figma.com/hc/en-us/articles/23920389749655-Code-Connect) 与 MCP 返回的套餐提示不一致，不能据此断言必须购买。未发布 Code Connect，也未执行真实回填或接收器验收。
 - 复审发现共用 Figma 传输层原先接受任意 `/v1/` GET；未发现事件可以控制该路径，但能力范围超过现有调用需要。现限定为文件版本、固定节点和 Dev Resources 三类 GET 及 Dev Resources POST；受控传输测试确认拒绝其他路径，不代表真实 Figma 集成通过。修改后再次运行 `pnpm check`：设计同步 76/76、Contract Tests 348/348、Prototype Tests 210/210、真实 Electron E2E 29/29 和 package smoke 通过；视觉比较仍在上述环境指纹处停止。

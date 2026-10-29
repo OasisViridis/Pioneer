@@ -49,7 +49,9 @@ pnpm design:external writeback <S2_PR_NUMBER> <FEATURE_ID> tmp/design-external/a
 
 先在现有 feature registry 审阅一个**真实未完成任务**；不要复用已关闭 #36 当作新产品任务。配置只取注册的 Issue、文件、节点、变更类型和行为边界。下面是配置结构，不是可直接启用的试点：
 
-当前 PR 提议的 `session-branch-tabs` 关联仍开放的 #25，仅覆盖会话标签的分支来源提示。其候选画板 `1093:1259` 由 S1 映射的组件集 `921:632` 的实例组成；`compositionMappings` 明确固定这一关系，`compositionApprovals` 记录当前画布中各实例的 TEXT/VARIANT 属性。准备时必须确认固定版本的实例集合、组件变体和属性均与登记一致；变化、缺失或不支持的属性要求重新审阅。画板全部文字和布局必须随固定快照整体审阅；注册项进入 main 后，登记经审阅的精确 SHA-256 到 `compositionSnapshotSha256` 前只返回 `materials-only`；注册项不在所选基线时返回 `review-required`。该注册项与此工具的修改仍随 PR #51 等待审阅和合并；候选画板是当前画布，**不是固定版本或真实事件**。只有取得 Figma 服务端版本和受审快照后才能准备真实 S2，且不可从视觉设计推断授权或自动运行行为。
+当前 PR 提议的 `session-branch-tabs` 关联仍开放的 #25，仅覆盖会话标签的分支来源提示。其候选画板 `1093:1259` 由 S1 映射的组件集 `921:632` 的实例组成；`compositionMappings` 明确固定这一关系，`compositionApprovals` 记录当前画布中各实例的 TEXT/VARIANT 属性。准备时必须确认固定版本的实例集合、组件变体和属性均与登记一致；变化、缺失或不支持的属性要求重新审阅。画板全部文字和布局必须随固定快照整体审阅；注册项进入 main 后，登记经审阅的精确 SHA-256 到 `compositionSnapshotSha256` 前只返回 `materials-only`；注册项不在所选基线时返回 `review-required`。该注册项与此工具的修改仍随 PR #51 等待审阅和合并。
+
+2026-10-29 在 Figma 版本历史保存并选中草案 `Pioneer DRAFT session-branch-tabs`，页面显示版本 ID `2415735911323890660`。该版本尚未通过 REST API 核验节点内容，也没有受审快照或真实事件接收证据。必须完成固定版本核验和快照审阅才能准备真实 S2；不可从视觉设计推断授权或自动运行行为。
 
 ```json
 {
