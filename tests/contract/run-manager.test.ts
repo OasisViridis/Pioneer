@@ -1551,6 +1551,39 @@ describe('P3-A run context projection (#17)', () => {
     expect(JSON.stringify(requestedBodies)).not.toContain('notes/');
   });
 
+  it('marks a binary material as unusable instead of scanned', async () => {
+    const { manager, projectRoot } = await createManager({
+      steps: [
+        {
+          action: 'tool',
+          request: {
+            tool: 'search_in_files',
+            arguments: { path: 'blobs', query: 'fixture' },
+          },
+        },
+        { action: 'text', text: 'done' },
+        { action: 'complete' },
+      ],
+    });
+    await mkdir(join(projectRoot, 'blobs'), { recursive: true });
+    await writeFile(
+      join(projectRoot, 'blobs', 'image.bin'),
+      Buffer.from([0x00, 0x01, 0x02, 0x66, 0x69, 0x78, 0x00, 0xff]),
+    );
+    const { runId } = await launchRun(manager, {
+      materials: ['blobs/image.bin'],
+    });
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+
+    const context = contextOf(manager, runId);
+    expect(context?.materials[0]).toMatchObject({
+      path: 'blobs/image.bin',
+      state: 'approved',
+      reason: 'BINARY_CONTENT',
+      readAt: null,
+    });
+  });
+
   it('marks a material whose bytes changed as changed instead of read', async () => {
     let file = '';
     const { manager, projectRoot } = await createManager(

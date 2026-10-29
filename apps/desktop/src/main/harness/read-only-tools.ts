@@ -42,7 +42,10 @@ export type ToolOutcome = Extract<
  * provenance without the event wire reflecting arguments.
  */
 export interface ToolMaterialObserver {
-  onMaterial?: (path: string, state: 'read' | 'scanned' | 'changed') => void;
+  onMaterial?: (
+    path: string,
+    state: 'read' | 'scanned' | 'changed' | 'unreadable',
+  ) => void;
 }
 
 const encoder = new TextEncoder();
@@ -362,10 +365,15 @@ async function searchInFiles(
         observer?.onMaterial?.(relativePath, 'changed');
         return;
       }
-      observer?.onMaterial?.(relativePath, 'scanned');
     }
     budget.files += 1;
-    if (isBinaryContent(prefix)) return;
+    if (isBinaryContent(prefix)) {
+      // A binary file never reaches the text scan, so it is not "scanned":
+      // record the reason instead of implying that its content was searched.
+      if (allow !== null) observer?.onMaterial?.(relativePath, 'unreadable');
+      return;
+    }
+    if (allow !== null) observer?.onMaterial?.(relativePath, 'scanned');
     const text = decoder.decode(prefix);
     let lineNumber = 0;
     for (const line of text.split('\n')) {

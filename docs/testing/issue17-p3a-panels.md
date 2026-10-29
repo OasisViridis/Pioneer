@@ -96,18 +96,23 @@
 | 8 个状态色硬编码，绕过设计 token                                               | 新增 DTCG token `danger-ink: #934342`（DESIGN-SYSTEM 错误字），其余改用既有 token；`tokens.css` 由 `pnpm tokens:build` 生成，`design/sync/component-mappings.json` 证据哈希同步。 |
 | 拒绝/失败原因只由 12px `.metadata` 承载                                        | 原因移到 13px `.capability-call__reason`，固定错误码单独以 `.capability-call__code` 呈现。                                                                                        |
 | 「已扫描 · 仅命中片段」暗示存在命中                                            | 文案改为「已扫描」。                                                                                                                                                              |
+| 整批被丢弃的 foreign 页不计入忽略计数                                          | 新增 `ignoredPages`，页级身份不符时单独计数，运行日志面板分别显示事件与整页的忽略数量。                                                                                           |
+| 二进制文件在判二进制前记 `scanned`，没有原因                                   | 观察回调新增 `unreadable`，`search_in_files` 先判二进制；新增固定原因 `BINARY_CONTENT`，面板显示「二进制内容，未按文本扫描」。                                                    |
 
 验证（本分支，Windows，Node v24.17.0，pnpm 11.7.0）：
 
-| 命令                                           | 结果                                                                                                    |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `pnpm typecheck`                               | PASS                                                                                                    |
-| `pnpm format:check`                            | PASS                                                                                                    |
-| `pnpm lint`                                    | PASS                                                                                                    |
-| `pnpm design:check`                            | PASS：45 tests                                                                                          |
-| `pnpm test:contract`                           | PASS：38 文件 / 386 测试（新增 4 条：首屏终态、首屏外来身份、上下文失败不写摘要、旧 revision 快照被拒） |
-| `pnpm test:e2e`（清除 `ELECTRON_RUN_AS_NODE`） | PASS：34/34，1.3m                                                                                       |
+| 命令                                           | 结果                                                                                               |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `pnpm typecheck`                               | PASS                                                                                               |
+| `pnpm format:check`                            | PASS                                                                                               |
+| `pnpm lint`                                    | PASS                                                                                               |
+| `pnpm design:check`                            | PASS：45 tests                                                                                     |
+| `pnpm test:contract`                           | PASS：38 文件 / 387 测试（新增首屏终态、首屏外来身份、上下文失败不写摘要、旧修订拒收、二进制原因） |
+| `pnpm test:e2e`（清除 `ELECTRON_RUN_AS_NODE`） | PASS：34/34                                                                                        |
 
-绑定提交：`4e27f0d`（主修复）与 `8661489`（收尾：停止请求拒绝伪造修订、重启调用摘要 13px 原因、状态边框改中性 token、失败历史文字改 `danger-ink`），上表为这两个提交之后的工作树结果；同一分支已推到 PR #57。
+绑定提交：`4e27f0d`、`8661489`、`a387e0b` 与本轮收尾提交（分支 head，见 PR 页面）。上表为本轮收尾提交的工作树结果。
 
-仍未处理：`failed` / `cancelled` 能力状态只有 Contract 覆盖，缺 Real Electron 用例；整批被丢弃的 foreign 事件未计入 `ignoredEvents`，首屏外来页也不计数；二进制文件在 `isBinaryContent` 判断前就记 `scanned`，没有单独的「内容不可解析」原因码；Windows 读屏人工验收仍为 NOT RUN。
+仍未处理：
+
+- `failed` / `cancelled` 能力状态只有 Contract 证据。要让真实 Electron 运行稳定产生这两种状态，需要在 main 注入受控工具执行器；#17 的 Testing Decisions 明确「本票不另建测试替换点」，因此没有为它们新增 seam，也没有用等待竞态的方式制造不稳定用例。
+- Windows 读屏/Narrator 人工验收见 [`issue17-narrator-manual.md`](issue17-narrator-manual.md)，当前仍为待执行。

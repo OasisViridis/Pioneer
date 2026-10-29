@@ -120,6 +120,7 @@ const MATERIAL_REASON_TEXT: Record<RunMaterialReason, string> = {
   SENSITIVE_PATH: '敏感路径已拒绝',
   PATH_OUTSIDE_PROJECT: '路径超出项目范围',
   INVALID_PATH: '路径无效',
+  BINARY_CONTENT: '二进制内容，未按文本扫描',
   TRUNCATED: '超出单文件读取预算',
   READ_FAILED: '工具读取失败，内容不可用',
 };

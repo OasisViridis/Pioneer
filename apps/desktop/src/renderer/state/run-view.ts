@@ -69,6 +69,8 @@ export interface RunViewState {
   omittedHistory: boolean;
   /** Events rejected by identity/schema checks; shown so nothing is silent. */
   ignoredEvents: number;
+  /** Pages rejected by page-level identity checks; counted separately. */
+  ignoredPages: number;
 }
 
 export interface RunPort {
@@ -266,6 +268,7 @@ const IDLE_STATE: RunViewState = {
   events: [],
   omittedHistory: false,
   ignoredEvents: 0,
+  ignoredPages: 0,
 };
 
 /** Tiny per-session store; the workbench reads it via useSyncExternalStore. */
@@ -363,8 +366,12 @@ export class RunViewStore {
       pageIdentity.projectId !== identity.projectId ||
       pageIdentity.runId !== identity.runId ||
       pageIdentity.revision !== identity.revision
-    )
+    ) {
+      this.update(input.sessionId, (current) => ({
+        ignoredPages: current.ignoredPages + 1,
+      }));
       return null;
+    }
     const fresh: RunEvent[] = [];
     let cursor = 0;
     let ignored = 0;
@@ -401,8 +408,14 @@ export class RunViewStore {
       state.projectId === null ||
       received.sessionId !== sessionId ||
       received.projectId !== state.projectId
-    )
+    ) {
+      // The page names another identity: count it so the panel can say that
+      // something was dropped instead of silently showing a shorter stream.
+      this.update(sessionId, (current) => ({
+        ignoredPages: current.ignoredPages + 1,
+      }));
       return;
+    }
     const identity = {
       sessionId,
       projectId: state.projectId,
@@ -685,6 +698,7 @@ export class RunViewStore {
         summaryText: input.summaryText ?? null,
         omittedHistory: false,
         ignoredEvents: 0,
+        ignoredPages: 0,
       });
       const authorization = await this.port.authorizeRun({
         sessionId: input.sessionId,

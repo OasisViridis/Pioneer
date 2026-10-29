@@ -869,12 +869,19 @@ export class RunManager {
   private trackMaterial(
     run: ActiveRun,
     path: string,
-    state: 'read' | 'scanned' | 'changed',
+    state: 'read' | 'scanned' | 'changed' | 'unreadable',
     reason: RunMaterialReason | null = null,
   ): void {
     const record = run.trackedMaterials.get(path);
     if (record === undefined) return;
     if (record.state === 'changed') return;
+    if (state === 'unreadable') {
+      // The executor read the bytes but could not use them as text. Keep the
+      // approved state and explain why nothing was analysed.
+      if (record.state === 'approved')
+        record.reason = reason ?? 'BINARY_CONTENT';
+      return;
+    }
     if (state === 'read' || state === 'scanned') {
       // A full read outranks a search scan; neither downgrades the other.
       if (record.state === 'read') return;

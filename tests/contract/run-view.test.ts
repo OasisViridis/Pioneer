@@ -279,6 +279,8 @@ describe('run view identity isolation', () => {
     await flushBatches();
     expect(store.get(SESSION_ID).events).toHaveLength(1);
     expect(store.get(SESSION_ID).runId).toBe(RUN_ID);
+    // Both foreign pages are counted; their events never reach this session.
+    expect(store.get(SESSION_ID).ignoredPages).toBe(2);
   });
 
   it('marks omitted history when a page skips sequence numbers', async () => {
@@ -453,6 +455,7 @@ describe('run view first page identity', () => {
     const state = store.get(SESSION_ID);
     expect(state.events).toHaveLength(0);
     expect(state.status).toBe('starting');
+    expect(state.ignoredPages).toBe(1);
   });
 
   it('leaves the previous summary untouched when the context read fails', async () => {

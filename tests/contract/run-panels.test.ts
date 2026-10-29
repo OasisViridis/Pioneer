@@ -97,6 +97,7 @@ const EMPTY_STATE: RunViewState = {
   events: [],
   omittedHistory: false,
   ignoredEvents: 0,
+  ignoredPages: 0,
 };
 
 const snapshot: RunSnapshot = {
@@ -216,6 +217,7 @@ describe('run panel projections (#17)', () => {
     expect(callStateText('failed')).toBe('失败');
     expect(callStateText('cancelled')).toBe('已取消');
     expect(materialReasonText('READ_FAILED')).toContain('失败');
+    expect(materialReasonText('BINARY_CONTENT')).toContain('二进制');
     expect(toolLabel(null)).toBe('未知工具');
     expect(toolLabel('search_in_files')).toBe('搜索文本');
   });

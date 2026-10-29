@@ -353,6 +353,11 @@ export function RunLogPanel({
           {`已忽略 ${String(state.ignoredEvents)} 条不属于当前运行身份的事件（来源或格式校验不通过）。`}
         </p>
       ) : null}
+      {state.ignoredPages > 0 ? (
+        <p role="alert" className="form-error">
+          {`已忽略 ${String(state.ignoredPages)} 个不属于当前运行身份的整页事件（会话、项目、运行或修订不符）。`}
+        </p>
+      ) : null}
       {state.omittedHistory ? (
         <p className="metadata" role="status">
           部分较早事件已省略（保留上限），不拼接成完整输出。
