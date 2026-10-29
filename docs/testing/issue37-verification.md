@@ -4,7 +4,7 @@
 
 ## 当前交付边界
 
-代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后只读回填清单。2026-10-28 用户委托 Codex 完成剩余视觉核验；已复核原图、修复输入框焦点对比度并接受[当前状态基线](../../tests/e2e/visual-baselines/README.md)，详见[审阅结论](issue37-visual-review.md)。2026-10-29 #58 已合并，分支同步 main `fef900a70934c6ad63434cf553ad85eed1a1db48`；最终提交的 CI 结果以 PR 记录为准。**本票尚未完成**：真实 Figma 回传与命名版本事件接收均未验收，且尚未授权合并本 PR。不得用这份准备工作的 PR 自动关闭 #37。
+代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后只读回填清单。2026-10-28 用户委托 Codex 完成剩余视觉核验；已复核原图、修复输入框焦点对比度并接受[当前状态基线](../../tests/e2e/visual-baselines/README.md)，详见[审阅结论](issue37-visual-review.md)。2026-10-29 #58 已合并，用户授权合并本 PR；实际合并状态和最终提交的 CI 结果以 PR 记录为准。**本票尚未完成**：真实 Figma 回传与命名版本事件接收均未验收。不得用这份准备工作的 PR 自动关闭 #37。
 
 S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook 接收器、scoped REST 凭证、Dev Resources 写入或 Code Connect 发布权益。当前连接工具未暴露 Webhook/Dev Resources REST 操作。S2 已合并，但实际路线是当前 Codex 会话 + 发布工具，并没有 `repository_dispatch` 事件消费者，也没有获准的无人值守模型执行环境。不能把一个只打印 payload 的 workflow 当作已接通 S2。
 
