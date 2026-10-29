@@ -115,4 +115,4 @@
 仍未处理：
 
 - `failed` / `cancelled` 能力状态只有 Contract 证据。要让真实 Electron 运行稳定产生这两种状态，需要在 main 注入受控工具执行器；#17 的 Testing Decisions 明确「本票不另建测试替换点」，因此没有为它们新增 seam，也没有用等待竞态的方式制造不稳定用例。
-- Windows 读屏/Narrator 人工验收见 [`issue17-narrator-manual.md`](issue17-narrator-manual.md)，当前仍为待执行。
+- Windows 读屏/Narrator 人工验收已由用户于 2026-10-29 在 `698090d` 上执行并判定通过，记录见 [`issue17-narrator-manual.md`](issue17-narrator-manual.md)。该记录是人工判定，未采集逐条播报文本、截图或录屏。
