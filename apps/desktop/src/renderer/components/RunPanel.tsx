@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import type { ProjectSummary } from '../../shared/contracts/catalog';
 import type { EgressCandidate } from '../../shared/contracts/egress';
 import type { SessionRunRecord } from '../../shared/contracts/session-run-history';
+import type { RunSnapshot } from '../../shared/contracts/run-context';
 import type { Session } from '../../shared/contracts/session-workspace';
 import { runViews } from '../state/run-view-instance';
 import { failureText, rejectionText, visibleStatus } from '../state/run-view';
@@ -19,10 +20,16 @@ export function RunPanel({
   session,
   project,
   onRunTerminal,
+  onRunSnapshot,
+  onRunStarted,
+  onOpenLog,
 }: {
   session: Session;
   project: ProjectSummary;
   onRunTerminal: (record: SessionRunRecord) => void;
+  onRunSnapshot: (snapshot: RunSnapshot) => void;
+  onRunStarted: (revision: number) => void;
+  onOpenLog: () => void;
 }): React.JSX.Element {
   const state = useSyncExternalStore(runViews.subscribe, () =>
     runViews.get(session.id),
@@ -54,14 +61,17 @@ export function RunPanel({
   const start = (): void => {
     const instruction = task.trim();
     if (instruction.length === 0) return;
+    const revision = session.runRevision + 1;
     void runViews.launch({
       sessionId: session.id,
       projectId: project.id,
-      revision: 1,
+      revision,
       task: instruction,
       materials: materials ?? [],
       summaryText: project.name,
       onTerminal: onRunTerminal,
+      onSnapshot: onRunSnapshot,
+      onStarted: onRunStarted,
     });
   };
 
@@ -117,10 +127,11 @@ export function RunPanel({
           className="button"
           disabled={stopping}
           onClick={() => {
+            if (state.revision === null) return;
             void runViews.stop({
               sessionId: session.id,
               projectId: project.id,
-              revision: 1,
+              revision: state.revision,
             });
           }}
         >
@@ -136,35 +147,12 @@ export function RunPanel({
           {authorizing ? '正在授权…' : '启动运行'}
         </button>
       )}
-      {state.events.length > 0 ? (
-        <div className="run-log__list" aria-label="运行事件">
-          {state.omittedHistory ? (
-            <p className="metadata">部分历史已省略。</p>
-          ) : null}
-          <ol>
-            {state.events.map((event) => (
-              <li
-                key={event.seq}
-                className={`run-event run-event--${event.tone}`}
-              >
-                {event.kind === 'text' ? (
-                  <p>{event.text}</p>
-                ) : (
-                  <span>
-                    {event.kind === 'tool-requested'
-                      ? `工具请求：${event.text}`
-                      : event.kind === 'tool-result'
-                        ? `工具结果：${event.text}`
-                        : event.text}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ol>
-        </div>
-      ) : state.phase === 'active' ? (
-        <p className="metadata">运行中，等待第一批事件…</p>
-      ) : null}
+      <p className="metadata">
+        事件流在「运行日志」面板；打开面板不会停止运行、清除草稿或抢占焦点。
+      </p>
+      <button type="button" className="quiet-button" onClick={onOpenLog}>
+        打开运行日志
+      </button>
       {session.runHistory.length > 0 ? (
         <section className="run-history" aria-label="历史运行">
           <h4>历史运行</h4>

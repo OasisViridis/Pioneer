@@ -5,12 +5,17 @@ import type {
   Session,
 } from '../../shared/contracts/session-workspace';
 import type { SessionWorkspaceAction } from '../state/session-workspace-reducer';
-import { ProjectOverview } from './ProjectOverview';
 import { LocalTabs } from './LocalTabs';
+import {
+  RunCapabilitiesPanel,
+  RunContextPanel,
+  RunLogPanel,
+} from './RunDetailPanels';
 
 export const panelNames: Record<PanelId, string> = {
   context: '上下文',
   capabilities: '能力',
+  runlog: '运行日志',
   diff: '改动',
   outputs: '产物',
 };
@@ -29,42 +34,20 @@ export function WorkbenchPanel({
   dispatch: Dispatch<SessionWorkspaceAction>;
   panel: PanelId;
 }): React.JSX.Element {
+  if (panel === 'context') return <RunContextPanel session={session} />;
+  if (panel === 'capabilities')
+    return <RunCapabilitiesPanel session={session} />;
+  if (panel === 'runlog') return <RunLogPanel session={session} />;
   return (
     <div className="module-content">
-      {panel === 'context' ? (
-        <>
-          <p className="metadata">只包含此会话的工作区概览，不代表执行授权。</p>
-          <ProjectOverview project={session.project} />
-        </>
-      ) : panel === 'capabilities' ? (
-        <>
-          <p className="eyebrow">已启用</p>
-          <h3>只读工作区发现</h3>
-          <p>扫描与元数据由现有受限接口提供。</p>
-          <dl className="capability-list">
-            <div>
-              <dt>Agent 运行器</dt>
-              <dd>未连接</dd>
-            </div>
-            <div>
-              <dt>执行命令</dt>
-              <dd>未提供</dd>
-            </div>
-            <div>
-              <dt>写入工作区</dt>
-              <dd>未授权</dd>
-            </div>
-          </dl>
-          <p className="metadata">切换布局或打开模块不会授予权限。</p>
-        </>
-      ) : panel === 'diff' ? (
+      {panel === 'diff' ? (
         <div className="module-empty">
           <span className="empty-symbol" aria-hidden="true">
             ±
           </span>
           <h3>还没有可审阅的改动</h3>
-          <p>运行器尚未接入，没有执行命令或修改文件。</p>
-          <span className="metadata">实际 Diff 会在运行器接入后显示。</span>
+          <p>P2 只读运行不会写入文件，因此这里没有 Diff 可审阅。</p>
+          <span className="metadata">实际 Diff 会在受控写入接入后显示。</span>
         </div>
       ) : (
         <>
@@ -97,7 +80,7 @@ export function WorkbenchPanel({
             <p>
               {session.outputTab === 'verification'
                 ? '没有测试结果，不预先标记通过。'
-                : '此会话尚未连接运行器。预览与文件将以真实产物为准。'}
+                : '只读运行不产生文件或预览；这里不填入演示数据。'}
             </p>
           </div>
         </>

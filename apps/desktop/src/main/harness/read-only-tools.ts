@@ -36,6 +36,18 @@ export type ToolOutcome = Extract<
   { type: 'tool.result' }
 >['result'];
 
+/**
+ * Main-only observation hook (Issue #17): the executor reports which approved
+ * material it actually read or found changed, so the context panel can show
+ * provenance without the event wire reflecting arguments.
+ */
+export interface ToolMaterialObserver {
+  onMaterial?: (
+    path: string,
+    state: 'read' | 'scanned' | 'changed' | 'unreadable',
+  ) => void;
+}
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder('utf-8', { fatal: false });
 
@@ -131,6 +143,7 @@ export async function executeReadOnlyTool(
   request: ReadOnlyToolRequest,
   signal: AbortSignal,
   materials?: readonly EgressMaterial[],
+  observer?: ToolMaterialObserver,
 ): Promise<ToolOutcome> {
   const preflight = await checkReadOnlyToolRequest(projectRoot, request);
   if (!preflight.ok) return { status: 'rejected', code: preflight.error.code };
@@ -145,7 +158,7 @@ export async function executeReadOnlyTool(
   try {
     switch (request.tool) {
       case 'read_file':
-        return await readTextFile(root, absolutePath, signal, allow);
+        return await readTextFile(root, absolutePath, signal, allow, observer);
       case 'list_directory':
         return await listDirectory(root, absolutePath, signal, allow);
       case 'search_in_files':
@@ -155,6 +168,7 @@ export async function executeReadOnlyTool(
           request.arguments.query,
           signal,
           allow,
+          observer,
         );
     }
   } catch {
@@ -182,6 +196,7 @@ async function readTextFile(
   absolutePath: string,
   signal: AbortSignal,
   allow: ReadonlyMap<string, EgressMaterial> | null,
+  observer?: ToolMaterialObserver,
 ): Promise<ToolOutcome> {
   const read = await readBoundedFile(
     absolutePath,
@@ -211,6 +226,7 @@ async function readTextFile(
     // not be sent under the old approval, and the stale grant is revoked.
     if (!materialMatches(entry, bounded))
       return { status: 'rejected', code: 'CONTENT_NOT_ALLOWED' };
+    observer?.onMaterial?.(entry.path, 'read');
   }
   const decoded = decoder.decode(
     truncatedByBudget
@@ -297,6 +313,7 @@ async function searchInFiles(
   query: string,
   signal: AbortSignal,
   allow: ReadonlyMap<string, EgressMaterial> | null,
+  observer?: ToolMaterialObserver,
 ): Promise<ToolOutcome> {
   const budget: SearchBudget = { files: 0, totalBytes: 0, hits: 0 };
   const lines: string[] = [];
@@ -345,11 +362,18 @@ async function searchInFiles(
         // The approval covered the bytes at authorization time. A changed file
         // rejects the search instead of quietly publishing its new content.
         changedMaterials.push(relativePath);
+        observer?.onMaterial?.(relativePath, 'changed');
         return;
       }
     }
     budget.files += 1;
-    if (isBinaryContent(prefix)) return;
+    if (isBinaryContent(prefix)) {
+      // A binary file never reaches the text scan, so it is not "scanned":
+      // record the reason instead of implying that its content was searched.
+      if (allow !== null) observer?.onMaterial?.(relativePath, 'unreadable');
+      return;
+    }
+    if (allow !== null) observer?.onMaterial?.(relativePath, 'scanned');
     const text = decoder.decode(prefix);
     let lineNumber = 0;
     for (const line of text.split('\n')) {

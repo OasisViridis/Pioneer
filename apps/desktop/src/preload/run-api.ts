@@ -1,5 +1,6 @@
 import {
   RunCursorRequestSchema,
+  RunIdentitySchema,
   RunStartRequestSchema,
   RunStopRequestSchema,
 } from '../shared/contracts/pioneer-run';
@@ -7,6 +8,7 @@ import {
   ListRunMaterialsReplySchema,
   ListRunMaterialsRequestSchema,
 } from '../shared/contracts/egress';
+import { RunContextReplySchema } from '../shared/contracts/run-context';
 import {
   RUN_IPC_CHANNELS,
   RunAckRequestSchema,
@@ -73,6 +75,13 @@ export function createRunApi(ipc: RunIpcRendererPort): RunDesktopApi {
       );
       return reply.ok ? reply.page : null;
     },
+    getRunContext: async (request) =>
+      RunContextReplySchema.parse(
+        await ipc.invoke(
+          RUN_IPC_CHANNELS.context,
+          RunIdentitySchema.parse(request),
+        ),
+      ),
     subscribeRun: async (request) =>
       RunSubscribeReplySchema.parse(
         await ipc.invoke(
