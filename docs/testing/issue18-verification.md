@@ -8,12 +8,12 @@
 
 | 模块 | 内容 |
 | --- | --- |
-| 决策规格 | [`docs/specs/2026-10-27-p4-write-authorization-and-recovery.md`](../specs/2026-10-27-p4-write-authorization-and-recovery.md)：四类许可关系、写入批准生命周期、保留内容、diffDigest 编码、陈旧审批拦截、部分完成状态、并发冲突与恢复规则、拒绝码、探针矩阵、威胁范围、12 项待人类确认决定、7 项留给 #19/#20 的决定 |
-| 数据契约 | [`apps/desktop/src/shared/contracts/write-approval.ts`](../../apps/desktop/src/shared/contracts/write-approval.ts)：批准记录、摘要、目标状态、逐路径结果、变更日志记录、撤销原因 |
+| 决策规格 | [`docs/specs/2026-10-27-p4-write-authorization-and-recovery.md`](../specs/2026-10-27-p4-write-authorization-and-recovery.md)：四类许可关系、写入批准生命周期、保留内容、diffDigest 编码、陈旧审批拦截、沙箱边界（照抄 Codex 的权限分层）、部分完成状态、并发冲突与恢复规则、拒绝码、探针矩阵、威胁范围、12 项待人类确认决定、8 项留给 #19/#20 的决定 |
+| 数据契约 | [`apps/desktop/src/shared/contracts/write-approval.ts`](../../apps/desktop/src/shared/contracts/write-approval.ts)：批准记录、摘要、目标状态、逐路径结果、变更日志记录、撤销原因、沙箱模式与保护路径 |
 | 目标观察 | [`apps/desktop/src/main/write-approval/observe-targets.ts`](../../apps/desktop/src/main/write-approval/observe-targets.ts)：只读句柄读取、内容哈希、文件身份；不写、不删、不改名 |
 | 共享读取 | [`apps/desktop/src/main/harness/bounded-read.ts`](../../apps/desktop/src/main/harness/bounded-read.ts)：外发清单与写入观察共用的有界稳定读取；`egress-materials.ts` 改为调用它，错误码映射不变 |
-| 纯决策 | [`apps/desktop/src/main/write-approval/decision.ts`](../../apps/desktop/src/main/write-approval/decision.ts)：批准判定、保留内容核对、撤销、完成标记、逐路径结果、恢复计划；不触碰文件系统 |
-| 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：96 项 Contract Tests |
+| 纯决策 | [`apps/desktop/src/main/write-approval/decision.ts`](../../apps/desktop/src/main/write-approval/decision.ts)：批准判定、保留内容核对、撤销、完成标记、逐路径结果、恢复计划、沙箱作用域判定；不触碰文件系统 |
+| 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：103 项 Contract Tests |
 | 词表 | [`GLOSSARY.md`](../../GLOSSARY.md)：新增「写入批准（Write Approval）」「变更日志（Change Journal）」 |
 
 没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段；`run-ipc.ts` 与 `pioneer-run.ts` 未改动。`egress-materials.ts` 只改了内部读取实现，对外错误码与行为不变。
@@ -23,7 +23,7 @@
 | 项 | 命令/位置 | 结果 |
 | --- | --- | --- |
 | 仓库规范化 | `pnpm verify:repository` | 6/6 通过 |
-| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 96/96 通过 |
+| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 103/103 通过 |
 | 受影响既有测试 | `egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` | 123/123 通过 |
 | 完整门禁 | `pnpm check` | 见下方"门禁结果" |
 | 类型 | `pnpm typecheck`、`pnpm test:contract:types` | 通过 |
@@ -32,14 +32,14 @@
 
 ### 门禁结果
 
-最终 `pnpm check`（日志 `tmp/issue18/full-check-7.log`，2026-10-27）退出码 0：
+最终 `pnpm check`（日志 `tmp/issue18/full-check-8.log`，2026-10-29）退出码 0：
 
-- Contract Tests：444/444 通过（37 个测试文件，含本票 96 项）；
+- Contract Tests：451/451 通过（37 个测试文件，含本票 103 项）；
 - Prototype Tests：210/210 通过；
 - Real Electron E2E：27/27 通过（先 build 再运行）；
 - 最终 package smoke：Electron Forge 打包完成，`Packaging for x64 on win32` 与 postPackage hook 均成功。
 
-该门禁覆盖第三轮修复（消费时机、保留内容按真实字节重算、日志不变量、路径规范化与大小写去重、`identity_unavailable`、`computeDiffDigest`、摘要去身份）之后的最终代码树。之后的改动只有 Markdown 规格与验证记录文本，不进入 `pnpm check`；仓库规范化的最终结果见上方"验证证据"表。受影响既有测试（egress、read-only 执行/策略、run manager）在修复后重跑为 123/123。
+该门禁覆盖第四轮改动（沙箱模式、保护路径、作用域判定与 `SCOPE_DENIED`）之后的最终代码树。之后的改动只有 Markdown 规格与验证记录文本，不进入 `pnpm check`；仓库规范化的最终结果见上方"验证证据"表。
 
 ### 编辑过程事故与修复
 
@@ -155,6 +155,18 @@
 | 认可项 | 内容优先判定、`applied.observedIdentity`、数值上限与 `superRefine`、未新增写入面、计数一致 | 保持不变 |
 
 本轮后 `issue18-verification.md` 的计数改为 96 项探针；规格 §7 的行与边界说明同步更新。仍待人类确认的决定仍是 12 项，本轮没有替用户同意任何一项。
+
+### 第四轮：把 Codex 的沙箱抄过来（本轮）
+
+用户要求把 Codex 的沙箱一起纳入。先用 voyager 摸清 Codex 现状（任务 `jmvquvx99972a18181f`，会话 https://chatgpt.com/c/6ae0c6de-a264-83ea-9c1b-663b7b897d3a ），结论：CLI 0.164.0（2026-10-23）；受信任 Git 工作区默认 `on-request` + `workspace-write`；`apply_patch` 批准窗只显示说明与目标路径、不渲染完整 Diff；Windows 有原生隔离三档（`mxc` / 低权限账户 / 受限 Token + ACL）；`/undo` 已移除，没有每次写入的检查点；并发靠 worktree 隔离。据此按「照抄骨架 + 保留绑定」落地：
+
+| 项 | 处理 |
+| --- | --- |
+| 契约 | 新增 `WRITE_SANDBOX_MODES`（`read_only`/`workspace_write`/`full_access`）、`WriteSandboxPolicySchema`（默认保护 `.git`）、`WRITE_SCOPE_DENIALS`、失败码 `SCOPE_DENIED` |
+| 判定 | 新增 `checkWriteScope`（`read_only` 全拒；`workspace_write` 拒保护路径；`full_access` 放行）与 `scopeDeniedOutcomes`（`failed` + `SCOPE_DENIED`） |
+| 规格 | 新增 §3.5 沙箱边界；§6 失败码 5 → 6；§7 新增沙箱行与边界说明；§9.1 新增第 8 项（Windows 执行机制留给 #19/#20） |
+| 探针 | 新增 7 条：`read_only` 全拒、`workspace_write` 放行、`.git` 三种形态、`.github` 近似前缀、`full_access`、策略默认与非法模式、`SCOPE_DENIED` 映射 |
+| 未做 | 真实内核级隔离（受限 Token、job object、`mxc`）属于 #19/#20；本票只有纯判定，写入能力仍关闭；`workspace_write` 在没有 OS 隔离前只是 main 的路径判定，界面不得宣传成沙箱 |
 
 ## 人类确认状态
 

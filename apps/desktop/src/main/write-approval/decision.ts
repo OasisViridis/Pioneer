@@ -9,6 +9,8 @@ import {
   type WriteChangeJournalRecord,
   type WriteFileState,
   type WriteRevocationReason,
+  type WriteSandboxPolicy,
+  type WriteScopeDenialCode,
   type WriteStaleTarget,
   type WriteTarget,
   type WriteTargetOutcome,
@@ -226,6 +228,49 @@ export function revokeWriteApproval(
  */
 export function consumeWriteApproval(approval: WriteApproval): WriteApproval {
   return WriteApprovalSchema.parse({ ...approval, consumed: true });
+}
+
+export type WriteScopeDecision =
+  { ok: true } | { ok: false; code: WriteScopeDenialCode };
+
+/**
+ * Applies the sandbox rule before any approval is consumed. `read_only` refuses
+ * every write; `workspace_write` keeps protected paths read-only; `full_access`
+ * is the explicit opt-out and is expected only after a separate confirmation.
+ *
+ * Containment (no `..`, no absolute path, no link escape, resolved path inside
+ * the project root) is already enforced by the path schema and main's read-only
+ * path policy, so this function owns the mode and protected-path rules only.
+ */
+export function checkWriteScope(
+  targets: readonly WriteTarget[],
+  policy: WriteSandboxPolicy,
+): WriteScopeDecision {
+  if (policy.mode === 'read_only')
+    return { ok: false, code: 'SCOPE_READ_ONLY' };
+  if (policy.mode === 'full_access') return { ok: true };
+  for (const target of targets) {
+    for (const protectedPath of policy.protectedPaths) {
+      if (
+        target.path === protectedPath ||
+        target.path.startsWith(`${protectedPath}/`)
+      ) {
+        return { ok: false, code: 'SCOPE_PROTECTED_PATH' };
+      }
+    }
+  }
+  return { ok: true };
+}
+
+/** Every target stays untouched because the sandbox refused the scope. */
+export function scopeDeniedOutcomes(
+  targets: readonly WriteTarget[],
+): WriteTargetOutcome[] {
+  return targets.map((target) => ({
+    path: target.path,
+    status: 'failed' as const,
+    code: 'SCOPE_DENIED' as const,
+  }));
 }
 
 /** Marks the approval as applied once, after the whole set succeeded. */

@@ -153,6 +153,26 @@ renderer 只能看到序列化的 `WriteApprovalSummary`：批准编号、操作
 
 对 #19 的硬要求：如果实现只能做到"落盘前再 stat 一次"，而无法说明核对与写入之间的窗口如何被压缩或检测，那么写入能力不得开启。按本规格 §9 第 7 条，人类可以选择接受写后核对 + 如实报告，也可以选择暂不启用；两种选择都必须显式记录，不能由实现方默认。
 
+### 3.5 沙箱边界（照抄 Codex 的权限分层）
+
+批准回答"这份 Diff 能不能写"，沙箱回答"这个进程能不能碰这些路径"。两者都通过才允许落盘；沙箱拒写发生在批准消费之前，不消耗批准。
+
+三档模式（`WRITE_SANDBOX_MODES`）：
+
+| 模式 | 允许 | 默认用途 |
+| --- | --- | --- |
+| `read_only` | 不写任何文件 | 本票交付期间的默认；写入能力关闭 |
+| `workspace_write` | 只写项目根内的普通文件；保护路径只读 | #19 启用写入后的默认 |
+| `full_access` | 不再施加路径限制 | 只能由用户显式开启并单独确认 |
+
+保护路径默认 `.git`（`WRITE_PROTECTED_PATHS`）：`workspace_write` 下即使批准了也拒绝，恢复同样拒绝。按路径段比较，`.github/` 这类近似前缀不算保护路径。
+
+越界检查由两层组成：契约层拒绝绝对路径、`..`、反斜杠与设备名；main 在落盘前用只读路径策略解析真实路径并确认仍在项目根内（P2 已实现）。沙箱只补"模式"与"保护路径"，不重复实现这两层。
+
+Windows 的执行方式与 Codex 同源，但本票不实现：#19/#20 在三者中选一并验收，`mxc`（需要 Win11 特定构建）、低权限账户、受限 Token + job object。没有 OS 级隔离时，`workspace_write` 只是 main 的路径判定，不是内核强制；界面必须说明这一点，不能宣传成沙箱。
+
+沙箱不解决并发与崩溃：那两件事仍由 §3.4 的核对与 §4 的日志、恢复规则处理。
+
 ## 4. 落盘、部分完成与验证失败
 
 ### 4.1 变更日志
@@ -161,7 +181,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 - `intent`：准备写某个目标，记批准编号、路径与 `beforeSha256`；这是"已经开始"的唯一证据。
 - `applied`：写入后重新读取的结果，记 `afterSha256`、实际观察到的 `observedSha256`、`observedIdentity`（写入后字节落在哪个文件对象上）与 `verification`（`verified`/`unverified`）。`verified` 记录必须满足 `observedSha256 === afterSha256`，否则契约层直接拒绝；`summarizeWriteOutcomes` 对读到的不一致记录再判一次 `verification_failed`，不允许日志自相矛盾地报告成功。
-- `failed`：该目标没有写成，记固定失败码（`WRITE_FAILED`、`VERIFY_FAILED`、`CANCELLED`、`RECOVERY_CONFLICT`、`UNKNOWN`）。
+- `failed`：该目标没有写成，记固定失败码（`WRITE_FAILED`、`VERIFY_FAILED`、`CANCELLED`、`RECOVERY_CONFLICT`、`SCOPE_DENIED`、`UNKNOWN`）。
 - `recovery`：后来的恢复动作，记 `restore`/`preserve`/`already_restored` 与当时观察到的哈希。
 
 日志只回答"这次批准实际改了什么"，不存储文件快照，也不是会话历史。它与现行 `RunJournal`（只记 Run 的 accept/terminal/tombstone，并有容量淘汰）分开维护：#20 不能拿 RunJournal 顶替写入证据，也不能让未解决的 `unknown` 与恢复冲突记录被普通日志上限淘汰。已完成记录的保留期限与容量由 #20 的验收决定。
@@ -245,17 +265,20 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 | `APPROVAL_REQUIRED` | 批准记录不存在，或它对应的待写入内容没有保留 |
 | `APPROVAL_STALE_TARGET` | 至少一个目标变了；`targets[]` 给出 `changed`/`missing`/`replaced`/`identity_unavailable`/`not_regular_file`/`link_not_allowed`/`too_large`/`unreadable`/`unstable` 之一 |
 
-目标状态 10 个：`unchanged`、`changed`、`missing`、`replaced`、`identity_unavailable`、`not_regular_file`、`link_not_allowed`、`too_large`、`unreadable`、`unstable`。`replaced` 专指「内容与批准一致但文件身份已变」的同名重建；`identity_unavailable` 专指「批准记了身份但本次读取无法报告」，两者都不能与 `changed` 合并：它们分别说明文件对象被换、身份无法证明、内容被改。逐路径结果 7 个：`applied`、`verification_failed`、`restored`、`unchanged`、`rejected`、`failed`、`unknown`。失败码 5 个：`WRITE_FAILED`、`VERIFY_FAILED`、`CANCELLED`、`RECOVERY_CONFLICT`、`UNKNOWN`。状态描述文件，结果描述这次操作，两者不混用。
+目标状态 10 个：`unchanged`、`changed`、`missing`、`replaced`、`identity_unavailable`、`not_regular_file`、`link_not_allowed`、`too_large`、`unreadable`、`unstable`。`replaced` 专指「内容与批准一致但文件身份已变」的同名重建；`identity_unavailable` 专指「批准记了身份但本次读取无法报告」，两者都不能与 `changed` 合并：它们分别说明文件对象被换、身份无法证明、内容被改。逐路径结果 7 个：`applied`、`verification_failed`、`restored`、`unchanged`、`rejected`、`failed`、`unknown`。失败码 6 个：`WRITE_FAILED`、`VERIFY_FAILED`、`CANCELLED`、`RECOVERY_CONFLICT`、`SCOPE_DENIED`、`UNKNOWN`。状态描述文件，结果描述这次操作，两者不混用。
+
+沙箱拒绝不是批准拒绝：`SCOPE_READ_ONLY`、`SCOPE_PROTECTED_PATH` 由 `checkWriteScope` 在批准消费之前返回，逐路径结果记 `failed` + `SCOPE_DENIED`，批准记录保持未消费，用户调大权限或换目标后可以重新走一次。
 
 ## 7. 负向探针矩阵（本票已执行）
 
-[探针测试](../../tests/contract/write-approval.test.ts)共 96 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
+[探针测试](../../tests/contract/write-approval.test.ts)共 103 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
 
 | 组 | 输入 | 期望 | 位置 |
 | --- | --- | --- | --- |
 | 契约 | 未知字段、摘要里带 `webContentsId` 或原始文件身份、非 `replace_file` 操作、重复目标、大小写重名、反斜杠路径、单文件超 1 MiB、整份超 4 MiB、有效期超窗口、撤销记录不自洽、设备名、超 32 层路径 | schema 解析失败 | `write approval contract` |
 | 路径语法 | `../`、绝对路径、盘符、UNC、反斜杠、空组件、尾点、NTFS ADS | schema 解析失败 | 同上 |
 | diffDigest | 规范编码复算、同输入稳定、改 Diff 文本、改 after 哈希、改身份 | 前两项相等；后三项各不相等 | `diff digest` |
+| 沙箱边界 | `read_only` 下任何目标、`.git` 与子路径、`.github/` 近似前缀、`full_access` 下的 `.git`、策略默认值、未知模式 | `SCOPE_READ_ONLY`/`SCOPE_PROTECTED_PATH`/通过；未知模式与空保护清单 schema 拒绝 | `write sandbox scope` |
 | 目标观察 | 未变、同尺寸改动、增长、截断、读取期间被改、移走、目录、符号链接、硬链接、隐藏凭证名、超预算、同名重建 | `unchanged`/`changed`/`unstable`/`missing`/`not_regular_file`/`link_not_allowed`/`unreadable`/`too_large`/`replaced` | `target observation` |
 | 批准有效性 | 已消费、已撤销、已过期、六种绑定不符、Diff 摘要不符、目标集合不符、身份无法确认 | 对应 `APPROVAL_*` 拒绝码；身份项为 `APPROVAL_STALE_TARGET` + `identity_unavailable` | `write approval decision` |
 | 消费与完成 | 写入前只消费、标记完成后再次应用 | 消费后 `appliedAt` 仍为 `null` 且判定为 `APPROVAL_CONSUMED`；完成后同样拒绝重放 | 同上 |
@@ -273,6 +296,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 - "同名重建"有一条真实删除后重建的探针，平台复用同一身份时会显式 `skip` 而不是静默通过；另有一条用改变的身份构造的确定性探针覆盖判定分支。
 - `identity_unavailable` 由平台"批准时报告身份、本次读取不报告"产生，NTFS 上无法稳定制造；确定性探针用伪造的观察对象覆盖判定分支，观察函数的该分支不在本轮探针内。
 - `computeDiffDigest` 的探针复算规范 JSON 的 SHA-256，并断言输入变化会改变摘要；它不证明将来的预览界面渲染出的文本与摘要绑定，那属于 #19。
+- 沙箱探针只证明 `checkWriteScope` 的纯判定：模式、保护路径、近似前缀、默认值与非法模式。它不是内核级隔离的证明；Windows 上的受限 Token、job object 或 `mxc` 由 #19/#20 实测。
 - "拒绝对象通过 schema 复验"只对已用/撤销/过期三个生命周期码调用 `WriteApprovalRejectionSchema.safeParse`；其余拒绝码断言具体 `code` 与目标状态。
 - "整体拒绝"里"另一个目标不写"是判定结果断言：本票没有写路径，无法观测磁盘副作用。
 - "恢复"的重复计划是计划层幂等：两次 `planRecovery` 之间测试手工把文件写回 `before`，验证判定为 `already_restored`；执行层幂等留 #20。
@@ -316,12 +340,13 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 5. **变更日志的存放与保留**：位置、格式、容量；未解决的 `unknown` 与冲突记录不得被淘汰。
 6. **恢复的执行入口**：恢复请求字段、逐目标选择、执行期停止语义与恢复自身的副作用记录。
 7. **部分写入后的自动检查**：写入后重读、哈希核对与失败码映射的实现位置。
+8. **沙箱执行机制**：Windows 三档实现（`mxc` / 低权限账户 / 受限 Token + job object）的选型与验收、保护路径默认清单、`full_access` 的开启流程与界面提示。本票只定义模式与判定，内核级强制由 #19/#20 验收。
 
 ## 10. 验证记录
 
 2026-10-27 在 `docs/issue18-write-authorization`（自 `origin/main` `b93d8e9`）执行：
 
-- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 96/96 通过。
+- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 103/103 通过。
 - 受影响既有测试：`egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` 共 123 项通过（共享读取重构未改变行为）。
 - `pnpm typecheck`、`pnpm test:contract:types` 通过；新文件 ESLint 0 问题；Prettier 检查通过。
 - 完整 `pnpm check` 与 `pnpm verify:repository` 记录见[验证记录](../testing/issue18-verification.md)；本文件的证据范围仅到 Contract Tests，不代表写入功能已实现。
