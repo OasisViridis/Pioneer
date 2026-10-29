@@ -127,10 +127,11 @@ export function RunPanel({
           className="button"
           disabled={stopping}
           onClick={() => {
+            if (state.revision === null) return;
             void runViews.stop({
               sessionId: session.id,
               projectId: project.id,
-              revision: state.revision ?? session.runRevision + 1,
+              revision: state.revision,
             });
           }}
         >

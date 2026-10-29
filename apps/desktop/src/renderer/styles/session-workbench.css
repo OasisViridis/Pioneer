@@ -368,11 +368,11 @@
 }
 .run-material__state--read {
   color: var(--hazel-success-ink);
-  border-color: var(--hazel-jade);
+  border-color: var(--hazel-line);
 }
 .run-material__state--scanned {
   color: var(--hazel-gold-ink);
-  border-color: var(--hazel-warm);
+  border-color: var(--hazel-line);
 }
 .run-material__state--changed,
 .run-material__state--missing {
@@ -497,7 +497,7 @@
   font-weight: 600;
 }
 .run-history__status--failed {
-  color: #b3541e;
+  color: var(--hazel-danger-ink);
 }
 .run-history__task {
   margin: 0;

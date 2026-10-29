@@ -393,10 +393,13 @@ export function RunLogPanel({
                 </p>
                 <span>
                   {`${toolLabel(call.tool)} · ${callStateText(call.state)}`}
-                  {call.code === null
-                    ? ''
-                    : ` · ${callCodeText(call.code)}（${call.code}）`}
                 </span>
+                {call.code === null ? null : (
+                  <p className="capability-call__reason">
+                    {callCodeText(call.code)}
+                    <code className="capability-call__code">{call.code}</code>
+                  </p>
+                )}
               </li>
             ))}
           </ol>
