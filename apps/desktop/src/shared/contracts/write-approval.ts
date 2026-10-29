@@ -296,8 +296,49 @@ export const WriteChangeFailureCodeSchema = z.enum([
   'VERIFY_FAILED',
   'CANCELLED',
   'RECOVERY_CONFLICT',
+  'SCOPE_DENIED',
   'UNKNOWN',
 ]);
+
+/**
+ * Sandbox modes copied from Codex's permission model. The sandbox decides what
+ * the process may touch; the approval decides whether this exact Diff may be
+ * written. Both must pass, and neither replaces the other.
+ *
+ * This module defines the rule and a pure scope check. The OS-level enforcement
+ * (Windows restricted token + job object, a low-privilege account, or MXC) is
+ * #19/#20 work and is not implemented here; until then the write capability
+ * stays closed.
+ */
+export const WRITE_SANDBOX_MODES = [
+  'read_only',
+  'workspace_write',
+  'full_access',
+] as const;
+
+export const WriteSandboxModeSchema = z.enum(WRITE_SANDBOX_MODES);
+
+/** Paths the workspace-write mode never writes, even with an approval. */
+export const WRITE_PROTECTED_PATHS = ['.git'] as const;
+
+export const WriteSandboxPolicySchema = z
+  .object({
+    mode: WriteSandboxModeSchema,
+    protectedPaths: z
+      .array(WriteTargetPathSchema)
+      .min(1)
+      .max(8)
+      .default([...WRITE_PROTECTED_PATHS]),
+  })
+  .strict();
+
+/** Why the sandbox refused a write before any approval was consumed. */
+export const WRITE_SCOPE_DENIALS = [
+  'SCOPE_READ_ONLY',
+  'SCOPE_PROTECTED_PATH',
+] as const;
+
+export const WriteScopeDenialCodeSchema = z.enum(WRITE_SCOPE_DENIALS);
 
 export const WriteTargetOutcomeSchema = z
   .object({
@@ -382,6 +423,9 @@ export type WriteApprovalSummaryTarget = z.infer<
 >;
 export type WriteTargetState = z.infer<typeof WriteTargetStateSchema>;
 export type WriteTargetStatus = z.infer<typeof WriteTargetStatusSchema>;
+export type WriteSandboxMode = z.infer<typeof WriteSandboxModeSchema>;
+export type WriteSandboxPolicy = z.infer<typeof WriteSandboxPolicySchema>;
+export type WriteScopeDenialCode = z.infer<typeof WriteScopeDenialCodeSchema>;
 export type WriteApprovalRejectionCode = z.infer<
   typeof WriteApprovalRejectionCodeSchema
 >;

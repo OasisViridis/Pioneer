@@ -23,6 +23,8 @@ import {
   WriteApprovalSchema,
   WriteApprovalSummarySchema,
   WriteChangeJournalRecordSchema,
+  WriteSandboxPolicySchema,
+  WriteTargetOutcomeSchema,
   WRITE_APPROVAL_LIMITS,
   type WriteApproval,
   type WriteApprovalRejection,
@@ -32,6 +34,7 @@ import {
 } from '../../apps/desktop/src/shared/contracts/write-approval';
 import {
   checkRetainedPostImages,
+  checkWriteScope,
   computeDiffDigest,
   consumeWriteApproval,
   evaluateWriteApproval,
@@ -39,6 +42,7 @@ import {
   planRecovery,
   rejectedOutcomes,
   revokeWriteApproval,
+  scopeDeniedOutcomes,
   summarizeWriteOutcomes,
   type WriteApprovalContext,
   type WriteApprovalDecision,
@@ -487,6 +491,87 @@ describe('diff digest', () => {
         diff,
       }),
     );
+  });
+});
+
+describe('write sandbox scope', () => {
+  it('refuses every write in read-only mode', () => {
+    const targets = [targetOf('src/a.ts', 'a', 'a2')];
+    expect(
+      checkWriteScope(targets, {
+        mode: 'read_only',
+        protectedPaths: ['.git'],
+      }),
+    ).toEqual({ ok: false, code: 'SCOPE_READ_ONLY' });
+  });
+
+  it('allows a project file in workspace-write mode', () => {
+    const targets = [targetOf('src/a.ts', 'a', 'a2')];
+    expect(
+      checkWriteScope(targets, {
+        mode: 'workspace_write',
+        protectedPaths: ['.git'],
+      }),
+    ).toEqual({ ok: true });
+  });
+
+  it('keeps .git read-only even with an approval', () => {
+    for (const path of ['.git', '.git/config', '.git/hooks/pre-commit']) {
+      const targets = [targetOf(path, 'a', 'a2')];
+      expect(
+        checkWriteScope(targets, {
+          mode: 'workspace_write',
+          protectedPaths: ['.git'],
+        }),
+        path,
+      ).toEqual({ ok: false, code: 'SCOPE_PROTECTED_PATH' });
+    }
+  });
+
+  it('does not treat a lookalike prefix as protected', () => {
+    const targets = [targetOf('.github/workflows/ci.yml', 'a', 'a2')];
+    expect(
+      checkWriteScope(targets, {
+        mode: 'workspace_write',
+        protectedPaths: ['.git'],
+      }),
+    ).toEqual({ ok: true });
+  });
+
+  it('allows protected paths only in full-access mode', () => {
+    const targets = [targetOf('.git/config', 'a', 'a2')];
+    expect(
+      checkWriteScope(targets, {
+        mode: 'full_access',
+        protectedPaths: ['.git'],
+      }),
+    ).toEqual({ ok: true });
+  });
+
+  it('defaults the policy to .git and rejects unknown modes', () => {
+    expect(WriteSandboxPolicySchema.parse({ mode: 'workspace_write' })).toEqual(
+      { mode: 'workspace_write', protectedPaths: ['.git'] },
+    );
+    expect(
+      WriteSandboxPolicySchema.safeParse({
+        mode: 'sandbox_everything',
+        protectedPaths: ['.git'],
+      }).success,
+    ).toBe(false);
+    expect(
+      WriteSandboxPolicySchema.safeParse({
+        mode: 'workspace_write',
+        protectedPaths: [],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('maps a scope denial to untouched targets with SCOPE_DENIED', () => {
+    const outcomes = scopeDeniedOutcomes([targetOf('src/a.ts', 'a', 'a2')]);
+    expect(outcomes).toEqual([
+      { path: 'src/a.ts', status: 'failed', code: 'SCOPE_DENIED' },
+    ]);
+    expect(WriteTargetOutcomeSchema.safeParse(outcomes[0]).success).toBe(true);
   });
 });
 
