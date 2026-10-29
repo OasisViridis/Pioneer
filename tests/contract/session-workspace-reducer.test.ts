@@ -227,6 +227,14 @@ describe('P3-A run revision and persisted summary (#17)', () => {
       snapshot: snapshotOf('run:2', 2, '2026-10-27T09:00:00.000Z'),
     });
     expect(state).toBe(newest);
+    // A summary for an older revision never replaces the newer one, even when
+    // it claims a fresher capture time.
+    state = sessionWorkspaceReducer(state, {
+      type: 'RECORD_RUN_SNAPSHOT',
+      id: 'session:a',
+      snapshot: snapshotOf('run:1', 1, '2026-10-27T11:00:00.000Z'),
+    });
+    expect(state).toBe(newest);
     state = sessionWorkspaceReducer(state, {
       type: 'RECORD_RUN_SNAPSHOT',
       id: 'session:a',

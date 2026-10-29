@@ -12,6 +12,7 @@ import type {
 import type {
   RunContext,
   RunContextReply,
+  RunSnapshot,
 } from '../../apps/desktop/src/shared/contracts/run-context';
 import {
   RunViewStore,
@@ -278,6 +279,8 @@ describe('run view identity isolation', () => {
     await flushBatches();
     expect(store.get(SESSION_ID).events).toHaveLength(1);
     expect(store.get(SESSION_ID).runId).toBe(RUN_ID);
+    // Both foreign pages are counted; their events never reach this session.
+    expect(store.get(SESSION_ID).ignoredPages).toBe(2);
   });
 
   it('marks omitted history when a page skips sequence numbers', async () => {
@@ -396,6 +399,102 @@ describe('run view identity isolation', () => {
     expect(state.authorization?.grantId).toBe('grant:alpha');
     expect(state.contextState).toBe('ready');
     expect(state.context?.identity.revision).toBe(REVISION);
+  });
+});
+
+describe('run view first page identity', () => {
+  it('marks the phase terminal when the first page already converged', async () => {
+    const completed: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 1,
+      at: '2026-10-25T00:00:00.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: {
+        type: 'run.completed',
+        usage: { inputTokens: null, outputTokens: null },
+      },
+    };
+    const page = pageOf({
+      status: 'completed',
+      events: [completed],
+      lastSeq: 1,
+      nextAfterSeq: 1,
+      hasMore: false,
+    });
+    const port = createFakeRunPort({
+      getRunPage: page,
+      stopReply: { ok: true, status: 'completed' },
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+    const state = store.get(SESSION_ID);
+    expect(state.status).toBe('completed');
+    expect(state.phase).toBe('terminal');
+  });
+
+  it('ignores a first page that names another session', async () => {
+    const page = pageOf({
+      status: 'running',
+      events: sequence(1, 2),
+      lastSeq: 2,
+      nextAfterSeq: 2,
+      hasMore: false,
+    });
+    const foreignPage: RunPage = {
+      ...page,
+      identity: { ...IDENTITY, sessionId: 'session:beta' },
+    };
+    const port = createFakeRunPort({
+      getRunPage: foreignPage,
+      stopReply: { ok: true, status: 'running' },
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+    const state = store.get(SESSION_ID);
+    expect(state.events).toHaveLength(0);
+    expect(state.status).toBe('starting');
+    expect(state.ignoredPages).toBe(1);
+  });
+
+  it('leaves the previous summary untouched when the context read fails', async () => {
+    const stopped: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 1,
+      at: '2026-10-25T00:00:00.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: { type: 'run.stopped' },
+    };
+    const page = pageOf({
+      status: 'stopped',
+      events: [stopped],
+      lastSeq: 1,
+      nextAfterSeq: 1,
+      hasMore: false,
+    });
+    const port = createFakeRunPort({
+      getRunPage: page,
+      stopReply: { ok: true, status: 'stopped' },
+      getRunContext: () => Promise.reject(new Error('context unavailable')),
+    });
+    const snapshots: RunSnapshot[] = [];
+    const store = new RunViewStore(port);
+    await store.launch({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+      task: '读取 fixture 并回答。',
+      materials: [],
+      onSnapshot: (snapshot) => snapshots.push(snapshot),
+    });
+    port.emit({ page });
+    await flushBatches();
+    await flushBatches();
+    expect(snapshots).toHaveLength(0);
+    expect(store.get(SESSION_ID).contextState).toBe('unavailable');
   });
 });
 

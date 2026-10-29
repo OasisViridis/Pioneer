@@ -4,6 +4,7 @@ import type {
   RunContextMaterial,
   RunMaterialReason,
   RunMaterialState,
+  RunSnapshot,
   RunToolCallState,
 } from '../../shared/contracts/run-context';
 import type { RunAuthorizationSummary } from '../../shared/contracts/run-ipc';
@@ -102,7 +103,7 @@ export function approvedMaterials(
 const MATERIAL_STATE_TEXT: Record<RunMaterialState, string> = {
   approved: '已批准 · 未读取',
   read: '已读取',
-  scanned: '已扫描 · 仅命中片段',
+  scanned: '已扫描',
   changed: '内容已变化',
   missing: '不可用',
 };
@@ -119,6 +120,7 @@ const MATERIAL_REASON_TEXT: Record<RunMaterialReason, string> = {
   SENSITIVE_PATH: '敏感路径已拒绝',
   PATH_OUTSIDE_PROJECT: '路径超出项目范围',
   INVALID_PATH: '路径无效',
+  BINARY_CONTENT: '二进制内容，未按文本扫描',
   TRUNCATED: '超出单文件读取预算',
   READ_FAILED: '工具读取失败，内容不可用',
 };
@@ -171,3 +173,17 @@ export const toolLabel = (tool: ReadOnlyToolName | null): string =>
 /** `2026-10-27T10:00:00.000Z` -> `10:00:00`. */
 export const formatUtcTime = (iso: string): string =>
   iso.replace('T', ' ').slice(11, 19);
+
+/**
+ * True when the session started a newer run than the one the persisted summary
+ * describes. The summary then belongs to an earlier run, and the panel must say
+ * so instead of presenting it as the latest result (Issue #17, restart).
+ */
+export function snapshotOutOfDate(session: {
+  runRevision: number;
+  lastRunView: RunSnapshot | null;
+}): boolean {
+  const snapshot = session.lastRunView;
+  if (snapshot === null) return false;
+  return session.runRevision > snapshot.identity.revision;
+}

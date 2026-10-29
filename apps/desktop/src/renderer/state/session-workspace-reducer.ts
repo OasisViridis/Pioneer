@@ -143,16 +143,27 @@ function editSession(session: Session, action: SessionOperation): Session {
       return { ...session, runHistory: history };
     }
     case 'RECORD_RUN_SNAPSHOT': {
-      const existing = session.lastRunView;
-      // The terminal capture may race an earlier, less complete context read;
-      // a newer capture of the same run must be able to replace it.
+      const { snapshot } = action;
+      // A summary only ever describes this session's own project, and it may
+      // never roll the session back to an older run revision (Issue #17).
       if (
-        existing !== null &&
-        existing.identity.runId === action.snapshot.identity.runId &&
-        existing.recordedAt >= action.snapshot.recordedAt
+        snapshot.identity.sessionId !== session.id ||
+        snapshot.identity.projectId !== session.project.id
       )
         return session;
-      return { ...session, lastRunView: action.snapshot };
+      const existing = session.lastRunView;
+      if (existing !== null) {
+        if (snapshot.identity.revision < existing.identity.revision)
+          return session;
+        // The terminal capture may race an earlier, less complete context read;
+        // a newer capture of the same run must be able to replace it.
+        if (
+          existing.identity.runId === snapshot.identity.runId &&
+          existing.recordedAt >= snapshot.recordedAt
+        )
+          return session;
+      }
+      return { ...session, lastRunView: snapshot };
     }
     case 'BUMP_RUN_REVISION': {
       if (action.revision <= session.runRevision) return session;

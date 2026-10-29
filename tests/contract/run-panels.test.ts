@@ -10,6 +10,7 @@ import {
   formatUtcTime,
   materialReasonText,
   materialStateText,
+  snapshotOutOfDate,
   toolLabel,
   visibleMaterials,
 } from '../../apps/desktop/src/renderer/state/run-panels';
@@ -96,6 +97,7 @@ const EMPTY_STATE: RunViewState = {
   events: [],
   omittedHistory: false,
   ignoredEvents: 0,
+  ignoredPages: 0,
 };
 
 const snapshot: RunSnapshot = {
@@ -208,15 +210,28 @@ describe('run panel projections (#17)', () => {
 
   it('keeps fixed user-facing copy for states, reasons and tools', () => {
     expect(materialStateText('approved')).toBe('已批准 · 未读取');
-    expect(materialStateText('scanned')).toBe('已扫描 · 仅命中片段');
+    expect(materialStateText('scanned')).toBe('已扫描');
     expect(materialReasonText('CONTENT_NOT_ALLOWED')).toContain('不一致');
     expect(materialReasonText(null)).toBeNull();
     expect(callStateText('rejected')).toBe('已拒绝');
     expect(callStateText('failed')).toBe('失败');
     expect(callStateText('cancelled')).toBe('已取消');
     expect(materialReasonText('READ_FAILED')).toContain('失败');
+    expect(materialReasonText('BINARY_CONTENT')).toContain('二进制');
     expect(toolLabel(null)).toBe('未知工具');
     expect(toolLabel('search_in_files')).toBe('搜索文本');
+  });
+
+  it('flags a persisted summary that is older than the session run revision', () => {
+    expect(snapshotOutOfDate({ runRevision: 1, lastRunView: snapshot })).toBe(
+      false,
+    );
+    expect(snapshotOutOfDate({ runRevision: 2, lastRunView: snapshot })).toBe(
+      true,
+    );
+    expect(snapshotOutOfDate({ runRevision: 5, lastRunView: null })).toBe(
+      false,
+    );
   });
 
   it('projects event calls without targets and formats shared copy', () => {

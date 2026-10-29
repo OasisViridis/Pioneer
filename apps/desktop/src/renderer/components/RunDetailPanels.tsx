@@ -15,9 +15,11 @@ import {
   formatUtcTime,
   materialReasonText,
   materialStateText,
+  snapshotOutOfDate,
   toolLabel,
   visibleMaterials,
 } from '../state/run-panels';
+import { ProjectOverview } from './ProjectOverview';
 
 /**
  * P3-A workbench panels: the current run's context, capability use and event
@@ -112,6 +114,11 @@ function RunIdentity({
           这是本机保存的上次运行摘要；事件流不持久化，重启后只显示摘要。
         </p>
       ) : null}
+      {run.fromSnapshot && snapshotOutOfDate(session) ? (
+        <p role="alert" className="form-error">
+          {`本会话在本机保存的这次运行之后又启动过运行（会话修订 ${String(session.runRevision)}，摘要修订 ${String(run.revision ?? '—')}），那次运行没有留下摘要；这里显示的是较早运行的摘要，不代表最新结果。`}
+        </p>
+      ) : null}
     </header>
   );
 }
@@ -193,6 +200,13 @@ export function RunContextPanel({
         </ul>
       ) : null}
       {run.runId !== null ? <p className="metadata">{sourceNote}</p> : null}
+      <details className="run-overview">
+        <summary>项目元数据（不随运行发送）</summary>
+        <p className="metadata">
+          这里只显示本机项目信息，不是本次运行批准或读取的材料。
+        </p>
+        <ProjectOverview project={session.project} />
+      </details>
       {state.authorization !== null ? (
         <details className="run-authorization">
           <summary>本次授权摘要</summary>
@@ -289,10 +303,13 @@ export function RunCapabilitiesPanel({
                 <p className="metadata">
                   {call.callId}
                   {call.target === null ? '' : ` · ${call.target}`}
-                  {call.code === null
-                    ? ''
-                    : ` · ${callCodeText(call.code)}（${call.code}）`}
                 </p>
+                {call.code === null ? null : (
+                  <p className="capability-call__reason">
+                    {callCodeText(call.code)}
+                    <code className="capability-call__code">{call.code}</code>
+                  </p>
+                )}
               </li>
             ))}
           </ol>
@@ -334,6 +351,11 @@ export function RunLogPanel({
       {state.ignoredEvents > 0 ? (
         <p role="alert" className="form-error">
           {`已忽略 ${String(state.ignoredEvents)} 条不属于当前运行身份的事件（来源或格式校验不通过）。`}
+        </p>
+      ) : null}
+      {state.ignoredPages > 0 ? (
+        <p role="alert" className="form-error">
+          {`已忽略 ${String(state.ignoredPages)} 个不属于当前运行身份的整页事件（会话、项目、运行或修订不符）。`}
         </p>
       ) : null}
       {state.omittedHistory ? (
@@ -379,10 +401,13 @@ export function RunLogPanel({
                 </p>
                 <span>
                   {`${toolLabel(call.tool)} · ${callStateText(call.state)}`}
-                  {call.code === null
-                    ? ''
-                    : ` · ${callCodeText(call.code)}（${call.code}）`}
                 </span>
+                {call.code === null ? null : (
+                  <p className="capability-call__reason">
+                    {callCodeText(call.code)}
+                    <code className="capability-call__code">{call.code}</code>
+                  </p>
+                )}
               </li>
             ))}
           </ol>

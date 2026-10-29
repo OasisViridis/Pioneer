@@ -367,17 +367,22 @@
   white-space: nowrap;
 }
 .run-material__state--read {
-  color: #2f6b3a;
-  border-color: #9fc9a7;
+  color: var(--hazel-success-ink);
+  border-color: var(--hazel-line);
 }
 .run-material__state--scanned {
-  color: #3f5f8a;
-  border-color: #a7bcd4;
+  color: var(--hazel-gold-ink);
+  border-color: var(--hazel-line);
 }
 .run-material__state--changed,
 .run-material__state--missing {
-  color: #b3541e;
-  border-color: #e0b19a;
+  color: var(--hazel-danger-ink);
+  border-color: var(--hazel-line);
+}
+.run-overview summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--hazel-secondary);
 }
 .run-authorization summary {
   cursor: pointer;
@@ -409,11 +414,21 @@
   font-size: 12px;
 }
 .capability-state--succeeded {
-  color: #2f6b3a;
+  color: var(--hazel-success-ink);
 }
 .capability-state--rejected,
 .capability-state--failed {
-  color: #b3541e;
+  color: var(--hazel-danger-ink);
+}
+.capability-call__reason {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--hazel-ink);
+}
+.capability-call__code {
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--hazel-secondary);
 }
 .capability-state--requested,
 .capability-state--cancelled {
@@ -482,7 +497,7 @@
   font-weight: 600;
 }
 .run-history__status--failed {
-  color: #b3541e;
+  color: var(--hazel-danger-ink);
 }
 .run-history__task {
   margin: 0;
