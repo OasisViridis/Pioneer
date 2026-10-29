@@ -30,6 +30,9 @@
       "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
       "nodes": ["1093:1259"],
       "compositionMappings": { "1093:1259": "921:632" },
+      "compositionSnapshotSha256": {
+        "1093:1259": "9fbb7868596a3e8f24656922756ad2e16da540987534c2884d750fafefccfd0f"
+      },
       "compositionApprovals": {
         "1093:1259": {
           "1093:1265": {
