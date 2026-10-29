@@ -10,8 +10,13 @@ import path from 'node:path';
 import type { PioneerDesktopApi } from '../../apps/desktop/src/shared/contracts/ipc';
 import { createDockLayout } from '../../apps/desktop/src/shared/docking';
 import {
+  initialSessionWorkspaceState,
+  sessionWorkspaceReducer,
+} from '../../apps/desktop/src/renderer/state/session-workspace-reducer';
+import {
   SessionStateRecordSchema,
   SESSION_STATE_VERSION,
+  MAX_SESSION_STATE_BYTES,
 } from '../../apps/desktop/src/shared/session-state';
 import {
   captureFixtureHash,
@@ -53,6 +58,163 @@ async function createSession(page: Page, title: string) {
     .fill(title);
   await page.getByRole('button', { name: '保存名称', exact: true }).click();
 }
+
+test('explains when a branch would exceed the storage limit without changing the record', async ({}, info) => {
+  test.setTimeout(60_000);
+  const before = await captureFixtureHash(fixtureRoot);
+  const userData = info.outputPath('branch-capacity-user-data');
+  await mkdir(userData, { recursive: true });
+  const project = {
+    id: 'alpha-app',
+    name: 'alpha-app',
+    absolutePath: path.join(fixtureRoot, 'alpha-app'),
+    description: null,
+    technologies: [],
+    hasGitRepository: false,
+    lastModifiedAt: '2026-10-03T00:00:00.000Z',
+    coverSeed: 'alpha-app',
+  };
+  const initial = sessionWorkspaceReducer(initialSessionWorkspaceState, {
+    type: 'CREATE_SESSION',
+    id: 'session:large-0',
+    project,
+  });
+  const source = initial.sessions[0];
+  if (!source) throw new Error('Expected source');
+  const messages = Array.from({ length: 100 }, () => '汉'.repeat(2500));
+  const sessions = Array.from({ length: 11 }, (_, index) => ({
+    ...source,
+    id: `session:large-${String(index)}` as const,
+    messages: [...messages],
+  }));
+  const state = { ...initial, sessions };
+  const bytes = JSON.stringify(
+    SessionStateRecordSchema.parse({ version: SESSION_STATE_VERSION, state }),
+  );
+  expect(Buffer.byteLength(bytes, 'utf8')).toBeLessThan(
+    MAX_SESSION_STATE_BYTES,
+  );
+  const file = path.join(userData, 'pioneer-session-state.json');
+  await writeFile(file, bytes, 'utf8');
+  const app = await launch(userData);
+  try {
+    const page = await app.firstWindow();
+    await page
+      .getByRole('button', { name: '从第 100 条消息创建分支', exact: true })
+      .click();
+    await expect(page.getByRole('alert')).toContainText('无法创建分支');
+    await expect(
+      page.getByRole('tab', { name: '新会话 分支', exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole('tab', { name: '新会话', exact: true }),
+    ).toHaveAttribute('aria-selected', 'true');
+    expect(await readFile(file, 'utf8')).toBe(bytes);
+  } finally {
+    await app.close();
+    expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(before);
+  }
+});
+
+test('branches from a saved message, restores independently and handles a missing source', async ({}, info) => {
+  const before = await captureFixtureHash(fixtureRoot);
+  const userData = info.outputPath('branch-user-data');
+  await mkdir(userData, { recursive: true });
+  const file = path.join(userData, 'pioneer-session-state.json');
+  let app = await launch(userData);
+  try {
+    let page = await app.firstWindow();
+    await createSession(page, '原会话');
+    const input = page.getByRole('textbox', {
+      name: '给 Agent 的消息',
+      exact: true,
+    });
+    for (const message of ['第一条消息', '第二条消息']) {
+      await input.fill(message);
+      await page
+        .getByRole('button', { name: '保存到会话', exact: true })
+        .click();
+    }
+    await input.fill('原会话草稿');
+    await page
+      .getByRole('button', { name: '从第 1 条消息创建分支', exact: true })
+      .click();
+    const childTab = page.getByRole('tab', {
+      name: '原会话 分支',
+      exact: true,
+    });
+    await expect(childTab).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('.message-list li')).toHaveCount(1);
+    await expect(page.locator('.message-list li').first()).toContainText(
+      '第一条消息',
+    );
+    await expect(input).toHaveValue('');
+    await expect(page.getByText('来源：原会话 · 第 1 条消息')).toBeVisible();
+    await page
+      .getByRole('button', { name: '打开来源会话', exact: true })
+      .click();
+    await expect(page.locator('.message-list li')).toHaveCount(2);
+    await expect(input).toHaveValue('原会话草稿');
+    await childTab.click();
+    await input.fill('分支的新消息');
+    await page.getByRole('button', { name: '保存到会话', exact: true }).click();
+    await expect(page.locator('.message-list li')).toHaveCount(2);
+    await expect(page.locator('.save-status')).toHaveText('已保存到本机');
+    await app.close();
+
+    app = await launch(userData);
+    page = await app.firstWindow();
+    await expect(
+      page.getByRole('tab', { name: '原会话 分支', exact: true }),
+    ).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('.message-list li')).toHaveCount(2);
+    await expect(page.locator('.message-list li').last()).toContainText(
+      '分支的新消息',
+    );
+    await expect(page.getByText('来源：原会话 · 第 1 条消息')).toBeVisible();
+    const stored = SessionStateRecordSchema.parse(
+      JSON.parse(await readFile(file, 'utf8')),
+    );
+    const branch = stored.state.sessions.find(
+      (session) => session.branchOrigin != null,
+    );
+    expect(branch?.runHistory).toEqual([]);
+    expect(branch?.runRevision).toBe(0);
+    expect(branch?.lastRunView).toBeNull();
+    await app.close();
+
+    if (!branch?.branchOrigin)
+      throw new Error('Expected persisted branch origin');
+    const sourceId = branch.branchOrigin.sessionId;
+    const withoutSource = {
+      ...stored,
+      state: {
+        ...stored.state,
+        sessions: stored.state.sessions.filter(
+          (session) => session.id !== sourceId,
+        ),
+        openSessionIds: stored.state.openSessionIds.filter(
+          (id) => id !== sourceId,
+        ),
+        mruTabIds: stored.state.mruTabIds.filter((id) => id !== sourceId),
+      },
+    };
+    await writeFile(
+      file,
+      JSON.stringify(SessionStateRecordSchema.parse(withoutSource)),
+    );
+    app = await launch(userData);
+    page = await app.firstWindow();
+    await expect(page.getByText('来源不可用', { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: '打开来源会话', exact: true }),
+    ).toHaveCount(0);
+    await expect(page.locator('.message-list li')).toHaveCount(2);
+  } finally {
+    await app.close();
+    expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(before);
+  }
+});
 
 test('creates independent sessions, reopens a closed tab and restores draft, messages and layout after Electron restart', async ({}, info) => {
   const before = await captureFixtureHash(fixtureRoot);

@@ -5,6 +5,12 @@ import { LIBRARY_TAB_ID, SETTINGS_TAB_ID } from './tabs';
 
 export { LIBRARY_TAB_ID, SETTINGS_TAB_ID } from './tabs';
 export type SessionId = `session:${string}`;
+/** Position plus a text snapshot permits detecting a changed source history. */
+export interface BranchOrigin {
+  sessionId: SessionId;
+  messageIndex: number;
+  messageText: string;
+}
 export type SessionTabId =
   typeof LIBRARY_TAB_ID | typeof SETTINGS_TAB_ID | SessionId;
 /** v1-v3 persistence vocabulary only. P1 migrates this to one session layout. */
@@ -37,6 +43,8 @@ export interface Session extends Omit<
   LegacySession,
   'layout' | 'dockLayouts' | 'savedLayouts'
 > {
+  /** Missing on records migrated from v7 to preserve their size. */
+  branchOrigin?: BranchOrigin | null;
   dock: DockLayout;
   savedDock: DockLayout | null;
   layoutHistory: Pick<
