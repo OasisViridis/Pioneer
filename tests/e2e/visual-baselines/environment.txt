@@ -1,0 +1,17 @@
+{
+  "os": "10.0.26100",
+  "image": "20261021.278.1",
+  "versions": {
+    "electron": "44.2.0",
+    "chrome": "152.0.7977.76"
+  },
+  "pixelRatio": 1,
+  "fonts": {
+    "NotoSansSC-Variable.woff2": "aef8c34277afad81ecd0227138a830263c0caea65b7aea66d1195395f097b55a",
+    "NotoSerifSC-Variable.woff2": "4ee9b0921ec9bd3f8b04587c7bc66c62731045e89d74eec054f37fc7a2d26383"
+  },
+  "locale": "en-US",
+  "time": "2026-10-01T00:00:00.000Z",
+  "motion": "reduce",
+  "colorScheme": "light"
+}

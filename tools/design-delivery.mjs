@@ -134,6 +134,21 @@ export function prepare(root, raw, policy, read = gitRead) {
     request.design.nodes.some((id) => !feature.nodes.includes(id))
   )
     fail('invalid-input', 'Duplicate or out-of-scope design node');
+  if (request.design.nodes.some((id) => feature.compositionMappings?.[id])) {
+    if (request.design.kind !== 'version')
+      fail('invalid-input', 'Composition requires a fixed Figma version');
+    const acceptedPolicy = JSON.parse(
+      read(root, request.baseSha, 'design/delivery/features.json'),
+    );
+    if (
+      canonical(acceptedPolicy.features?.[request.featureId]) !==
+      canonical(feature)
+    )
+      fail(
+        'review-required',
+        'Composition registry differs from accepted main',
+      );
+  }
   const source = read(root, request.design.commit, request.design.path);
   if (hash(source) !== request.design.sha256)
     fail('invalid-input', 'Snapshot hash mismatch');
@@ -168,9 +183,93 @@ export function prepare(root, raw, policy, read = gitRead) {
   );
   if (!mappings.complete) fail('missing-input', 'S1 mappings are not complete');
   const components = request.design.nodes.map((id) => {
-    const mapping = mappings.components.find((c) => c.designNode === id);
+    const compositionTarget = feature.compositionMappings?.[id];
+    const mapping = mappings.components.find(
+      (c) => c.designNode === (compositionTarget ?? id),
+    );
     if (!mapping || mapping.status !== 'mapped')
       fail('missing-input', `No accepted mapping for ${id}`);
+    let compositionInstances;
+    if (compositionTarget !== undefined) {
+      const frame = nodes.find((node) => node.id === id);
+      if (typeof compositionTarget !== 'string' || frame?.type !== 'FRAME')
+        fail('invalid-input', 'Composition must be a registered frame');
+      const allowed = new Set(
+        mapping.variants.map((variant) => variant.nodeId),
+      );
+      const approvals = feature.compositionApprovals?.[id];
+      if (
+        !approvals ||
+        typeof approvals !== 'object' ||
+        Array.isArray(approvals)
+      )
+        fail('missing-input', 'Composition instance approvals are missing');
+      const nestedApprovals = feature.compositionNestedApprovals?.[id] ?? {};
+      if (typeof nestedApprovals !== 'object' || Array.isArray(nestedApprovals))
+        fail('invalid-input', 'Invalid nested composition approvals');
+      const seen = new Set();
+      const seenNested = new Set();
+      compositionInstances = [];
+      const collect = (node, parentInstanceId = null) => {
+        if (node.type === 'INSTANCE') {
+          if (
+            typeof node.id !== 'string' ||
+            seen.has(node.id) ||
+            seenNested.has(node.id)
+          )
+            fail('invalid-input', 'Composition instance is not reviewed');
+          let properties;
+          if (parentInstanceId === null) {
+            if (
+              !allowed.has(node.componentId) ||
+              !Object.hasOwn(approvals, node.id)
+            )
+              fail('invalid-input', 'Composition has an unapproved instance');
+            properties = approvals[node.id];
+            seen.add(node.id);
+          } else {
+            if (!Object.hasOwn(nestedApprovals, node.id))
+              fail(
+                'invalid-input',
+                'Composition has an unapproved nested instance',
+              );
+            const approval = nestedApprovals[node.id];
+            if (
+              !approval ||
+              approval.parentInstanceId !== parentInstanceId ||
+              approval.componentId !== node.componentId
+            )
+              fail(
+                'invalid-input',
+                'Nested composition instance identity changed',
+              );
+            properties = approval.properties;
+            seenNested.add(node.id);
+          }
+          if (
+            !Object.hasOwn(node, 'componentProperties') ||
+            canonical(node.componentProperties) !== canonical(properties)
+          )
+            fail('review-required', 'Composition instance properties changed');
+          compositionInstances.push({
+            id: node.id,
+            componentId: node.componentId,
+            ...(parentInstanceId === null ? {} : { parentInstanceId }),
+          });
+          parentInstanceId = node.id;
+        }
+        for (const child of node.children ?? [])
+          collect(child, parentInstanceId);
+      };
+      collect(frame);
+      if (!seen.size)
+        fail('missing-input', 'Composition has no mapped instances');
+      if (
+        seen.size !== Object.keys(approvals).length ||
+        seenNested.size !== Object.keys(nestedApprovals).length
+      )
+        fail('review-required', 'Reviewed composition instance is missing');
+    }
     const source = read(root, request.baseSha, mapping.code.path);
     const blob = createHash('sha1')
       .update(`blob ${Buffer.byteLength(source)}\0`)
@@ -180,12 +279,24 @@ export function prepare(root, raw, policy, read = gitRead) {
       fail('stale-input', 'Mapping source changed; review S1 mapping first');
     return {
       ...mapping,
+      ...(compositionInstances
+        ? { compositionNode: id, compositionInstances }
+        : {}),
       acceptedAt: request.baseSha,
       actualSourceSha256: hash(read(root, request.baseSha, mapping.code.path)),
     };
   });
   const designDifferences = nodes.flatMap((node) => {
-    const mapping = components.find((item) => item.designNode === node.id);
+    const mapping = components.find(
+      (item) => (item.compositionNode ?? item.designNode) === node.id,
+    );
+    // Instance properties alone cannot cover ordinary text or nested geometry.
+    // Review is tied to the entire fixed snapshot, not just selected fields.
+    if (mapping.compositionNode)
+      return feature.compositionSnapshotSha256?.[node.id] ===
+        request.design.sha256
+        ? []
+        : [`${node.id}: fixed composition snapshot requires review`];
     const differences = [];
     if (canonical(node.properties) !== canonical(mapping.designProperties))
       differences.push(
@@ -221,6 +332,11 @@ export function prepare(root, raw, policy, read = gitRead) {
       'Design is visual evidence, not behavioral authority.',
       'Preserve retained S1 differences; no inferred Grant, stop or Unknown state.',
       'No automatic merge, issue edits, Figma writeback or real Provider execution.',
+      ...(components.some((component) => component.compositionNode)
+        ? [
+            'Review composition overrides and visual evidence before implementation.',
+          ]
+        : []),
     ],
   };
   return { ...frozen, packageHash: hash(canonical(frozen)) };
@@ -265,7 +381,7 @@ export function validateOutput(root, pkg, raw) {
   }
   return result;
 }
-function metadata(body) {
+export function metadata(body) {
   const start = body?.indexOf(metadataStart) ?? -1;
   if (start < 0) return null;
   const end = body.indexOf(metadataEnd, start + metadataStart.length);
@@ -528,6 +644,31 @@ export async function publish({ root, pkg, output, api, actor }) {
     };
   }
 }
+// Shared by S2 receipts and the read-only, post-merge S3 publication plan.
+export function qualityJobsPassed(jobs) {
+  const required = {
+    'Windows / pnpm check': [
+      'Verify repository normalization',
+      'Contract tests',
+      'Electron E2E',
+      'Package smoke',
+      'Confirm aggregate quality and S1 acceptance',
+    ],
+    'Windows / reviewed visual baseline': ['Compare reviewed Windows baseline'],
+  };
+  return Object.entries(required).every(([name, steps]) => {
+    const job = jobs.find((item) => item.name === name);
+    return (
+      job?.conclusion === 'success' &&
+      steps.every((step) =>
+        job.steps?.some(
+          (item) => item.name === step && item.conclusion === 'success',
+        ),
+      )
+    );
+  });
+}
+
 export async function verify(api, number) {
   const pr = await api('GET', `${prefix}/pulls/${number}`);
   const headSha = pr.head.sha;
@@ -555,23 +696,7 @@ export async function verify(api, number) {
         `${prefix}/actions/runs/${run.id}/jobs?per_page=100`,
       );
       jobs = response.jobs;
-      const gate = jobs.find((job) => job.name === 'Windows / pnpm check');
-      const required = [
-        'Verify repository normalization',
-        'Contract tests',
-        'Electron E2E',
-        'Package smoke',
-        'Confirm aggregate quality and S1 acceptance',
-      ];
-      state =
-        gate?.conclusion === 'success' &&
-        required.every((name) =>
-          gate.steps?.some(
-            (step) => step.name === name && step.conclusion === 'success',
-          ),
-        )
-          ? 'verified'
-          : 'validation-incomplete';
+      state = qualityJobsPassed(jobs) ? 'verified' : 'validation-incomplete';
     }
   }
   const current = await api('GET', `${prefix}/pulls/${number}`);

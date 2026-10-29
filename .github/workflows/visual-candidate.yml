@@ -1,0 +1,29 @@
+name: Prepare Windows visual candidates (not acceptance)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidates:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:desktop
+      - name: Capture candidates only
+        run: pnpm design:visual:candidate
+      - name: Upload candidates for human review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-candidates-${{ github.sha }}
+          path: tests/e2e/test-output/visual/
+          if-no-files-found: error

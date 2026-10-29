@@ -355,6 +355,14 @@ test('verification rejects old SHA, absent, failed and skipped checks; only fina
       ].map((name) => ({ name, conclusion: 'success' })),
     },
   ];
+  assert.equal((await verify(api, 44)).state, 'validation-incomplete');
+  state.jobs.push({
+    name: 'Windows / reviewed visual baseline',
+    conclusion: 'success',
+    steps: [
+      { name: 'Compare reviewed Windows baseline', conclusion: 'success' },
+    ],
+  });
   assert.equal((await verify(api, 44)).state, 'verified');
   state.jobs[0].steps[0].conclusion = 'skipped';
   assert.equal((await verify(api, 44)).state, 'validation-incomplete');

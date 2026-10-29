@@ -1,0 +1,7 @@
+{
+  "approved": false,
+  "pr": 0,
+  "featureId": "replace-with-reviewed-feature",
+  "commit": "replace-with-merged-40-character-sha",
+  "acceptanceUrl": "https://github.com/OasisViridis/Pioneer/blob/REPLACE_SHA/docs/testing/REPLACE.md"
+}

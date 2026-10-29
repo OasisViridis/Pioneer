@@ -21,7 +21,7 @@ concurrency:
 jobs:
   windows-quality:
     name: Windows / pnpm check
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 30
 
     steps:
@@ -74,10 +74,43 @@ jobs:
       - name: Confirm aggregate quality and S1 acceptance
         run: pnpm design:acceptance
 
-      - name: Upload S1 visual evidence
+      - name: Upload Electron behavior and design evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s1-visual-evidence
-          path: tests/e2e/test-output/artifacts/**/s1-*.png
+          name: electron-evidence-${{ github.sha }}
+          path: |
+            tests/e2e/test-output/report/
+            tests/e2e/test-output/results.json
+            tests/e2e/test-output/artifacts/**/*.png
+            tests/e2e/test-output/artifacts/**/trace.zip
+            tests/e2e/test-output/artifacts/**/error-context.md
           if-no-files-found: ignore
+
+  windows-visual:
+    name: Windows / reviewed visual baseline
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:desktop
+      - name: Capture missing baseline candidates (not acceptance)
+        if: hashFiles('tests/e2e/visual-baselines/environment.txt') == ''
+        run: pnpm design:visual:candidate
+      - name: Compare reviewed Windows baseline
+        run: pnpm test:visual
+      - name: Upload visual comparison report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-comparison-${{ github.sha }}
+          path: tests/e2e/test-output/visual/
+          if-no-files-found: warn

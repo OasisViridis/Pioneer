@@ -623,6 +623,10 @@
   font: inherit;
   padding: 4px;
 }
+.composer textarea:focus-visible {
+  outline: 2px solid var(--pioneer-focus);
+  outline-offset: 2px;
+}
 .composer footer {
   display: flex;
   align-items: center;

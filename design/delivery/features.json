@@ -24,6 +24,79 @@
         "tests/e2e/design-mappings.e2e.spec.ts",
         "tests/e2e/p2-run.e2e.spec.ts"
       ]
+    },
+    "session-branch-tabs": {
+      "issue": 25,
+      "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+      "nodes": ["1093:1259"],
+      "compositionMappings": { "1093:1259": "921:632" },
+      "compositionApprovals": {
+        "1093:1259": {
+          "1093:1265": {
+            "Label#921:20": { "type": "TEXT", "value": "整理参考素材" },
+            "State": { "type": "VARIANT", "value": "Active" }
+          },
+          "1093:1277": {
+            "Label#921:20": { "type": "TEXT", "value": "探索新路径" },
+            "State": { "type": "VARIANT", "value": "Active" }
+          },
+          "1093:1291": {
+            "Label#921:20": { "type": "TEXT", "value": "探索新路径" },
+            "State": { "type": "VARIANT", "value": "Active" }
+          }
+        }
+      },
+      "compositionNestedApprovals": {
+        "1093:1259": {
+          "I1093:1265;921:620": {
+            "parentInstanceId": "1093:1265",
+            "componentId": "921:522",
+            "properties": {}
+          },
+          "I1093:1265;921:624": {
+            "parentInstanceId": "1093:1265",
+            "componentId": "921:503",
+            "properties": {}
+          },
+          "I1093:1277;921:620": {
+            "parentInstanceId": "1093:1277",
+            "componentId": "921:522",
+            "properties": {}
+          },
+          "I1093:1277;921:624": {
+            "parentInstanceId": "1093:1277",
+            "componentId": "921:503",
+            "properties": {}
+          },
+          "I1093:1291;921:620": {
+            "parentInstanceId": "1093:1291",
+            "componentId": "921:522",
+            "properties": {}
+          },
+          "I1093:1291;921:624": {
+            "parentInstanceId": "1093:1291",
+            "componentId": "921:503",
+            "properties": {}
+          }
+        }
+      },
+      "changeTypes": ["ui"],
+      "allowedPaths": [
+        "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
+        "apps/desktop/src/renderer/styles/session-workbench.css",
+        "design/sync/component-mappings.json",
+        "tests/e2e/tab-strip.e2e.spec.ts",
+        "tests/e2e/p1-session.e2e.spec.ts",
+        "tests/e2e/session-branch-tabs.e2e.spec.ts",
+        "docs/testing/issue25-s2-tab-acceptance.md"
+      ],
+      "basis": [
+        "design/sync/component-mappings.json",
+        "design/sync/mapping-acceptance.md",
+        "apps/desktop/src/shared/contracts/session-workspace.ts",
+        "tests/e2e/p1-session.e2e.spec.ts",
+        "tests/e2e/tab-strip.e2e.spec.ts"
+      ]
     }
   }
 }
