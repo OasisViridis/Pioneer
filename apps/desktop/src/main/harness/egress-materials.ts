@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { lstat, open, opendir, realpath } from 'node:fs/promises';
+import { lstat, opendir, realpath } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
 
 import {
@@ -10,6 +10,7 @@ import {
   type EgressMaterial,
 } from '../../shared/contracts/egress';
 import { isPathInsideRoot, normalizeRootPath } from '../catalog/path-policy';
+import { BoundedReadError, readStableFile } from './bounded-read';
 import { isSensitiveEntryName } from './read-only-tool-policy';
 
 /**
@@ -52,39 +53,29 @@ function hasSensitiveSegment(relativePath: string): boolean {
     .some((segment) => isSensitiveEntryName(segment));
 }
 
+/**
+ * Egress keeps its own fixed error codes: the shared stable read reports
+ * NOT_REGULAR_FILE/LINK_NOT_ALLOWED/TOO_LARGE as INVALID_REQUEST and an
+ * unstable read as MATERIAL_NOT_ALLOWED, matching the manifest contract.
+ */
 async function readBounded(
   absolutePath: string,
   capacity: number,
 ): Promise<{ buffer: Buffer; bytesRead: number; size: number }> {
-  const handle = await open(absolutePath, 'r');
   try {
-    const before = await handle.stat();
-    if (!before.isFile() || before.nlink !== 1)
-      throw new EgressMaterialError('INVALID_REQUEST');
-    if (before.size > capacity)
-      throw new EgressMaterialError('INVALID_REQUEST');
-    const buffer = Buffer.allocUnsafe(capacity);
-    let bytesRead = 0;
-    while (bytesRead < buffer.length) {
-      const chunk = await handle.read(
-        buffer,
-        bytesRead,
-        buffer.length - bytesRead,
-        bytesRead,
+    const read = await readStableFile(absolutePath, capacity);
+    return {
+      buffer: read.buffer,
+      bytesRead: read.bytesRead,
+      size: read.before.size,
+    };
+  } catch (error) {
+    if (error instanceof BoundedReadError) {
+      throw new EgressMaterialError(
+        error.code === 'UNSTABLE' ? 'MATERIAL_NOT_ALLOWED' : 'INVALID_REQUEST',
       );
-      if (chunk.bytesRead === 0) break;
-      bytesRead += chunk.bytesRead;
     }
-    const after = await handle.stat();
-    if (
-      after.size !== before.size ||
-      after.mtimeMs !== before.mtimeMs ||
-      after.ino !== before.ino
-    )
-      throw new EgressMaterialError('MATERIAL_NOT_ALLOWED');
-    return { buffer, bytesRead, size: before.size };
-  } finally {
-    await handle.close();
+    throw new EgressMaterialError('INVALID_REQUEST');
   }
 }
 
