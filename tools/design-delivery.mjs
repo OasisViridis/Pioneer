@@ -204,36 +204,70 @@ export function prepare(root, raw, policy, read = gitRead) {
         Array.isArray(approvals)
       )
         fail('missing-input', 'Composition instance approvals are missing');
+      const nestedApprovals = feature.compositionNestedApprovals?.[id] ?? {};
+      if (typeof nestedApprovals !== 'object' || Array.isArray(nestedApprovals))
+        fail('invalid-input', 'Invalid nested composition approvals');
       const seen = new Set();
+      const seenNested = new Set();
       compositionInstances = [];
-      const collect = (node) => {
+      const collect = (node, parentInstanceId = null) => {
         if (node.type === 'INSTANCE') {
-          if (!allowed.has(node.componentId))
-            fail('invalid-input', 'Composition has an unapproved instance');
           if (
             typeof node.id !== 'string' ||
             seen.has(node.id) ||
-            !Object.hasOwn(approvals, node.id)
+            seenNested.has(node.id)
           )
             fail('invalid-input', 'Composition instance is not reviewed');
+          let properties;
+          if (parentInstanceId === null) {
+            if (
+              !allowed.has(node.componentId) ||
+              !Object.hasOwn(approvals, node.id)
+            )
+              fail('invalid-input', 'Composition has an unapproved instance');
+            properties = approvals[node.id];
+            seen.add(node.id);
+          } else {
+            if (!Object.hasOwn(nestedApprovals, node.id))
+              fail(
+                'invalid-input',
+                'Composition has an unapproved nested instance',
+              );
+            const approval = nestedApprovals[node.id];
+            if (
+              !approval ||
+              approval.parentInstanceId !== parentInstanceId ||
+              approval.componentId !== node.componentId
+            )
+              fail(
+                'invalid-input',
+                'Nested composition instance identity changed',
+              );
+            properties = approval.properties;
+            seenNested.add(node.id);
+          }
           if (
             !Object.hasOwn(node, 'componentProperties') ||
-            canonical(node.componentProperties) !==
-              canonical(approvals[node.id])
+            canonical(node.componentProperties) !== canonical(properties)
           )
             fail('review-required', 'Composition instance properties changed');
-          seen.add(node.id);
           compositionInstances.push({
             id: node.id,
             componentId: node.componentId,
+            ...(parentInstanceId === null ? {} : { parentInstanceId }),
           });
+          parentInstanceId = node.id;
         }
-        for (const child of node.children ?? []) collect(child);
+        for (const child of node.children ?? [])
+          collect(child, parentInstanceId);
       };
       collect(frame);
-      if (!compositionInstances.length)
+      if (!seen.size)
         fail('missing-input', 'Composition has no mapped instances');
-      if (seen.size !== Object.keys(approvals).length)
+      if (
+        seen.size !== Object.keys(approvals).length ||
+        seenNested.size !== Object.keys(nestedApprovals).length
+      )
         fail('review-required', 'Reviewed composition instance is missing');
     }
     const source = read(root, request.baseSha, mapping.code.path);

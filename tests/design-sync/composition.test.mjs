@@ -122,6 +122,29 @@ test('accepts a registered frame composed from a mapped session tab variant', ()
 
 test('controlled fixed-version event projects a reviewable composition and passes only after exact snapshot approval', async () => {
   const f = fixture();
+  const designNode = frame();
+  designNode.children[0].overrides = [
+    { id: '1093:1265', overriddenFields: ['height', 'width'] },
+  ];
+  designNode.children[0].children = [
+    {
+      id: 'I1093:1265;921:620',
+      name: 'Icon',
+      type: 'INSTANCE',
+      componentId: '921:522',
+      componentProperties: {},
+      remoteAssetUrl: 'https://example.invalid/asset',
+    },
+  ];
+  f.policy.features[featureId].compositionNestedApprovals = {
+    [frameId]: {
+      'I1093:1265;921:620': {
+        parentInstanceId: '1093:1265',
+        componentId: '921:522',
+        properties: {},
+      },
+    },
+  };
   const label = `Pioneer READY ${featureId}`;
   const event = {
     event_type: 'FILE_VERSION_UPDATE',
@@ -151,7 +174,7 @@ test('controlled fixed-version event projects a reviewable composition and passe
             { id: 'fixed1', label, created_at: '2026-10-29T00:00:00Z' },
           ],
         }
-      : { version: 'fixed1', nodes: { [frameId]: { document: frame() } } };
+      : { version: 'fixed1', nodes: { [frameId]: { document: designNode } } };
   const github = async (_method, url) =>
     url.includes('/pulls?') ? [] : { object: { sha: baseSha } };
   const material = await inspectEvent({
@@ -183,6 +206,54 @@ test('controlled fixed-version event projects a reviewable composition and passe
   const after = prepare('unused-root', request, f.policy, read);
   assert.deepEqual(after.designDifferences, []);
   assert.equal(after.nodes[0].children[0].componentId, activeVariantId);
+  const icon = after.nodes[0].children[0].children[0];
+  assert.deepEqual(after.nodes[0].children[0].overrides, [
+    { id: '1093:1265', overriddenFields: ['height', 'width'] },
+  ]);
+  assert.equal(icon.id, 'I1093:1265;921:620');
+  assert.equal(icon.componentId, '921:522');
+  assert.equal(icon.remoteAssetUrl, undefined);
+  designNode.children[0].overrides[0].overriddenFields.push('opacity');
+  const changed = await inspectEvent({
+    event,
+    config,
+    policy: f.policy,
+    passcode: event.passcode,
+    figma,
+    github,
+  });
+  assert.notEqual(changed.snapshotSha256, material.snapshotSha256);
+  designNode.children[0].overrides = [
+    { id: '1093:1265', overriddenFields: 'width' },
+  ];
+  await assert.rejects(
+    () =>
+      inspectEvent({
+        event,
+        config,
+        policy: f.policy,
+        passcode: event.passcode,
+        figma,
+        github,
+      }),
+    (e) => e.state === 'review-required',
+  );
+  designNode.children[0].overrides = Array.from({ length: 201 }, () => ({
+    id: '1093:1265',
+    overriddenFields: [],
+  }));
+  await assert.rejects(
+    () =>
+      inspectEvent({
+        event,
+        config,
+        policy: f.policy,
+        passcode: event.passcode,
+        figma,
+        github,
+      }),
+    (e) => e.state === 'review-required',
+  );
 });
 
 test('allows a valid registered composition through the open, unblocked Issue gate', async () => {
@@ -300,6 +371,137 @@ test('rejects an unapproved nested instance even under a mapped instance', () =>
   ];
   const f = fixture({ designNode: node });
   assert.throws(() => prepare('unused-root', f.request, f.policy, f.read));
+});
+
+function reviewedNestedFixture({
+  id = 'I1093:1265;921:620',
+  componentId = '921:522',
+  properties = {},
+  include = true,
+  parentId = '1093:1265',
+} = {}) {
+  const node = frame();
+  if (include)
+    node.children[0].children = [
+      {
+        id,
+        type: 'INSTANCE',
+        name: 'Icon',
+        componentId,
+        componentProperties: properties,
+      },
+    ];
+  const f = fixture({ designNode: node });
+  f.policy.features[featureId].compositionNestedApprovals = {
+    [frameId]: {
+      'I1093:1265;921:620': {
+        parentInstanceId: parentId,
+        componentId: '921:522',
+        properties: {},
+      },
+    },
+  };
+  return f;
+}
+
+test('accepts an explicitly reviewed nested Figma instance under its reviewed parent', () => {
+  const f = reviewedNestedFixture();
+  const pkg = prepare('unused-root', f.request, f.policy, f.read);
+  assert.equal(pkg.nodes[0].children[0].children[0].componentId, '921:522');
+});
+
+test('rejects changed, moved, extra or missing reviewed nested instances', () => {
+  for (const options of [
+    { componentId: '921:503' },
+    { id: 'I1093:1265;921:624' },
+    { include: false },
+    { parentId: '1093:1277' },
+    { properties: { State: { type: 'VARIANT', value: 'Changed' } } },
+  ]) {
+    const f = reviewedNestedFixture(options);
+    assert.throws(() => prepare('unused-root', f.request, f.policy, f.read));
+  }
+});
+
+function threeTabFixture(mutate = () => {}) {
+  const parents = ['1093:1265', '1093:1277', '1093:1291'];
+  const node = {
+    id: frameId,
+    type: 'FRAME',
+    name: 'Tabs',
+    children: parents.map((id) => ({
+      id,
+      type: 'INSTANCE',
+      name: 'Tab',
+      componentId: activeVariantId,
+      componentProperties: {},
+      children: [
+        {
+          id: `I${id};921:620`,
+          type: 'INSTANCE',
+          name: 'Chat',
+          componentId: '921:522',
+          componentProperties: {},
+        },
+        {
+          id: `I${id};921:624`,
+          type: 'INSTANCE',
+          name: 'Close',
+          componentId: '921:503',
+          componentProperties: {},
+        },
+      ],
+    })),
+  };
+  mutate(node);
+  const f = fixture({ designNode: node });
+  f.policy.features[featureId].compositionApprovals[frameId] =
+    Object.fromEntries(parents.map((id) => [id, {}]));
+  f.policy.features[featureId].compositionNestedApprovals = {
+    [frameId]: Object.fromEntries(
+      parents.flatMap((id) => [
+        [
+          `I${id};921:620`,
+          { parentInstanceId: id, componentId: '921:522', properties: {} },
+        ],
+        [
+          `I${id};921:624`,
+          { parentInstanceId: id, componentId: '921:503', properties: {} },
+        ],
+      ]),
+    ),
+  };
+  return f;
+}
+
+test('accepts exactly three reviewed tabs and six reviewed nested icons', () => {
+  const f = threeTabFixture();
+  const pkg = prepare('unused-root', f.request, f.policy, f.read);
+  assert.equal(pkg.components[0].compositionInstances.length, 9);
+});
+
+test('rejects extra, duplicated, moved or incomplete nested icons among three tabs', () => {
+  for (const mutate of [
+    (n) =>
+      n.children[0].children.push({
+        id: 'I1093:1265;999:1',
+        type: 'INSTANCE',
+        componentId: '999:1',
+        componentProperties: {},
+      }),
+    (n) =>
+      n.children[0].children.push(structuredClone(n.children[0].children[0])),
+    (n) => n.children[1].children.push(n.children[0].children.shift()),
+    (n) => {
+      delete n.children[0].children[0].componentProperties;
+    },
+    (n) => {
+      n.children[0].children.pop();
+    },
+  ]) {
+    const f = threeTabFixture(mutate);
+    assert.throws(() => prepare('unused-root', f.request, f.policy, f.read));
+  }
 });
 
 test('rejects an unreviewed variant from an otherwise mapped component set', () => {

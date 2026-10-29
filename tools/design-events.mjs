@@ -161,6 +161,31 @@ function projectNode(node, budget, composition = false) {
         value: property.value,
       };
     }
+    if (node.overrides !== undefined) {
+      if (!Array.isArray(node.overrides) || node.overrides.length > 200)
+        fail('review-required', 'Unsupported instance overrides');
+      result.overrides = node.overrides.map((override) => {
+        if (
+          !override ||
+          typeof override.id !== 'string' ||
+          override.id.length > 200 ||
+          !Array.isArray(override.overriddenFields) ||
+          override.overriddenFields.length > 200 ||
+          override.overriddenFields.some(
+            (field) => typeof field !== 'string' || field.length > 200,
+          )
+        )
+          fail('review-required', 'Unsupported instance overrides');
+        budget.overrideFields =
+          (budget.overrideFields ?? 0) + override.overriddenFields.length + 1;
+        if (budget.overrideFields > 10_000)
+          fail('review-required', 'Instance overrides exceed review budget');
+        return {
+          id: override.id,
+          overriddenFields: [...override.overriddenFields],
+        };
+      });
+    }
   }
   for (const field of [
     'characters',

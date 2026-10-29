@@ -46,6 +46,40 @@
           }
         }
       },
+      "compositionNestedApprovals": {
+        "1093:1259": {
+          "I1093:1265;921:620": {
+            "parentInstanceId": "1093:1265",
+            "componentId": "921:522",
+            "properties": {}
+          },
+          "I1093:1265;921:624": {
+            "parentInstanceId": "1093:1265",
+            "componentId": "921:503",
+            "properties": {}
+          },
+          "I1093:1277;921:620": {
+            "parentInstanceId": "1093:1277",
+            "componentId": "921:522",
+            "properties": {}
+          },
+          "I1093:1277;921:624": {
+            "parentInstanceId": "1093:1277",
+            "componentId": "921:503",
+            "properties": {}
+          },
+          "I1093:1291;921:620": {
+            "parentInstanceId": "1093:1291",
+            "componentId": "921:522",
+            "properties": {}
+          },
+          "I1093:1291;921:624": {
+            "parentInstanceId": "1093:1291",
+            "componentId": "921:503",
+            "properties": {}
+          }
+        }
+      },
       "changeTypes": ["ui"],
       "allowedPaths": [
         "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
