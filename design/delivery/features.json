@@ -30,6 +30,9 @@
       "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
       "nodes": ["1093:1259"],
       "compositionMappings": { "1093:1259": "921:632" },
+      "compositionSnapshotSha256": {
+        "1093:1259": "9fbb7868596a3e8f24656922756ad2e16da540987534c2884d750fafefccfd0f"
+      },
       "compositionApprovals": {
         "1093:1259": {
           "1093:1265": {
@@ -83,6 +86,8 @@
       "changeTypes": ["ui"],
       "allowedPaths": [
         "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
+        "apps/desktop/src/renderer/components/SessionWorkbench.tsx",
+        "apps/desktop/src/renderer/state/session-branch-origin.ts",
         "apps/desktop/src/renderer/styles/session-workbench.css",
         "design/sync/component-mappings.json",
         "tests/e2e/tab-strip.e2e.spec.ts",
@@ -94,6 +99,7 @@
         "design/sync/component-mappings.json",
         "design/sync/mapping-acceptance.md",
         "apps/desktop/src/shared/contracts/session-workspace.ts",
+        "apps/desktop/src/renderer/components/SessionWorkbench.tsx",
         "tests/e2e/p1-session.e2e.spec.ts",
         "tests/e2e/tab-strip.e2e.spec.ts"
       ]
