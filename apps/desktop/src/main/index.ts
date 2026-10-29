@@ -5,6 +5,8 @@ import { scanWorkspace } from './catalog/scanner';
 import { registerCatalogIpc } from './ipc';
 import { IPC_CHANNELS } from '../shared/contracts/ipc';
 import { applyLaunchRuntimeConfig } from './runtime-config';
+import { applyPackagedAcceptanceConfig } from './acceptance-config';
+import { writePackagedAcceptanceReport } from './acceptance-report';
 import { createSettingsStore } from './settings-store';
 import { createMainWindow } from './window';
 import {
@@ -42,9 +44,13 @@ let runHost: AssembledRunHost | null = null;
 let windowEpochCounter = 0;
 let activeWindowBinding: { webContentsId: number; epoch: number } | null = null;
 const acceptedSaves = createPendingSaveTracker();
+const launchStartedAt = new Date().toISOString();
 
 // This must run before app readiness can construct Chromium session state.
 const launchRuntimeConfig = applyLaunchRuntimeConfig(app);
+// Packaged acceptance is a separate, doubly-gated seam: packaged build plus the
+// exact PIONEER_ACCEPTANCE=1 switch. It is null in every development launch.
+const acceptanceConfig = applyPackagedAcceptanceConfig(app);
 const ownsProfile = app.requestSingleInstanceLock();
 if (!ownsProfile) app.exit(0);
 
@@ -369,8 +375,12 @@ void app.whenReady().then(async () => {
     beforeRescan,
   });
 
-  runHost = await assembleRunHost({
+  const assembledRunHost = await assembleRunHost({
     userDataPath: app.getPath('userData'),
+    launchGate: {
+      isPackaged: app.isPackaged,
+      acceptanceRunScriptPath: acceptanceConfig?.runScriptPath ?? null,
+    },
     resolveProject: async (projectId) => {
       const service = catalogService;
       if (service === null) return null;
@@ -399,14 +409,53 @@ void app.whenReady().then(async () => {
       },
     },
   });
+  runHost = assembledRunHost;
 
   if (launchRuntimeConfig !== null) {
     await catalogService.selectRoot(launchRuntimeConfig.rootPath);
     rejectSaveArmed = true;
+  } else if (acceptanceConfig !== null) {
+    // The packaged acceptance pass opens the same root a person would pick in
+    // the native chooser, then reports what main actually sees.
+    await catalogService.selectRoot(acceptanceConfig.workspacePath);
   }
 
   if (!appLifecycle.isQuitting()) openMainWindow(catalogService);
   appLifecycle.markReady();
+
+  if (acceptanceConfig !== null) {
+    const catalog = catalogService.getCurrentCatalog();
+    await writePackagedAcceptanceReport(acceptanceConfig.reportPath, {
+      kind: 'pioneer-packaged-acceptance-startup',
+      schemaVersion: 1,
+      isPackaged: app.isPackaged,
+      electronVersion: process.versions.electron,
+      nodeVersion: process.versions.node,
+      platform: process.platform,
+      processId: process.pid,
+      startedAt: launchStartedAt,
+      reportedAt: new Date().toISOString(),
+      userDataRoot: app.getPath('userData'),
+      workspaceRoot: catalog.rootPath,
+      projects: catalog.projects.map((project) => ({
+        id: project.id,
+        name: project.name,
+        absolutePath: project.absolutePath,
+      })),
+      warnings: catalog.warnings.map((warning) => ({
+        code: warning.code,
+        path: warning.path,
+      })),
+      adapterKind: assembledRunHost.adapterKind,
+      adapterAvailable: assembledRunHost.adapterAvailable,
+      modelName: assembledRunHost.modelName,
+      channels: [
+        ...Object.values(IPC_CHANNELS),
+        ...Object.values(SESSION_IPC_CHANNELS),
+        ...Object.values(RUN_IPC_CHANNELS),
+      ],
+    });
+  }
 
   app.on('activate', () => {
     if (

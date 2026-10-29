@@ -21,6 +21,7 @@
   - **Contract Tests**：`pnpm test:contract`，验证共享契约、路径、扫描器、IPC、安全边界、设置存储与 Tabs reducer。
   - **Prototype Tests**：`pnpm test:prototype`，冻结 M1 Prototype Tests 为 210/210；这是模拟器和探针证据，不是 Electron proof。
   - **Real E2E**：`pnpm test:e2e`，由 Playwright 启动真实 Electron，跨越 main → preload → renderer，并校验 fixture 不变性。
+  - **Packaged Acceptance**：`pnpm acceptance:packaged`，重新打包后启动 `@pioneer-desktop.exe`，经 `PIONEER_ACCEPTANCE=1` 双重开关跑通一次只读运行并留下启动报告、journal、截图与日志。它不并入 `pnpm check`（打包耗时），证据层级与 Real E2E 分开记录。
   - `pnpm check` 依次执行格式、lint、类型检查、上述三层测试与最终 package smoke；M2 已完成，M3 继续以该门禁作为主线质量基线。
 - **工作流规范**：
   - 采用 TheMasterplan 单一交付责任人机制，子代理可协助编码与调研，但主交付责任人统管最终 Diff 审阅、VCS 提交与人类交接；

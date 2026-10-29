@@ -22,6 +22,7 @@
     "test:contract:types": "tsc --noEmit -p tsconfig.tests.json",
     "test:contract": "pnpm test:contract:types && vitest run --config vitest.config.ts",
     "test:e2e": "pnpm build:desktop && playwright test --config tests/e2e/playwright.config.ts",
+    "acceptance:packaged": "pnpm build:desktop && playwright test --config tests/e2e/playwright.acceptance.config.ts",
     "check": "pnpm design:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:contract && pnpm test:prototype && pnpm test:e2e && pnpm package:smoke",
     "tokens:build": "node tools/design-tokens.mjs build",
     "tokens:check": "node tools/design-tokens.mjs check",
