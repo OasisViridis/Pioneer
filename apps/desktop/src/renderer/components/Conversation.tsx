@@ -1,5 +1,14 @@
-import { useEffect, useRef, useSyncExternalStore, type Dispatch } from 'react';
-import type { Session } from '../../shared/contracts/session-workspace';
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type Dispatch,
+} from 'react';
+import type {
+  Session,
+  SessionId,
+} from '../../shared/contracts/session-workspace';
 import type { SessionWorkspaceAction } from '../state/session-workspace-reducer';
 import { workspaceIdentity } from './workspace-identity';
 import { HazelCompanion } from './HazelCompanion';
@@ -8,13 +17,16 @@ import { runViews } from '../state/run-view-instance';
 export function Conversation({
   session,
   dispatch,
+  onBranch,
   allowDecoration,
 }: {
   session: Session;
   dispatch: Dispatch<SessionWorkspaceAction>;
+  onBranch: (sourceId: SessionId, messageIndex: number) => boolean;
   allowDecoration: boolean;
 }): React.JSX.Element {
   const transcript = useRef<HTMLDivElement>(null);
+  const [branchError, setBranchError] = useState(false);
   const run = useSyncExternalStore(runViews.subscribe, () =>
     runViews.get(session.id),
   );
@@ -113,9 +125,24 @@ export function Conversation({
                     <span className="eyebrow">你</span>
                     <p>{message}</p>
                     <span className="metadata">已保留 · 尚未发送</span>
+                    <button
+                      type="button"
+                      className="quiet-button branch-message-action"
+                      aria-label={`从第 ${String(index + 1)} 条消息创建分支`}
+                      onClick={() => {
+                        setBranchError(!onBranch(session.id, index));
+                      }}
+                    >
+                      从此处分支
+                    </button>
                   </li>
                 ))}
               </ol>
+              {branchError ? (
+                <p role="alert">
+                  无法创建分支，请确认消息可用且会话数据未达到容量上限。
+                </p>
+              ) : null}
               <p className="connection-notice" role="status">
                 {run.phase === 'idle'
                   ? '消息已保存在本机，尚未启动运行。'

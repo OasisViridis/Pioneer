@@ -87,6 +87,17 @@ export const App = (): React.JSX.Element => {
                 <SessionWorkbench
                   key={active.id}
                   session={active}
+                  sourceSession={state.sessions.find(
+                    (session) => session.id === active.branchOrigin?.sessionId,
+                  )}
+                  onBranch={(sourceId, messageIndex) =>
+                    dispatch({
+                      type: 'BRANCH_FROM_MESSAGE',
+                      id: `session:${crypto.randomUUID()}`,
+                      sourceId,
+                      messageIndex,
+                    })
+                  }
                   dispatch={dispatch}
                   saveStatus={sessions.saveStatus}
                 />

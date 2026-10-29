@@ -122,16 +122,17 @@ export function useSessionState(initialApi: SessionDesktopApi) {
     };
   }, [api, queue]);
   const dispatch = useCallback(
-    (action: SessionWorkspaceAction): void => {
-      if (!ready.current || closing.current) return;
+    (action: SessionWorkspaceAction): boolean => {
+      if (!ready.current || closing.current) return false;
       const next = sessionWorkspaceReducer(latest.current, {
         ...action,
         occurredAt: Date.now(),
       });
-      if (next === latest.current) return;
+      if (next === latest.current) return false;
       latest.current = next;
       setState(next);
       queue.enqueue(next);
+      return true;
     },
     [queue],
   );

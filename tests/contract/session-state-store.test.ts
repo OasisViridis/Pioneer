@@ -66,6 +66,7 @@ function stateWith(
         runHistory: [],
         runRevision: 0,
         lastRunView: null,
+        branchOrigin: null,
       },
     ],
     openSessionIds: [id],
@@ -87,6 +88,7 @@ function legacyV3State(): LegacySessionWorkspaceState {
         runHistory,
         runRevision,
         lastRunView,
+        branchOrigin,
         ...base
       }) => {
         expect(dock).toEqual(createDockLayout('focus'));
@@ -95,6 +97,7 @@ function legacyV3State(): LegacySessionWorkspaceState {
         expect(runHistory).toEqual([]);
         expect(runRevision).toBe(0);
         expect(lastRunView).toBeNull();
+        expect(branchOrigin).toBeNull();
         return {
           ...base,
           layout: 'focus',
@@ -344,6 +347,103 @@ describe('session state store', () => {
 });
 
 describe('session state migration', () => {
+  it('loads and saves a v7 record at the byte limit without expanding it', async () => {
+    const userDataPath = await createUserDataDirectory();
+    const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
+    const state = stateWith();
+    const { branchOrigin: _origin, ...oldSession } = firstSession(state);
+    expect(_origin).toBeNull();
+    const sessions = Array.from({ length: 11 }, (_, index) => ({
+      ...oldSession,
+      id: `session:large-${String(index)}` as const,
+      messages: Array.from({ length: 100 }, () => 'x'.repeat(7600)),
+    }));
+    const first = sessions[0];
+    if (!first) throw new Error('Expected session');
+    const old = {
+      version: 7,
+      state: {
+        ...state,
+        sessions,
+        openSessionIds: [first.id],
+        activeTabId: first.id,
+        mruTabIds: [first.id, 'library'],
+      },
+    };
+    let remaining =
+      MAX_SESSION_STATE_BYTES - Buffer.byteLength(JSON.stringify(old));
+    for (const session of sessions) {
+      for (
+        let index = 0;
+        index < session.messages.length && remaining > 0;
+        index++
+      ) {
+        const addition = Math.min(400, remaining);
+        const message = session.messages[index];
+        if (message === undefined) throw new Error('Expected message');
+        session.messages[index] = message + 'x'.repeat(addition);
+        remaining -= addition;
+      }
+    }
+    expect(remaining).toBe(0);
+    const bytes = JSON.stringify(old);
+    expect(Buffer.byteLength(bytes)).toBe(MAX_SESSION_STATE_BYTES);
+    await writeFile(statePath, bytes, 'utf8');
+    const store = createSessionStateStore(userDataPath);
+    const loaded = await store.load();
+    expect(await readFile(statePath, 'utf8')).toBe(bytes);
+    if (!loaded) throw new Error('Expected migrated state');
+    expect(loaded.sessions[0]?.branchOrigin).toBeUndefined();
+    await store.save(loaded);
+    expect(Buffer.byteLength(await readFile(statePath))).toBe(
+      MAX_SESSION_STATE_BYTES,
+    );
+    expect((await store.load())?.sessions).toHaveLength(11);
+  });
+
+  it('reads v7 without rewriting it, then saves v8 with no branch origin', async () => {
+    const userDataPath = await createUserDataDirectory();
+    const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
+    const state = stateWith();
+    const session = firstSession(state);
+    const { branchOrigin, ...v7Session } = session;
+    expect(branchOrigin).toBeNull();
+    const old = {
+      version: 7,
+      state: {
+        ...state,
+        sessions: [
+          {
+            ...v7Session,
+            messages: ['old message'],
+            draft: 'old draft',
+            runRevision: 3,
+          },
+        ],
+      },
+    };
+    const bytes = JSON.stringify(old);
+    await writeFile(statePath, bytes, 'utf8');
+    const store = createSessionStateStore(userDataPath);
+    const loaded = await store.load();
+    expect(await readFile(statePath, 'utf8')).toBe(bytes);
+    expect(loaded?.sessions[0]).toMatchObject({
+      messages: ['old message'],
+      draft: 'old draft',
+      runRevision: 3,
+    });
+    if (!loaded) throw new Error('Expected migrated state');
+    await store.save(loaded);
+    const saved = SessionStateRecordSchema.parse(
+      JSON.parse(await readFile(statePath, 'utf8')),
+    );
+    expect(saved.version).toBe(8);
+    expect(
+      (await createSessionStateStore(userDataPath).load())?.sessions[0]
+        ?.branchOrigin,
+    ).toBeUndefined();
+  });
+
   it('loads v3 without rewriting bytes and retains dormant layouts through v5 save and restart', async () => {
     const userDataPath = await createUserDataDirectory();
     const statePath = join(userDataPath, SESSION_STATE_FILE_NAME);
@@ -690,7 +790,7 @@ describe('session v6 migration (#17 RunLog panel)', () => {
       version: 6,
       state: { ...stateWith(), sessions: [legacy] },
     });
-    expect(migrated.version).toBe(7);
+    expect(migrated.version).toBe(SESSION_STATE_VERSION);
     const restored = migrated.state.sessions[0];
     if (!restored) throw new Error('Expected migrated session');
     expect(restored.draft).toBe('保留草稿');

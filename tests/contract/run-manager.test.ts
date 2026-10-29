@@ -890,6 +890,47 @@ describe('P2 run manager review hardening', () => {
     expect(started).toEqual({ ok: false, code: 'STALE_REVISION' });
   });
 
+  it('does not let a source session grant start a branched session run', async () => {
+    const { manager } = await createManager({
+      steps: [{ action: 'complete' }],
+    });
+    const authorization = await manager.authorize({
+      sessionId: 'session:source',
+      projectId: 'project:test',
+      revision: 1,
+      task: '来源会话任务',
+      materials: [],
+      ...binding,
+    });
+    expect(authorization.ok).toBe(true);
+    if (!authorization.ok) return;
+
+    const grantId = authorization.authorization.grantId;
+    const branched = await manager.start(
+      {
+        sessionId: 'session:branch',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:branch-with-source-grant',
+        grantId,
+      },
+      binding,
+    );
+    expect(branched).toEqual({ ok: false, code: 'AUTHORIZATION_REQUIRED' });
+
+    const source = await manager.start(
+      {
+        sessionId: 'session:source',
+        projectId: 'project:test',
+        expectedRevision: 1,
+        requestId: 'request:source-after-branch-rejection',
+        grantId,
+      },
+      binding,
+    );
+    expect(source.ok).toBe(true);
+  });
+
   it('stops the run when the tool call budget is exhausted (contract §5)', async () => {
     const steps = Array.from({ length: RUN_LIMITS.toolCalls + 1 }, () => ({
       action: 'tool',

@@ -794,3 +794,10 @@
     flex-wrap: wrap;
   }
 }
+.session-branch-origin {
+  margin-top: 4px;
+}
+
+.branch-message-action {
+  margin-inline-start: 8px;
+}

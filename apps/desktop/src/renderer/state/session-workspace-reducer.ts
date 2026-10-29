@@ -25,7 +25,11 @@ import {
   type SessionRunRecord,
 } from '../../shared/contracts/session-run-history';
 import type { RunSnapshot } from '../../shared/contracts/run-context';
-import { SessionStateSchema } from '../../shared/session-state';
+import {
+  MAX_SESSION_STATE_BYTES,
+  SESSION_STATE_VERSION,
+  SessionStateSchema,
+} from '../../shared/session-state';
 
 type SessionOperation =
   | { type: 'UPDATE_DRAFT'; id: SessionId; value: string }
@@ -62,6 +66,12 @@ type SessionOperation =
   | { type: 'SET_OUTPUT_TAB'; id: SessionId; tab: OutputTab };
 export type SessionWorkspaceAction = (
   | { type: 'CREATE_SESSION'; id: SessionId; project: ProjectSummary }
+  | {
+      type: 'BRANCH_FROM_MESSAGE';
+      id: SessionId;
+      sourceId: SessionId;
+      messageIndex: number;
+    }
   | { type: 'OPEN_SESSION'; id: SessionId }
   | { type: 'ACTIVATE_TAB' | 'CLOSE_TAB'; tabId: SessionTabId }
   | SessionOperation
@@ -251,6 +261,54 @@ function reduce(
         runHistory: [],
         runRevision: 0,
         lastRunView: null,
+        branchOrigin: null,
+      };
+      return activate(
+        {
+          ...state,
+          sessions: [
+            ...state.sessions,
+            activity(session, state, action.occurredAt),
+          ],
+          openSessionIds: [...state.openSessionIds, action.id],
+        },
+        action.id,
+      );
+    }
+    case 'BRANCH_FROM_MESSAGE': {
+      const source = state.sessions.find(
+        (session) => session.id === action.sourceId,
+      );
+      if (
+        !source ||
+        state.sessions.some((session) => session.id === action.id) ||
+        !Number.isInteger(action.messageIndex) ||
+        action.messageIndex < 0 ||
+        action.messageIndex >= source.messages.length
+      )
+        return state;
+      const message = source.messages[action.messageIndex];
+      if (message === undefined) return state;
+      const session: Session = {
+        id: action.id,
+        project: source.project,
+        title: `${source.title.slice(0, 44)} 分支`,
+        customTitle: false,
+        draft: '',
+        messages: source.messages.slice(0, action.messageIndex + 1),
+        lastActivityAt: null,
+        dock: createDockLayout('focus'),
+        savedDock: null,
+        layoutHistory: null,
+        outputTab: 'preview',
+        runHistory: [],
+        runRevision: 0,
+        lastRunView: null,
+        branchOrigin: {
+          sessionId: source.id,
+          messageIndex: action.messageIndex,
+          messageText: message,
+        },
       };
       return activate(
         {
@@ -358,6 +416,14 @@ export function sessionWorkspaceReducer(
   action: SessionWorkspaceAction,
 ): SessionWorkspaceState {
   const next = reduce(state, action);
+  if (
+    action.type === 'BRANCH_FROM_MESSAGE' &&
+    next !== state &&
+    new TextEncoder().encode(
+      JSON.stringify({ version: SESSION_STATE_VERSION, state: next }),
+    ).byteLength > MAX_SESSION_STATE_BYTES
+  )
+    return state;
   return next === state || SessionStateSchema.safeParse(next).success
     ? next
     : state;

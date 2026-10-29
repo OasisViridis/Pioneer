@@ -2,6 +2,7 @@ import type { Dispatch } from 'react';
 import type {
   PanelId,
   Session,
+  SessionId,
 } from '../../shared/contracts/session-workspace';
 import { createDockLayout } from '../../shared/docking';
 import type { SessionWorkspaceAction } from '../state/session-workspace-reducer';
@@ -20,14 +21,22 @@ const panels: PanelId[] = [
 ];
 export function SessionWorkbench({
   session,
+  sourceSession,
+  onBranch,
   dispatch,
   saveStatus,
 }: {
   session: Session;
+  sourceSession: Session | undefined;
+  onBranch: (sourceId: SessionId, messageIndex: number) => boolean;
   dispatch: Dispatch<SessionWorkspaceAction>;
   saveStatus: SessionSaveStatus;
 }): React.JSX.Element {
   const dock = session.dock;
+  const origin = session.branchOrigin;
+  const sourceAvailable =
+    origin != null &&
+    sourceSession?.messages[origin.messageIndex] === origin.messageText;
   const saved = session.savedDock;
   const atSaved = !!saved && JSON.stringify(saved) === JSON.stringify(dock);
   const customized =
@@ -48,6 +57,27 @@ export function SessionWorkbench({
           <p>
             {session.project.name} <span aria-hidden="true">/</span> 本地工作区
           </p>
+          {origin ? (
+            <p className="session-branch-origin">
+              {sourceAvailable ? (
+                <>
+                  来源：{sourceSession.title} · 第 {origin.messageIndex + 1}{' '}
+                  条消息{' '}
+                  <button
+                    type="button"
+                    className="quiet-button"
+                    onClick={() => {
+                      dispatch({ type: 'OPEN_SESSION', id: origin.sessionId });
+                    }}
+                  >
+                    打开来源会话
+                  </button>
+                </>
+              ) : (
+                '来源不可用'
+              )}
+            </p>
+          ) : null}
         </div>
         {dock.hidden.includes('conversation') ? (
           <button
@@ -134,6 +164,7 @@ export function SessionWorkbench({
             <Conversation
               session={session}
               dispatch={dispatch}
+              onBranch={onBranch}
               allowDecoration={saveStatus.status !== 'error'}
             />
           ) : (

@@ -15,8 +15,8 @@ import {
 } from './legacy-session-state';
 export { MAX_SESSION_STATE_BYTES } from './legacy-session-state';
 
-/** v7 adds the RunLog dock panel to every stored layout (Issue #17). */
-export const SESSION_STATE_VERSION = 7 as const;
+/** v8 records the source of a branched conversation (Issue #25). */
+export const SESSION_STATE_VERSION = 8 as const;
 
 const weight = z
   .number()
@@ -112,13 +112,30 @@ const SessionWorkspaceFieldsSchema = LegacySessionSchema.omit({
   layoutHistory: LayoutHistorySchema.nullable(),
 });
 
-const SessionSchema = SessionWorkspaceFieldsSchema.extend({
+const V7SessionSchema = SessionWorkspaceFieldsSchema.extend({
   runHistory: z.array(SessionRunRecordSchema).max(MAX_SESSION_RUN_HISTORY),
   /** Newest started run's revision; v1–v6 records start at 0. */
   runRevision: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
   /** Bounded summary of the newest run; v1–v6 records start at null. */
   lastRunView: RunSnapshotSchema.nullable(),
 }).strict();
+const BranchOriginSchema = z
+  .object({
+    sessionId: LegacySessionSchema.shape.id,
+    messageIndex: z.number().int().min(0).max(99),
+    messageText: z.string().max(8_000),
+  })
+  .strict();
+const SessionSchema = V7SessionSchema.extend({
+  branchOrigin: BranchOriginSchema.nullable().optional(),
+}).superRefine((session, context) => {
+  if (session.branchOrigin?.sessionId === session.id)
+    context.addIssue({
+      code: 'custom',
+      path: ['branchOrigin'],
+      message: 'A session cannot branch from itself.',
+    });
+});
 export const SessionStateSchema: z.ZodType<SessionWorkspaceState> =
   LegacyStateObjectSchema.extend({
     sessions: z.array(SessionSchema).max(10_000),
@@ -193,7 +210,22 @@ function upgradeSession(
     runHistory: session.runHistory ?? [],
     runRevision: 0,
     lastRunView: null,
+    branchOrigin: null,
   };
+}
+
+const V7StateSchema = LegacyStateObjectSchema.extend({
+  sessions: z.array(V7SessionSchema).max(10_000),
+}).superRefine(validateWorkspaceState);
+const V7RecordSchema = z
+  .object({ version: z.literal(7), state: V7StateSchema })
+  .strict();
+function migrateV7(input: unknown): SessionStateRecord {
+  const old = V7RecordSchema.parse(input);
+  return SessionStateRecordSchema.parse({
+    version: SESSION_STATE_VERSION,
+    state: old.state,
+  });
 }
 
 /**
@@ -306,6 +338,7 @@ export function loadRecord(input: unknown): SessionStateRecord {
     throw new Error('Unsupported session state record.');
   if (input.version === SESSION_STATE_VERSION)
     return SessionStateRecordSchema.parse(input);
+  if (input.version === 7) return migrateV7(input);
   if (input.version === 6) return migrateV6(input);
   if (input.version === 5) return migrateV5(input);
   if (input.version === 4) return migrateV4(input);
