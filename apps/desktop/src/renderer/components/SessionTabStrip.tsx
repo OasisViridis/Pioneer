@@ -222,14 +222,16 @@ export function SessionTabStrip({
                   else elements.current.delete(tab.id);
                 }}
               >
-                <span className="session-tab-label">
-                  <span className="session-tab-label__text">{tab.label}</span>
-                  {tab.origin ? (
+                {tab.origin ? (
+                  <span className="session-tab-label">
+                    <span className="session-tab-label__text">{tab.label}</span>
                     <span className="session-branch-badge" aria-hidden="true">
                       分支
                     </span>
-                  ) : null}
-                </span>
+                  </span>
+                ) : (
+                  <span>{tab.label}</span>
+                )}
                 {tab.project ? <small>{tab.project}</small> : null}
                 {tab.origin ? (
                   <>

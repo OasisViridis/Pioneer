@@ -212,7 +212,7 @@
         "exportName": "SessionTabStrip",
         "path": "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
         "commit": null,
-        "blob": "963e6ea1df3aeee4f1d5c1dd60d319cb731474e8",
+        "blob": "2aa8779f57064ffecb949243ff79dc13f5466a64",
         "inAcceptedMain": false,
         "mainBlob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
         "props": {

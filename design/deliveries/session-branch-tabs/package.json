@@ -975,11 +975,11 @@
     "Review composition overrides and visual evidence before implementation."
   ],
   "packageHash": "5a76991fb52a8d1adb506da9083b419f08ae7901d0cba152091ab1e63770da9d",
-  "outputHash": "98f34e05e46d311cb2cb4bcaf9395cb823cdd5ac2f56534bdf687af65167aaf2",
+  "outputHash": "5eb0d1c58c7abc96f829f6c5b2350a43f9b3e3782e3d2ef7eb2424a356aff76e",
   "files": [
     {
       "path": "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
-      "sha256": "515bd3b58fbb7642d2384911bfa07283e1c71ea9f83f128166bff20046f0c6db"
+      "sha256": "5201f029f9ad0361f6fb1bfd7bd4cb4207dee6bfd6b630a50dadedab94f80a89"
     },
     {
       "path": "apps/desktop/src/renderer/components/SessionWorkbench.tsx",
@@ -995,7 +995,7 @@
     },
     {
       "path": "design/sync/component-mappings.json",
-      "sha256": "9afe56f5eb6ae3c4abb4737271ded251e2b04c015f652f0b64a36426046fdbbe"
+      "sha256": "bfa9dcfe5950f626cc570da08904514db755545bb74c5b5948e788a88c49fe11"
     },
     {
       "path": "docs/testing/issue25-s2-tab-acceptance.md",
