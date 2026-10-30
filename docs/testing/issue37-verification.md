@@ -4,9 +4,9 @@
 
 ## 当前交付边界
 
-代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后只读回填清单。2026-10-28 用户委托 Codex 完成剩余视觉核验；已复核原图、修复输入框焦点对比度并接受[当前状态基线](../../tests/e2e/visual-baselines/README.md)，详见[审阅结论](issue37-visual-review.md)。2026-10-29 #58 已合并，用户授权合并本 PR；实际合并状态和最终提交的 CI 结果以 PR 记录为准。**本票尚未完成**：真实 Figma 回传与命名版本事件接收均未验收。不得用这份准备工作的 PR 自动关闭 #37。
+代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后回填流程。2026-10-28 用户委托 Codex 完成剩余视觉核验；已复核原图、修复输入框焦点对比度并接受[当前状态基线](../../tests/e2e/visual-baselines/README.md)，详见[审阅结论](issue37-visual-review.md)。2026-10-30 会话标签试点已合并且真实 Dev Resources 链接已回读，具体证据见下文。**本票尚未完成**：真实命名版本事件接收与完整自动链路尚未验收。不得用这份准备工作的 PR 自动关闭 #37。
 
-S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook 接收器、scoped REST 凭证、Dev Resources 写入或 Code Connect 发布权益。当前连接工具未暴露 Webhook/Dev Resources REST 操作。S2 已合并，但实际路线是当前 Codex 会话 + 发布工具，并没有 `repository_dispatch` 事件消费者，也没有获准的无人值守模型执行环境。不能把一个只打印 payload 的 workflow 当作已接通 S2。
+S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook 接收器、scoped REST 凭证、Dev Resources 写入或 Code Connect 发布权益；此后 Dev Resources 已通过受控 REST 客户端真实写入。S2 试点走当前 Codex 会话 + 发布工具，并没有 `repository_dispatch` 事件消费者，也没有获准的无人值守模型执行环境。不能把一个只打印 payload 的 workflow 当作已接通 S2。
 
 ## 旧测试盘点与真实选择范围
 
@@ -46,7 +46,7 @@ pnpm design:delivery writeback-plan <PR编号> <已登记featureId>
 
 该命令明确返回 `writeback-blocked`，非成功退出：实际 Dev Resources 写入授权、scoped 凭证、Code Connect 发布能力、同提交人工验收链接尚未确认。验收链接缺失不填假值；Windows/真实 Provider 人工验收保持 pending。清单是只读准备物，重复运行相同证据得到相同清单，没有创建评论、标记 COMPLETED 或改动 Issue 的能力。
 
-2026-10-28 已补充 `design:external writeback`：默认预览；显式授权记录与 `--apply` 后，根据新的合并/CI 证据执行 Dev Resources 写入，按节点和固定 URL 仅补缺项，部分成功/超时后先回读，容量不足不删除人工链接。逻辑已通过受控边界测试，**真实写入与重试验收仍未进行**。Code Connect 须另行用官方 CLI 发布，不能以链接回填冒充映射发布。配置、命令和本地接手步骤见[交接入口](../workflow/issue37-local-handoff.md)。
+2026-10-28 已补充 `design:external writeback`：默认预览；显式授权记录与 `--apply` 后，根据新的合并/CI 证据执行 Dev Resources 写入，按节点和固定 URL 仅补缺项，部分成功/超时后先回读，容量不足不删除人工链接。当时仅完成受控边界测试；2026-10-30 的真实写入与重放结果见下文。Code Connect 须另行用官方 CLI 发布，不能以链接回填冒充映射发布。配置、命令和本地接手步骤见[交接入口](../workflow/issue37-local-handoff.md)。
 
 ## Webhook 保留阻塞
 
@@ -96,3 +96,10 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 - PR #48 的 merge SHA `1cbface10f24667b8babc1b9d427f64d29588536` 对应 [quality run](https://github.com/OasisViridis/Pioneer/actions/runs/40367977047) 只有 Windows 质量作业，没有视觉作业，不能作为当前真实回填试点。当前 registry 仅有已关闭的 #36 交付；新试点仍待登记与验收。
 - Figma MCP 对 `921:706` 的 Code Connect 探测仍拒绝，当前身份报告学生套餐 Full seat；文件所属团队、组件发布状态与实际权限尚未确认。[Figma 当前帮助文档](https://help.figma.com/hc/en-us/articles/23920389749655-Code-Connect) 与 MCP 返回的套餐提示不一致，不能据此断言必须购买。未发布 Code Connect，也未执行真实回填或接收器验收。
 - 复审发现共用 Figma 传输层原先接受任意 `/v1/` GET；未发现事件可以控制该路径，但能力范围超过现有调用需要。现限定为文件版本、固定节点和 Dev Resources 三类 GET 及 Dev Resources POST；受控传输测试确认拒绝其他路径，不代表真实 Figma 集成通过。修改后再次运行 `pnpm check`：设计同步 76/76、Contract Tests 348/348、Prototype Tests 210/210、真实 Electron E2E 29/29 和 package smoke 通过；视觉比较仍在上述环境指纹处停止。
+
+## 2026-10-30 试点合并与真实回填
+
+- 固定草案版本 `2415735911323890660` 的结构快照与视觉参考分别在独立[快照提交](https://github.com/OasisViridis/Pioneer/blob/4b67a17b7b121644bbab37760526fe2bbbb4bedd/docs/testing/snapshots/session-branch-tabs-2415735911323890660.json)和[审阅记录](https://github.com/OasisViridis/Pioneer/blob/305109beacab966e176f471f688288f62d9818b0/docs/testing/snapshots/session-branch-tabs-review.md)。快照使用真实版本节点读取及模拟事件投影；不是实际 Webhook 投递。
+- [PR #59](https://github.com/OasisViridis/Pioneer/pull/59) 固定受审快照与允许范围；[PR #60](https://github.com/OasisViridis/Pioneer/pull/60) 实现标签分支来源提示，最终 head `fa3c56ffb8c7fbaf1d2e28700cb14d235f34eb8b` 的质量与视觉检查通过。普通标签视觉差异在合并前修复，未更新既有视觉基线。[合并提交](https://github.com/OasisViridis/Pioneer/commit/e407b6660366fa1221e9464b92a21f6be7924dc3)的 [main 检查](https://github.com/OasisViridis/Pioneer/actions/runs/40979414675)两项均通过。
+- 获用户外部发布授权后，对 Figma 文件节点 `1093:1259` 先预览，再通过 `design:external writeback` 写入并读回六条 Dev Resources：#25、PR #60、合并提交、同提交 CI、固定设计包和[验证记录](https://github.com/OasisViridis/Pioneer/blob/e407b6660366fa1221e9464b92a21f6be7924dc3/docs/testing/issue25-s2-tab-acceptance.md)。回执为 `links-verified`，`confirmed: 6`、`attempted: 6`；随后顺序重放三次均为 `links-verified`、`created: 0`。这验证正常成功与幂等重放，不是实际超时或部分失败演练。
+- 验证记录说明真实 Electron 自动测试和 Codex 受托视觉检查；真人设备验收、真实 Provider 与官方 Code Connect 发布仍未验证。当前没有可确认的获准 HTTPS/n8n 接收器或无人值守消费者，真实 Figma 命名版本事件到 S2 的链路仍未验收。#37 和 #33 不因此关闭。
