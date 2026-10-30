@@ -29,6 +29,42 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.session-tab-label {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+.session-tab-label__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.session-branch-badge {
+  background: var(--hazel-mint);
+  border-radius: 7px;
+  color: var(--hazel-ink);
+  flex: 0 0 auto;
+  font-size: 11px;
+  padding: 3px 8px;
+}
+.session-branch-hint {
+  background: var(--hazel-surface);
+  border: 1px solid var(--hazel-line);
+  border-radius: 8px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgb(44 53 71 / 15%);
+  color: var(--hazel-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  max-height: calc(100vh - 16px);
+  overflow: auto;
+  overflow-wrap: anywhere;
+  padding: 8px 10px;
+  position: fixed;
+  visibility: hidden;
+  white-space: normal;
+  z-index: 50;
+}
 .session-tab-strip .tab-strip__close {
   color: var(--hazel-secondary);
 }

@@ -1,0 +1,1009 @@
+{
+  "schemaVersion": 1,
+  "request": {
+    "schemaVersion": 1,
+    "featureId": "session-branch-tabs",
+    "issue": 25,
+    "changeType": "ui",
+    "baseSha": "7ab2c9c1fa2a1d4e3a2f1778575119fd8d9dcc4a",
+    "design": {
+      "commit": "4b67a17b7b121644bbab37760526fe2bbbb4bedd",
+      "path": "docs/testing/snapshots/session-branch-tabs-2415735911323890660.json",
+      "sha256": "9fbb7868596a3e8f24656922756ad2e16da540987534c2884d750fafefccfd0f",
+      "kind": "version",
+      "version": "2415735911323890660",
+      "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+      "nodes": [
+        "1093:1259"
+      ]
+    },
+    "behaviorChanges": []
+  },
+  "nodes": [
+    {
+      "id": "1093:1259",
+      "type": "FRAME",
+      "name": "#25 · 会话分支来源 · 设计草案",
+      "absoluteBoundingBox": {
+        "x": 4480,
+        "y": 100,
+        "width": 920,
+        "height": 586
+      },
+      "layoutMode": "VERTICAL",
+      "itemSpacing": 20,
+      "paddingLeft": 32,
+      "paddingRight": 32,
+      "paddingTop": 32,
+      "paddingBottom": 32,
+      "children": [
+        {
+          "id": "1093:1260",
+          "type": "TEXT",
+          "name": "会话标签 · 分支来源",
+          "characters": "会话标签 · 分支来源",
+          "absoluteBoundingBox": {
+            "x": 4512,
+            "y": 132,
+            "width": 227,
+            "height": 29
+          }
+        },
+        {
+          "id": "1093:1261",
+          "type": "TEXT",
+          "name": "设计草案 / 以下标题与消息位置仅为示例，需真实来源数据支持。",
+          "characters": "设计草案 / 以下标题与消息位置仅为示例，需真实来源数据支持。",
+          "absoluteBoundingBox": {
+            "x": 4512,
+            "y": 181,
+            "width": 375,
+            "height": 16
+          }
+        },
+        {
+          "id": "1093:1262",
+          "type": "FRAME",
+          "name": "普通会话",
+          "absoluteBoundingBox": {
+            "x": 4512,
+            "y": 217,
+            "width": 856,
+            "height": 121
+          },
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 12,
+          "paddingLeft": 20,
+          "paddingRight": 20,
+          "paddingTop": 16,
+          "paddingBottom": 16,
+          "children": [
+            {
+              "id": "1093:1263",
+              "type": "TEXT",
+              "name": "普通会话",
+              "characters": "普通会话",
+              "absoluteBoundingBox": {
+                "x": 4532,
+                "y": 233,
+                "width": 56,
+                "height": 17
+              }
+            },
+            {
+              "id": "1093:1264",
+              "type": "FRAME",
+              "name": "会话标签与标识",
+              "absoluteBoundingBox": {
+                "x": 4532,
+                "y": 262,
+                "width": 138,
+                "height": 34
+              },
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 8,
+              "children": [
+                {
+                  "id": "1093:1265",
+                  "type": "INSTANCE",
+                  "name": "Pioneer F9 / SessionTab",
+                  "componentId": "921:619",
+                  "componentProperties": {
+                    "Label#921:20": {
+                      "type": "TEXT",
+                      "value": "整理参考素材"
+                    },
+                    "State": {
+                      "type": "VARIANT",
+                      "value": "Active"
+                    }
+                  },
+                  "overrides": [],
+                  "absoluteBoundingBox": {
+                    "x": 4532,
+                    "y": 262,
+                    "width": 138,
+                    "height": 34
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 8,
+                  "paddingLeft": 12,
+                  "paddingRight": 12,
+                  "children": [
+                    {
+                      "id": "I1093:1265;921:620",
+                      "type": "INSTANCE",
+                      "name": "Icon / chat",
+                      "componentId": "921:522",
+                      "componentProperties": {},
+                      "overrides": [],
+                      "absoluteBoundingBox": {
+                        "x": 4544,
+                        "y": 272.5,
+                        "width": 13,
+                        "height": 13
+                      },
+                      "children": [
+                        {
+                          "id": "I1093:1265;921:620;921:523",
+                          "type": "FRAME",
+                          "name": "Frame",
+                          "absoluteBoundingBox": {
+                            "x": 4544,
+                            "y": 272.5,
+                            "width": 16,
+                            "height": 16
+                          },
+                          "children": [
+                            {
+                              "id": "I1093:1265;921:620;921:524",
+                              "type": "VECTOR",
+                              "name": "Vector",
+                              "absoluteBoundingBox": {
+                                "x": 4547,
+                                "y": 275.5,
+                                "width": 10,
+                                "height": 10.5
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "I1093:1265;921:623",
+                      "type": "TEXT",
+                      "name": "Label",
+                      "characters": "整理参考素材",
+                      "absoluteBoundingBox": {
+                        "x": 4565,
+                        "y": 269,
+                        "width": 75,
+                        "height": 20
+                      }
+                    },
+                    {
+                      "id": "I1093:1265;921:624",
+                      "type": "INSTANCE",
+                      "name": "Icon / x",
+                      "componentId": "921:503",
+                      "componentProperties": {},
+                      "overrides": [],
+                      "absoluteBoundingBox": {
+                        "x": 4648,
+                        "y": 274,
+                        "width": 10,
+                        "height": 10
+                      },
+                      "children": [
+                        {
+                          "id": "I1093:1265;921:624;921:504",
+                          "type": "FRAME",
+                          "name": "Frame",
+                          "absoluteBoundingBox": {
+                            "x": 4648,
+                            "y": 274,
+                            "width": 16,
+                            "height": 16
+                          },
+                          "children": [
+                            {
+                              "id": "I1093:1265;921:624;921:505",
+                              "type": "VECTOR",
+                              "name": "Vector",
+                              "absoluteBoundingBox": {
+                                "x": 4652,
+                                "y": 278,
+                                "width": 8,
+                                "height": 8
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "1093:1273",
+              "type": "TEXT",
+              "name": "没有来源标记。",
+              "characters": "没有来源标记。",
+              "absoluteBoundingBox": {
+                "x": 4532,
+                "y": 308,
+                "width": 84,
+                "height": 14
+              }
+            }
+          ]
+        },
+        {
+          "id": "1093:1274",
+          "type": "FRAME",
+          "name": "分支会话",
+          "absoluteBoundingBox": {
+            "x": 4512,
+            "y": 358,
+            "width": 856,
+            "height": 121
+          },
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 12,
+          "paddingLeft": 20,
+          "paddingRight": 20,
+          "paddingTop": 16,
+          "paddingBottom": 16,
+          "children": [
+            {
+              "id": "1093:1275",
+              "type": "TEXT",
+              "name": "分支会话",
+              "characters": "分支会话",
+              "absoluteBoundingBox": {
+                "x": 4532,
+                "y": 374,
+                "width": 56,
+                "height": 17
+              }
+            },
+            {
+              "id": "1093:1276",
+              "type": "FRAME",
+              "name": "会话标签与标识",
+              "absoluteBoundingBox": {
+                "x": 4532,
+                "y": 403,
+                "width": 172,
+                "height": 34
+              },
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 8,
+              "children": [
+                {
+                  "id": "1093:1277",
+                  "type": "INSTANCE",
+                  "name": "Pioneer F9 / SessionTab",
+                  "componentId": "921:619",
+                  "componentProperties": {
+                    "Label#921:20": {
+                      "type": "TEXT",
+                      "value": "探索新路径"
+                    },
+                    "State": {
+                      "type": "VARIANT",
+                      "value": "Active"
+                    }
+                  },
+                  "overrides": [
+                    {
+                      "id": "1093:1277",
+                      "overriddenFields": [
+                        "height",
+                        "width"
+                      ]
+                    }
+                  ],
+                  "absoluteBoundingBox": {
+                    "x": 4532,
+                    "y": 403,
+                    "width": 126,
+                    "height": 34
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 8,
+                  "paddingLeft": 12,
+                  "paddingRight": 12,
+                  "children": [
+                    {
+                      "id": "I1093:1277;921:620",
+                      "type": "INSTANCE",
+                      "name": "Icon / chat",
+                      "componentId": "921:522",
+                      "componentProperties": {},
+                      "overrides": [],
+                      "absoluteBoundingBox": {
+                        "x": 4544,
+                        "y": 413.5,
+                        "width": 13,
+                        "height": 13
+                      },
+                      "children": [
+                        {
+                          "id": "I1093:1277;921:620;921:523",
+                          "type": "FRAME",
+                          "name": "Frame",
+                          "absoluteBoundingBox": {
+                            "x": 4544,
+                            "y": 413.5,
+                            "width": 16,
+                            "height": 16
+                          },
+                          "children": [
+                            {
+                              "id": "I1093:1277;921:620;921:524",
+                              "type": "VECTOR",
+                              "name": "Vector",
+                              "absoluteBoundingBox": {
+                                "x": 4547,
+                                "y": 416.5,
+                                "width": 10,
+                                "height": 10.5
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "I1093:1277;921:623",
+                      "type": "TEXT",
+                      "name": "Label",
+                      "characters": "探索新路径",
+                      "absoluteBoundingBox": {
+                        "x": 4565,
+                        "y": 410,
+                        "width": 63,
+                        "height": 20
+                      }
+                    },
+                    {
+                      "id": "I1093:1277;921:624",
+                      "type": "INSTANCE",
+                      "name": "Icon / x",
+                      "componentId": "921:503",
+                      "componentProperties": {},
+                      "overrides": [],
+                      "absoluteBoundingBox": {
+                        "x": 4636,
+                        "y": 415,
+                        "width": 10,
+                        "height": 10
+                      },
+                      "children": [
+                        {
+                          "id": "I1093:1277;921:624;921:504",
+                          "type": "FRAME",
+                          "name": "Frame",
+                          "absoluteBoundingBox": {
+                            "x": 4636,
+                            "y": 415,
+                            "width": 16,
+                            "height": 16
+                          },
+                          "children": [
+                            {
+                              "id": "I1093:1277;921:624;921:505",
+                              "type": "VECTOR",
+                              "name": "Vector",
+                              "absoluteBoundingBox": {
+                                "x": 4640,
+                                "y": 419,
+                                "width": 8,
+                                "height": 8
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "1093:1285",
+                  "type": "FRAME",
+                  "name": "分支标识",
+                  "absoluteBoundingBox": {
+                    "x": 4666,
+                    "y": 410.5,
+                    "width": 38,
+                    "height": 19
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 8,
+                  "paddingRight": 8,
+                  "paddingTop": 3,
+                  "paddingBottom": 3,
+                  "children": [
+                    {
+                      "id": "1093:1286",
+                      "type": "TEXT",
+                      "name": "分支",
+                      "characters": "分支",
+                      "absoluteBoundingBox": {
+                        "x": 4674,
+                        "y": 413.5,
+                        "width": 22,
+                        "height": 13
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "1093:1287",
+              "type": "TEXT",
+              "name": "聚焦或悬停时：来自「整理参考素材」 · 第 3 条消息",
+              "characters": "聚焦或悬停时：来自「整理参考素材」 · 第 3 条消息",
+              "absoluteBoundingBox": {
+                "x": 4532,
+                "y": 449,
+                "width": 282,
+                "height": 14
+              }
+            }
+          ]
+        },
+        {
+          "id": "1093:1288",
+          "type": "FRAME",
+          "name": "来源不可用",
+          "absoluteBoundingBox": {
+            "x": 4512,
+            "y": 499,
+            "width": 856,
+            "height": 121
+          },
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 12,
+          "paddingLeft": 20,
+          "paddingRight": 20,
+          "paddingTop": 16,
+          "paddingBottom": 16,
+          "children": [
+            {
+              "id": "1093:1289",
+              "type": "TEXT",
+              "name": "来源不可用",
+              "characters": "来源不可用",
+              "absoluteBoundingBox": {
+                "x": 4532,
+                "y": 515,
+                "width": 70,
+                "height": 17
+              }
+            },
+            {
+              "id": "1093:1290",
+              "type": "FRAME",
+              "name": "会话标签与标识",
+              "absoluteBoundingBox": {
+                "x": 4532,
+                "y": 544,
+                "width": 172,
+                "height": 34
+              },
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 8,
+              "children": [
+                {
+                  "id": "1093:1291",
+                  "type": "INSTANCE",
+                  "name": "Pioneer F9 / SessionTab",
+                  "componentId": "921:619",
+                  "componentProperties": {
+                    "Label#921:20": {
+                      "type": "TEXT",
+                      "value": "探索新路径"
+                    },
+                    "State": {
+                      "type": "VARIANT",
+                      "value": "Active"
+                    }
+                  },
+                  "overrides": [
+                    {
+                      "id": "1093:1291",
+                      "overriddenFields": [
+                        "height",
+                        "width"
+                      ]
+                    }
+                  ],
+                  "absoluteBoundingBox": {
+                    "x": 4532,
+                    "y": 544,
+                    "width": 126,
+                    "height": 34
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "itemSpacing": 8,
+                  "paddingLeft": 12,
+                  "paddingRight": 12,
+                  "children": [
+                    {
+                      "id": "I1093:1291;921:620",
+                      "type": "INSTANCE",
+                      "name": "Icon / chat",
+                      "componentId": "921:522",
+                      "componentProperties": {},
+                      "overrides": [],
+                      "absoluteBoundingBox": {
+                        "x": 4544,
+                        "y": 554.5,
+                        "width": 13,
+                        "height": 13
+                      },
+                      "children": [
+                        {
+                          "id": "I1093:1291;921:620;921:523",
+                          "type": "FRAME",
+                          "name": "Frame",
+                          "absoluteBoundingBox": {
+                            "x": 4544,
+                            "y": 554.5,
+                            "width": 16,
+                            "height": 16
+                          },
+                          "children": [
+                            {
+                              "id": "I1093:1291;921:620;921:524",
+                              "type": "VECTOR",
+                              "name": "Vector",
+                              "absoluteBoundingBox": {
+                                "x": 4547,
+                                "y": 557.5,
+                                "width": 10,
+                                "height": 10.5
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "I1093:1291;921:623",
+                      "type": "TEXT",
+                      "name": "Label",
+                      "characters": "探索新路径",
+                      "absoluteBoundingBox": {
+                        "x": 4565,
+                        "y": 551,
+                        "width": 63,
+                        "height": 20
+                      }
+                    },
+                    {
+                      "id": "I1093:1291;921:624",
+                      "type": "INSTANCE",
+                      "name": "Icon / x",
+                      "componentId": "921:503",
+                      "componentProperties": {},
+                      "overrides": [],
+                      "absoluteBoundingBox": {
+                        "x": 4636,
+                        "y": 556,
+                        "width": 10,
+                        "height": 10
+                      },
+                      "children": [
+                        {
+                          "id": "I1093:1291;921:624;921:504",
+                          "type": "FRAME",
+                          "name": "Frame",
+                          "absoluteBoundingBox": {
+                            "x": 4636,
+                            "y": 556,
+                            "width": 16,
+                            "height": 16
+                          },
+                          "children": [
+                            {
+                              "id": "I1093:1291;921:624;921:505",
+                              "type": "VECTOR",
+                              "name": "Vector",
+                              "absoluteBoundingBox": {
+                                "x": 4640,
+                                "y": 560,
+                                "width": 8,
+                                "height": 8
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "1093:1299",
+                  "type": "FRAME",
+                  "name": "分支标识",
+                  "absoluteBoundingBox": {
+                    "x": 4666,
+                    "y": 551.5,
+                    "width": 38,
+                    "height": 19
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 8,
+                  "paddingRight": 8,
+                  "paddingTop": 3,
+                  "paddingBottom": 3,
+                  "children": [
+                    {
+                      "id": "1093:1300",
+                      "type": "TEXT",
+                      "name": "分支",
+                      "characters": "分支",
+                      "absoluteBoundingBox": {
+                        "x": 4674,
+                        "y": 554.5,
+                        "width": 22,
+                        "height": 13
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "1093:1301",
+              "type": "TEXT",
+              "name": "来源不可用：保留分支标记，不提供失效跳转。",
+              "characters": "来源不可用：保留分支标记，不提供失效跳转。",
+              "absoluteBoundingBox": {
+                "x": 4532,
+                "y": 590,
+                "width": 252,
+                "height": 14
+              }
+            }
+          ]
+        },
+        {
+          "id": "1093:1302",
+          "type": "TEXT",
+          "name": "设计边界：仅呈现已保存的来源关系；浏览历史不回退项目文件。",
+          "characters": "设计边界：仅呈现已保存的来源关系；浏览历史不回退项目文件。",
+          "absoluteBoundingBox": {
+            "x": 4512,
+            "y": 640,
+            "width": 348,
+            "height": 14
+          }
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "designNode": "921:632",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=921-632",
+      "designProperties": {
+        "Label#921:20": {
+          "type": "TEXT",
+          "defaultValue": "流式发票导出"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Active",
+          "variantOptions": [
+            "Active",
+            "Inactive"
+          ]
+        }
+      },
+      "designVersion": "S0 snapshot-only; three component-set screenshots re-read on 2026-10-26; no official Code Connect publication",
+      "status": "mapped",
+      "code": {
+        "exportName": "SessionTabStrip",
+        "path": "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
+        "commit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
+        "blob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
+        "inAcceptedMain": true,
+        "mainBlob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
+        "props": {
+          "state": "SessionWorkspaceState",
+          "dispatch": "Dispatch<SessionWorkspaceAction>"
+        }
+      },
+      "usedProps": [
+        "state",
+        "dispatch"
+      ],
+      "example": "<SessionTabStrip state={state} dispatch={dispatch} />",
+      "variants": [
+        {
+          "nodeId": "921:619",
+          "name": "State=Active",
+          "status": "preserved-difference",
+          "reason": "Map one session item inside SessionTabStrip; state.activeTabId determines aria-selected. Preserve current responsive width, project subtitle and inactive close button (pointer accessible, tabindex -1), rather than claiming pixel parity with Figma.",
+          "exercise": "Create two real sessions, verify selected/unselected colors and close focus policy, activate and close each, reopen retained sessions. Close and reopen a running session without stopping its Run.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            },
+            {
+              "path": "tests/e2e/p2-run.e2e.spec.ts",
+              "test": "stops mid-run and shows 已停止 only after background convergence"
+            }
+          ]
+        },
+        {
+          "nodeId": "921:627",
+          "name": "State=Inactive",
+          "status": "preserved-difference",
+          "reason": "Map one session item inside SessionTabStrip; state.activeTabId determines aria-selected. Preserve current responsive width, project subtitle and inactive close button (pointer accessible, tabindex -1), rather than claiming pixel parity with Figma.",
+          "exercise": "Create two real sessions, verify selected/unselected colors and close focus policy, activate and close each, reopen retained sessions. Close and reopen a running session without stopping its Run.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S1 session and dock compositions preserve selection, focus and close semantics"
+            },
+            {
+              "path": "tests/e2e/p2-run.e2e.spec.ts",
+              "test": "stops mid-run and shows 已停止 only after background convergence"
+            }
+          ]
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Label#921:20",
+          "code": "state.sessions[].title",
+          "status": "composition",
+          "reason": "Library and Settings labels are fixed; project subtitle derives from session.project.name."
+        },
+        {
+          "figma": "State=Active|Inactive",
+          "code": "state.activeTabId",
+          "status": "composition",
+          "reason": "SessionTabStrip renders a list from state.openSessionIds; a single instance is not the entire strip."
+        },
+        {
+          "figma": "close icon",
+          "code": "dispatch({ type: 'CLOSE_TAB', tabId })",
+          "status": "composition",
+          "reason": "Rendered only for session tabs; closing does not delete the session or stop its run."
+        }
+      ],
+      "examplesExport": "SessionTabExamples",
+      "compositionNode": "1093:1259",
+      "compositionInstances": [
+        {
+          "id": "1093:1265",
+          "componentId": "921:619"
+        },
+        {
+          "id": "I1093:1265;921:620",
+          "componentId": "921:522",
+          "parentInstanceId": "1093:1265"
+        },
+        {
+          "id": "I1093:1265;921:624",
+          "componentId": "921:503",
+          "parentInstanceId": "1093:1265"
+        },
+        {
+          "id": "1093:1277",
+          "componentId": "921:619"
+        },
+        {
+          "id": "I1093:1277;921:620",
+          "componentId": "921:522",
+          "parentInstanceId": "1093:1277"
+        },
+        {
+          "id": "I1093:1277;921:624",
+          "componentId": "921:503",
+          "parentInstanceId": "1093:1277"
+        },
+        {
+          "id": "1093:1291",
+          "componentId": "921:619"
+        },
+        {
+          "id": "I1093:1291;921:620",
+          "componentId": "921:522",
+          "parentInstanceId": "1093:1291"
+        },
+        {
+          "id": "I1093:1291;921:624",
+          "componentId": "921:503",
+          "parentInstanceId": "1093:1291"
+        }
+      ],
+      "acceptedAt": "7ab2c9c1fa2a1d4e3a2f1778575119fd8d9dcc4a",
+      "actualSourceSha256": "f23f84f72c20d009918bfd4f0347849349068b0d4076ab816d3dfb7e99549f8e"
+    }
+  ],
+  "designDifferences": [],
+  "basis": [
+    {
+      "path": "design/sync/component-mappings.json",
+      "commit": "7ab2c9c1fa2a1d4e3a2f1778575119fd8d9dcc4a",
+      "sha256": "1b1717d69b4aa1ce730a93c1f51d7c5d5576a1931282ea2c819bf2b0baca33e4"
+    },
+    {
+      "path": "design/sync/mapping-acceptance.md",
+      "commit": "7ab2c9c1fa2a1d4e3a2f1778575119fd8d9dcc4a",
+      "sha256": "4dcf3bb51b5f090a358257d207ecb948ddd9ea0e69545d69f4dbd38125a5a79b"
+    },
+    {
+      "path": "apps/desktop/src/shared/contracts/session-workspace.ts",
+      "commit": "7ab2c9c1fa2a1d4e3a2f1778575119fd8d9dcc4a",
+      "sha256": "926b26c907a511578e058b5905bc80ae3c6f66e5f8aa5b15cc42a3f640a22f31"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/SessionWorkbench.tsx",
+      "commit": "7ab2c9c1fa2a1d4e3a2f1778575119fd8d9dcc4a",
+      "sha256": "3fbbcfe7f77f0db5b73e480b2d51f1f84a64cd205da059ad095b60477f241e0d"
+    },
+    {
+      "path": "tests/e2e/p1-session.e2e.spec.ts",
+      "commit": "7ab2c9c1fa2a1d4e3a2f1778575119fd8d9dcc4a",
+      "sha256": "16df521fa72b88ad17c35598c192837670ccaad18198209d4039f317a00fcc26"
+    },
+    {
+      "path": "tests/e2e/tab-strip.e2e.spec.ts",
+      "commit": "7ab2c9c1fa2a1d4e3a2f1778575119fd8d9dcc4a",
+      "sha256": "cb65d5376c03b80d2dc3db9f8a2a6d6efb733efc46f255ecd6ce3d9549819ac0"
+    }
+  ],
+  "policy": {
+    "issue": 25,
+    "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+    "nodes": [
+      "1093:1259"
+    ],
+    "compositionMappings": {
+      "1093:1259": "921:632"
+    },
+    "compositionSnapshotSha256": {
+      "1093:1259": "9fbb7868596a3e8f24656922756ad2e16da540987534c2884d750fafefccfd0f"
+    },
+    "compositionApprovals": {
+      "1093:1259": {
+        "1093:1265": {
+          "Label#921:20": {
+            "type": "TEXT",
+            "value": "整理参考素材"
+          },
+          "State": {
+            "type": "VARIANT",
+            "value": "Active"
+          }
+        },
+        "1093:1277": {
+          "Label#921:20": {
+            "type": "TEXT",
+            "value": "探索新路径"
+          },
+          "State": {
+            "type": "VARIANT",
+            "value": "Active"
+          }
+        },
+        "1093:1291": {
+          "Label#921:20": {
+            "type": "TEXT",
+            "value": "探索新路径"
+          },
+          "State": {
+            "type": "VARIANT",
+            "value": "Active"
+          }
+        }
+      }
+    },
+    "compositionNestedApprovals": {
+      "1093:1259": {
+        "I1093:1265;921:620": {
+          "parentInstanceId": "1093:1265",
+          "componentId": "921:522",
+          "properties": {}
+        },
+        "I1093:1265;921:624": {
+          "parentInstanceId": "1093:1265",
+          "componentId": "921:503",
+          "properties": {}
+        },
+        "I1093:1277;921:620": {
+          "parentInstanceId": "1093:1277",
+          "componentId": "921:522",
+          "properties": {}
+        },
+        "I1093:1277;921:624": {
+          "parentInstanceId": "1093:1277",
+          "componentId": "921:503",
+          "properties": {}
+        },
+        "I1093:1291;921:620": {
+          "parentInstanceId": "1093:1291",
+          "componentId": "921:522",
+          "properties": {}
+        },
+        "I1093:1291;921:624": {
+          "parentInstanceId": "1093:1291",
+          "componentId": "921:503",
+          "properties": {}
+        }
+      }
+    },
+    "changeTypes": [
+      "ui"
+    ],
+    "allowedPaths": [
+      "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
+      "apps/desktop/src/renderer/components/SessionWorkbench.tsx",
+      "apps/desktop/src/renderer/state/session-branch-origin.ts",
+      "apps/desktop/src/renderer/styles/session-workbench.css",
+      "design/sync/component-mappings.json",
+      "tests/e2e/tab-strip.e2e.spec.ts",
+      "tests/e2e/p1-session.e2e.spec.ts",
+      "tests/e2e/session-branch-tabs.e2e.spec.ts",
+      "docs/testing/issue25-s2-tab-acceptance.md"
+    ],
+    "basis": [
+      "design/sync/component-mappings.json",
+      "design/sync/mapping-acceptance.md",
+      "apps/desktop/src/shared/contracts/session-workspace.ts",
+      "apps/desktop/src/renderer/components/SessionWorkbench.tsx",
+      "tests/e2e/p1-session.e2e.spec.ts",
+      "tests/e2e/tab-strip.e2e.spec.ts"
+    ]
+  },
+  "constraints": [
+    "Design is visual evidence, not behavioral authority.",
+    "Preserve retained S1 differences; no inferred Grant, stop or Unknown state.",
+    "No automatic merge, issue edits, Figma writeback or real Provider execution.",
+    "Review composition overrides and visual evidence before implementation."
+  ],
+  "packageHash": "5a76991fb52a8d1adb506da9083b419f08ae7901d0cba152091ab1e63770da9d",
+  "outputHash": "98f34e05e46d311cb2cb4bcaf9395cb823cdd5ac2f56534bdf687af65167aaf2",
+  "files": [
+    {
+      "path": "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
+      "sha256": "515bd3b58fbb7642d2384911bfa07283e1c71ea9f83f128166bff20046f0c6db"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/SessionWorkbench.tsx",
+      "sha256": "ab1d29c0335ed4cc0c9d5f4edcffab72886ee39988fc1d885f66b01fd7ab0c58"
+    },
+    {
+      "path": "apps/desktop/src/renderer/state/session-branch-origin.ts",
+      "sha256": "62e19c9fc42620224ec943fd2561218054cf76618f6bf58ebf7b1c4547a80759"
+    },
+    {
+      "path": "apps/desktop/src/renderer/styles/session-workbench.css",
+      "sha256": "a0432d0e1eff3de5d61b434e2b023905cc87237c8a688aad13a7615d5f499340"
+    },
+    {
+      "path": "design/sync/component-mappings.json",
+      "sha256": "9afe56f5eb6ae3c4abb4737271ded251e2b04c015f652f0b64a36426046fdbbe"
+    },
+    {
+      "path": "docs/testing/issue25-s2-tab-acceptance.md",
+      "sha256": "14e0108b180d32739a56914778d6976dbc11f0b77fb3a9035ee0c2b689537b9a"
+    },
+    {
+      "path": "tests/e2e/p1-session.e2e.spec.ts",
+      "sha256": "1ef82628ff302db76b0019d5537a98db21719f39802d474bcd0e25d18694851c"
+    }
+  ]
+}

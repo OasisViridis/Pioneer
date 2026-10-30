@@ -149,7 +149,9 @@ test('branches from a saved message, restores independently and handles a missin
       '第一条消息',
     );
     await expect(input).toHaveValue('');
-    await expect(page.getByText('来源：原会话 · 第 1 条消息')).toBeVisible();
+    await expect(page.locator('.session-branch-origin')).toContainText(
+      '来源：原会话 · 第 1 条消息',
+    );
     await page
       .getByRole('button', { name: '打开来源会话', exact: true })
       .click();
@@ -171,7 +173,9 @@ test('branches from a saved message, restores independently and handles a missin
     await expect(page.locator('.message-list li').last()).toContainText(
       '分支的新消息',
     );
-    await expect(page.getByText('来源：原会话 · 第 1 条消息')).toBeVisible();
+    await expect(page.locator('.session-branch-origin')).toContainText(
+      '来源：原会话 · 第 1 条消息',
+    );
     const stored = SessionStateRecordSchema.parse(
       JSON.parse(await readFile(file, 'utf8')),
     );
@@ -205,7 +209,16 @@ test('branches from a saved message, restores independently and handles a missin
     );
     app = await launch(userData);
     page = await app.firstWindow();
-    await expect(page.getByText('来源不可用', { exact: true })).toBeVisible();
+    await expect(page.locator('.session-branch-origin')).toHaveText(
+      '来源不可用',
+    );
+    const branchTab = page.getByRole('tab', {
+      name: '原会话 分支',
+      exact: true,
+    });
+    await expect(branchTab).toHaveAccessibleDescription(/分支.*来源不可用/);
+    await branchTab.focus();
+    await expect(page.locator('.session-branch-hint')).toHaveText('来源不可用');
     await expect(
       page.getByRole('button', { name: '打开来源会话', exact: true }),
     ).toHaveCount(0);
@@ -666,6 +679,205 @@ test('keeps an unsupported record intact and offers retry instead of silently st
   } finally {
     await app.close();
     expect(await readFile(file, 'utf8')).toBe(original);
+    expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(before);
+  }
+});
+
+test('branch tabs reveal real origin on focus and hover and handle changed source', async ({}, info) => {
+  const before = await captureFixtureHash(fixtureRoot);
+  const userData = info.outputPath('branch-tab-user-data');
+  await mkdir(userData, { recursive: true });
+  const file = path.join(userData, 'pioneer-session-state.json');
+  let app = await launch(userData);
+  try {
+    let page = await app.firstWindow();
+    await page
+      .getByRole('button', { name: 'Open project alpha-app', exact: true })
+      .click();
+    await page.getByRole('button', { name: '新建会话', exact: true }).click();
+    await page.getByRole('button', { name: '重命名会话', exact: true }).click();
+    await page
+      .getByRole('textbox', { name: '会话名称', exact: true })
+      .fill('原会话');
+    await page.getByRole('button', { name: '保存名称', exact: true }).click();
+    const source = page.getByRole('tab', { name: '原会话', exact: true });
+    await expect(source.locator('.session-branch-badge')).toHaveCount(0);
+    await page
+      .getByRole('textbox', { name: '给 Agent 的消息', exact: true })
+      .fill('第一条消息');
+    await page.getByRole('button', { name: '保存到会话', exact: true }).click();
+    await page
+      .getByRole('button', { name: '从第 1 条消息创建分支', exact: true })
+      .click();
+    const branch = page.getByRole('tab', { name: '原会话 分支', exact: true });
+    const hint = page.locator('.session-branch-hint');
+    await expect(branch.locator('.session-branch-badge')).toHaveText('分支');
+    await expect(branch).toHaveAccessibleDescription(
+      /分支.*来源：原会话 · 第 1 条消息/,
+    );
+    await branch.focus();
+    await expect(hint).toBeVisible();
+    await expect(hint).toContainText('来源：原会话 · 第 1 条消息');
+    await branch.press('Escape');
+    await expect(hint).toBeHidden();
+    await page.getByRole('tab', { name: 'Library', exact: true }).focus();
+    await branch.focus();
+    await expect(hint).toBeVisible();
+    await page.screenshot({ path: info.outputPath('branch-tab-focused.png') });
+    await branch.press('ArrowLeft');
+    await expect(source).toBeFocused();
+    await expect(source).toHaveAttribute('aria-selected', 'true');
+    await source.press('ArrowRight');
+    await expect(branch).toBeFocused();
+    await expect(branch).toHaveAttribute('aria-selected', 'true');
+    await page.getByRole('tab', { name: 'Library', exact: true }).focus();
+    await page.mouse.move(0, 0);
+    await expect(hint).toBeHidden();
+    await branch.hover();
+    await expect(hint).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(hint).toBeHidden();
+    await page.mouse.move(0, 0);
+    await branch.hover();
+    await expect(hint).toBeVisible();
+    const branchBox = await branch.boundingBox();
+    const initialHintBox = await hint.boundingBox();
+    if (!branchBox || !initialHintBox)
+      throw new Error('Missing hover geometry');
+    await page.mouse.move(
+      branchBox.x + branchBox.width / 2,
+      initialHintBox.y + 2,
+    );
+    await expect(hint).toBeVisible();
+    await page.mouse.move(0, 0);
+    await expect(hint).toBeHidden();
+    await expect(page.locator('.save-status')).toHaveText('已保存到本机');
+    await app.close();
+
+    const stored = SessionStateRecordSchema.parse(
+      JSON.parse(await readFile(file, 'utf8')),
+    );
+    const child = stored.state.sessions.find((session) => session.branchOrigin);
+    const original = stored.state.sessions.find(
+      (session) => session.id === child?.branchOrigin?.sessionId,
+    );
+    if (!original) throw new Error('Missing source session');
+    original.title = '很长的来源会话名称'.repeat(5).slice(0, 48);
+    if (!child) throw new Error('Missing branch session');
+    const extra = {
+      ...original,
+      id: 'session:extra-tab' as const,
+      title: '额外会话',
+      branchOrigin: null,
+    };
+    stored.state.sessions.push(extra);
+    stored.state.openSessionIds.splice(
+      stored.state.openSessionIds.indexOf(child.id),
+      0,
+      extra.id,
+    );
+    stored.state.mruTabIds.push(extra.id);
+    await writeFile(
+      file,
+      JSON.stringify(SessionStateRecordSchema.parse(stored)),
+    );
+    app = await launch(userData);
+    page = await app.firstWindow();
+    await app.evaluate(({ BrowserWindow }) =>
+      BrowserWindow.getAllWindows()[0]?.setContentSize(640, 800),
+    );
+    const narrowBranch = page.getByRole('tab', {
+      name: '原会话 分支',
+      exact: true,
+    });
+    const strip = page.getByRole('tablist', { name: 'Workspace sections' });
+    await page.getByRole('tab', { name: 'Settings', exact: true }).focus();
+    await page.mouse.move(0, 0);
+    await strip.evaluate((node) => {
+      node.scrollLeft = 0;
+    });
+    const beforeScroll = await narrowBranch.boundingBox();
+    if (!beforeScroll) throw new Error('Missing branch tab geometry');
+    await strip.evaluate((node, left) => {
+      node.scrollLeft = Math.max(0, left - 540);
+    }, beforeScroll.x);
+    const partial = await narrowBranch.boundingBox();
+    if (!partial) throw new Error('Missing branch tab geometry');
+    expect(partial.x + partial.width).toBeGreaterThan(640);
+    const scrollBeforeHover = await strip.evaluate((node) => node.scrollLeft);
+    await page.mouse.move(630, partial.y + 20);
+    await expect(page.locator('.session-branch-hint')).toBeVisible();
+    expect(await strip.evaluate((node) => node.scrollLeft)).toBe(
+      scrollBeforeHover,
+    );
+    await narrowBranch.focus();
+    const narrowHint = page.locator('.session-branch-hint');
+    await expect(narrowHint).toContainText(original.title);
+    const hintBox = await narrowHint.boundingBox();
+    const closeBox = await page
+      .getByRole('button', { name: 'Close 原会话 分支', exact: true })
+      .boundingBox();
+    const stripBox = await strip.boundingBox();
+    if (!hintBox || !closeBox || !stripBox)
+      throw new Error('Missing narrow-window geometry');
+    await page.screenshot({
+      path: info.outputPath('branch-tab-narrow-long.png'),
+    });
+    expect(hintBox.x).toBeGreaterThanOrEqual(0);
+    expect(hintBox.x + hintBox.width).toBeLessThanOrEqual(640);
+    expect(hintBox.y + hintBox.height).toBeLessThanOrEqual(800);
+    expect(closeBox.x).toBeGreaterThanOrEqual(stripBox.x);
+    expect(closeBox.x + closeBox.width).toBeLessThanOrEqual(
+      stripBox.x + stripBox.width + 1,
+    );
+    expect(await strip.evaluate((node) => node.scrollLeft)).toBeGreaterThan(
+      scrollBeforeHover,
+    );
+    await app.evaluate(({ BrowserWindow }) =>
+      BrowserWindow.getAllWindows()[0]?.setContentSize(640, 150),
+    );
+    await expect
+      .poll(async () => {
+        const box = await narrowHint.boundingBox();
+        const height = await page.evaluate(() => window.innerHeight);
+        return box != null && box.y >= 0 && box.y + box.height <= height;
+      })
+      .toBe(true);
+    await app.close();
+
+    original.messages[0] = '来源消息已变化';
+    await writeFile(
+      file,
+      JSON.stringify(SessionStateRecordSchema.parse(stored)),
+    );
+    app = await launch(userData);
+    page = await app.firstWindow();
+    const stale = page.getByRole('tab', { name: '原会话 分支', exact: true });
+    await stale.focus();
+    await expect(stale.locator('.session-branch-badge')).toHaveText('分支');
+    await expect(page.locator('.session-branch-hint')).toHaveText('来源不可用');
+    await expect(stale).toHaveAccessibleDescription(/分支.*来源不可用/);
+    await page.screenshot({
+      path: info.outputPath('branch-tab-unavailable.png'),
+    });
+    await expect(
+      page.getByRole('button', { name: '打开来源会话', exact: true }),
+    ).toHaveCount(0);
+    await page
+      .getByRole('button', { name: 'Close 原会话 分支', exact: true })
+      .click();
+    await expect(stale).toHaveCount(0);
+    await expect(
+      page.getByRole('tab', { name: original.title, exact: true }),
+    ).toBeFocused();
+    await page.getByRole('tab', { name: 'Library', exact: true }).click();
+    await page
+      .getByRole('button', { name: '打开会话 原会话 分支', exact: true })
+      .click();
+    await page.mouse.move(0, 0);
+    await expect(page.locator('.session-branch-hint')).toHaveCount(0);
+  } finally {
+    await app.close();
     expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(before);
   }
 });

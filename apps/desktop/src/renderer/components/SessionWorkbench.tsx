@@ -7,6 +7,7 @@ import type {
 import { createDockLayout } from '../../shared/docking';
 import type { SessionWorkspaceAction } from '../state/session-workspace-reducer';
 import type { SessionSaveStatus } from '../state/session-save-queue';
+import { resolveBranchOrigin } from '../state/session-branch-origin';
 import { PanelMenu } from './PanelMenu';
 import { SessionTitle } from './SessionTitle';
 import { Conversation } from './Conversation';
@@ -34,9 +35,7 @@ export function SessionWorkbench({
 }): React.JSX.Element {
   const dock = session.dock;
   const origin = session.branchOrigin;
-  const sourceAvailable =
-    origin != null &&
-    sourceSession?.messages[origin.messageIndex] === origin.messageText;
+  const originView = resolveBranchOrigin(origin, sourceSession);
   const saved = session.savedDock;
   const atSaved = !!saved && JSON.stringify(saved) === JSON.stringify(dock);
   const customized =
@@ -59,9 +58,9 @@ export function SessionWorkbench({
           </p>
           {origin ? (
             <p className="session-branch-origin">
-              {sourceAvailable ? (
+              {originView?.kind === 'available' ? (
                 <>
-                  来源：{sourceSession.title} · 第 {origin.messageIndex + 1}{' '}
+                  来源：{originView.title} · 第 {originView.messageIndex + 1}{' '}
                   条消息{' '}
                   <button
                     type="button"

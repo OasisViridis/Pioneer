@@ -211,14 +211,16 @@
       "code": {
         "exportName": "SessionTabStrip",
         "path": "apps/desktop/src/renderer/components/SessionTabStrip.tsx",
-        "commit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
-        "blob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
-        "inAcceptedMain": true,
+        "commit": null,
+        "blob": "963e6ea1df3aeee4f1d5c1dd60d319cb731474e8",
+        "inAcceptedMain": false,
         "mainBlob": "01ce7abe75914f3b6b5a7696b7c1de7428e1780d",
         "props": {
           "state": "SessionWorkspaceState",
           "dispatch": "Dispatch<SessionWorkspaceAction>"
-        }
+        },
+        "proposedInThisPR": true,
+        "baseCommit": "7ab2c9c1fa2a1d4e3a2f1778575119fd8d9dcc4a"
       },
       "usedProps": ["state", "dispatch"],
       "example": "<SessionTabStrip state={state} dispatch={dispatch} />",
@@ -297,7 +299,7 @@
     "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "2d39cd9aeeeb35137a6813016a4cf1e8dce9fcf1",
     "apps/desktop/src/renderer/components/Conversation.tsx": "cf72736a084a10821e93d876ebde2506fc3e13f3",
     "apps/desktop/src/renderer/styles/app.css": "cfce7cf1c923f3e0b4febc85b49a3d1e96b15658",
-    "apps/desktop/src/renderer/styles/session-workbench.css": "9a628a80c7c8adb759da62b07d78d7da108f428d",
+    "apps/desktop/src/renderer/styles/session-workbench.css": "468944a19375f407b176684fc6ac8c111b9ef272",
     "tests/e2e/design-mappings.e2e.spec.ts": "41968a251c1e44c8b29d1ffb704e6dd23815f7e6",
     "tests/e2e/p2-run.e2e.spec.ts": "08363406bd9129bc9891b472a6a95fd3ea952393",
     "tests/e2e/design-decoration.e2e.spec.ts": "ee00c34bc7c5699d7c52bbbd1553b73e3b03da58"
