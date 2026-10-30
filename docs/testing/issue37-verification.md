@@ -50,7 +50,7 @@ pnpm design:delivery writeback-plan <PR编号> <已登记featureId>
 
 ## Webhook 保留阻塞
 
-顺序仍是检查 → 获准回传 → Webhook。没有启动 HTTP 服务、安装 n8n、购买服务或启用 repository_dispatch。后来获准的 Figma 令牌仅用于下文所述只读核验；命名版本是草案，不是事件接收验收。本轮不引入只有受控 payload 通过的假接收器。
+顺序仍是检查 → 获准回传 → Webhook。没有启动 HTTP 服务、安装 n8n、购买服务或启用 repository_dispatch。2026-10-29 获准的 Figma 令牌当时用于下文所述只读核验，2026-10-30 又用于下文所述真实回填；命名版本是草案，不是事件接收验收。本轮不引入只有受控 payload 通过的假接收器。
 
 后续真实接入必须先具备：获准 HTTPS/n8n 接收器、Figma Webhook 权益与 passcode、固定版本读取凭证、S2 的获准 dispatch 消费者及执行成本边界。按[官方事件字段](https://developers.figma.com/docs/rest-api/webhooks-events/)和[passcode 校验要求](https://developers.figma.com/docs/rest-api/webhooks-security/)处理：
 
