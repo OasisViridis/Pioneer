@@ -14,7 +14,7 @@
 | 目标观察     | [`apps/desktop/src/main/harness/write-permission/observe-targets.ts`](../../apps/desktop/src/main/harness/write-permission/observe-targets.ts) |
 | 纯决策       | [`apps/desktop/src/main/harness/write-permission/decision.ts`](../../apps/desktop/src/main/harness/write-permission/decision.ts)               |
 | 共享读取     | [`apps/desktop/src/main/harness/bounded-read.ts`](../../apps/desktop/src/main/harness/bounded-read.ts)                                         |
-| 探针测试     | [`tests/contract/write-permission.test.ts`](../../tests/contract/write-permission.test.ts)：59 项 Contract 探针                                |
+| 探针测试     | [`tests/contract/write-permission.test.ts`](../../tests/contract/write-permission.test.ts)：64 项 Contract 探针                                |
 
 没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段；`run-ipc.ts` 与 `pioneer-run.ts` 未改动。`egress-materials.ts` 只改了内部读取实现，对外错误码映射不变（`UNSTABLE` → `MATERIAL_NOT_ALLOWED`，其余读取失败 → `INVALID_REQUEST`）。
 
@@ -23,7 +23,7 @@
 | 项         | 命令/位置                                                      | 结果                                                               |
 | ---------- | -------------------------------------------------------------- | ------------------------------------------------------------------ |
 | 仓库规范化 | `pnpm verify:repository`                                       | 6/6 通过                                                           |
-| 定向探针   | `pnpm exec vitest run tests/contract/write-permission.test.ts` | 59/59 通过；其中 1 条在平台复用文件身份时显式 `skip`（本机未触发） |
+| 定向探针   | `pnpm exec vitest run tests/contract/write-permission.test.ts` | 64/64 通过；其中 1 条在平台复用文件身份时显式 `skip`（本机未触发） |
 | 完整门禁   | `pnpm check`                                                   | 见下方"门禁结果"                                                   |
 | 类型       | `pnpm typecheck`、`pnpm test:contract:types`                   | 通过                                                               |
 | 代码风格   | `pnpm lint`、`pnpm format:check`（均在 `pnpm check` 内）       | 通过                                                               |
@@ -31,9 +31,9 @@
 
 ### 门禁结果
 
-最终 `pnpm check`（日志 `tmp/issue18/full-check-20.log`，2026-11-02）退出码 0：
+最终 `pnpm check`（日志 `tmp/issue18/full-check-21.log`，2026-11-02）退出码 0：
 
-- Contract Tests：453/453 通过（40 个测试文件，含本票 59 项）；
+- Contract Tests：458/458 通过（40 个测试文件，含本票 64 项）；
 - Prototype Tests：210/210 通过；
 - Real Electron E2E：39/39 通过（先 build 再运行）；
 - 最终 package smoke：Electron Forge 打包完成。

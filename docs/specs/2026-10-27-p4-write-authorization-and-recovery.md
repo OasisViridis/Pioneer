@@ -10,7 +10,7 @@
 | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 交付物   | 本规格、[写入权限契约](../../apps/desktop/src/shared/contracts/write-permission.ts)、[目标观察](../../apps/desktop/src/main/harness/write-permission/observe-targets.ts)、[纯决策](../../apps/desktop/src/main/harness/write-permission/decision.ts)、[探针](../../tests/contract/write-permission.test.ts) |
 | 共享读取 | [`apps/desktop/src/main/harness/bounded-read.ts`](../../apps/desktop/src/main/harness/bounded-read.ts)，同时被外发材料读取复用                                                                                                                                                                              |
-| 不做     | 真实写入执行器、批准界面、内核级沙箱、恢复执行器；这些属于 #19 与 #20                                                                                                                                                                                                                                       |
+| 不做     | 真实写入执行器、权限选择器界面、内核级沙箱、恢复执行器；这些属于 #19 与 #20                                                                                                                                                                                                                                       |
 | 前提     | §9 的 12 个决定需要人类确认；确认前写入能力保持关闭                                                                                                                                                                                                                                                         |
 
 ## 1. 四类许可的授权关系
@@ -42,9 +42,9 @@
 | 界面档位        | `mode`            | 允许                                                             | 拒绝                             |
 | --------------- | ----------------- | ---------------------------------------------------------------- | -------------------------------- |
 | 仅可查看        | `read_only`       | 读取授权范围内的文件                                             | 任何写入、删除、创建             |
-| 工作区内修改    | `workspace_write` | 在项目内创建、修改普通文件                                       | 越界路径、保护路径               |
+| 工作区内修改    | `workspace_write` | 在项目内替换已有普通文件的内容                                   | 越界路径、保护路径               |
 | 完全权限        | `full_access`     | 项目内的普通文件，含保护路径；不含项目外路径与命令执行           | 未明确授权的项目外操作           |
-| 自动审查（EXP） | `auto_review`     | 与工作区内修改相同，且不需逐次确认；写前检查与写后校验都必须通过 | 保护路径、无法确认的目标、超预算 |
+| 自动审查（EXP） | `auto_review`     | 与工作区内修改相同的替换能力，且不需逐次确认；写前检查与写后校验都必须通过 | 保护路径、无法确认的目标、超预算 |
 
 字段见 `WritePermissionSchema`：
 
@@ -144,7 +144,9 @@
 - `full_access`：项目内普通文件，含保护路径。仍不越过项目根，也不等于命令执行；开启需要风险确认。
 - `auto_review`：在 `workspace_write` 的边界内免去逐次确认，前提是写前校验与写后回读都通过；它不增强任何能力。
 
-四档都不改变读取策略：隐藏文件与凭证类名称在观察阶段仍然被拒绝，`full_access` 不绕过这一层。真正的内核级隔离（Windows 受限 Token + job object、低权限账户或 MXC）属于 #19/#20，本票只定义判定。
+读取策略与写入档位的关系：观察阶段默认沿用只读策略，隐藏文件与凭证类名称被拒绝。`full_access` 下只有**保护路径**（`WRITE_PROTECTED_PATHS` 加授权里自带的 `protectedPaths`）通过允许清单进入观察，其余隐藏名称照样拒绝；`workspace_write` 与 `auto_review` 连保护路径都不进入观察，因此 `.git` 在这两档下观察结果就是 `unreadable`。允许清单由 `observationAllowance(permission)` 给出，只有 `full_access` 返回非空。
+
+真正的内核级隔离（Windows 受限 Token + job object、低权限账户或 MXC）属于 #19/#20，本票只定义判定。
 
 ## 4. 落盘、部分完成与验证失败
 
@@ -155,9 +157,9 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 | 记录       | 字段                                                                       | 含义                                                             |
 | ---------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | `intent`   | `runId`、`revision`、`path`、`beforeSha256`、`at`                          | 真正写之前先落盘，是"这次运行动过这个目标"的唯一证据             |
-| `applied`  | 同上加 `afterSha256`、`observedSha256`、`observedIdentity`、`verification` | 写完回读的结果；`verified` 要求 `observedSha256 === afterSha256` |
-| `failed`   | 同上加 `code`                                                              | 这个目标没写成，`code` 取失败码                                  |
-| `recovery` | 同上加 `action`、`observedSha256`                                          | 恢复做了什么，以及当时观察到的哈希                               |
+| `applied`  | `runId`、`revision`、`path`、`afterSha256`、`observedSha256`、`observedIdentity`、`verification`、`at` | 写完回读的结果；`verified` 要求 `observedSha256 === afterSha256` |
+| `failed`   | `runId`、`revision`、`path`、`code`、`at`                                  | 这个目标没写成，`code` 取失败码                                  |
+| `recovery` | `runId`、`revision`、`path`、`action`、`observedSha256`、`at`              | 恢复做了什么，以及当时观察到的哈希                               |
 
 日志是"实际发生了什么"，不是"打算发生什么"。没有 `intent` 的 `applied` 不算证明：写前校验链必须完整。
 
@@ -222,7 +224,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 ### 5.5 恢复的权限
 
-恢复同样受权限模式约束：`read_only` 下不能恢复，`workspace_write` 与 `auto_review` 只能恢复项目内普通文件，保护路径不恢复。恢复不再需要"重新批准"，因为它作用于本 Run 已证明写入的目标，并且要重新观察当前磁盘。
+恢复同样受权限模式约束：`read_only` 下不能恢复，`workspace_write` 与 `auto_review` 只能恢复项目内普通文件，保护路径不恢复。恢复不再需要"重新确认"，因为它作用于本 Run 已证明写入的目标，并且要重新观察当前磁盘。
 
 ## 6. 拒绝码与状态词汇
 
@@ -240,7 +242,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 ## 7. 负向探针矩阵（本票已执行）
 
-[探针测试](../../tests/contract/write-permission.test.ts)共 59 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
+[探针测试](../../tests/contract/write-permission.test.ts)共 64 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
 
 | 组         | 覆盖                                                                                                                          | 期望                                                 | describe                     |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------- |
@@ -287,7 +289,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 | 5   | 权限在切任务、切项目、关窗、重启时失效（本规格：是）                | PENDING |
 | 6   | 升权需要再次确认、降权立即生效（本规格：是）                        | PENDING |
 | 7   | 完全权限与自动审查需要风险确认（本规格：是）                        | PENDING |
-| 8   | 恢复不需要重新批准，只受权限与当前磁盘约束（本规格：是）            | PENDING |
+| 8   | 恢复不需要重新确认，只受权限与当前磁盘约束（本规格：是）            | PENDING |
 | 9   | 接受写前校验与落盘之间的残余竞态（§3.4）                            | PENDING |
 | 10  | 拒绝不撤销权限、不消耗任何一次性记录（本规格：是）                  | PENDING |
 | 11  | 目标上限 16、单文件 1 MiB、整批 4 MiB（§2.1）                       | PENDING |

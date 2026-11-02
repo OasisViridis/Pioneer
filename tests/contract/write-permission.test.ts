@@ -32,6 +32,7 @@ import {
 import {
   checkWritePermission,
   evaluateWriteTargets,
+  observationAllowance,
   permissionDeniedOutcomes,
   planRecovery,
   rejectedOutcomes,
@@ -406,6 +407,40 @@ describe('write permission scope', () => {
   });
 });
 
+describe('full access and protected paths', () => {
+  it('lets full access observe and accept a protected path end to end', async () => {
+    const permission = permissionOf({
+      mode: 'full_access',
+      riskAcknowledged: true,
+    });
+    await write(projectRoot, '.git/config', 'core');
+    const target = targetOf('.git/config', 'core', 'core\nedited');
+    expect(checkWritePermission([target], permission)).toMatchObject({
+      ok: true,
+    });
+    const observations = await observeWriteTargets(projectRoot, [target], {
+      allowProtectedPaths: observationAllowance(permission),
+    });
+    expect(observations[0]).toMatchObject({ state: 'unchanged' });
+    expect(evaluateWriteTargets([target], observations)).toEqual({ ok: true });
+  });
+
+  it('keeps a protected path unreadable in the workspace modes', async () => {
+    const permission = permissionOf();
+    await write(projectRoot, '.git/config', 'core');
+    const target = targetOf('.git/config', 'core', 'core\nedited');
+    expect(observationAllowance(permission)).toEqual([]);
+    const observations = await observeWriteTargets(projectRoot, [target], {
+      allowProtectedPaths: observationAllowance(permission),
+    });
+    expect(observations[0]).toMatchObject({ state: 'unreadable' });
+    const verdict = evaluateWriteTargets([target], observations);
+    expect(verdict.ok).toBe(false);
+    if (verdict.ok) return;
+    expect(verdict.error.code).toBe('TARGET_UNREADABLE');
+  });
+});
+
 describe('write-time target check', () => {
   it('allows the whole batch when every target is unchanged', async () => {
     const projectRoot = await makeProject();
@@ -469,6 +504,25 @@ describe('write-time target check', () => {
     expect(verdict.ok).toBe(false);
     if (verdict.ok) return;
     expect(verdict.error.code).toBe('TARGET_IDENTITY_UNAVAILABLE');
+  });
+
+  it('compares the whole identity, not just the file index', async () => {
+    const projectRoot = await makeProject();
+    const target = await seed(projectRoot, 'src/a.ts', 'a');
+    const observations = await observeWriteTargets(projectRoot, [target]);
+    const current = observations[0]?.identity;
+    if (current === null || current === undefined) return;
+    const sameIdOtherBirth: WriteTarget = {
+      ...target,
+      identity: {
+        fileId: current.fileId,
+        birthtimeMs: current.birthtimeMs + 1,
+      },
+    };
+    const verdict = evaluateWriteTargets([sameIdOtherBirth], observations);
+    expect(verdict.ok).toBe(false);
+    if (verdict.ok) return;
+    expect(verdict.error.code).toBe('TARGET_REPLACED');
   });
 
   it('maps every observed state to its rejection code', () => {
@@ -603,7 +657,12 @@ describe('target observation', () => {
     await rm(join(projectRoot, 'src/a.ts'));
     await write(projectRoot, 'src/a.ts', 'stable');
     const after = await identityFor(projectRoot, 'src/a.ts');
-    if (before !== null && after !== null && before.fileId === after.fileId) {
+    if (
+      before !== null &&
+      after !== null &&
+      before.fileId === after.fileId &&
+      before.birthtimeMs === after.birthtimeMs
+    ) {
       context.skip();
       return;
     }
@@ -777,6 +836,24 @@ describe('write outcomes', () => {
     ]);
   });
 
+  it('refuses an intent recorded after the applied record', () => {
+    const target = targetOf('src/a.ts', 'a', 'a2');
+    const records = [
+      WriteChangeJournalRecordSchema.parse({
+        kind: 'intent',
+        runId: RUN_ID,
+        revision: 1,
+        path: 'src/a.ts',
+        beforeSha256: target.before.sha256,
+        at: '2026-10-27T12:00:09.000Z',
+      }),
+      appliedRecord(target),
+    ];
+    expect(summarizeWriteOutcomes(RUN_ID, [target], records)[0]).toMatchObject({
+      status: 'verification_failed',
+    });
+  });
+
   it('reports a proven restore as restored and an unproven one as failed', () => {
     const target = at(targets, 0);
     const proven = [
@@ -856,6 +933,27 @@ describe('recovery planning', () => {
       runId: RUN_ID,
       targets: [target],
       records: [],
+      observations,
+    });
+    expect(plan.outOfScope).toEqual(['src/index.ts']);
+    expect(plan.actions).toEqual([]);
+  });
+
+  it('keeps a failed write with no applied record out of scope', async () => {
+    const target = await seed(projectRoot, 'src/index.ts', 'before\n');
+    const observations = await observeWriteTargets(projectRoot, [target]);
+    const failed = WriteChangeJournalRecordSchema.parse({
+      kind: 'failed',
+      runId: RUN_ID,
+      revision: 1,
+      path: 'src/index.ts',
+      code: 'WRITE_FAILED',
+      at: '2026-10-27T12:00:02.000Z',
+    });
+    const plan = planRecovery({
+      runId: RUN_ID,
+      targets: [target],
+      records: [failed],
       observations,
     });
     expect(plan.outOfScope).toEqual(['src/index.ts']);

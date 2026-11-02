@@ -116,6 +116,19 @@ export function permissionDeniedOutcomes(
   }));
 }
 
+/**
+ * Protected paths observation may read through the sensitive-name filter.
+ * Only `full_access` opens them: the other modes must see `.git` as
+ * `unreadable`, which is what makes their refusal honest instead of a
+ * permission check against a target nobody was allowed to inspect.
+ */
+export function observationAllowance(
+  permission: WritePermission,
+): readonly string[] {
+  if (permission.mode !== 'full_access') return [];
+  return [...WRITE_PROTECTED_PATHS, ...permission.protectedPaths];
+}
+
 /** Map an observed target state to the rejection code it produces. */
 export function rejectionCodeFor(state: WriteTargetState): WriteRejectionCode {
   switch (state) {

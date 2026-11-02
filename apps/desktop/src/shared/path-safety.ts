@@ -1,6 +1,6 @@
 /**
  * One rule for "may this path component appear in a project path", shared by the
- * write-approval contract and the read-only tool policy. Both paths guard the
+ * write-permission contract and the read-only tool policy. Both paths guard the
  * same boundary, so the segment rule lives once to keep them from drifting.
  */
 

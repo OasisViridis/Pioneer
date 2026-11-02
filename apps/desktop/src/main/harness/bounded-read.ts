@@ -7,7 +7,7 @@ import type { Stats } from 'node:fs';
  * Callers must treat `buffer.subarray(0, bytesRead)` as the file content: the
  * buffer is allocated at `capacity`, and a short read is reported as UNSTABLE
  * rather than silently truncating the content. Both the egress manifest and
- * the write-approval observer depend on this single implementation so the two
+ * the write-permission observer depend on this single implementation so the two
  * safety paths cannot drift apart.
  */
 
