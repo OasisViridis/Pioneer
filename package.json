@@ -10,8 +10,8 @@
   "scripts": {
     "build:desktop": "pnpm --filter @pioneer/desktop build",
     "dev": "pnpm --filter @pioneer/desktop start",
-    "format": "prettier --write apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync",
-    "format:check": "prettier --check apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync",
+    "format": "prettier --write apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync tools/experiments tests/experiments",
+    "format:check": "prettier --check apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync tools/experiments tests/experiments",
     "lint": "eslint apps/desktop/src apps/desktop/design tests/contract tests/e2e *.config.* tools/design-*.mjs tests/design-sync",
     "typecheck": "pnpm --filter @pioneer/desktop typecheck",
     "package:smoke": "pnpm --filter @pioneer/desktop build",
@@ -33,7 +33,11 @@
     "design:delivery": "node tools/design-delivery-cli.mjs",
     "design:external": "node tools/design-external-cli.mjs",
     "test:visual": "playwright test --config tests/e2e/playwright.visual.config.ts",
-    "design:visual:candidate": "playwright test --config tests/e2e/playwright.visual-candidate.config.ts"
+    "design:visual:candidate": "playwright test --config tests/e2e/playwright.visual-candidate.config.ts",
+    "experiment:build": "node tools/experiments/build-dataset.mjs --captures docs/experiments/m5a/captures --tasks docs/experiments/m5a/v1/tasks.json --out docs/experiments/m5a/pilot-controlled",
+    "experiment:analyze": "node tools/experiments/analyze.mjs --dataset docs/experiments/m5a/pilot-controlled/dataset.jsonl --tasks docs/experiments/m5a/v1/tasks.json --protocol docs/experiments/m5a/v1/protocol.json --plan docs/experiments/m5a/v1/analysis-plan.json --out docs/experiments/m5a/pilot-controlled",
+    "experiment:freeze": "node tools/experiments/freeze.mjs --protocol-dir docs/experiments/m5a/v1",
+    "test:experiments": "node --test tests/experiments/*.test.mjs"
   },
   "devDependencies": {
     "@eslint/compat": "2.1.1",
