@@ -330,4 +330,17 @@ describe('packaged acceptance launch seam', () => {
       }),
     ).toThrow('must be outside');
   });
+
+  it('rejects a report path that is also the run script', async () => {
+    const fixture = await createAcceptanceFixture();
+
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_REPORT: fixture.scriptPath,
+      }),
+    ).toThrow(
+      'PIONEER_ACCEPTANCE_REPORT and PIONEER_ACCEPTANCE_RUN_SCRIPT must differ',
+    );
+  });
 });

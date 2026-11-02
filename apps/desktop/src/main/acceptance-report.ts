@@ -1,4 +1,10 @@
-import { rename, writeFile } from 'node:fs/promises';
+import { writeFileAtomic } from './atomic-file';
+import { IPC_CHANNELS } from '../shared/contracts/ipc';
+import { RUN_IPC_CHANNELS } from '../shared/contracts/run-ipc';
+import {
+  SESSION_CLOSE_REQUESTED_CHANNEL,
+  SESSION_IPC_CHANNELS,
+} from '../shared/contracts/session-ipc';
 
 /**
  * Startup facts a packaged acceptance run can read back without trusting the
@@ -27,6 +33,20 @@ export interface PackagedAcceptanceReport {
   channels: string[];
 }
 
+/**
+ * Every IPC channel name this build wires, in one place. The report records it
+ * and the acceptance spec compares the whole list with the shared contract
+ * maps, so adding a channel cannot silently leave the report behind.
+ */
+export function acceptanceChannels(): string[] {
+  return [
+    ...Object.values(IPC_CHANNELS),
+    ...Object.values(SESSION_IPC_CHANNELS),
+    SESSION_CLOSE_REQUESTED_CHANNEL,
+    ...Object.values(RUN_IPC_CHANNELS),
+  ];
+}
+
 /** Everything the main process already knows when it builds the report. */
 export interface PackagedAcceptanceReportInput {
   isPackaged: boolean;
@@ -47,7 +67,6 @@ export interface PackagedAcceptanceReportInput {
     adapterAvailable: boolean;
     modelName: string | null;
   };
-  channels: readonly string[];
   now: () => Date;
 }
 
@@ -79,20 +98,14 @@ export function buildPackagedAcceptanceReport(
     adapterKind: input.runHost.adapterKind,
     adapterAvailable: input.runHost.adapterAvailable,
     modelName: input.runHost.modelName,
-    channels: [...input.channels],
+    channels: acceptanceChannels(),
   };
 }
 
-/** Write through a temporary sibling so a reader never sees half a report. */
+/** Write through a uniquely named temporary sibling so no reader sees half a report. */
 export async function writePackagedAcceptanceReport(
   reportPath: string,
   report: PackagedAcceptanceReport,
 ): Promise<void> {
-  const temporaryPath = `${reportPath}.tmp`;
-  await writeFile(
-    temporaryPath,
-    `${JSON.stringify(report, null, 2)}\n`,
-    'utf-8',
-  );
-  await rename(temporaryPath, reportPath);
+  await writeFileAtomic(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 }

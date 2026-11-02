@@ -438,12 +438,6 @@ void app.whenReady().then(async () => {
       executablePath: app.getPath('exe'),
       catalog: catalogService.getCurrentCatalog(),
       runHost: assembledRunHost,
-      channels: [
-        ...Object.values(IPC_CHANNELS),
-        ...Object.values(SESSION_IPC_CHANNELS),
-        SESSION_CLOSE_REQUESTED_CHANNEL,
-        ...Object.values(RUN_IPC_CHANNELS),
-      ],
       now: () => new Date(),
     });
     await writePackagedAcceptanceReport(acceptanceConfig.reportPath, report);

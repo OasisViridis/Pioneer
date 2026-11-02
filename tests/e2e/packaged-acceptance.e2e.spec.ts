@@ -6,6 +6,7 @@ import {
   existsSync,
   readFileSync,
   realpathSync,
+  statSync,
   type WriteStream,
 } from 'node:fs';
 import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
@@ -19,19 +20,17 @@ import {
   type Page,
 } from '@playwright/test';
 
-import type { PackagedAcceptanceReport } from '../../apps/desktop/src/main/acceptance-report';
+import type { PackagedAcceptanceConfig } from '../../apps/desktop/src/main/acceptance-config';
+import {
+  acceptanceChannels,
+  type PackagedAcceptanceReport,
+} from '../../apps/desktop/src/main/acceptance-report';
 import {
   RunJournalRecordSchema,
   type RunJournalAccept,
   type RunJournalRecord,
   type RunJournalTerminal,
 } from '../../apps/desktop/src/main/harness/run-journal';
-import { IPC_CHANNELS } from '../../apps/desktop/src/shared/contracts/ipc';
-import { RUN_IPC_CHANNELS } from '../../apps/desktop/src/shared/contracts/run-ipc';
-import {
-  SESSION_CLOSE_REQUESTED_CHANNEL,
-  SESSION_IPC_CHANNELS,
-} from '../../apps/desktop/src/shared/contracts/session-ipc';
 
 import {
   captureFixtureHash,
@@ -75,16 +74,18 @@ const evidenceDirectory = path.join(
   'latest',
 );
 
+const runStatePath = path.join(
+  repositoryRoot,
+  'tmp',
+  'issue53-acceptance',
+  'run.json',
+);
+
 const cdpStartupTimeoutMs = 45_000;
 const windowTimeoutMs = 60_000;
 const runTimeoutMs = 90_000;
 
-const expectedChannels = [
-  ...Object.values(IPC_CHANNELS),
-  ...Object.values(SESSION_IPC_CHANNELS),
-  SESSION_CLOSE_REQUESTED_CHANNEL,
-  ...Object.values(RUN_IPC_CHANNELS),
-].sort();
+const expectedChannels = acceptanceChannels().sort();
 
 /** Development-only variables must not leak into the packaged launch. */
 const inheritedLaunchVariables = [
@@ -145,38 +146,40 @@ const sha256File = (filePath: string): Promise<string> =>
     });
   });
 
-interface GitEvidence {
+interface AcceptanceRunState {
+  startedAt: string;
   commit: string | null;
   dirty: boolean | null;
 }
 
-const readGitEvidence = (): GitEvidence => {
-  try {
-    const commit = execFileSync('git', ['rev-parse', 'HEAD'], {
-      cwd: repositoryRoot,
-      encoding: 'utf-8',
-    }).trim();
-    const status = execFileSync('git', ['status', '--porcelain'], {
-      cwd: repositoryRoot,
-      encoding: 'utf-8',
-    });
-    return { commit, dirty: status.trim().length > 0 };
-  } catch {
-    // Git may be unavailable where the spec runs; record that instead of
-    // claiming a clean worktree the run never observed.
-    return { commit: null, dirty: null };
+/**
+ * Reads the marker `prepare-acceptance-run.mjs` wrote before the package build.
+ * It anchors the run: the executable may not predate it, and the recorded
+ * commit describes the tree the package was built from.
+ */
+const readAcceptanceRunState = (): AcceptanceRunState => {
+  if (!existsSync(runStatePath)) {
+    throw new Error(
+      `STALE_EXECUTABLE: ${runStatePath} is missing; run \`pnpm acceptance:packaged\` instead of invoking playwright directly`,
+    );
   }
+  const parsed: unknown = JSON.parse(readFileSync(runStatePath, 'utf-8'));
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw new Error(`STALE_EXECUTABLE: ${runStatePath} is not a run marker`);
+  }
+  const state = parsed as Partial<AcceptanceRunState>;
+  if (typeof state.startedAt !== 'string') {
+    throw new Error(`STALE_EXECUTABLE: ${runStatePath} has no startedAt`);
+  }
+  return {
+    startedAt: state.startedAt,
+    commit: typeof state.commit === 'string' ? state.commit : null,
+    dirty: typeof state.dirty === 'boolean' ? state.dirty : null,
+  };
 };
 
-interface AcceptancePaths {
-  workspacePath: string;
-  userDataPath: string;
-  reportPath: string;
-  runScriptPath: string;
-}
-
 const createAcceptanceEnvironment = (
-  paths: AcceptancePaths,
+  paths: PackagedAcceptanceConfig,
 ): NodeJS.ProcessEnv => {
   const environment: NodeJS.ProcessEnv = { ...process.env };
   for (const variable of inheritedLaunchVariables) {
@@ -289,8 +292,9 @@ const stopChild = async (child: ChildProcess): Promise<void> => {
 };
 
 /**
- * Spawns the packaged executable. The child is always stopped if the CDP port
- * never appears, so a failed launch cannot leak an Electron process.
+ * Spawns the packaged executable. A spawn error and a missing CDP port both end
+ * in the same cleanup, so a failed launch cannot leak an Electron process or an
+ * open log stream.
  */
 const launchPackagedApp = async (options: {
   environment: NodeJS.ProcessEnv;
@@ -298,6 +302,7 @@ const launchPackagedApp = async (options: {
   userDataPath: string;
 }): Promise<PackagedApp> => {
   const logStream = createWriteStream(options.logPath, { flags: 'w' });
+  logStream.on('error', () => undefined);
   const child = spawn(packagedExecutablePath, ['--remote-debugging-port=0'], {
     env: options.environment,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -305,8 +310,16 @@ const launchPackagedApp = async (options: {
   });
   child.stdout.pipe(logStream);
   child.stderr.pipe(logStream);
+  const spawnFailure = new Promise<never>((_resolve, reject) => {
+    child.once('error', (error) => {
+      reject(new Error(`SPAWN_FAILED: ${describeError(error)}`));
+    });
+  });
   try {
-    const port = await waitForDevToolsPort(options.userDataPath);
+    const port = await Promise.race([
+      waitForDevToolsPort(options.userDataPath),
+      spawnFailure,
+    ]);
     return { child, port, logStream };
   } catch (error) {
     await stopChild(child).catch(() => undefined);
@@ -334,7 +347,8 @@ const findPackagedWindow = (browser: Browser): Promise<Page> =>
     },
   });
 
-const RETRY_MESSAGE = 'retry-partial-read';
+/** A journal read that landed on a half-written line; the caller retries. */
+class PartialJournalRead extends Error {}
 
 const readJournalRecords = (journalPath: string): RunJournalRecord[] => {
   const content = readFileSync(journalPath, 'utf-8');
@@ -345,8 +359,7 @@ const readJournalRecords = (journalPath: string): RunJournalRecord[] => {
     try {
       parsedLine = JSON.parse(line) as unknown;
     } catch {
-      // A half-written line is retried by the caller.
-      throw new Error(RETRY_MESSAGE);
+      throw new PartialJournalRead(journalPath);
     }
     const parsed = RunJournalRecordSchema.safeParse(parsedLine);
     if (!parsed.success) {
@@ -369,9 +382,7 @@ const waitForJournal = (journalPath: string): Promise<RunJournalRecord[]> =>
       try {
         records = readJournalRecords(journalPath);
       } catch (error) {
-        if (error instanceof Error && error.message === RETRY_MESSAGE) {
-          return null;
-        }
+        if (error instanceof PartialJournalRead) return null;
         throw error;
       }
       return records.some((record) => record.kind === 'terminal')
@@ -448,7 +459,18 @@ test('the packaged build completes one read-only run through the acceptance seam
   ).toBe(true);
 
   const startedAt = new Date().toISOString();
-  const git = readGitEvidence();
+  const runState = readAcceptanceRunState();
+  const runStartedAtMs = Date.parse(runState.startedAt);
+  if (!Number.isFinite(runStartedAtMs)) {
+    throw new Error(
+      `STALE_EXECUTABLE: ${runStatePath} startedAt is not a timestamp`,
+    );
+  }
+  const executableMtimeMs = statSync(packagedExecutablePath).mtimeMs;
+  expect(
+    executableMtimeMs,
+    'STALE_EXECUTABLE: the packaged executable predates this run, so the build did not produce it',
+  ).toBeGreaterThan(runStartedAtMs);
   const executableSha256 = await sha256File(packagedExecutablePath);
   const readme = readReadmeEvidence();
   const beforeHash = await captureFixtureHash(fixtureRoot);
@@ -589,11 +611,11 @@ test('the packaged build completes one read-only run through the acceptance seam
       ).toContain(line);
     }
 
-    // Two frames: the terminal status header, then the tool exchange itself.
-    await window.locator('.run-status').scrollIntoViewIfNeeded();
-    await window.screenshot({ path: statusScreenshotPath });
-    await runLogPanel.scrollIntoViewIfNeeded();
-    await window.screenshot({ path: eventsScreenshotPath });
+    // Two distinct element frames: the run controls with the terminal status,
+    // then the run-log panel with the tool exchange.
+    const runControls = window.locator('details.run-log');
+    await runControls.screenshot({ path: statusScreenshotPath });
+    await runLogPanel.screenshot({ path: eventsScreenshotPath });
     await testInfo.attach('packaged-run-status.png', {
       path: statusScreenshotPath,
       contentType: 'image/png',
@@ -629,6 +651,11 @@ test('the packaged build completes one read-only run through the acceptance seam
     expect(accepted.projectId).toBe(alphaProject.id);
     expect(terminal.runId).toBe(accepted.runId);
     expect(terminal.status).toBe('completed');
+    // The panel a person reads must name the same run the journal committed.
+    expect(
+      transcript,
+      'the run-log panel must show the run id the journal recorded',
+    ).toContain(terminal.runId);
 
     await copyFile(journalPath, path.join(evidenceFilesPath, 'journal.jsonl'));
     await copyFile(
@@ -668,8 +695,12 @@ test('the packaged build completes one read-only run through the acceptance seam
       outcome,
       startedAt,
       endedAt: new Date().toISOString(),
-      git,
-      executable: { path: packagedExecutablePath, sha256: executableSha256 },
+      source: runState,
+      executable: {
+        path: packagedExecutablePath,
+        sha256: executableSha256,
+        mtimeMs: executableMtimeMs,
+      },
       launch: {
         processId: app?.child.pid ?? null,
         cdpPort: app?.port ?? null,

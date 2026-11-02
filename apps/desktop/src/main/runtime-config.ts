@@ -1,5 +1,5 @@
 import {
-  containsPath,
+  isPathInsideOrEqual,
   requireExistingAbsoluteDirectory,
   type LaunchProfileApp,
 } from './launch-paths';
@@ -37,8 +37,8 @@ export function resolveLaunchRuntimeConfig(
   );
 
   if (
-    containsPath(rootPath, userDataPath) ||
-    containsPath(userDataPath, rootPath)
+    isPathInsideOrEqual(rootPath, userDataPath) ||
+    isPathInsideOrEqual(userDataPath, rootPath)
   ) {
     throw new Error(
       'PIONEER_E2E_ROOT and PIONEER_E2E_USER_DATA must be disjoint',

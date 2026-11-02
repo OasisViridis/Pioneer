@@ -89,7 +89,12 @@ export function requireAbsoluteOutputFile(
   }
 }
 
-export function containsPath(
+/**
+ * True when `candidatePath` is `parentPath` itself or sits below it, after
+ * normalising separators. Kept free of filesystem access on purpose: callers
+ * pass canonical paths.
+ */
+export function isPathInsideOrEqual(
   parentPath: string,
   candidatePath: string,
 ): boolean {

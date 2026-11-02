@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
+  acceptanceChannels,
   buildPackagedAcceptanceReport,
   writePackagedAcceptanceReport,
 } from '../../apps/desktop/src/main/acceptance-report';
@@ -22,7 +23,6 @@ const fixedNow = (): Date => new Date('2026-11-02T00:00:00.000Z');
 
 describe('packaged acceptance startup report', () => {
   it('copies the catalog and run host facts without sharing their arrays', () => {
-    const channels = ['catalog:get', 'run:start'];
     const report = buildPackagedAcceptanceReport({
       isPackaged: true,
       electronVersion: '44.2.0',
@@ -48,7 +48,6 @@ describe('packaged acceptance startup report', () => {
         adapterAvailable: true,
         modelName: null,
       },
-      channels,
       now: fixedNow,
     });
 
@@ -76,9 +75,9 @@ describe('packaged acceptance startup report', () => {
       adapterKind: 'controlled',
       adapterAvailable: true,
       modelName: null,
-      channels: ['catalog:get', 'run:start'],
+      channels: acceptanceChannels(),
     });
-    expect(report.channels).not.toBe(channels);
+    expect(report.channels).not.toBe(acceptanceChannels());
   });
 
   it('writes the report through a temporary sibling and leaves no temp file', async () => {
@@ -100,7 +99,6 @@ describe('packaged acceptance startup report', () => {
         adapterAvailable: false,
         modelName: null,
       },
-      channels: [],
       now: fixedNow,
     });
 

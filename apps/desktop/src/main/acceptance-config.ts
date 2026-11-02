@@ -1,5 +1,8 @@
+import { realpathSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import {
-  containsPath,
+  isPathInsideOrEqual,
   requireAbsoluteOutputFile,
   requireExistingAbsoluteDirectory,
   type LaunchProfileApp,
@@ -37,6 +40,15 @@ export type PackagedAcceptanceEnvironment = Readonly<
   >
 >;
 
+/** Canonicalises a path even when it does not exist yet. */
+const canonicalPath = (value: string): string => {
+  try {
+    return realpathSync(value);
+  } catch {
+    return resolve(value);
+  }
+};
+
 /**
  * The packaged acceptance run must name its script explicitly: the controlled
  * adapter's default script never reads a file, so a default would let a run
@@ -50,7 +62,7 @@ function requireScriptPath(
     'PIONEER_ACCEPTANCE_RUN_SCRIPT',
     value,
   );
-  if (containsPath(workspacePath, scriptPath)) {
+  if (isPathInsideOrEqual(workspacePath, scriptPath)) {
     throw new Error(
       'PIONEER_ACCEPTANCE_RUN_SCRIPT must be outside PIONEER_ACCEPTANCE_WORKSPACE',
     );
@@ -85,35 +97,37 @@ export function resolvePackagedAcceptanceConfig(
   );
 
   if (
-    containsPath(workspacePath, userDataPath) ||
-    containsPath(userDataPath, workspacePath)
+    isPathInsideOrEqual(workspacePath, userDataPath) ||
+    isPathInsideOrEqual(userDataPath, workspacePath)
   ) {
     throw new Error(
       'PIONEER_ACCEPTANCE_WORKSPACE and PIONEER_ACCEPTANCE_USER_DATA must be disjoint',
     );
   }
-  if (containsPath(workspacePath, reportPath)) {
+  if (isPathInsideOrEqual(workspacePath, reportPath)) {
     throw new Error(
       'PIONEER_ACCEPTANCE_REPORT must be outside PIONEER_ACCEPTANCE_WORKSPACE',
     );
   }
 
-  return {
+  const runScriptPath = requireScriptPath(
     workspacePath,
-    userDataPath,
-    reportPath,
-    runScriptPath: requireScriptPath(
-      workspacePath,
-      environment.PIONEER_ACCEPTANCE_RUN_SCRIPT,
-    ),
-  };
+    environment.PIONEER_ACCEPTANCE_RUN_SCRIPT,
+  );
+  if (runScriptPath === reportPath) {
+    throw new Error(
+      'PIONEER_ACCEPTANCE_REPORT and PIONEER_ACCEPTANCE_RUN_SCRIPT must differ',
+    );
+  }
+
+  return { workspacePath, userDataPath, reportPath, runScriptPath };
 }
 
 /**
  * Applies the isolated profile only after the whole acceptance config is valid.
  * A configured profile that is, contains or sits inside the application's own
- * profile directory is refused: the acceptance run must never reuse real user
- * data, even when the caller points it there on purpose.
+ * profile directory is refused, so the acceptance run can never reuse real user
+ * data, even through a junction or a differently spelled path.
  */
 export function applyPackagedAcceptanceConfig(
   app: PackagedAcceptanceApp,
@@ -122,10 +136,11 @@ export function applyPackagedAcceptanceConfig(
   const config = resolvePackagedAcceptanceConfig(app.isPackaged, environment);
   if (config === null) return null;
 
-  const applicationProfile = app.getPath('userData');
+  const applicationProfile = canonicalPath(app.getPath('userData'));
+  const userDataPath = canonicalPath(config.userDataPath);
   if (
-    containsPath(applicationProfile, config.userDataPath) ||
-    containsPath(config.userDataPath, applicationProfile)
+    isPathInsideOrEqual(applicationProfile, userDataPath) ||
+    isPathInsideOrEqual(userDataPath, applicationProfile)
   ) {
     throw new Error(
       'PIONEER_ACCEPTANCE_USER_DATA must not overlap the application profile directory',

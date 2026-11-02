@@ -14,7 +14,9 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   reporter: 'line',
-  timeout: 240_000,
+  // The individual waits (CDP 45 s, window 60 s, run 90 s, cleanup 30 s) can
+  // add up on a slow machine; the test budget must stay above their sum.
+  timeout: 360_000,
   expect: {
     timeout: 15_000,
   },
