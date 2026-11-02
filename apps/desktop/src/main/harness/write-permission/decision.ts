@@ -208,10 +208,11 @@ export function rejectionCodeFor(state: WriteTargetState): WriteRejectionCode {
     case 'unstable':
       return 'TARGET_UNSTABLE';
     case 'unreadable':
-    case 'unchanged':
-      // Callers only ask for a code when the target is refused; `unchanged`
-      // never reaches this branch but the switch stays exhaustive.
       return 'TARGET_UNREADABLE';
+    case 'unchanged':
+      // A target that did not change is never rejected; asking for its code is
+      // a caller bug, not something to map onto another reason.
+      throw new Error('internal: unchanged target has no rejection code');
   }
 }
 

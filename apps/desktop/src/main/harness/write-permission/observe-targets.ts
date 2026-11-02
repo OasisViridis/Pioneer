@@ -1,5 +1,5 @@
 import { lstat, realpath } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 
 import { isPathInsideRoot } from '../../catalog/path-policy';
 
@@ -77,14 +77,20 @@ async function resolveProtectedTarget(
   }
   if (stats.isSymbolicLink()) return 'link_not_allowed';
   if (!stats.isFile()) return 'not_regular_file';
+  // Same rule the read-only policy applies to a leaf: a hard-linked file has
+  // more than one name, so writing through it may edit a path nobody reviewed.
+  if (stats.nlink !== 1) return 'link_not_allowed';
   try {
-    // Reject a link or junction at any intermediate component, the same rule
-    // the read-only policy applies; resolving the leaf alone would follow it.
+    // Same walk the read-only policy does: no intermediate component may be a
+    // link, and each component's canonical path must be itself and stay inside
+    // the project root. A junction that resolves elsewhere fails both.
     let current = projectRoot;
     for (const component of components.slice(0, -1)) {
       current = join(current, component);
-      const entry = await lstat(current);
-      if (entry.isSymbolicLink()) return 'link_not_allowed';
+      if ((await lstat(current)).isSymbolicLink()) return 'link_not_allowed';
+      const canonical = await realpath(current);
+      if (!isPathInsideRoot(projectRoot, canonical)) return 'link_not_allowed';
+      if (relative(current, canonical) !== '') return 'link_not_allowed';
     }
     const [resolvedRoot, resolved] = await Promise.all([
       realpath(projectRoot),

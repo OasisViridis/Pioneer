@@ -73,7 +73,7 @@
 
 选择器显示当前档位与作用域（"全部 N 个文件"或列出的路径）。界面必须写明四档的实际差异，不能把自动审查说成"不需要检查"。不得显示绝对路径、项目根、`webContentsId` 等内部绑定字段，也不得把模型自述的"已完成"当作状态。
 
-权限替代不了核对：待写入的变化仍要在界面里逐条列出（项目相对路径、`before`/`after` 的字节数与哈希、文件身份是否记录），并且属于哪个 Run 要能对上。`#19` 提供这份预览；本票只要求契约里的 `WriteTarget` 足以渲染它，且预览内容来自 main，不接受 renderer 或模型自述。
+权限替代不了核对：待写入的变化仍要在界面里逐条列出（项目相对路径、`before`/`after` 的字节数与哈希、文件身份是否记录），Run 身份由外层传入的 Run 元数据提供（`WriteTarget` 本身不含 `runId`）。`#19` 提供这份预览；本票只要求契约里的 `WriteTarget` 足以渲染它，且预览内容来自 main，不接受 renderer 或模型自述。
 
 ### 2.4 允许的操作类型
 
@@ -231,7 +231,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 ### 5.5 恢复的权限
 
-恢复同样受权限模式约束，而且这条由代码执行：`planRecovery` 先调用 `checkWritePermission`，`read_only` 返回 `denied: PERMISSION_READ_ONLY`，工作区两档命中保护路径返回 `denied: PERMISSION_PROTECTED_PATH`，被拒时 `actions` 为空、全部目标进 `outOfScope`。恢复不需要"重新确认"，因为它作用于本 Run 已证明写入的目标，并且要重新观察当前磁盘。
+恢复同样受权限模式约束，而且这条由代码执行：`planRecovery` 先调用 `checkWritePermission`，`read_only` 返回 `denied: PERMISSION_READ_ONLY`，工作区两档命中保护路径返回 `denied: PERMISSION_PROTECTED_PATH`；被拒时 `actions` 与 `outOfScope` 都为空，调用方只能靠 `denied` 判断"权限不允许"，不能读成"没有需要恢复的目标"。恢复不需要"重新确认"，因为它作用于本 Run 已证明写入的目标，并且要重新观察当前磁盘。
 
 ## 6. 拒绝码与状态词汇
 
@@ -249,7 +249,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 ## 7. 负向探针矩阵（本票已执行）
 
-[探针测试](../../tests/contract/write-permission.test.ts)共 73 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
+[探针测试](../../tests/contract/write-permission.test.ts)共 75 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
 
 | 组                 | 覆盖                                                                                                                                                              | 期望                                                                         | describe                          |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------- |
@@ -320,7 +320,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 2026-11-02 在 `docs/issue18-write-authorization`（自 `origin/main` `28e6882` 起）执行：
 
-- 定向探针：`pnpm exec vitest run tests/contract/write-permission.test.ts` → 73/73 通过；其中 4 处 `skip` 分布在 3 种平台前提（身份复用、身份不可用、符号链接/联接权限），本机未触发。
+- 定向探针：`pnpm exec vitest run tests/contract/write-permission.test.ts` → 75 项全部通过；4 处 `skip` 只在平台前提不满足时触发（身份复用、身份不可用、符号链接或联接权限），本机未触发。
 - 完整门禁：`pnpm check`，结果与日志见 [`docs/testing/issue18-verification.md`](../testing/issue18-verification.md)。
 
 探针只证明决策函数与目标观察的行为，不证明写入执行器、界面或内核隔离。

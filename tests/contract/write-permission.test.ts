@@ -548,6 +548,30 @@ describe('full access and protected paths', () => {
     expect(['link_not_allowed', 'unreadable']).toContain(observation?.state);
   });
 
+  it('refuses a hard-linked protected path', async () => {
+    const permission = permissionOf({
+      mode: 'full_access',
+      riskAcknowledged: true,
+    });
+    await write(projectRoot, '.git/config', 'core');
+    const { link } = await import('node:fs/promises');
+    await link(
+      join(projectRoot, '.git/config'),
+      join(projectRoot, '.git/other'),
+    );
+    const target = targetOf('.git/config', 'core', 'core\nedited');
+    const [observation] = await observeTargetsForPermission(
+      projectRoot,
+      [target],
+      permission,
+    );
+    expect(observation?.state).toBe('link_not_allowed');
+  });
+
+  it('refuses to name a rejection code for an unchanged target', () => {
+    expect(() => rejectionCodeFor('unchanged')).toThrow();
+  });
+
   it('refuses recovery under the view-only mode', async () => {
     const target = await seed(projectRoot, 'src/index.ts', 'before\n');
     const observations = await observeWriteTargets(projectRoot, [target]);
@@ -704,10 +728,14 @@ describe('write-time target check', () => {
 
 let projectRoot = '';
 
+/** Containers created by this test file; every one is removed after each test. */
+const containers: string[] = [];
+
 async function makeProject(): Promise<string> {
   // Resolve the real path: CI's tmpdir goes through a junction or short name,
   // and main's read-only policy compares resolved paths.
   const container = await mkdtemp(join(tmpdir(), 'pioneer-write-permission-'));
+  containers.push(container);
   const root = join(container, 'project');
   await mkdir(root, { recursive: true });
   return realpath(root);
@@ -750,7 +778,10 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  await rm(projectRoot, { recursive: true, force: true });
+  const roots = containers.splice(0);
+  await Promise.all(
+    roots.map((root) => rm(root, { recursive: true, force: true })),
+  );
 });
 
 const sourceRoot = join(sourceRootPath, 'apps/desktop/src');

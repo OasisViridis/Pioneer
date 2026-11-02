@@ -14,25 +14,25 @@
 | 目标观察     | [`apps/desktop/src/main/harness/write-permission/observe-targets.ts`](../../apps/desktop/src/main/harness/write-permission/observe-targets.ts) |
 | 纯决策       | [`apps/desktop/src/main/harness/write-permission/decision.ts`](../../apps/desktop/src/main/harness/write-permission/decision.ts)               |
 | 共享读取     | [`apps/desktop/src/main/harness/bounded-read.ts`](../../apps/desktop/src/main/harness/bounded-read.ts)                                         |
-| 探针测试     | [`tests/contract/write-permission.test.ts`](../../tests/contract/write-permission.test.ts)：73 项 Contract 探针                                |
+| 探针测试     | [`tests/contract/write-permission.test.ts`](../../tests/contract/write-permission.test.ts)：75 项 Contract 探针                                |
 
 没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段；`run-ipc.ts` 与 `pioneer-run.ts` 未改动。`egress-materials.ts` 只改了内部读取实现，对外错误码映射不变（`UNSTABLE` → `MATERIAL_NOT_ALLOWED`，其余读取失败 → `INVALID_REQUEST`）。
 
 ## 验证证据
 
-| 项             | 命令/位置                                                                                                               | 结果                                                                                               |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| 仓库规范化     | `pnpm verify:repository`                                                                                                | 6/6 通过                                                                                           |
-| 定向探针       | `pnpm exec vitest run tests/contract/write-permission.test.ts`                                                          | 73/73 通过；其中 4 处 `skip` 分布在 3 种平台前提（身份复用、身份不可用、符号链接权限；本机未触发） |
-| 本地无窗口检查 | `pnpm verify:repository`、`format:check`、`lint`、`typecheck`、`test:contract:types`、`test:contract`、`test:prototype` | 全部退出码 0；Contract 467/467                                                                     |
-| 完整门禁       | CI `Windows / pnpm check`                                                                                               | 见下方"门禁结果"                                                                                   |
-| 空白差异       | `git diff --check`                                                                                                      | 无输出                                                                                             |
+| 项             | 命令/位置                                                                                                               | 结果                                                                                                  |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| 仓库规范化     | `pnpm verify:repository`                                                                                                | 6/6 通过                                                                                              |
+| 定向探针       | `pnpm exec vitest run tests/contract/write-permission.test.ts`                                                          | 75 项全部通过；4 处 `skip` 只在平台前提不满足时触发（身份复用、身份不可用、符号链接权限；本机未触发） |
+| 本地无窗口检查 | `pnpm verify:repository`、`format:check`、`lint`、`typecheck`、`test:contract:types`、`test:contract`、`test:prototype` | 全部退出码 0；Contract 467/467                                                                        |
+| 完整门禁       | CI `Windows / pnpm check`                                                                                               | 见下方"门禁结果"                                                                                      |
+| 空白差异       | `git diff --check`                                                                                                      | 无输出                                                                                                |
 
 ### 门禁结果
 
 本地不再执行 `pnpm check`：它包含 Real Electron E2E，会在使用者桌面弹出窗口。本地只跑无窗口的部分，完整门禁（含 E2E 与 package smoke）由 CI 的 `Windows / pnpm check` 执行，结果以该次 CI run 为准：
 
-- Contract Tests：467/467 通过（40 个测试文件，含本票 73 项）；
+- Contract Tests：469/469 通过（40 个测试文件，含本票 75 项）；
 - Prototype Tests：210/210 通过；
 - 此前在本机完整跑通的门禁日志保留为 `tmp/issue18/full-check-24.log`（含 E2E 39/39 与打包），但后续改动改为由 CI 验证；
 - Real Electron E2E 与 package smoke 的结论只引用 CI，不在本地重跑。
