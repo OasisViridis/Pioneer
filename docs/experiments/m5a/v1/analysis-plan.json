@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "m5a-harness-context-comparison",
+  "protocolVersion": 1,
+  "planVersion": 1,
+  "frozenAt": "2026-11-03T01:40:00+08:00",
+  "purpose": "把 dataset.jsonl 与同目录 answers.ndjson 重算成可复核的汇总。分析步骤固定，任何人用同一份数据重跑应得到相同的 summary.json（除生成时间字段）。",
+  "inputs": {
+    "dataset": "<outDir>/dataset.jsonl（先导或正式运行目录）",
+    "answers": "<outDir>/answers.ndjson（可选；存在则做评分复算一致性检查）",
+    "protocol": "docs/experiments/m5a/v1/protocol.json",
+    "tasks": "docs/experiments/m5a/v1/tasks.json",
+    "recordSchema": "docs/experiments/m5a/v1/record-schema.json"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "name": "freeze-verify",
+      "operation": "node tools/experiments/freeze.mjs --protocol-dir docs/experiments/m5a/v1 --verify",
+      "passCondition": "退出码 0；否则停止分析"
+    },
+    {
+      "step": 2,
+      "name": "validate-dataset",
+      "operation": "逐行按 record-schema.json 与协议不变量校验",
+      "passCondition": "无非法字段、无缺行、无重复 attemptId；否则停止分析"
+    },
+    {
+      "step": 3,
+      "name": "denominators",
+      "operation": "plannedDenominator = 行数（断言等于登记数）；executedCount = 非 not_run 行数；coverage = executedCount / plannedDenominator",
+      "output": ["plannedDenominator", "executedCount", "coverage"]
+    },
+    {
+      "step": 4,
+      "name": "status-counts",
+      "operation": "按 run.status 与 result.verdict 计数，派生 outcomeClass 与 timedOut",
+      "output": "counts"
+    },
+    {
+      "step": 5,
+      "name": "primary-rates",
+      "operation": "completionRate = completed_pass / plannedDenominator；successRateAmongExecuted = completed_pass / executedCount",
+      "outputs": ["completionRate", "successRateAmongExecuted"]
+    },
+    {
+      "step": 6,
+      "name": "score-recheck",
+      "operation": "若存在 answers.ndjson，用 tasks.json 的 rubric 重算每条 completed 行的 verdict，与 dataset 比对",
+      "passCondition": "不一致条数为 0；否则非零退出并列出 attemptId"
+    },
+    {
+      "step": 7,
+      "name": "usage-coverage",
+      "operation": "reported = count(source=reported)；missing = count(source=missing)；只在 reported 行算均值、中位数、总和与覆盖率",
+      "constraint": "缺失值不参与计算、不补 0；estimated 单独成列，不并入实测"
+    },
+    {
+      "step": 8,
+      "name": "duration",
+      "operation": "对 durationMs 非 null 的行计算 median 与 p90；另给 completed_pass 子集的 median 与排除计数",
+      "constraint": "not_run 与 unknown 无终端时间，排除并单列计数"
+    },
+    {
+      "step": 9,
+      "name": "task-level",
+      "operation": "按 taskId 给出：每个变体 3 次重复的 pass 次数与成功率；两个变体成功率之差；12 个差值的等权均值、min、median、max、完整分布",
+      "role": "primary"
+    },
+    {
+      "step": 10,
+      "name": "exploratory-sign-test",
+      "operation": "对 12 个任务差值做精确符号检验（双侧），报原始 p 与差值方向计数",
+      "label": "exploratory-only",
+      "constraint": "12 个单位太少，只作方向性旁证；不得写成确认性显著性结论"
+    },
+    {
+      "step": 11,
+      "name": "group-by-variant-and-category",
+      "operation": "按 variantId 与 variantId × task.category 聚合步骤 4-8 的计数与比率",
+      "output": ["byVariant", "byVariantCategory"]
+    },
+    {
+      "step": 12,
+      "name": "attempt-level-descriptive",
+      "operation": "attempt 级比例与 Wilson 区间，字段名前缀 descriptiveAttemptLevel",
+      "constraint": "必须在 summary.md 写明「重复不是独立试验，该区间只描述本次数据」"
+    },
+    {
+      "step": 13,
+      "name": "emit",
+      "operation": "写 summary.json 与 summary.md；所有数字由程序生成，不手工编辑",
+      "outputs": ["summary.json", "summary.md"]
+    }
+  ],
+  "primaryMetrics": [
+    {
+      "id": "taskLevelSuccessDifference",
+      "definition": "12 个任务上（V1 成功率 − V0 成功率）的等权均值，附 12 个差值的分布",
+      "unit": "task"
+    },
+    {
+      "id": "completionRate",
+      "definition": "completed_pass / plannedDenominator",
+      "denominator": "全部登记尝试（含 not_run）"
+    }
+  ],
+  "secondaryMetrics": [
+    "successRateAmongExecuted 与 coverage",
+    "reportedInputTokens / reportedOutputTokens 与 usage 覆盖率（token 在缺 usage 时标不可测）",
+    "durationMs 的 median 与 p90",
+    "toolCalls 五项分布",
+    "failureCode 与 stopReason 分布",
+    "timedOut 计数",
+    "每格 pass 次数分布",
+    "answerBytes 分布"
+  ],
+  "missingDataPolicy": {
+    "usage": "Provider 未报告时保持 null 并计入 missing 覆盖率；不得以 0、估算值或其他运行的均值填充。usage 报告率低时，token 指标在 summary.md 里标为不可测，不得作主结论。",
+    "duration": "缺 startedAt 或 terminalAt 时保持 null 并单列排除计数。",
+    "notRun": "保留在 plannedDenominator，单列原因码；不计入 executedCount，不参与完成率分子、不参与耗时统计，也不当作模型答错。"
+  },
+  "denominatorPolicy": {
+    "threeLayers": "plannedDenominator / executedCount / coverage 必须同时出现。",
+    "fixed": "plannedDenominator 在运行前由 capture.json 固定，分析阶段只读不改。",
+    "noReclassification": "不得把 failed/stopped/unknown/not_run 归入 completed；不得剔除任何行。",
+    "addingRuns": "新增尝试必须新版本协议 + 新 attemptId；旧数据集分母不变。"
+  },
+  "verdictCounting": {
+    "rule": "主表只统计 completed 行的 verdict（completedVerdictCounts）；全行 verdictCounts 另列并注明非 completed 行的 verdict 不进入任何比率。",
+    "summaryJsonFields": ["verdictCounts", "completedVerdictCounts"],
+    "summaryLine": "非 completed 行的 verdict 只表示该行已有的回答文本能否匹配 rubric，不进入任何比率；主指标只用 completed 且 pass 的行。"
+  },
+  "statistics": {
+    "primaryUnit": "task",
+    "pairing": "按 taskId 配对，每个任务两变体各 3 次重复",
+    "taskSuccessRate": "该任务某变体 3 次里 pass 的个数 / 3",
+    "difference": "V1 成功率 − V0 成功率，逐任务计算后等权汇总",
+    "signTest": { "method": "exact-binomial-sign-test", "sides": 2, "label": "exploratory-only", "ignoreZeroDifferences": true },
+    "attemptLevelCi": { "method": "wilson", "level": 0.95, "z": 1.959963984540054, "label": "descriptive-only", "caveat": "重复不是独立试验" },
+    "noPValueAsPrimary": "主指标只给差值分布与等权均值；不做显著性宣称。"
+  },
+  "recomputeCommand": "node tools/experiments/analyze.mjs --dataset <outDir>/dataset.jsonl --tasks docs/experiments/m5a/v1/tasks.json --protocol docs/experiments/m5a/v1/protocol.json --plan docs/experiments/m5a/v1/analysis-plan.json --out <outDir>",
+  "determinism": {
+    "ordering": "数组按固定键排序（variantId、category、taskId、attemptId），不依赖 Map 插入顺序。",
+    "timestamps": "summary.json 可含 generatedAt；比对时忽略该字段。",
+    "floatFormat": "比例保留 4 位小数；token 与毫秒为整数。"
+  }
+}

@@ -1,0 +1,463 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "m5a-harness-context-comparison",
+  "protocolVersion": 1,
+  "datasetVersion": 1,
+  "title": "Pioneer 只读 Harness 信息供给方式对照实验：冻结方案 v1",
+  "frozenAt": "2026-11-03T01:40:00+08:00",
+  "frozenAgainst": {
+    "repository": "OasisViridis/Pioneer",
+    "branch": "feat/m5a-experiment-freeze",
+    "baseCommit": "13ccfe5f0c9f8cc376aec08eb21cd91162719237",
+    "note": "协议冻结在 baseCommit 之上；每次真实运行必须把实际提交写入 capture.environment.softwareCommit 与数据集行的 environment，协议文件本身不替代版本绑定。"
+  },
+  "issue": 29,
+  "map": 9,
+  "prerequisites": {
+    "issue13ReadonlyHarness": "CLOSED（2026-10-27）；只读 Harness 已交付，真实 Provider 证据见 docs/testing/issue13-real-provider.md",
+    "entryCheck": "只把已交付能力放进可执行样本：read_file / list_directory / search 三个只读工具、会话、运行状态与停止。写入、命令执行、会话分支、Windows 独立安装包不在样本内。"
+  },
+  "comparisonQuestion": {
+    "primary": "在同一 Provider、同一模型、同一任务文本、同一预算与时限下，「按需只读工具 + 随需取用材料」（V1）与「固定前缀全量材料 + 无工具」（V0）两种信息供给配置，在 12 个只读检索任务上的任务完成率、Provider 报告 token 用量与端到端耗时是否存在可复核差异？",
+    "secondary": [
+      "每个任务格（task × variant）的工具请求、成功、拒绝、失败、取消计数分布。",
+      "失败与超时的原因分布，以及 V0 因 64 KiB 固定前缀截断而失败的次数。",
+      "重复 3 次之间的结果一致性（同格 pass 次数 0/1/2/3）。"
+    ],
+    "expectation": "期望 V1 完成率不低于 V0。这只是预期，不是验证条件；若实测相反，按实测报告并分析工具往返开销、截断位置与任务措辞。",
+    "nonClaims": [
+      "不主张 Pioneer 优于其他 Harness 或优于任何未测配置。",
+      "不主张单因子因果效应（上下文量、工具能力各自贡献多少）。",
+      "不主张任何具体提升比例、显著性结论或成本节省金额。",
+      "不主张用户研究结论；本实验不涉及真实用户。"
+    ]
+  },
+  "variants": [
+    {
+      "variantId": "pioneer-readonly-tools",
+      "label": "V1 按需只读工具 + 随需取用材料",
+      "factors": { "contextAssembly": "on-demand", "toolsEnabled": true },
+      "definition": "使用产品现有只读 Harness：系统提示 + 任务文本 + 允许材料清单；模型自行决定调用 read_file / list_directory / search，工具结果回到模型后继续，直到给出最终回答。",
+      "implementation": "apps/desktop 现有 pi 适配器与只读工具策略，不修改产品代码；通过产品会话启动一次任务。",
+      "promptTemplate": "<system: Pioneer 只读任务，允许使用 read_file/list_directory/search，材料根为 demos/>\n<user: {task.prompt}>\n<format: {answerFormatInstruction}>",
+      "toolPolicy": {
+        "allowedTools": ["read_file", "list_directory", "search"],
+        "materialScope": "仅 tasks.json 中该任务 materialScope.allowedFiles 覆盖的 demos/ 文件",
+        "egress": "提示文本 + 工具结果；不发送材料清单以外的文件"
+      }
+    },
+    {
+      "variantId": "fixed-prefix-no-tools",
+      "label": "V0 固定前缀全量材料 + 无工具",
+      "factors": { "contextAssembly": "fixed-prefix", "toolsEnabled": false },
+      "definition": "同模型、同任务文本；把允许材料按固定路径顺序（tasks.json corpus.files 顺序）拼接进单条提示，超过 64 KiB 输入预算即按字节截断（保留前缀，不跳读、不摘要），禁用工具，单次模型调用，输出上限同为 4096 tokens。",
+      "implementation": "同一 Provider 与模型的单次对话请求；不经过只读工具执行器，避免把 V0 变成另一种 Harness。",
+      "promptTemplate": "<user: 以下是允许材料的固定前缀拼接，共 {prefixBytes} 字节，超出 65536 字节的部分已截断并标记 [TRUNCATED_AT_64KiB]。\n{materialPrefix}\n\n{task.prompt}\n{answerFormatInstruction}>",
+      "toolPolicy": { "allowedTools": [], "materialScope": "同上，但以拼接文本形式一次性发送" },
+      "truncationRule": {
+        "budgetBytes": 65536,
+        "order": "tasks.json corpus.files 的固定顺序",
+        "cut": "按字节前缀截断，若切断在多字节字符中间则回退到最近字符边界",
+        "marker": "[TRUNCATED_AT_64KiB]",
+        "disclosure": "该标记不参与评分，也不得包含答案提示；截断位置随任务固定，不在运行间变化"
+      }
+    }
+  ],
+  "modelParameters": {
+    "provider": "正式运行前由授权点名，冻结时点未定",
+    "modelId": "正式运行前由授权点名，冻结时点未定",
+    "temperature": "产品未显式设置，按 Provider 默认值记录；不允许为两个变体设不同温度",
+    "maxOutputTokens": 4096,
+    "determinism": "同一任务同一变体重复 3 次，不复用对话上下文；每次都是新会话、新 run"
+  },
+  "answerFormatInstruction": "最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+  "confound": {
+    "statement": "V1 与 V0 同时改变了信息供给方式与工具可用性，无法把差异单独归因于「上下文量」或「工具能力」。",
+    "mitigation": [
+      "论文表述把 V1 视为「已交付配置整体」，不拆成单因子结论。",
+      "数据行记录 toolCalls 与 usage，使读者能看到工具往返是否带来额外 token。",
+      "若后续需要单因子结论，由 M5-B 另立第三臂（例如「预载材料 + 允许工具」），本票不追加。"
+    ]
+  },
+  "corpus": {
+    "corpusId": "pioneer-demos-m1-frozen",
+    "root": "demos",
+    "fileCount": 6,
+    "totalBytes": 396500,
+    "rationale": "仓库政策规定 demos/ 为冻结的 M1 参考实现，内容不会再改，且为公开材料；总量 396500 B 明显超过 65536 B 输入预算，使 V0 必然截断、V1 必须按需定位，差异才有观察价值。",
+    "filesManifest": "docs/experiments/m5a/v1/tasks.json#corpus.files",
+    "files": [
+      {
+        "path": "demos/00-pioneer-workbench.html",
+        "bytes": 127662,
+        "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c"
+      },
+      {
+        "path": "demos/01-bookshelf-workspace.html",
+        "bytes": 41161,
+        "sha256": "727e2486d4309200cc2e65bdddde865f5ae23fe7b29b309cb450cd7248199dd2"
+      },
+      {
+        "path": "demos/02-session-intent-card.html",
+        "bytes": 58858,
+        "sha256": "d34a8ef63dcc043fc61fdca70699da6fddfb30704221f25d110a111e3157d7bc"
+      },
+      {
+        "path": "demos/03-wrapup-and-gallery.html",
+        "bytes": 50181,
+        "sha256": "abb129a07b3b7743bc2e09b6cdd7de105e1a0d572f8d9f88ef83fff8195fa515"
+      },
+      {
+        "path": "demos/04-ppt-presentation-demo.html",
+        "bytes": 116981,
+        "sha256": "79cee4b3a6173d1c46bd9e2044cf2040b2bf7c0c2ff4218e187c10d74f6d0575"
+      },
+      {
+        "path": "demos/README.md",
+        "bytes": 1657,
+        "sha256": "625d3303147427ed04eef20807e0a2f052c9e089c27bcc1167c3e62c7cf95038"
+      }
+    ]
+  },
+  "taskSet": {
+    "source": "docs/experiments/m5a/v1/tasks.json",
+    "count": 12,
+    "categories": [
+      { "id": "locate-exact-fact", "count": 3, "capability": "read_file" },
+      { "id": "aggregate-count", "count": 3, "capability": "search + read_file" },
+      { "id": "cross-file-synthesis", "count": 3, "capability": "read_file across two files" },
+      { "id": "negative-scope", "count": 3, "capability": "search absence without fabrication" }
+    ],
+    "selectionRule": "任务只能用已交付的三个只读工具与 demos/ 冻结材料作答；答案必须能由材料内容唯一确定；任务位置与类别在运行前固定，不按结果挑选。",
+    "exclusionRule": "不收录写入、命令执行、会话分支、安装包、真实用户、时延敏感或需要外部网络的题；不收录答案随时间变化的题。",
+    "debugVsFormal": "调试用题与正式题分离：调试只使用先导子集 t01-t03，正式题一经运行不得替换。"
+  },
+  "scoring": {
+    "mode": "deterministic",
+    "normalization": [
+      "去除 Markdown 装饰符（反引号、强调符、标题号、链接括号保留文字）",
+      "Unicode 空白折叠为单个空格",
+      "大小写不敏感比较"
+    ],
+    "answerFormat": "题面统一附加 answerFormatInstruction，要求末行输出 ANSWER: <ASCII 值>；评分仍按字面量判定，不解析 JSON。",
+    "matchKinds": ["contains_all", "contains_none"],
+    "literalPolicy": "只使用 ASCII 字面量；每条字面量必须是答对时必然出现的最小事实（id、类名、计数值、字符串常量）。",
+    "verdicts": {
+      "pass": "status=completed 且 rubric 满足",
+      "fail": "status=completed 但 rubric 不满足",
+      "unscorable": "status=completed 但回答为空或超过回答字节上限，无法按规则判定",
+      "not_run": "未执行，verdict 与 status 一致为 not_run"
+    },
+    "answerByteCap": 65536,
+    "answerByteCapScope": "answerByteCap（65536）判 unscorable，用的是原始回答字节数；scoreEvidence 里的归一化文本另按 4096 字节截断后再存 answers.ndjson 与算摘要。两个上限并存：前者决定能否评分，后者决定能存多少证据。",
+    "verdictCountingRule": "只有 completed 行的 verdict 进入比率。failed、stopped、unknown 行即使残留部分回答并被 rubric 匹配，其 verdict 也只表示该行文本的匹配情况，不进入任何分子与分母；所有比率必须写成 completed_pass / 分母。",
+    "answerDigestScope": "dataset.result.answerSha256 与 result.answerBytes 一律针对归一化后的回答文本，与 answers.ndjson 的 answerSha256 / answerBytes 逐字节一致；原始回答文本不落盘，因此不存在第二套不可验证的摘要。",
+    "scoreEvidence": {
+      "file": "answers.ndjson",
+      "description": "与 dataset.jsonl 同目录，存 completed 行的归一化回答文本（每行 ≤4096 字节，过同一套脱敏扫描），供第三方用同一 rubric 复算 verdict；dataset.jsonl 只存该归一化文本的 sha256 与字节数，两者可直接对账。",
+      "reproducibilityCheck": "analyze 用 normalizedAnswer 重算 rubric 并与 dataset verdict 比对，同时核对 answerSha256/answerBytes 一致；不一致即失败。",
+      "sharing": "answers.ndjson 只在本地与授权范围内使用；论文不引用回答原文。"
+    },
+    "blindSpotCheck": {
+      "planned": true,
+      "sample": "对 real-provider 数据按 attemptId 排序取每变体前 3 条 pass 与 3 条 fail 做人工复核",
+      "status": "未执行（无 real-provider 数据）",
+      "role": "只作为评分规则有效性的旁证，不进入主指标计算"
+    }
+  },
+  "design": {
+    "registeredAttempts": 72,
+    "cells": 24,
+    "attemptsPerCell": 3,
+    "cellDefinition": "variantId × taskId",
+    "unitOfAnalysis": "任务级。12 个任务为配对单位，重复只是可靠性重复，不是独立试验。",
+    "attemptLevelStatus": "72 次尝试彼此不独立，attempt 级比例与区间仅作描述，不作为主结论。",
+    "primaryTaskLevelStatistic": "对每个任务，先算两个变体的成功比例（各自 3 次中 pass 数 / 3），再取 12 个任务差值的等权均值；同时给出差值的 min/median/max 和 12 个差值的完整分布。",
+    "exploratoryTest": {
+      "name": "task-level exact sign / permutation test",
+      "unit": "task",
+      "label": "exploratory-only",
+      "constraint": "不得写成确认性显著性结论；12 个任务太少，只能作为方向性旁证。"
+    },
+    "orderRandomization": {
+      "seed": "m5a-2026-11-03-v1",
+      "method": "排序算法固定，可被人手复算：对 24 个任务格各取 key = seed + '|' + variantId + '|' + taskId，算 SHA-256，按十六进制升序排序，名次即 orderIndex（1 到 24）。执行按轮进行：第 1 轮按 orderIndex 跑完全部 24 格，再第 2 轮、第 3 轮；同格三次重复沿用同一 orderIndex。",
+      "rationale": "同一轮内把 V0/V1 交错，降低 Provider 侧随时间漂移带来的系统性偏置。排序只控制执行顺序，不能控制模型自身随机性。",
+      "frozen": true,
+      "executionOrder": [
+        { "orderIndex": 1, "variantId": "fixed-prefix-no-tools", "taskId": "t02", "cellKeySha256": "15f96f9e1c1b90fa" },
+        { "orderIndex": 2, "variantId": "pioneer-readonly-tools", "taskId": "t01", "cellKeySha256": "1a14548eed8fe143" },
+        { "orderIndex": 3, "variantId": "fixed-prefix-no-tools", "taskId": "t03", "cellKeySha256": "2939f607ffbcd3d3" },
+        { "orderIndex": 4, "variantId": "pioneer-readonly-tools", "taskId": "t03", "cellKeySha256": "29decf7d958e3efb" },
+        { "orderIndex": 5, "variantId": "pioneer-readonly-tools", "taskId": "t11", "cellKeySha256": "2b2ed6613db99957" },
+        { "orderIndex": 6, "variantId": "fixed-prefix-no-tools", "taskId": "t11", "cellKeySha256": "30f54df4b365c375" },
+        { "orderIndex": 7, "variantId": "fixed-prefix-no-tools", "taskId": "t07", "cellKeySha256": "4fec29ad572d7049" },
+        { "orderIndex": 8, "variantId": "pioneer-readonly-tools", "taskId": "t12", "cellKeySha256": "5ec56873756e228a" },
+        { "orderIndex": 9, "variantId": "pioneer-readonly-tools", "taskId": "t06", "cellKeySha256": "64cb93e9ac710c4f" },
+        { "orderIndex": 10, "variantId": "pioneer-readonly-tools", "taskId": "t07", "cellKeySha256": "760baa879eee00d4" },
+        { "orderIndex": 11, "variantId": "fixed-prefix-no-tools", "taskId": "t09", "cellKeySha256": "8f12c9b5520a060c" },
+        { "orderIndex": 12, "variantId": "fixed-prefix-no-tools", "taskId": "t01", "cellKeySha256": "944a44f9c674cce8" },
+        { "orderIndex": 13, "variantId": "pioneer-readonly-tools", "taskId": "t05", "cellKeySha256": "98db1803cfaec3c1" },
+        { "orderIndex": 14, "variantId": "pioneer-readonly-tools", "taskId": "t09", "cellKeySha256": "9a5e9acc8f6b99f0" },
+        { "orderIndex": 15, "variantId": "fixed-prefix-no-tools", "taskId": "t10", "cellKeySha256": "b7e42df586b43507" },
+        { "orderIndex": 16, "variantId": "fixed-prefix-no-tools", "taskId": "t06", "cellKeySha256": "bb911904dc23e51f" },
+        { "orderIndex": 17, "variantId": "pioneer-readonly-tools", "taskId": "t04", "cellKeySha256": "c29439521f8bd57b" },
+        { "orderIndex": 18, "variantId": "fixed-prefix-no-tools", "taskId": "t05", "cellKeySha256": "c58723b278e720e0" },
+        { "orderIndex": 19, "variantId": "fixed-prefix-no-tools", "taskId": "t12", "cellKeySha256": "ca5c688976d4ea0e" },
+        { "orderIndex": 20, "variantId": "pioneer-readonly-tools", "taskId": "t08", "cellKeySha256": "d8c2de0cf5d6509a" },
+        { "orderIndex": 21, "variantId": "fixed-prefix-no-tools", "taskId": "t04", "cellKeySha256": "dc8b0e580273748f" },
+        { "orderIndex": 22, "variantId": "fixed-prefix-no-tools", "taskId": "t08", "cellKeySha256": "e328999e70ce4534" },
+        { "orderIndex": 23, "variantId": "pioneer-readonly-tools", "taskId": "t02", "cellKeySha256": "f1d76e2da33cbef3" },
+        { "orderIndex": 24, "variantId": "pioneer-readonly-tools", "taskId": "t10", "cellKeySha256": "f1ff2078c520c237" }
+      ]
+    },
+    "pairing": "按 taskId 配对：同一任务在两个变体下使用完全相同的任务文本与允许材料；分析按任务配对，不按重复配对。",
+    "sampleSizeBasis": {
+      "realPilot": "NOT_RUN（无 Provider/模型/外发材料授权，见 real-pilot-status.md）",
+      "power": "未做功效分析；72 次尝试只够支撑描述性统计与大差异观察。",
+      "calculation": "2 变体 × 12 任务 × 3 重复",
+      "attemptLevelCi": {
+        "level": 0.95,
+        "method": "wilson",
+        "n72": "p=0.5 时半宽约 0.1125",
+        "n36": "单变体 p=0.5 时半宽约 0.1553",
+        "caveat": "该区间把尝试当独立样本，与设计不符，只能在 descriptiveAttemptLevel 字段里描述本次数据；主结论用任务级统计。"
+      }
+    }
+  },
+  "budgets": {
+    "perAttempt": {
+      "runMs": 120000,
+      "modelOutputTokens": 4096,
+      "materialBytes": 65536,
+      "toolCalls": 32,
+      "stopGraceMs": 5000,
+      "singleToolConcurrency": 1
+    },
+    "perAttemptSource": "apps/desktop/src/shared/contracts/pioneer-run.ts RUN_LIMITS 与 P2 运行合同 §5；实验不改产品上限，也不放大到超过产品上限的预算。",
+    "formalRunCap": {
+      "attempts": 72,
+      "inputTokens": 3000000,
+      "outputTokens": 300000,
+      "wallClockMs": 21600000,
+      "stoppingRule": "按 orderIndex 顺序执行；每次尝试前检查累计 inputTokens、outputTokens 与墙上时间。任一项加上本次尝试后可能超限，就把剩余全部尝试记为 not_run，原因码 BUDGET_EXHAUSTED，且全部保留在分母内。已开始的尝试不因预算中断，按产品规则自然收敛或失败。",
+      "tokenEstimateMethod": "工程估算，按 4 字节/token 把 65536 B 折算为 16384 tokens，加 4096 输出，单次约 20480 tokens；72 次约 1474560 tokens。字节到 token 的比例不是硬上界，因此 token 上限是安全余量 2 倍的预算停机线，不宣称是推导出来的理论上界。",
+      "wallClockBasis": "72 × (120 s 运行 + 180 s 准备与收尾) ≈ 6 小时。"
+    },
+    "costConversion": "货币成本不在本版本固定：正式运行前必须从取得授权的 Provider 价目表抄录价格、生效日期与来源，按 输入 tokens × 输入单价 + 输出 tokens × 输出单价 计算；价目表未确认前，只以 token 与墙上时间作为上限。不得编造价格或换算金额。"
+  },
+  "outcomes": {
+    "statusValues": ["completed", "failed", "stopped", "unknown", "not_run"],
+    "taxonomy": [
+      {
+        "status": "completed",
+        "successRule": "verdict=pass 记为成功；verdict=fail/unscorable 记为未成功",
+        "denominator": "计入全部三层分母"
+      },
+      {
+        "status": "failed",
+        "failureCodes": [
+          "START_FAILED",
+          "MODEL_FAILED",
+          "TOOL_FAILED",
+          "PROTOCOL_ERROR",
+          "OUTPUT_LIMIT",
+          "RUN_DEADLINE",
+          "AUTHORIZATION_REVOKED",
+          "STOP_TIMEOUT",
+          "ADAPTER_DISCONNECTED"
+        ],
+        "successRule": "一律不算成功",
+        "denominator": "计入计划分母与已执行分母"
+      },
+      {
+        "status": "stopped",
+        "stopReasons": [
+          "user",
+          "window_closed",
+          "deadline",
+          "authorization_revoked",
+          "host_failure"
+        ],
+        "successRule": "不算成功；deadline 停止在分析中同时计入 timedOut 派生标记",
+        "denominator": "计入计划分母与已执行分母"
+      },
+      {
+        "status": "unknown",
+        "source": "journal tombstone host_restarted",
+        "successRule": "不算成功，也不推断其回答质量",
+        "denominator": "计入计划分母与已执行分母"
+      },
+      {
+        "status": "not_run",
+        "reasonCodes": [
+          "AUTHORIZATION_MISSING",
+          "PROVIDER_UNAVAILABLE",
+          "MATERIAL_MISSING",
+          "BUDGET_EXHAUSTED",
+          "OPERATOR_ABORT",
+          "TOOL_UNAVAILABLE"
+        ],
+        "successRule": "不算成功，也不当作模型答错；不参与完成率分子",
+        "denominator": "只计入计划分母，不计入已执行分母"
+      }
+    ],
+    "timedOutDerivation": "timedOut = (status=failed 且 failureCode=RUN_DEADLINE) 或 (status=stopped 且 stopReason=deadline)；派生标记不新增状态，避免双计。",
+    "derivedOutcome": "outcomeClass = completed_pass | completed_fail | completed_unscorable | failed | stopped | unknown | not_run"
+  },
+  "denominator": {
+    "definition": "三层同时报告：plannedDenominator = capture.json 登记的 attempt 总数（先导 18，正式 72）；executedCount = 有 run 的行数（非 not_run）；coverage = executedCount / plannedDenominator。",
+    "primaryRate": "completionRate = completed_pass / plannedDenominator。",
+    "secondaryRate": "successRateAmongExecuted = completed_pass / executedCount。",
+    "rules": [
+      "每条登记尝试必须恰好产生一行数据集记录，缺行视为构建失败而不是跳过。",
+      "not_run 计入 plannedDenominator 并单独报告原因码计数；未授权不得计入模型答错。",
+      "失败、超时、取消、unknown 一律保留；不得从样本剔除、不得改判为成功。",
+      "看到结果后不得补跑未登记尝试、不得改变重复次数、不得删除任务。补跑必须用新 attemptId 且新版本协议，旧 attempt 仍留在旧分母里。",
+      "构建时被脱敏扫描拒绝的采集包视为构建失败；不得只丢那一行继续出汇总。"
+    ]
+  },
+  "deidentification": {
+    "stored": [
+      "attemptId / rowId",
+      "taskId / category / promptSha256 / rubricId",
+      "variantId / harnessVersion",
+      "repetition / orderIndex",
+      "sessionId / projectId / runId / revision / adapter（main 生成的 opaque id）",
+      "status / failureCode / stopReason",
+      "startedAt / terminalAt / durationMs / lastSeq",
+      "toolCalls 计数",
+      "usage 数字与 source / estimated 分离标记",
+      "verdict / matchedLiterals / requiredLiterals / answerSha256 / answerBytes",
+      "environment（softwareCommit、dirty、platform、node/electron 版本、provider、modelId、endpointOrigin、corpusId、corpusManifestSha256）",
+      "capture 三份输入的 sha256",
+      "answers.ndjson 中的归一化回答文本（仅 completed 行，≤4096 字节，同样过扫描）"
+    ],
+    "neverStored": [
+      "数据集文件中的任务提示原文与模型回答原文",
+      "材料文件内容",
+      "绝对路径、盘符、UNC、用户目录",
+      "用户名、邮箱、学号、联系方式",
+      "API key、Bearer 头、凭证片段",
+      "窗口标题、剪贴板、对话转录"
+    ],
+    "scannerRules": [
+      "拒绝盘符绝对路径（任意位置匹配 /(?:^|[^A-Za-z0-9])[A-Za-z]:[\\\\/]/）",
+      "拒绝 UNC 路径（任意位置匹配 /\\\\\\\\[A-Za-z0-9._-]+\\\\/）",
+      "拒绝 POSIX 绝对路径（匹配 /(?:^|\\s)\\/(?:Users|home|tmp|var|etc|opt|mnt|root|private)\\//）",
+      "拒绝 sk- 开头的凭证样式字符串（/(?:^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{8,}/）",
+      "拒绝 Bearer 后接可见字符（/Bearer\\s+[A-Za-z0-9._~+/=-]{8,}/i）",
+      "拒绝 PEM 私钥头（/-----BEGIN [A-Z ]*PRIVATE KEY-----/）",
+      "HTML/代码片段中的 </div>、/> 与 // 注释不得误判为路径"
+    ],
+    "scannerAction": "命中即构建失败并指出文件与行号；不做静默替换。"
+  },
+  "linking": {
+    "primaryKey": "attemptId",
+    "keys": {
+      "task": "task.taskId + task.promptSha256 + task.rubricId",
+      "run": "run.runId + run.sessionId + run.revision",
+      "configuration": "variant.variantId + variant.harnessVersion + protocol.protocolVersion",
+      "software": "environment.softwareCommit + environment.dirty + platform + node/electron 版本",
+      "provider": "environment.provider + modelId + endpointOrigin",
+      "material": "environment.corpusId + corpusManifestSha256",
+      "raw": "capture.captureManifestSha256 + journalSha256 + eventsSha256",
+      "protocol": "protocolId + protocolVersion + datasetVersion",
+      "scoring": "answers.ndjson 的 attemptId + task.rubricId + 评分源码哈希（freeze 清单覆盖）"
+    },
+    "joinCheck": "build-report.json 必须能按 capture 的 sha256 与 dataset 的 capture 字段一一对上；analyze 只读 dataset.jsonl 与同目录 answers.ndjson，不读原始采集包。"
+  },
+  "freeze": {
+    "artifacts": [
+      "docs/experiments/m5a/v1/protocol.json",
+      "docs/experiments/m5a/v1/tasks.json",
+      "docs/experiments/m5a/v1/analysis-plan.json",
+      "docs/experiments/m5a/v1/record-schema.json"
+    ],
+    "lockedInThisVersion": [
+      "比较问题与非主张",
+      "两个变体的提示模板与截断规则",
+      "12 条任务、评分字面量与 ground truth",
+      "模型参数与输出上限",
+      "执行顺序与随机种子",
+      "预算（每次尝试与正式运行总上限）",
+      "失败分类、分母定义与不重分类规则",
+      "脱敏字段与扫描规则",
+      "分析步骤、任务级统计口径与探索性检验标签"
+    ],
+    "codeCovered": "tools/experiments 下全部 .mjs",
+    "manifest": "docs/experiments/m5a/v1/freeze-manifest.json",
+    "verifyCommand": "node tools/experiments/freeze.mjs --protocol-dir docs/experiments/m5a/v1 --verify",
+    "changeRules": [
+      "R1 影响任务内容、评分规则、指标定义、分母、预算、变体定义、提示模板、执行顺序或随机种子的改动，必须升 protocolVersion 并新建 v2/ 目录；v1 数据不得重算或并入 v2 分母。",
+      "R2 不影响上述语义的纯文字勘误，记录到 docs/experiments/m5a/errata.md 后重生成 manifest，可不升 protocolVersion；一旦已存在 real-provider 数据，勘误同样必须升版本。",
+      "R3 正式运行开始后不得新增或删除任务、不得修改评分字面量、不得调整执行顺序或提示模板。",
+      "R4 发现评分实现缺陷时，保留旧版本与旧数据，用新版本重新评分并同时报告新旧结果；不得只覆盖旧结果。",
+      "R5 正式运行前后各执行一次 freeze --verify，输出归档；verify 失败时不得开始或采信该批数据。",
+      "R6 每次变更必须写明动机、时间、影响的数据版本，并在 issue #29 的 resolution/评论里留记录。"
+    ]
+  },
+  "pilot": {
+    "controlled": {
+      "path": "docs/experiments/m5a/pilot-controlled/",
+      "captures": "docs/experiments/m5a/captures/",
+      "purpose": "用受控数据走通记录与分析流程，验证缺 usage、失败、停止、超时、unknown、not_run 的分类与分母规则；不作为模型效果证据。",
+      "evidenceKind": "controlled"
+    },
+    "real": {
+      "status": "NOT_RUN",
+      "reason": "没有具体 Provider、模型与外发材料授权；按本票与 P2 合同，票据 ready 不自动授予真实调用许可。",
+      "record": "docs/experiments/m5a/real-pilot-status.md",
+      "consequence": "正式样本量与成本上限只有可解释上界依据，未由真实先导验证；不得把第 4 条完成条件写成已验证。"
+    }
+  },
+  "externalReview": {
+    "reviewer": "ChatGPT（用户自己的账号，经 voyager 通道）",
+    "conversation": "https://chatgpt.com/c/6ae8c26a-1544-83ea-beed-ef6c512e4322",
+    "role": "外部方法学意见，作为参考数据，不作为授权或结论",
+    "adopted": [
+      "统计单位改为任务级配对，attempt 级区间只作描述",
+      "token 指标在 usage 全为 null 时降为次指标，不填零",
+      "增加三层分母（计划 / 已执行 / 覆盖率）与两种成功率",
+      "变体改名 fixed-prefix-no-tools，避免暗示单因子差异",
+      "评分证据 answers.ndjson，使 verdict 可被第三方复算",
+      "冻结范围加入提示模板、模型参数、评分源码与排除规则",
+      "题面统一 ANSWER 末行格式，减少中文数字导致的误判"
+    ],
+    "rejected": [
+      "改为 JSON 结构输出并另设格式合规指标：会扩大实现面并引入格式失败这一新失败模式，本版改用 ANSWER 末行 + 字面量，残余限制写进 limitations。",
+      "任务级聚类自助法区间：12 个任务的自助法区间本身不稳定，本版只给差值分布与精确符号检验并标 exploratory，不宣称区间精度。"
+    ]
+  },
+  "risks": [
+    { "risk": "V0/V1 因子混淆", "mitigation": "作为限制披露，不做单因子归因。" },
+    {
+      "risk": "确定性字面量误判同义正确回答",
+      "mitigation": "字面量限定为 ASCII 事实；题面要求末行 ANSWER 值；保留 unscorable 与人工盲检样本作旁证。"
+    },
+    {
+      "risk": "Provider 不返回 usage",
+      "mitigation": "usage 保持 null、标 source=missing 并报告覆盖率；token 只在 reported 子集上计算，不补 0、不用估算替代实测。"
+    },
+    {
+      "risk": "120 秒总时限截断长任务",
+      "mitigation": "任务设计为短任务；超时按 RUN_DEADLINE 计入失败与 timedOut，不重跑成成功。"
+    },
+    {
+      "risk": "demos/ 是原型页面而非真实用户项目",
+      "mitigation": "结论限定在同类只读检索任务；不外推到真实项目或长任务。"
+    },
+    {
+      "risk": "缺少功效分析",
+      "mitigation": "预注册为任务级描述性统计 + 探索性符号检验；不报确认性 p 值。"
+    },
+    {
+      "risk": "12 个任务不足以支撑普适结论",
+      "mitigation": "报告每格 0/1/2/3 次 pass 的分布与逐任务差值，不只报合并比例。"
+    },
+    {
+      "risk": "PILOT 与正式数据混用",
+      "mitigation": "证据级别字段强制区分；controlled 数据不得进入结果章节，目录与命令分离。"
+    }
+  ]
+}
