@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import type {
   WriteFileIdentity,
   WriteFileState,
-} from '../../../shared/contracts/write-approval';
+} from '../../../shared/contracts/write-permission';
 
 /**
  * Byte-level helpers shared by target observation and the pure decisions, so

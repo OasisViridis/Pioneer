@@ -1,10 +1,10 @@
 import {
-  WRITE_APPROVAL_LIMITS,
+  WRITE_LIMITS,
   type WriteFileIdentity,
   type WriteFileState,
   type WriteTarget,
   type WriteTargetState,
-} from '../../../shared/contracts/write-approval';
+} from '../../../shared/contracts/write-permission';
 import type { ReadOnlyToolRejection } from '../../../shared/contracts/read-only-tools';
 import { BoundedReadError, readStableFile } from '../bounded-read';
 import { checkReadOnlyToolRequest } from '../read-only-tool-policy';
@@ -99,7 +99,7 @@ export async function observeWriteTarget(
   try {
     read = await readStableFile(
       preflight.value.absolutePath,
-      WRITE_APPROVAL_LIMITS.targetBytes,
+      WRITE_LIMITS.targetBytes,
       options.afterRead === undefined ? {} : { afterRead: options.afterRead },
     );
   } catch (error) {
