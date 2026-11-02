@@ -538,6 +538,22 @@ describe('write sandbox scope', () => {
     }
   });
 
+  it('keeps .git protected even when the policy omits it', () => {
+    const targets = [targetOf('.git/config', 'a', 'a2')];
+    expect(
+      checkWriteScope(targets, {
+        mode: 'workspace_write',
+        protectedPaths: ['src/generated'],
+      }),
+    ).toEqual({ ok: false, code: 'SCOPE_PROTECTED_PATH' });
+    expect(
+      checkWriteScope([targetOf('src/generated/types.ts', 'a', 'a2')], {
+        mode: 'workspace_write',
+        protectedPaths: ['src/generated'],
+      }),
+    ).toEqual({ ok: false, code: 'SCOPE_PROTECTED_PATH' });
+  });
+
   it('does not treat a lookalike prefix as protected', () => {
     const targets = [targetOf('.github/workflows/ci.yml', 'a', 'a2')];
     expect(
@@ -1134,6 +1150,21 @@ describe('write outcomes', () => {
     targetOf('src/d.ts', 'd', 'd2'),
   ]);
 
+  // Journal records must carry the hashes of the target they belong to; a
+  // record that merely repeats its own numbers is what the summarizer rejects.
+  const beforeByPath: Record<string, string> = {
+    'src/a.ts': 'a',
+    'src/b.ts': 'b',
+    'src/c.ts': 'c',
+    'src/d.ts': 'd',
+  };
+  const afterByPath: Record<string, string> = {
+    'src/a.ts': 'a2',
+    'src/b.ts': 'b2',
+    'src/c.ts': 'c2',
+    'src/d.ts': 'd2',
+  };
+
   function record(
     kind: 'intent' | 'applied' | 'failed' | 'recovery',
     path: string,
@@ -1144,18 +1175,23 @@ describe('write outcomes', () => {
       approvalId: approval.approvalId,
       path,
       at: new Date(AT + 2_000).toISOString(),
-      ...(kind === 'intent' ? { beforeSha256: sha256Of('before') } : {}),
+      ...(kind === 'intent'
+        ? { beforeSha256: sha256Of(beforeByPath[path] ?? 'before') }
+        : {}),
       ...(kind === 'applied'
         ? {
-            afterSha256: sha256Of('after'),
-            observedSha256: sha256Of('after'),
+            afterSha256: sha256Of(afterByPath[path] ?? 'after'),
+            observedSha256: sha256Of(afterByPath[path] ?? 'after'),
             observedIdentity: null,
             verification: 'verified',
           }
         : {}),
       ...(kind === 'failed' ? { code: 'WRITE_FAILED' } : {}),
       ...(kind === 'recovery'
-        ? { action: 'restore', observedSha256: sha256Of('before') }
+        ? {
+            action: 'restore',
+            observedSha256: sha256Of(beforeByPath[path] ?? 'before'),
+          }
         : {}),
       ...extra,
     });
@@ -1189,6 +1225,35 @@ describe('write outcomes', () => {
     ]);
   });
 
+  it('rejects an applied record whose hash is not this approval after-image', () => {
+    const outcomes = summarizeWriteOutcomes(approval, [
+      record('applied', 'src/a.ts', {
+        afterSha256: sha256Of('wrong'),
+        observedSha256: sha256Of('wrong'),
+      }),
+    ]);
+    expect(outcomes[0]).toEqual({
+      path: 'src/a.ts',
+      status: 'verification_failed',
+      code: 'VERIFY_FAILED',
+    });
+  });
+
+  it('rejects a restore record that does not observe the before-image', () => {
+    const outcomes = summarizeWriteOutcomes(approval, [
+      record('applied', 'src/a.ts'),
+      record('recovery', 'src/a.ts', {
+        action: 'restore',
+        observedSha256: sha256Of('still-after'),
+      }),
+    ]);
+    expect(outcomes[0]).toEqual({
+      path: 'src/a.ts',
+      status: 'failed',
+      code: 'RECOVERY_CONFLICT',
+    });
+  });
+
   it('uses the last journal record for a path', () => {
     const outcomes = summarizeWriteOutcomes(approval, [
       record('applied', 'src/a.ts'),
@@ -1206,7 +1271,7 @@ describe('write outcomes', () => {
       record('applied', 'src/a.ts'),
       record('recovery', 'src/a.ts', {
         action: 'restore',
-        observedSha256: sha256Of('before'),
+        observedSha256: sha256Of('a'),
       }),
     ]);
     expect(outcomes[0]).toEqual({
@@ -1249,12 +1314,17 @@ describe('recovery planning', () => {
     path: string,
     observedIdentity: WriteFileIdentity | null = null,
   ) {
+    // The journal must agree with the approval it belongs to; a record carrying
+    // its own unrelated hash is exactly what the summarizer rejects.
+    const afterSha256 =
+      approval.targets.find((target) => target.path === path)?.after.sha256 ??
+      sha256Of(`after\n`);
     return WriteChangeJournalRecordSchema.parse({
       kind: 'applied',
       approvalId: approval.approvalId,
       path,
-      afterSha256: sha256Of(`after\n`),
-      observedSha256: sha256Of(`after\n`),
+      afterSha256,
+      observedSha256: afterSha256,
       observedIdentity,
       verification: 'verified',
       at: new Date(AT + 2_000).toISOString(),
@@ -1325,6 +1395,110 @@ describe('recovery planning', () => {
       action: 'already_restored',
       state: 'unchanged',
       observed: stateOf('before\n'),
+    });
+  });
+
+  it('does not replay a target that already has a recovery record', async () => {
+    const target = await seed('src/index.ts', 'before\n');
+    await writeFile(join(projectRoot, 'src/index.ts'), 'after\n');
+    const actual: WriteTarget = { ...target, after: stateOf('after\n') };
+    const approval = approvalOf([actual]);
+    const observations = await observeWriteTargets(projectRoot, [actual]);
+    const plan = planRecovery({
+      approval,
+      records: [
+        appliedRecord(approval, 'src/index.ts'),
+        WriteChangeJournalRecordSchema.parse({
+          kind: 'recovery',
+          approvalId: approval.approvalId,
+          path: 'src/index.ts',
+          action: 'restore',
+          observedSha256: sha256Of('before\n'),
+          at: new Date(AT + 3_000).toISOString(),
+        }),
+      ],
+      observations,
+    });
+    expect(plan.actions[0]).toMatchObject({
+      path: 'src/index.ts',
+      action: 'already_restored',
+      state: 'changed',
+    });
+  });
+
+  it('keeps a target whose last record is a failed write out of scope', async () => {
+    const target = await seed('src/index.ts', 'before\n');
+    await writeFile(join(projectRoot, 'src/index.ts'), 'after\n');
+    const actual: WriteTarget = { ...target, after: stateOf('after\n') };
+    const approval = approvalOf([actual]);
+    const observations = await observeWriteTargets(projectRoot, [actual]);
+    const plan = planRecovery({
+      approval,
+      records: [
+        WriteChangeJournalRecordSchema.parse({
+          kind: 'failed',
+          approvalId: approval.approvalId,
+          path: 'src/index.ts',
+          code: 'WRITE_FAILED',
+          at: new Date(AT + 2_000).toISOString(),
+        }),
+      ],
+      observations,
+    });
+    expect(plan.outOfScope).toEqual(['src/index.ts']);
+    expect(plan.actions).toEqual([]);
+  });
+
+  it('treats an interrupted write as a conflict instead of guessing', async () => {
+    const target = await seed('src/index.ts', 'before\n');
+    await writeFile(join(projectRoot, 'src/index.ts'), 'after\n');
+    const actual: WriteTarget = { ...target, after: stateOf('after\n') };
+    const approval = approvalOf([actual]);
+    const observations = await observeWriteTargets(projectRoot, [actual]);
+    const plan = planRecovery({
+      approval,
+      records: [
+        WriteChangeJournalRecordSchema.parse({
+          kind: 'intent',
+          approvalId: approval.approvalId,
+          path: 'src/index.ts',
+          beforeSha256: sha256Of('before\n'),
+          at: new Date(AT + 2_000).toISOString(),
+        }),
+      ],
+      observations,
+    });
+    expect(plan.actions[0]).toMatchObject({
+      path: 'src/index.ts',
+      action: 'conflict',
+    });
+  });
+
+  it('refuses to recover an applied record that was never verified', async () => {
+    const target = await seed('src/index.ts', 'before\n');
+    await writeFile(join(projectRoot, 'src/index.ts'), 'after\n');
+    const actual: WriteTarget = { ...target, after: stateOf('after\n') };
+    const approval = approvalOf([actual]);
+    const observations = await observeWriteTargets(projectRoot, [actual]);
+    const plan = planRecovery({
+      approval,
+      records: [
+        WriteChangeJournalRecordSchema.parse({
+          kind: 'applied',
+          approvalId: approval.approvalId,
+          path: 'src/index.ts',
+          afterSha256: actual.after.sha256,
+          observedSha256: actual.after.sha256,
+          observedIdentity: null,
+          verification: 'unverified',
+          at: new Date(AT + 2_000).toISOString(),
+        }),
+      ],
+      observations,
+    });
+    expect(plan.actions[0]).toMatchObject({
+      path: 'src/index.ts',
+      action: 'conflict',
     });
   });
 

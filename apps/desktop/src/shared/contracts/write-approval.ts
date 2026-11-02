@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { RunIdentitySchema } from './pioneer-run';
+import { isSafePathSegment } from '../path-safety';
 
 /**
  * P4-D1 (#18) write approval contract: a decision-only surface.
@@ -35,15 +36,13 @@ const bytes = z
   .nonnegative()
   .max(WRITE_APPROVAL_LIMITS.targetBytes);
 
-const RESERVED_DEVICE_NAME =
-  /^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³]|conin\$|conout\$)(?:\.|$)/i;
-
 /**
  * Shape-only check: plain project-relative components with no traversal,
  * drive, UNC, ADS, reserved device name or over-long path. Components must use
  * `/` so one file cannot enter an approval twice as `src/a.ts` and `src\a.ts`.
- * Containment, link, sensitive-name and type checks stay in main's path policy
- * and are re-run before any write.
+ * The per-segment rule is shared with main's read-only policy. Containment,
+ * link, sensitive-name and type checks stay in main's path policy and are
+ * re-run before any write.
  */
 export const WriteTargetPathSchema = z
   .string()
@@ -54,16 +53,7 @@ export const WriteTargetPathSchema = z
     if (value.startsWith('/')) return false;
     const segments = value.split('/');
     if (segments.length > WRITE_APPROVAL_LIMITS.pathComponents) return false;
-    return segments.every(
-      (segment) =>
-        segment.length > 0 &&
-        segment !== '.' &&
-        segment !== '..' &&
-        !segment.includes(':') &&
-        !/[\u0000-\u001f\u007f<>"|?*]/.test(segment) &&
-        !/[. ]$/.test(segment) &&
-        !RESERVED_DEVICE_NAME.test(segment),
-    );
+    return segments.every(isSafePathSegment);
   }, 'Use a plain project-relative path.');
 
 /** Exact bytes of one side of a reviewed change; the hash is authoritative. */

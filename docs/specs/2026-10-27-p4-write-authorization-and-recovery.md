@@ -66,7 +66,7 @@ renderer 只能看到序列化的 `WriteApprovalSummary`：批准编号、操作
 - 重复应用返回 `APPROVAL_CONSUMED`。本票不提供"返回上次结果"的语义：那要求一份按批准保存的执行结果记录，属于 #19 的实现内容；在此之前，唯一诚实的答案是"已经用过，重新审阅"。
 - 批准在 `expiresAt` 之后返回 `APPROVAL_EXPIRED`；`expiresAt <= createdAt` 或超过 10 分钟窗口的记录不合法。
 - 撤销由 main 触发：用户取消审阅、关闭窗口或窗口代次变化、会话出现更新修订号、陈旧目标拒绝之后。`revoked` 为真时 `revocationReason` 必须非空，取值 `user`、`window_closed`、`new_revision`、`stale_target`；`revoked` 为假时原因必须为空。
-- 被拒绝的批准不是"还可以再试"：拒绝后 main 撤销它（`stale_target`），保留原因供追溯，用户必须重新读取目标、重新生成 Diff、重新审阅。
+- 被拒绝的批准不是"还可以再试"：拒绝路径上由 main 调用 `revokeWriteApproval(approval, 'stale_target')`，保留原因供追溯，用户必须重新读取目标、重新生成 Diff、重新审阅。本票交付该函数，拒绝路径的调用点属 #19。
 - 窗口绑定（`webContentsId`、`windowEpoch`）不符返回 `APPROVAL_BINDING_MISMATCH`，且不透露记录状态。
 
 ### 2.3 用户核对界面必须显示与不得显示
@@ -90,7 +90,7 @@ renderer 只能看到序列化的 `WriteApprovalSummary`：批准编号、操作
 
 ### 2.5 diffDigest 的规范编码
 
-`diffDigest = SHA-256(UTF-8(JSON.stringify({ version: 1, operation, targets, diff })))`。其中 `targets` 按批准顺序排列，每项含 `path`、`before.bytes`、`before.sha256`、`after.bytes`、`after.sha256`、`identity`；`diff` 是用户实际看到的规范化 Diff 文本（`\n` 换行、无尾随空白、与渲染内容逐字一致）。`JSON.stringify` 使用默认紧凑格式，不排序键。`computeDiffDigest` 是本票交付的生产者，探针用同一输入复算并断言"改任一目标、任一字节、任一身份或 Diff 文本都会改变摘要"；两份实现按同一规则才能得出同一摘要，避免"看起来一样"的假一致。
+`diffDigest = SHA-256(UTF-8(JSON.stringify({ version: 1, operation, targets, diff })))`。其中 `targets` 按批准顺序排列，每项是完整的 `WriteTarget`：`path`、`before`、`after`、`identity`，而 `before`/`after` 是完整状态对象（含 `kind: "file"`、`bytes`、`sha256`），序列化时必须原样包含，不能只取哈希；`diff` 是用户实际看到的规范化 Diff 文本（`\n` 换行、无尾随空白、与渲染内容逐字一致）。`JSON.stringify` 使用默认紧凑格式，不排序键。`computeDiffDigest` 是本票交付的生产者，探针用同一输入复算并断言"改任一目标、任一字节、任一身份或 Diff 文本都会改变摘要"；两份实现按同一规则才能得出同一摘要，避免"看起来一样"的假一致。
 
 ## 3. 落盘前目标核验（陈旧批准拦截）
 
@@ -117,7 +117,7 @@ renderer 只能看到序列化的 `WriteApprovalSummary`：批准编号、操作
 
 一次应用由 main 按固定顺序组合三层，每层只做自己的事：
 
-1. **记录与保留内容**：先按 `approvalId` 查批准记录；没有记录，或对应目标的待写入内容没有保留，返回 `APPROVAL_REQUIRED`；保留内容哈希不符返回 `APPROVAL_DIGEST_MISMATCH`；保留内容的目标集合不符返回 `APPROVAL_TARGET_MISMATCH`。
+1. **记录与保留内容**：main 先用 `approvalId` 从自己的批准存储取出记录，再交给 `evaluateWriteApproval`；取不到记录、或对应目标的待写入内容没有保留，按 `APPROVAL_REQUIRED` 处理；保留内容哈希不符返回 `APPROVAL_DIGEST_MISMATCH`；保留内容的目标集合不符返回 `APPROVAL_TARGET_MISMATCH`。存储与取记录属 #19，本票的探针只覆盖"保留内容缺失"这一条能确定性构造的分支。
 2. **观察（只读，无副作用）**：main 以自己在目录册里的项目根为起点，对每个目标执行只读路径策略（拒绝绝对路径、`..`、隐藏与凭证类名称、链接、项目外解析、非普通文件与多链接），再用共享的有界稳定读取（上限 `targetBytes`）读取一次，读取前后核对 `size`/`mtimeMs`/`ino` 一致，不一致记 `unstable`；随后按 §3.1 得出每个目标的 `changed`/`replaced`/`missing` 等状态与内容哈希、文件身份。
 3. **纯判定**：拿观察结果做判定，顺序是 绑定 → 撤销 → 已用 → 过期 → 确认的 Diff 摘要 → 目标集合 → 目标状态。这个顺序也决定多个条件同时成立时返回哪个码：窗口绑定不符最先返回，不让外来窗口读到记录状态；撤销先于已用，已用先于过期。
 
@@ -165,7 +165,7 @@ renderer 只能看到序列化的 `WriteApprovalSummary`：批准编号、操作
 | `workspace_write` | 只写项目根内的普通文件；保护路径只读 | #19 启用写入后的默认 |
 | `full_access` | 跳过模式与保护路径限制；契约层的相对路径、无反斜杠、无 `..` 与 main 的项目根确认仍然生效 | 只能由用户显式开启并单独确认 |
 
-`full_access` 不等于任意磁盘访问：它只是不再额外施加"只写项目内"与保护路径这两层，路径语法与项目根确认仍然拦在前面；它也不是内核隔离，进程本身仍有宿主权限。
+`full_access` 不等于任意磁盘访问：它只是不再额外施加"只写项目内"与保护路径这两层，路径语法与项目根确认仍然拦在前面；它也不是内核隔离，进程本身仍有宿主权限。观察与落盘仍走 main 的只读路径策略，隐藏与凭证类名称、链接、非普通文件照旧拒绝，`full_access` 不绕过这些检查。
 
 保护路径默认 `.git`（`WRITE_PROTECTED_PATHS`）：`workspace_write` 下即使批准了也拒绝，恢复同样拒绝。匹配按路径段、任意深度、大小写不敏感，因此 `.git/config`、`vendor/x/.git/config`、`.GIT/config` 都被拒绝；`.github/` 这类近似前缀不算保护路径。
 
@@ -273,14 +273,14 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 ## 7. 负向探针矩阵（本票已执行）
 
-[探针测试](../../tests/contract/write-approval.test.ts)共 103 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
+[探针测试](../../tests/contract/write-approval.test.ts)共 110 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
 
 | 组 | 输入 | 期望 | 位置 |
 | --- | --- | --- | --- |
 | 契约 | 未知字段、摘要里带 `webContentsId` 或原始文件身份、非 `replace_file` 操作、重复目标、大小写重名、反斜杠路径、单文件超 1 MiB、整份超 4 MiB、有效期超窗口、撤销记录不自洽、设备名、超 32 层路径 | schema 解析失败 | `write approval contract` |
 | 路径语法 | `../`、绝对路径、盘符、UNC、反斜杠、空组件、尾点、NTFS ADS | schema 解析失败 | 同上 |
 | diffDigest | 规范编码复算、同输入稳定、改 Diff 文本、改 after 哈希、改身份 | 前两项相等；后三项各不相等 | `diff digest` |
-| 沙箱边界 | `read_only` 下任何目标、`.git` 与子路径、`.github/` 近似前缀、`full_access` 下的 `.git`、策略默认值、未知模式 | `SCOPE_READ_ONLY`/`SCOPE_PROTECTED_PATH`/通过；未知模式与空保护清单 schema 拒绝 | `write sandbox scope` |
+| 沙箱边界 | `read_only` 下任何目标、`.git` 与子路径、`.github/` 近似前缀、`full_access` 下的 `.git`、策略省略 `.git` 仍拒绝、自定义保护路径、未知模式 | `SCOPE_READ_ONLY`/`SCOPE_PROTECTED_PATH`/通过；未知模式与空保护清单 schema 拒绝 | `write sandbox scope` |
 | 目标观察 | 未变、同尺寸改动、增长、截断、读取期间被改、移走、目录、符号链接、硬链接、隐藏凭证名、超预算、同名重建 | `unchanged`/`changed`/`unstable`/`missing`/`not_regular_file`/`link_not_allowed`/`unreadable`/`too_large`/`replaced` | `target observation` |
 | 批准有效性 | 已消费、已撤销、已过期、六种绑定不符、Diff 摘要不符、目标集合不符、身份无法确认 | 对应 `APPROVAL_*` 拒绝码；身份项为 `APPROVAL_STALE_TARGET` + `identity_unavailable` | `write approval decision` |
 | 消费与完成 | 写入前只消费、标记完成后再次应用 | 消费后 `appliedAt` 仍为 `null` 且判定为 `APPROVAL_CONSUMED`；完成后同样拒绝重放 | 同上 |
@@ -290,13 +290,15 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 | 撤销与完成 | 撤销记录、标记完成后再次应用 | schema 复验通过；`APPROVAL_REVOKED`/`APPROVAL_CONSUMED` | 同上 |
 | 日志不变量 | `verified` 但观察哈希与 `after` 不同 | schema 解析失败 | 同上 |
 | 逐路径结果 | 无记录、已校验、未校验、失败、只有 `intent`、恢复完成、恢复冲突 | `unchanged`/`applied`/`verification_failed`/`failed`/`unknown`/`restored`/`failed(RECOVERY_CONFLICT)` | `write outcomes` |
+| 日志真实性 | 记录哈希与本批准的 `after` 不符、恢复记录观察哈希与 `before` 不符 | `verification_failed` / `failed(RECOVERY_CONFLICT)` | 同上 |
+| 恢复归属 | 已有 `recovery` 记录、最后一条是 `intent`、最后一条是 `failed`、`applied` 未 verified | `already_restored` / `conflict` / `outOfScope` / `conflict` | `recovery planning` |
 | 恢复 | 当前等于 `after`、等于 `before`、用户改动、文件被删、类型改变、身份不同、身份无法确认、未应用目标、重复计划 | `restore`/`already_restored`/`conflict`/`outOfScope` | `recovery planning` |
 | 能力关闭 | 扫描 `apps/desktop/src` 的写调用字面量；检查 `run-ipc.ts` 与 `pioneer-run.ts` | 四个既有文件之外没有出现写调用字面量；无 `write`/`approval` 通道、无能力位 | `write surface stays closed` |
 
 矩阵的边界，逐条说清：
 
 - "同名重建"有一条真实删除后重建的探针，平台复用同一身份时会显式 `skip` 而不是静默通过；另有一条用改变的身份构造的确定性探针覆盖判定分支。
-- 当前有 2 条探针在平台限制下显式 `skip`（身份复用、无符号链接权限），验证记录的"定向探针"一行必须把它们与通过分开写，不能只报 103/103。
+- 有 2 条探针在平台不满足前提时显式 `skip`（身份复用、无符号链接权限）；本机门禁未触发 skip，因此记录报 110/110，并以日志中的实际计数为准。
 - `readStableFile` 有一个 `afterRead` 测试钩子，用来确定性地制造"读取期间被改动"。这是本票对 Issue "不另建测试替换点" 的一次偏离：没有它测不到 `unstable` 分支；钩子只在构造选项时传入，生产调用不传，验证记录里单列。
 - `identity_unavailable` 由平台"批准时报告身份、本次读取不报告"产生，NTFS 上无法稳定制造；确定性探针用伪造的观察对象覆盖判定分支，观察函数的该分支不在本轮探针内。
 - `computeDiffDigest` 的探针复算规范 JSON 的 SHA-256，并断言输入变化会改变摘要；它不证明将来的预览界面渲染出的文本与摘要绑定，那属于 #19。
@@ -331,7 +333,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 11. **恢复复用原批准（默认）vs 要求新的写入批准**：复用让"恢复到自己刚批准的旧内容"少一次流程，代价是批准被消费后仍有写权限；要求新批准更保守但更繁琐。
 12. **写入批准是否进入 preload API**：默认不进入，等 #19 的界面上线时再定通道与字段。
 
-以上第 1—10 条已写进代码常量与纯函数；第 11—12 条是 #19/#20 的输入，本票不实现。
+以上第 1—6、8—10 条已写进代码常量与纯函数；第 7 条（接受并发残余风险）是风险接受条款，没有对应代码，只在 §3.4 记录；第 11—12 条是 #19/#20 的输入，本票不实现。
 
 ### 9.1 留给 #19/#20 的实现前决定
 
@@ -345,12 +347,13 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 6. **恢复的执行入口**：恢复请求字段、逐目标选择、执行期停止语义与恢复自身的副作用记录。
 7. **部分写入后的自动检查**：写入后重读、哈希核对与失败码映射的实现位置。
 8. **沙箱执行机制**：Windows 三档实现（`mxc` / 低权限账户 / 受限 Token + job object）的选型与验收、保护路径默认清单、`full_access` 的开启流程与界面提示。本票只定义模式与判定，内核级强制由 #19/#20 验收。
+9. **`afterRead` 测试接缝**：本票在 `readStableFile` 上留了一个可选钩子，用来确定性测试"读取期间被改动"。这是对 Issue "不另建测试替换点" 的偏离，需要人类决定保留（并在 #19 说明它不进入生产调用路径）还是移除（同时删掉 `unstable` 的那条确定性探针）。
 
 ## 10. 验证记录
 
 2026-10-27 在 `docs/issue18-write-authorization`（自 `origin/main` `28e6882`）执行：
 
-- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 103/103 通过。
+- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 103/103 通过；其中 2 条只在平台复用文件身份或无符号链接权限时显式 `skip`，本机未触发。
 - 受影响既有测试：`egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` 共 123 项通过（共享读取重构未改变行为）。
 - `pnpm typecheck`、`pnpm test:contract:types` 通过；新文件 ESLint 0 问题；Prettier 检查通过。
 - 完整 `pnpm check` 与 `pnpm verify:repository` 记录见[验证记录](../testing/issue18-verification.md)；本文件的证据范围仅到 Contract Tests，不代表写入功能已实现。

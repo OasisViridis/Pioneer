@@ -16,14 +16,14 @@
 | 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：103 项 Contract Tests |
 | 词表 | [`GLOSSARY.md`](../../GLOSSARY.md)：新增「写入批准（Write Approval）」「变更日志（Change Journal）」 |
 
-没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段；`run-ipc.ts` 与 `pioneer-run.ts` 未改动。`egress-materials.ts` 只改了内部读取实现，对外错误码与行为不变。
+没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段；`run-ipc.ts` 与 `pioneer-run.ts` 未改动。`egress-materials.ts` 只改了内部读取实现，对外错误码映射不变（`UNSTABLE` → `MATERIAL_NOT_ALLOWED`，其余读取失败 → `INVALID_REQUEST`）；短读与关闭失败的处理移入共享读取，边界行为有变化，见下方记录。
 
 ## 验证证据
 
 | 项 | 命令/位置 | 结果 |
 | --- | --- | --- |
 | 仓库规范化 | `pnpm verify:repository` | 6/6 通过 |
-| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 103/103 通过；其中 2 条在平台不报告文件身份或无符号链接权限时会显式 `skip`（本机未触发，日志保留实际计数） |
+| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 110/110 通过；其中 2 条只在平台复用文件身份或无符号链接权限时显式 `skip`（本机未触发，日志保留实际计数） |
 | 受影响既有测试 | `egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` | 123/123 通过 |
 | 完整门禁 | `pnpm check` | 见下方"门禁结果" |
 | 类型 | `pnpm typecheck`、`pnpm test:contract:types` | 通过 |
@@ -32,9 +32,9 @@
 
 ### 门禁结果
 
-最终 `pnpm check`（日志 `tmp/issue18/full-check-10.log`，2026-11-02）退出码 0：
+最终 `pnpm check`（日志 `tmp/issue18/full-check-12.log`，2026-11-02）退出码 0：
 
-- Contract Tests：497/497 通过（40 个测试文件，含本票 103 项）；
+- Contract Tests：504/504 通过（40 个测试文件，含本票 110 项）；
 - Prototype Tests：210/210 通过；
 - Real Electron E2E：39/39 通过（先 build 再运行）；
 - 最终 package smoke：Electron Forge 打包完成，`Packaging for x64 on win32` 与 postPackage hook 均成功。
@@ -48,7 +48,7 @@
 ## 环境差异与失败记录
 
 1. **`ELECTRON_RUN_AS_NODE=1`**：首次 `pnpm check`（`tmp/issue18/full-check-1.log`）E2E 27/27 失败，首个错误为 `electron.exe: bad option: --remote-debugging-port=0`。原因是本会话环境把 Electron 置为纯 Node 模式。移除该变量后重跑通过（`full-check-2.log`，退出码 0）。属环境差异，不是代码缺陷；该变量未写入仓库文件。
-2. **会话生命周期 E2E 波动**：第三次门禁（`full-check-3.log`）中 `session-lifecycle.e2e.spec.ts` 有 1 项失败（`canceling a slow close prevents its late save completion from closing the window`，`expect(locator).toHaveValue`），同一提交在第二次门禁中 27/27 通过。本票没有修改 renderer、Electron 主进程或会话生命周期代码（改动仅限 `shared/contracts/write-approval.ts`、`main/write-approval/`、`main/harness/bounded-read.ts` 与 `main/harness/egress-materials.ts` 的内部读取实现、探针测试与文档），因此该失败按既有 E2E 波动处理，并在最终门禁重跑确认；日志保留，不删除失败记录。
+2. **会话生命周期 E2E 波动**：第三次门禁（`full-check-3.log`）中 `session-lifecycle.e2e.spec.ts` 有 1 项失败（`canceling a slow close prevents its late save completion from closing the window`，`expect(locator).toHaveValue`），同一提交在第二次门禁中 27/27 通过。本票没有修改 renderer、Electron 主进程或会话生命周期代码（改动仅限 `shared/contracts/write-approval.ts`、`main/harness/write-approval/`、`main/harness/bounded-read.ts` 与 `main/harness/egress-materials.ts` 的内部读取实现、探针测试与文档），因此该失败按既有 E2E 波动处理，并在最终门禁重跑确认；日志保留，不删除失败记录。
 
 ## Issue #18 完成条件对照
 
@@ -167,6 +167,22 @@
 | 规格 | 新增 §3.5 沙箱边界；§6 失败码 5 → 6；§7 新增沙箱行与边界说明；§9.1 新增第 8 项（Windows 执行机制留给 #19/#20） |
 | 探针 | 新增 7 条：`read_only` 全拒、`workspace_write` 放行、`.git` 三种形态、`.github` 近似前缀、`full_access`、策略默认与非法模式、`SCOPE_DENIED` 映射 |
 | 未做 | 真实内核级隔离（受限 Token、job object、`mxc`）属于 #19/#20；本票只有纯判定，写入能力仍关闭；`workspace_write` 在没有 OS 隔离前只是 main 的路径判定，界面不得宣传成沙箱 |
+
+### 第五轮：审查循环第二轮（journal 真实性与恢复归属）
+
+外部审查（voyager）在修复后的树上给出 3 个 blocking，指出的都是"日志可以虚报成功"和"恢复归属会随历史错误延续"：
+
+| 项 | 处理 |
+| --- | --- |
+| 日志虚报 `applied` | `summarizeWriteOutcomes` 现在要求 `applied.afterSha256` 等于本批准的 `target.after.sha256`（`verified` 还要求 `observedSha256 === afterSha256`），否则报 `verification_failed`。新增 1 条探针 |
+| 恢复虚报 `restored` | 只有 `observedSha256 === target.before.sha256` 才算 `restored`，否则 `failed(RECOVERY_CONFLICT)`。新增 1 条探针 |
+| 恢复归属随历史延续 | `planRecovery` 改为以"该路径最后一条记录"判定：已有 `recovery` → `already_restored`；`intent` → `conflict`；`failed` → `outOfScope`；`applied` 未 verified 或 `after` 不符 → `conflict`。新增 4 条探针 |
+| 保护路径可被策略移除 | `checkWriteScope` 始终并入 `WRITE_PROTECTED_PATHS`，策略不能删掉 `.git`。新增 1 条探针 |
+| 规格与代码不一致 | §2.5 说明 digest 里的 `before`/`after` 是完整状态对象（含 `kind`）；§3.2 说明记录由 main 的存储取出；§2.2 说明撤销函数与调用点归属；§9 说明第 7 条没有代码；§9.1 新增第 9 项 `afterRead` 接缝待裁 |
+
+探针从 103 增至 110；本轮同时修掉两处会掩盖缺陷的测试夹具（`record()` 与 `appliedRecord()` 用的是与批准无关的哈希）。
+
+仍未解决、且不是代码能解决的：人类对 §9 的确认；`egress-materials.ts` 重构属判断项；`write-approval` 模块没有生产 importer 是决策票的预期；`afterRead` 接缝保留还是移除需要人类裁决。
 
 ## 人类确认状态
 

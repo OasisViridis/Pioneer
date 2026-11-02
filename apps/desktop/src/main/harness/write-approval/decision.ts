@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import {
+  WRITE_PROTECTED_PATHS,
   WriteApprovalRejectionSchema,
   WriteApprovalSchema,
   type WriteApproval,
@@ -227,15 +228,6 @@ export type WriteScopeDecision =
   { ok: true } | { ok: false; code: WriteScopeDenialCode };
 
 /**
- * Applies the sandbox rule before any approval is consumed. `read_only` refuses
- * every write; `workspace_write` keeps protected paths read-only; `full_access`
- * is the explicit opt-out and is expected only after a separate confirmation.
- *
- * Containment (no `..`, no absolute path, no link escape, resolved path inside
- * the project root) is already enforced by the path schema and main's read-only
- * path policy, so this function owns the mode and protected-path rules only.
- */
-/**
  * Protected paths match by path segment, at any depth and in any case: `.git`,
  * `.git/config`, `vendor/x/.git/config` and `.GIT/config` are all refused,
  * while a lookalike such as `.github/workflows` is not protected.
@@ -261,6 +253,15 @@ function containsSegmentRun(
   return false;
 }
 
+/**
+ * Applies the sandbox rule before any approval is consumed. `read_only` refuses
+ * every write; `workspace_write` keeps protected paths read-only; `full_access`
+ * is the explicit opt-out and is expected only after a separate confirmation.
+ *
+ * Containment (no `..`, no absolute path, no link escape, resolved path inside
+ * the project root) is already enforced by the path schema and main's read-only
+ * path policy, so this function owns the mode and protected-path rules only.
+ */
 export function checkWriteScope(
   targets: readonly WriteTarget[],
   policy: WriteSandboxPolicy,
@@ -268,9 +269,13 @@ export function checkWriteScope(
   if (policy.mode === 'read_only')
     return { ok: false, code: 'SCOPE_READ_ONLY' };
   if (policy.mode === 'full_access') return { ok: true };
-  const protectedSegments = policy.protectedPaths.map((protectedPath) =>
-    protectedPath.toLowerCase().split('/'),
-  );
+  // `.git` is an invariant of workspace-write, not a default a policy may drop.
+  const protectedSegments = [...WRITE_PROTECTED_PATHS, ...policy.protectedPaths]
+    .map((protectedPath) => protectedPath.toLowerCase().split('/'))
+    .filter(
+      (run, index, all) =>
+        all.findIndex((other) => other.join('/') === run.join('/')) === index,
+    );
   for (const target of targets) {
     const segments = target.path.toLowerCase().split('/');
     if (protectedSegments.some((run) => containsSegmentRun(segments, run))) {
@@ -366,10 +371,11 @@ export function summarizeWriteOutcomes(
       case 'applied': {
         // Defense in depth: the contract forbids a "verified" record whose
         // observed hash differs from the after hash, but a record loaded from
-        // an older store must still be presented as unverified.
+        // an older store must still match this approval's reviewed bytes.
         const verified =
           record.verification === 'verified' &&
-          record.observedSha256 === record.afterSha256;
+          record.observedSha256 === record.afterSha256 &&
+          record.afterSha256 === target.after.sha256;
         return {
           path: target.path,
           status: verified
@@ -390,14 +396,21 @@ export function summarizeWriteOutcomes(
           status: 'unknown' as const,
           code: 'UNKNOWN' as const,
         };
-      case 'recovery':
-        return record.action === 'preserve'
-          ? {
+      case 'recovery': {
+        // "Restored" is only true when the recorded observation is the
+        // approval's before-image; a preserved or unproven restore stays a
+        // conflict a human must resolve.
+        const restored =
+          record.action !== 'preserve' &&
+          record.observedSha256 === target.before.sha256;
+        return restored
+          ? { path: target.path, status: 'restored' as const, code: null }
+          : {
               path: target.path,
               status: 'failed' as const,
               code: 'RECOVERY_CONFLICT' as const,
-            }
-          : { path: target.path, status: 'restored' as const, code: null };
+            };
+      }
     }
   });
 }
@@ -435,22 +448,64 @@ export function planRecovery(input: {
   const actions: RecoveryAction[] = [];
   const outOfScope: string[] = [];
   for (const target of input.approval.targets) {
-    const applied = lastRecordFor(
+    const latest = lastRecordFor(
       input.records,
       input.approval.approvalId,
       target.path,
-      'applied',
     );
-    if (applied === null) {
-      outOfScope.push(target.path);
-      continue;
-    }
     const observation: TargetObservation = byPath.get(target.path) ?? {
       path: target.path,
       state: 'unreadable',
       observed: null,
       identity: null,
     };
+    if (latest === null) {
+      outOfScope.push(target.path);
+      continue;
+    }
+    // A later recovery record ends this run's claim on the target: a completed
+    // restore or a preserved conflict must not be replayed, and the user may
+    // legitimately edit the file back to a matching byte stream afterwards.
+    if (latest.kind === 'recovery') {
+      actions.push({
+        path: target.path,
+        action: latest.action === 'preserve' ? 'conflict' : 'already_restored',
+        state: observation.state,
+        observed: observation.observed,
+      });
+      continue;
+    }
+    if (latest.kind === 'failed') {
+      // Nothing was written, so there is nothing this run may undo.
+      outOfScope.push(target.path);
+      continue;
+    }
+    if (latest.kind === 'intent') {
+      // The process stopped mid-write; the real state is unknown, so recovery
+      // must not guess and overwrite it.
+      actions.push({
+        path: target.path,
+        action: 'conflict',
+        state: observation.state,
+        observed: observation.observed,
+      });
+      continue;
+    }
+    // Only a verified applied record that matches this approval proves the run
+    // actually wrote the reviewed bytes.
+    if (
+      latest.verification !== 'verified' ||
+      latest.afterSha256 !== target.after.sha256
+    ) {
+      actions.push({
+        path: target.path,
+        action: 'conflict',
+        state: observation.state,
+        observed: observation.observed,
+      });
+      continue;
+    }
+    const applied = latest;
     if (observation.state === 'unchanged') {
       actions.push({
         path: target.path,
