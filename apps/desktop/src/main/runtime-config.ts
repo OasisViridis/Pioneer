@@ -1,50 +1,21 @@
-import { realpathSync, statSync } from 'node:fs';
-import { isAbsolute, relative, sep } from 'node:path';
+import {
+  pathsOverlap,
+  requireExistingAbsoluteDirectory,
+  type LaunchProfileApp,
+} from './launch-paths';
 
 export interface LaunchRuntimeConfig {
   rootPath: string;
   userDataPath: string;
 }
 
-export interface LaunchRuntimeApp {
-  readonly isPackaged: boolean;
-  setPath(name: 'userData', path: string): void;
-}
+export type LaunchRuntimeApp = Pick<LaunchProfileApp, 'isPackaged' | 'setPath'>;
 
 export type LaunchRuntimeEnvironment = Readonly<
   Partial<
     Record<'PIONEER_E2E' | 'PIONEER_E2E_ROOT' | 'PIONEER_E2E_USER_DATA', string>
   >
 >;
-
-function requireExistingAbsoluteDirectory(
-  variableName: 'PIONEER_E2E_ROOT' | 'PIONEER_E2E_USER_DATA',
-  value: string | undefined,
-): string {
-  if (value === undefined || value.length === 0 || !isAbsolute(value)) {
-    throw new Error(`${variableName} must be an existing absolute directory`);
-  }
-
-  try {
-    const canonicalPath = realpathSync(value);
-    if (!statSync(canonicalPath).isDirectory()) {
-      throw new Error('not a directory');
-    }
-    return canonicalPath;
-  } catch {
-    throw new Error(`${variableName} must be an existing absolute directory`);
-  }
-}
-
-function containsPath(parentPath: string, candidatePath: string): boolean {
-  const relativePath = relative(parentPath, candidatePath);
-  return (
-    relativePath === '' ||
-    (!relativePath.startsWith(`..${sep}`) &&
-      relativePath !== '..' &&
-      !isAbsolute(relativePath))
-  );
-}
 
 /**
  * Resolves the opt-in launch seam. Environment values are intentionally not
@@ -65,10 +36,7 @@ export function resolveLaunchRuntimeConfig(
     environment.PIONEER_E2E_USER_DATA,
   );
 
-  if (
-    containsPath(rootPath, userDataPath) ||
-    containsPath(userDataPath, rootPath)
-  ) {
+  if (pathsOverlap(rootPath, userDataPath)) {
     throw new Error(
       'PIONEER_E2E_ROOT and PIONEER_E2E_USER_DATA must be disjoint',
     );

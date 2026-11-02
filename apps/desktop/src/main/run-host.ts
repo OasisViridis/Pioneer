@@ -1,5 +1,7 @@
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { writeFileAtomic } from './atomic-file';
 
 import { RunJournal, type RunJournalStore } from './harness/run-journal';
 import {
@@ -20,11 +22,13 @@ import {
   resolvePiRuntimeConfig,
 } from './harness/pi-adapter';
 
-/** Atomic whole-file journal storage: temp write + rename in userData/runs. */
+/**
+ * Atomic whole-file journal storage on top of the shared writer, so two writers
+ * can never share one temporary file and a failed write leaves no fragment.
+ */
 export function createFileJournalStore(userDataPath: string): RunJournalStore {
   const directory = join(userDataPath, 'runs');
   const file = join(directory, 'journal.jsonl');
-  const temp = join(directory, 'journal.tmp');
   return {
     load: async () => {
       try {
@@ -35,8 +39,7 @@ export function createFileJournalStore(userDataPath: string): RunJournalStore {
     },
     save: async (content: string) => {
       await mkdir(directory, { recursive: true });
-      await writeFile(temp, content, 'utf-8');
-      await rename(temp, file);
+      await writeFileAtomic(file, content);
     },
   };
 }
@@ -64,10 +67,58 @@ type RunManagerResolveProject = RunManagerDependencies['resolveProject'];
 export type { ProjectBinding, WindowBindingPort, RunSenderPort };
 
 /**
+ * The adapter source this launch may use. `controlled` carries the script it
+ * must load (null means the adapter's default script); `pi` carries nothing, so
+ * an illegal "Pi with a script" state cannot be written down.
+ */
+export type RunHostAdapterSelection =
+  | { readonly kind: 'controlled'; readonly scriptPath: string | null }
+  | { readonly kind: 'pi' };
+
+export interface RunHostLaunchGate {
+  isPackaged: boolean;
+  /** Resolved by the packaged acceptance seam; null in every other launch. */
+  acceptanceRunScriptPath: string | null;
+}
+
+/**
+ * Decides which adapter source this launch may use. A packaged build never
+ * reads the development E2E variables at all: it selects the controlled
+ * adapter only through a script path the acceptance seam already validated.
+ * A development launch keeps the E2E guard unchanged. A renderer request
+ * cannot reach either branch.
+ */
+export function selectRunHostAdapter(
+  environment: RunHostEnvironment,
+  gate: RunHostLaunchGate,
+): RunHostAdapterSelection {
+  if (gate.isPackaged) {
+    return gate.acceptanceRunScriptPath === null
+      ? { kind: 'pi' }
+      : { kind: 'controlled', scriptPath: gate.acceptanceRunScriptPath };
+  }
+
+  if (
+    environment.PIONEER_E2E === '1' &&
+    environment.PIONEER_E2E_RUN_ADAPTER === 'controlled'
+  ) {
+    const scriptPath = environment.PIONEER_E2E_RUN_SCRIPT;
+    return {
+      kind: 'controlled',
+      scriptPath:
+        scriptPath === undefined || scriptPath.length === 0 ? null : scriptPath,
+    };
+  }
+
+  return { kind: 'pi' };
+}
+
+/**
  * Assembles the run host. The controlled adapter is injected only through the
- * development/E2E launch guard (never a renderer request); production uses
- * the Pi adapter, which without an authorized provider config refuses
- * admission and is recorded as NOT_RUN instead of replaying anything.
+ * development/E2E launch guard or the packaged acceptance seam (never a
+ * renderer request); production uses the Pi adapter, which without an
+ * authorized provider config refuses admission and is recorded as NOT_RUN
+ * instead of replaying anything.
  */
 export async function assembleRunHost(dependencies: {
   userDataPath: string;
@@ -75,30 +126,29 @@ export async function assembleRunHost(dependencies: {
   resolveProject: RunManagerResolveProject;
   windowBindings: WindowBindingPort;
   sender: RunSenderPort;
+  /** Says whether this launch is a packaged build and, if so, the acceptance script. */
+  launchGate: RunHostLaunchGate;
 }): Promise<AssembledRunHost> {
   const environment = dependencies.environment ?? process.env;
   const journalStore = createFileJournalStore(dependencies.userDataPath);
   const { journal } = await RunJournal.open(journalStore);
 
-  const e2eControlled =
-    environment.PIONEER_E2E === '1' &&
-    environment.PIONEER_E2E_RUN_ADAPTER === 'controlled';
+  const selection = selectRunHostAdapter(environment, dependencies.launchGate);
 
+  const adapterKind = selection.kind;
   let adapterFactory: HarnessAdapterFactory;
-  let adapterKind: 'controlled' | 'pi';
   let adapterAvailable: boolean;
   let modelName: string | null = null;
 
-  if (e2eControlled) {
-    adapterKind = 'controlled';
+  if (selection.kind === 'controlled') {
     adapterAvailable = true;
-    adapterFactory = environment.PIONEER_E2E_RUN_SCRIPT
-      ? createControlledAdapterFactory(
-          await loadControlledScript(environment.PIONEER_E2E_RUN_SCRIPT),
-        )
-      : createControlledAdapterFactory();
+    adapterFactory =
+      selection.scriptPath !== null
+        ? createControlledAdapterFactory(
+            await loadControlledScript(selection.scriptPath),
+          )
+        : createControlledAdapterFactory();
   } else {
-    adapterKind = 'pi';
     const config = resolvePiRuntimeConfig(environment);
     adapterAvailable =
       config !== null && piCredentialPresent(config, process.env);

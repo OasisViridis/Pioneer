@@ -19,12 +19,12 @@ Pioneer 的设计前提是：项目、会话与运行状态都应当是可操作
 
 里程碑以 [ROADMAP](themasterplan/ROADMAP.md) 为唯一权威，下表只做导航。
 
-| 阶段或工作包                 | 状态                                | 证据                                                                                                                                                         |
-| ---------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| M1 开题定音、M1.5 仓库规范化 | 完成                                | ROADMAP 里程碑表；冻结原型保留为历史设计基线                                                                                                                 |
-| M2 只读桌面切片              | 完成                                | 受限 preload、海报墙、契约与真实 Electron 测试均通过；原生目录选择器的人工验收见[记录](docs/testing/m2-native-picker-smoke.md)                               |
-| M3 任务执行                  | 进行中                              | P0 整合底座与 P1 可恢复会话于 2026-10-03 收口，见 [P1 收口记录](docs/testing/p1-session-closeout-2026-10-03.md)                                              |
-| P2 真实只读 Harness          | 已合并 `main`（PR #16，2026-10-26） | 验证清单见 [Issue #13 验证记录](docs/testing/issue13-verification.md)；真实 Provider 运行见 [A09 记录](docs/testing/issue13-real-provider.md)                |
+| 阶段或工作包                 | 状态                                 | 证据                                                                                                                                                         |
+| ---------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| M1 开题定音、M1.5 仓库规范化 | 完成                                 | ROADMAP 里程碑表；冻结原型保留为历史设计基线                                                                                                                 |
+| M2 只读桌面切片              | 完成                                 | 受限 preload、海报墙、契约与真实 Electron 测试均通过；原生目录选择器的人工验收见[记录](docs/testing/m2-native-picker-smoke.md)                               |
+| M3 任务执行                  | 进行中                               | P0 整合底座与 P1 可恢复会话于 2026-10-03 收口，见 [P1 收口记录](docs/testing/p1-session-closeout-2026-10-03.md)                                              |
+| P2 真实只读 Harness          | 已合并 `main`（PR #16，2026-10-26）  | 验证清单见 [Issue #13 验证记录](docs/testing/issue13-verification.md)；真实 Provider 运行见 [A09 记录](docs/testing/issue13-real-provider.md)                |
 | P3 及之后                    | 进行中（#17、#41、#42 已合并并关闭） | #17 至 #32 十六张已发布；2026-10-26 追加 #41、#42（移除意图卡、修正运行提示），设计同步另有 #33 至 #37；#41 由 PR #46 合并，运行任务改为在运行日志里直接填写 |
 
 以上按 2026-10-27 的 `main`（`55f8130`）核对；#41 已移除意图卡，任务不再需要「确认意图」这一步。
@@ -53,9 +53,9 @@ P2 只接通一条只读链路，边界都放在主进程里：
 | 模型接入 | `pi-ai` 与 `pi-agent-core` 1.4.0，经主进程适配器调用；运行未启动时不发请求                                                                           |
 | 只读工具 | `read_file`（单次 64 KiB）、`list_directory`（200 条目）、`search_in_files`（深度 16、1000 文件、每文件 64 KiB、合计 4 MiB、100 命中）；路径先过预检 |
 | 外发材料 | 运行前勾选可外发文件；主进程绑定相对路径、字节数与 SHA-256。未列入清单返回 `MATERIAL_NOT_ALLOWED`，清单文件内容变化返回 `CONTENT_NOT_ALLOWED` 并停止 |
-| 运行时   | 主进程管理 Run 生命周期，append-only 事件日志；停止先等收敛，宽限期（默认 5 秒）到期由主进程强制结束并记固定失败码（含 `ADAPTER_DISCONNECTED`）       |
-| 会话历史 | 每次终态把任务与有界结果摘要写入 session state v6，每会话最多 20 条，重启后恢复；主进程日志只存摘要                                                   |
-| 授权     | 每次运行签发一次性 Grant，绑定任务内容、会话、revision、发起窗口与材料清单，超时或内容变更后重新授权                                                  |
+| 运行时   | 主进程管理 Run 生命周期，append-only 事件日志；停止先等收敛，宽限期（默认 5 秒）到期由主进程强制结束并记固定失败码（含 `ADAPTER_DISCONNECTED`）      |
+| 会话历史 | 每次终态把任务与有界结果摘要写入 session state v6，每会话最多 20 条，重启后恢复；主进程日志只存摘要                                                  |
+| 授权     | 每次运行签发一次性 Grant，绑定任务内容、会话、revision、发起窗口与材料清单，超时或内容变更后重新授权                                                 |
 | 凭证     | 只在主进程内从环境变量读取后交给适配器；不进仓库，不写日志，事件与错误码里也不出现                                                                   |
 | 未接通   | 写入、命令、通用文件系统 IPC、Runtime 子进程                                                                                                         |
 
@@ -101,17 +101,18 @@ pnpm dev
 
 质量门禁按证据层级分开跑，不要用一层的结果代替另一层：
 
-| 命令                     | 检查什么                                                                                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `pnpm verify:repository` | 仓库规范化：公开身份与旧路径、绝对 `file://` 链接、210 声明必须限定为 Prototype Tests、README 必须链到 `apps/desktop` |
-| `pnpm test:contract`     | 共享契约、路径遏制、IPC 与 sender 校验、设置存储与 Tabs                                                               |
-| `pnpm test:prototype`    | 冻结的 M1 模拟器 210 项用例，属 Prototype Tests 证据，不是 Electron 证据                                              |
-| `pnpm test:e2e`          | Playwright 启动真实 Electron，跨 main → preload → renderer，并校验 fixture 未被改动                                   |
-| `pnpm check`             | 依次跑格式、lint、类型、上述三层测试与 package smoke                                                                  |
+| 命令                       | 检查什么                                                                                                              |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `pnpm verify:repository`   | 仓库规范化：公开身份与旧路径、绝对 `file://` 链接、210 声明必须限定为 Prototype Tests、README 必须链到 `apps/desktop` |
+| `pnpm test:contract`       | 共享契约、路径遏制、IPC 与 sender 校验、设置存储与 Tabs                                                               |
+| `pnpm test:prototype`      | 冻结的 M1 模拟器 210 项用例，属 Prototype Tests 证据，不是 Electron 证据                                              |
+| `pnpm test:e2e`            | Playwright 启动真实 Electron，跨 main → preload → renderer，并校验 fixture 未被改动                                   |
+| `pnpm acceptance:packaged` | 重新打包并启动 `@pioneer-desktop.exe`，经 `PIONEER_ACCEPTANCE=1` 跑通一次只读运行；不进 `pnpm check`                  |
+| `pnpm check`               | 依次跑 design:check、格式、lint、类型、Contract / Prototype / Real E2E 三层测试与 package smoke                       |
 
-最近一次完整门禁记录在 2026-10-27（分支 `codex/issue13-remaining`，见 [Issue #13 验证记录](docs/testing/issue13-verification.md)）：契约 348/348（36 文件）、冻结原型 210/210（Prototype Tests）、真实 Electron 27/27、仓库规范化 6/6。数字随提交变化，引用时带上日期与版本。
+最近一次完整门禁记录在 2026-11-02（分支 `feat/p3-packaged-acceptance`，见 [Issue #53 验证记录](docs/testing/issue53-packaged-acceptance.md)）：契约 430/430（42 文件）、冻结原型 210/210（Prototype Tests）、真实 Electron 39/39、仓库规范化 6/6。数字随提交变化，引用时带上日期与版本。
 
-`test:e2e` 的 `testMatch` 只列了 8 个 spec；`window-chrome`、`session-persistence`、`hazel-design` 三个 spec 不在白名单内，因此不进 `pnpm check`，也不进 CI。
+`test:e2e` 的 `testMatch` 列了 12 个 spec；`hazel-design`、`session-persistence`、`window-chrome` 与打包验收用的 `packaged-acceptance` 不在白名单内，因此不进 `pnpm check`；其中 `design-visual` 由独立的视觉基线 job 运行。
 
 ## 目录结构
 
@@ -136,7 +137,7 @@ tests/
 | 里程碑与阶段状态                 | [ROADMAP](themasterplan/ROADMAP.md)                                                 |
 | 当前施工前沿与后续票             | [Wayfinder 开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)   |
 | 长期交付范围与验收条件           | [长期开发规格](docs/specs/2026-10-24-pioneer-long-term-development-spec.md)         |
-| 三层测试的证据边界               | [TEST_INFRA](TEST_INFRA.md)                                                         |
+| 四层测试的证据边界               | [TEST_INFRA](TEST_INFRA.md)                                                         |
 | 术语：Session、Run、Grant、收敛  | [GLOSSARY](GLOSSARY.md)                                                             |
 | 课题定位（题目、双主线、时间线） | [选题收敛说明](选题收敛说明.md)                                                     |
 | 产品形态与美学                   | [产品定义与美学纲领](产品定义与美学纲领.md)（v2.1，题名已同步 2026-10-08 正式题目） |

@@ -5,6 +5,14 @@ import { scanWorkspace } from './catalog/scanner';
 import { registerCatalogIpc } from './ipc';
 import { IPC_CHANNELS } from '../shared/contracts/ipc';
 import { applyLaunchRuntimeConfig } from './runtime-config';
+import {
+  applyPackagedAcceptanceConfig,
+  type PackagedAcceptanceConfig,
+} from './acceptance-config';
+import {
+  buildPackagedAcceptanceReport,
+  writePackagedAcceptanceReport,
+} from './acceptance-report';
 import { createSettingsStore } from './settings-store';
 import { createMainWindow } from './window';
 import {
@@ -42,9 +50,39 @@ let runHost: AssembledRunHost | null = null;
 let windowEpochCounter = 0;
 let activeWindowBinding: { webContentsId: number; epoch: number } | null = null;
 const acceptedSaves = createPendingSaveTracker();
+const launchStartedAt = new Date().toISOString();
+
+/**
+ * Writes the packaged acceptance startup report after the workspace is
+ * selected and the window exists, so it describes what this launch assembled.
+ * Every other launch writes nothing.
+ */
+async function writeAcceptanceReport(dependencies: {
+  config: PackagedAcceptanceConfig;
+  catalog: ReturnType<CatalogService['getCurrentCatalog']>;
+  runHost: AssembledRunHost;
+}): Promise<void> {
+  const report = buildPackagedAcceptanceReport({
+    isPackaged: app.isPackaged,
+    electronVersion: process.versions.electron,
+    nodeVersion: process.versions.node,
+    platform: process.platform,
+    processId: process.pid,
+    startedAt: launchStartedAt,
+    userDataRoot: app.getPath('userData'),
+    executablePath: app.getPath('exe'),
+    catalog: dependencies.catalog,
+    runHost: dependencies.runHost,
+    now: () => new Date(),
+  });
+  await writePackagedAcceptanceReport(dependencies.config.reportPath, report);
+}
 
 // This must run before app readiness can construct Chromium session state.
 const launchRuntimeConfig = applyLaunchRuntimeConfig(app);
+// Packaged acceptance is a separate, doubly-gated seam: packaged build plus the
+// exact PIONEER_ACCEPTANCE=1 switch. It is null in every development launch.
+const acceptanceConfig = applyPackagedAcceptanceConfig(app);
 const ownsProfile = app.requestSingleInstanceLock();
 if (!ownsProfile) app.exit(0);
 
@@ -369,8 +407,12 @@ void app.whenReady().then(async () => {
     beforeRescan,
   });
 
-  runHost = await assembleRunHost({
+  const assembledRunHost = await assembleRunHost({
     userDataPath: app.getPath('userData'),
+    launchGate: {
+      isPackaged: app.isPackaged,
+      acceptanceRunScriptPath: acceptanceConfig?.runScriptPath ?? null,
+    },
     resolveProject: async (projectId) => {
       const service = catalogService;
       if (service === null) return null;
@@ -399,14 +441,27 @@ void app.whenReady().then(async () => {
       },
     },
   });
+  runHost = assembledRunHost;
 
   if (launchRuntimeConfig !== null) {
     await catalogService.selectRoot(launchRuntimeConfig.rootPath);
     rejectSaveArmed = true;
+  } else if (acceptanceConfig !== null) {
+    // The packaged acceptance pass opens the same root a person would pick in
+    // the native chooser, then reports what main actually sees.
+    await catalogService.selectRoot(acceptanceConfig.workspacePath);
   }
 
   if (!appLifecycle.isQuitting()) openMainWindow(catalogService);
   appLifecycle.markReady();
+
+  if (acceptanceConfig !== null) {
+    await writeAcceptanceReport({
+      config: acceptanceConfig,
+      catalog: catalogService.getCurrentCatalog(),
+      runHost: assembledRunHost,
+    });
+  }
 
   app.on('activate', () => {
     if (
