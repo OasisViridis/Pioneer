@@ -121,9 +121,10 @@ not_run 计入 plannedDenominator 但不计入 executedCount，也不当作模�
 
 ## 输入
 
-- dataset: docs/experiments/m5a/pilot-controlled/dataset.jsonl (sha256 aa915191b410c0c6a9b192b315fb30070a8299cd5885a2aedf5972066af1ba67)
+- dataset: docs/experiments/m5a/pilot-controlled/dataset.jsonl (sha256 0d8cbc1b2beaf387ce9f83de3ab168bf0be998af243311a4c7b37d49128227b3)
+- buildReport: docs/experiments/m5a/pilot-controlled/build-report.json (sha256 5101248a7a4a1a97ee37572d060eed278e943defa6d6c16b33d0f09f446a412a)
 - answers: docs/experiments/m5a/pilot-controlled/answers.ndjson (sha256 866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842)
-- protocol: docs/experiments/m5a/v1/protocol.json (sha256 8f6beee18529dd0e452713ebe1c2e2eb6ee1ac62790436e08fd952dafe22b81f)
-- plan: docs/experiments/m5a/v1/analysis-plan.json (sha256 a3e9cf99a9edf50c766f02e298211ce3de375c4e3f0952b26b1939c69a9bd21f)
-- tasks: docs/experiments/m5a/v1/tasks.json (sha256 25bde05f9759e1e2debc7bcb65df2845ee80bbf30f52851c3c44f2c9020719da)
+- protocol: docs/experiments/m5a/v1/protocol.json (sha256 da1e5508f027586c332dd031e78c117cf2014a74ce8898192b021318dca4b7cc)
+- plan: docs/experiments/m5a/v1/analysis-plan.json (sha256 037df891d5d4af05ea4e17267d28d79c52abfd369c9ae05e5712d38e1325fa56)
+- tasks: docs/experiments/m5a/v1/tasks.json (sha256 67a261eb1a6ae87520c5371b8d71e01d2a54e24fa2edcaf0f5e8e9d752223b1e)
 

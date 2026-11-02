@@ -55,6 +55,18 @@
 
 ---
 
+### 2026-11-03 M5-A 方案冻结与受控先导（M5 仍未完成）
+
+Issue #29 的对比方案冻结为 v1：两个变体（`pioneer-readonly-tools` / `fixed-prefix-no-tools`）、12 条任务分 4 类、三层分母、任务级统计，以及 `tools/experiments` 的记录与分析工具。冻结清单 `docs/experiments/m5a/v1/freeze-manifest.json` 覆盖 4 份 v1 JSON 与 7 个工具源码。
+
+受控先导（`evidenceKind=controlled`）跑通 build → analyze → freeze 全链路：18 条登记尝试、16 条执行、2 条 `not_run`；缺 usage 保持 null，`MODEL_FAILED`、`RUN_DEADLINE`、用户停止与 `host_restarted` 墓碑各按枚举分类；`answers.ndjson` 复算 12/12 一致。这组数据只证明记录与分析流程正确，不是模型结果，不进入论文结果章节。
+
+真实 Provider 先导为 **NOT_RUN**：没有点名 Provider、模型与外发材料授权，且产品侧还缺「把 journal 与事件流导出成采集包」的入口。因此「先导结果」与「样本量、成本已由真实先导验证」两项保持待办，M5 不因本票据关闭而完成。
+
+`pnpm check` 退出码 0（含 Real Electron E2E 39/39 与 package smoke）；`pnpm test:experiments` 31/31。协议、披露与限制见[冻结方案](../docs/experiments/2026-11-03-m5a-comparison-protocol.md)。
+
+---
+
 ### 2026-10-03 开发恢复（历史记录；P2 已于 2026-10-26 合并，当前状态见下一节）
 
 用户已验收 v8 展示视频并明确恢复应用开发。M3 仍为 **IN PROGRESS**。现役计划 P0 底座与 P1 可恢复会话均已完成：生产 main / preload / App 接通，媒体库支持同项目多会话，草稿／消息／可选意图／单一停靠布局可保存、关闭重开和重启恢复，旧三模式入口已移除。新完整 `pnpm check` exit 0（200 Contract、21 Real Electron E2E、最终 package；冻结 Prototype 门同时通过）。下一片 P2 接真实、可停止的只读 Harness；模型／工具／写入当前仍关闭。见[P1 收口](../docs/testing/p1-session-closeout-2026-10-03.md)和[Wayfinder 端到端开发计划](../docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)（接替 [10-01 计划](../docs/plans/2026-10-01-pioneer-frozen-prototype-development-plan.md)）。

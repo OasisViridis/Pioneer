@@ -3,25 +3,32 @@
   "protocolId": "m5a-harness-context-comparison",
   "tasks": {
     "path": "docs/experiments/m5a/v1/tasks.json",
-    "sha256": "25bde05f9759e1e2debc7bcb65df2845ee80bbf30f52851c3c44f2c9020719da",
-    "bytes": 32227,
+    "sha256": "67a261eb1a6ae87520c5371b8d71e01d2a54e24fa2edcaf0f5e8e9d752223b1e",
+    "bytes": 32815,
     "taskCount": 12
+  },
+  "corpus": {
+    "corpusId": "pioneer-demos-m1-frozen",
+    "manifestSha256": "1557594df4dbdd7324dd4ffa4dcbf6c71607c6e99dfd5ee967f023f52bdc7f42",
+    "fileCount": 6,
+    "totalBytes": 396500,
+    "verified": true
   },
   "captures": [
     {
       "captureDir": "controlled-v0",
       "files": {
         "capture.json": {
-          "sha256": "6d693f5c3ecddcae2dfa3233ea858ed82e980ca56a842d103091b7df4ff19540",
-          "bytes": 2828
+          "sha256": "787de9206c27b31df97d0f8b6bcce44f1aeb748e255e27f14d7297ce5b4052e6",
+          "bytes": 2831
         },
         "journal.ndjson": {
-          "sha256": "8d0e09dac2d8e633eab1bfa3a323ff5f6d201b67b0861e6fd2eb88007ad2e8c0",
-          "bytes": 3554
+          "sha256": "d3f40d07e85a6e2d14860bac4a1c72bee14d89f59787fa6a7ec81726a0b48065",
+          "bytes": 3618
         },
         "events.ndjson": {
-          "sha256": "1ca1774a22a254c73668a076fb47fcd261669a59b42dcaf245f2db968288d303",
-          "bytes": 8281
+          "sha256": "1c09ab54e38320e7f2a2be8d62d6d645812041b9f94d61ff8a205a5f17871391",
+          "bytes": 8545
         }
       },
       "attemptCount": 9,
@@ -33,16 +40,16 @@
       "captureDir": "controlled-v1",
       "files": {
         "capture.json": {
-          "sha256": "cff16e567af2dffdccb5934fa9a6197e32bbcf90d19b0b2e1eba5023595a8f72",
-          "bytes": 2820
+          "sha256": "44e6f4bee0af1e3543d7f995f73413fa4014435421e750e1c0a06c795388adda",
+          "bytes": 2823
         },
         "journal.ndjson": {
-          "sha256": "cda63f9b12a623a5b7d3c9794af1acf8be1143e98895e99db2b2310c576ad427",
-          "bytes": 3601
+          "sha256": "6374010655ac87d20e6626b5aa4383a07c54d65b50641d1a46f9793feef53d80",
+          "bytes": 3665
         },
         "events.ndjson": {
-          "sha256": "1f8f4529aa71f15f01bd781053faeed043e14b442ae3afb435b3140d9f3f49ba",
-          "bytes": 19542
+          "sha256": "a2454103a94704c0455a8370dda43293903e6c311e34186644052a1e50043160",
+          "bytes": 20102
         }
       },
       "attemptCount": 9,

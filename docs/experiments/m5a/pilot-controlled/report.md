@@ -14,7 +14,7 @@
 1. 本次 `evidenceKind = controlled`。**这不是真实模型结果，只验证记录与分析流程**，本目录的任何数字都不支撑 Harness 效果结论，也不能进入论文结果章节。
 2. build 接受 2 个采集包、拒绝 0 个，写出 18 行数据集与 12 条 `answers.ndjson`；analyze 退出码 0，`plannedDenominator=18`、`executedCount=16`，`answers.ndjson` 复算 12 条全部一致。
 3. 受控数据覆盖了缺 usage、failed、stopped、deadline、tombstone(unknown)、not_run 六类边界，工具对每一类的分类都与预期一致；`t01` 在 V0 判 0/3、V1 判 3/3，说明确定性评分与按任务聚合能区分两个变体。
-4. 冻结链路已经补上：本轮开始时 `freeze --verify` 因缺少 `freeze-manifest.json` 退出 1，Lead 随后生成清单，最终 `freeze --verify` 退出 0 并输出 `verified 11 files against freeze-manifest.json`。
+4. 冻结链路已经补上：本轮开始时 `freeze --verify` 因缺少 `freeze-manifest.json` 退出 1，Lead 随后生成清单，最终 `freeze --verify` 退出 0 并输出 `verified 13 files against freeze-manifest.json`。
 
 ## 1. 这是什么，不是什么
 
@@ -44,6 +44,10 @@
 
 每个采集包含 `capture.json`（严格字段）、`journal.ndjson`（accept/terminal/tombstone）、`events.ndjson`（`version: 1` 的 `RunEvent`）。journal 与 event 的字段照 `apps/desktop/src/main/harness/run-journal.ts` 与 `apps/desktop/src/shared/contracts/pioneer-run.ts` 写，事件顺序照真实宿主的 `run-manager.ts`：deadline 停止先发 `run.stop_requested{deadline}`，再取消在飞工具调用，最后 `run.failed{RUN_DEADLINE}`。
 
+两个采集包的 journal accept、events 与 dataset 行都写 `adapter: "controlled"`，不是 `pi`。三种取值的语义：`pi` 是产品 pi 适配器，V1 正式运行时由它写 journal 与事件；`controlled` 是产品确定性适配器，或代它写记录的受控采集器（本先导属于后者）；`baseline-runner` 是正式运行时 V0 的采集者，V0 不经过产品 Run host，永不是产品 Run host。两条 `not_run` 行没有 run，`adapter` 为 `null`。
+
+`orderIndex` 按冻结表 `protocol.json:design.orderRandomization.executionOrder` 取值，同格三次重复共用：V1 `t01=2`、`t02=23`、`t03=4`；V0 `t01=12`、`t02=1`、`t03=3`。采集包顶层 `capture.json.orderIndex` 是该变体最小的格序号（v0 为 1、v1 为 2），逐格值在 `attempts[]` 里。
+
 ### 2.2 每个状态怎么造
 
 | attempt | 变体 | 任务/重复 | 造法                                                                                                                                                         |
@@ -52,7 +56,7 @@
 | a-0002  | V0   | t01/r2    | `completed`，`usage: null`（missing）；回答同样缺字面量，判 fail                                                                                             |
 | a-0003  | V0   | t01/r3    | `failed`，固定失败码 `MODEL_FAILED`                                                                                                                          |
 | a-0004  | V0   | t02/r1    | `completed`，缺 usage；回答含 t02 两个字面量，判 pass                                                                                                        |
-| a-0005  | V0   | t02/r2    | `not_run`，原因码 `AUTHORIZATION_MISSING`，只出现在 `capture.json.notRun[]`，无 journal、无 events                                                           |
+| a-0005  | V0   | t02/r2    | `not_run`，原因码 `AUTHORIZATION_MISSING`，只出现在 `capture.json.notRun[]`，无 journal、无 events；数据集行 `run.notRunReason` 记该码、`adapter` 为 `null`  |
 | a-0006  | V0   | t02/r3    | `stopped`，`run.stop_requested{reason:"user"}`                                                                                                               |
 | a-0007  | V0   | t03/r1    | `completed`，reported usage，判 pass                                                                                                                         |
 | a-0008  | V0   | t03/r2    | `completed`，缺 usage，判 pass                                                                                                                               |
@@ -62,7 +66,7 @@
 | a-0012  | V1   | t01/r3    | `completed`，reported usage，3 次工具调用，判 pass                                                                                                           |
 | a-0013  | V1   | t02/r1    | `completed`，reported usage，判 pass                                                                                                                         |
 | a-0014  | V1   | t02/r2    | 120 秒时限：`run.stop_requested{deadline}`、1 次 `tool.result{cancelled}`、`run.failed{RUN_DEADLINE}`，journal terminal `status=failed`、`code=RUN_DEADLINE` |
-| a-0015  | V1   | t02/r3    | `not_run`，原因码 `PROVIDER_UNAVAILABLE`                                                                                                                     |
+| a-0015  | V1   | t02/r3    | `not_run`，原因码 `PROVIDER_UNAVAILABLE`；数据集行 `run.notRunReason` 记该码、`adapter` 为 `null`                                                            |
 | a-0016  | V1   | t03/r1    | `completed`，reported usage，判 pass                                                                                                                         |
 | a-0017  | V1   | t03/r2    | `completed`，缺 usage，判 pass                                                                                                                               |
 | a-0018  | V1   | t03/r3    | `completed`，reported usage，1 次工具调用，判 pass                                                                                                           |
@@ -113,7 +117,7 @@ experiment:build-dataset: wrote 18 rows and 12 answers from 2 capture(s) to docs
 EXITCODE=0
 ```
 
-[build-report.json](build-report.json)：`totals.captures=2`、`totals.accepted=2`、`totals.rejected=0`、`totals.rows=18`、`totals.answers=12`、`errors=[]`；两个采集包的 `attemptCount` 都是 9，`rowCount` 都是 9，`errors` 都是空数组。
+[build-report.json](build-report.json)：`totals.captures=2`、`totals.accepted=2`、`totals.rejected=0`、`totals.rows=18`、`totals.answers=12`、`errors=[]`；两个采集包的 `attemptCount` 都是 9，`rowCount` 都是 9，`errors` 都是空数组。`corpus.verified=true`、`corpus.fileCount=6`、`corpus.totalBytes=396500`、`corpus.manifestSha256=1557594d...`：build 重算了 `demos/` 六个文件的 sha256 与字节数，并与采集包的 `environment.corpusManifestSha256` 对上。
 
 ### 3.2 analyze
 
@@ -222,7 +226,7 @@ EXIT=0
 除工具输出外，我用 `tools/experiments/lib/record.mjs` 的校验函数与一段只读脚本复核了以下内容，全部通过（0 条问题）：
 
 1. 18 个登记 attemptId 与 18 行 dataset 的 attemptId 集合完全相等，无重复、无缺行。
-2. record-schema 的交叉不变量：`usage.source=missing` 当且仅当两个 token 为 null；`completed` 无 failureCode 与 stopReason；`failed` 有合法失败码且无 stopReason；`stopped` 有合法 stopReason；`unknown` 无 terminalAt；`not_run` 的 run 标识全 null、`verdict=not_run`、`notes` 非空。
+2. record-schema 的交叉不变量：`usage.source=missing` 当且仅当两个 token 为 null；`completed` 无 failureCode 与 stopReason；`failed` 有合法失败码且无 stopReason；`stopped` 有合法 stopReason；`unknown` 无 terminalAt；`not_run` 的 run 标识全 null、`adapter` 为 null、`notRunReason` 非空且属枚举、`verdict=not_run`、`notes` 非空；其余行的 `notRunReason` 为 null。
 3. `answers.ndjson` 的 attemptId 集合等于 `completed` 行集合。
 4. `dataset.jsonl` 的 `result.answerSha256` / `result.answerBytes` 与 `answers.ndjson` 对应字段逐行相等（12 条 completed，0 条不一致）。
 5. dataset 与 answers 都不含任务提示原文、不含凭证/盘符/UNC 形态字符串。
@@ -231,18 +235,26 @@ EXIT=0
 
 ```text
 node tools/experiments/freeze.mjs --protocol-dir docs/experiments/m5a/v1 --verify
-experiment:freeze: verified 11 files against freeze-manifest.json
+experiment:freeze: verified 13 files against freeze-manifest.json
 EXIT=0
 ```
 
-[freeze-manifest.json](../v1/freeze-manifest.json) 由 Lead 用 `--write` 生成（2000 字节，sha256 `77c6549e180d27fc674992f700036d30b20658737926f21cbab7220124408399`），`frozenAt` 是 `2026-11-02T17:29:56.450Z`，覆盖 v1 目录四个 JSON（protocol、tasks、analysis-plan、record-schema）与 `tools/experiments` 下 7 个 `.mjs`，共 11 个文件。本轮开始时清单还不存在，`--verify` 退出 1；这条证据是在清单生成后补跑的。
+[freeze-manifest.json](../v1/freeze-manifest.json) 由 Lead 用 `--write` 生成（2340 字节，sha256 `19428e35bb2fcab7a7ee40fbd26ac627ec4005f46c9e798c84852c316ef31a67`），`frozenAt` 是 `2026-11-02T17:56:58.667Z`，覆盖 v1 目录四个 JSON（protocol、tasks、analysis-plan、record-schema）与 `tools/experiments` 下 9 个 `.mjs`（analyze、build-dataset、freeze 与 lib 下 6 个），共 13 个文件。本轮开始时清单还不存在，`--verify` 退出 1；这条证据是在清单定稿后补跑的。
+
+### 3.11 本版新增的自检与口径
+
+1. `analyze` 现在自己跑三道检查：① 读 `freeze-manifest.json`，重算 `protocol.json` 与 `tasks.json` 的哈希并比对，漂移直接非零退出；② 读同目录 `build-report.json`，断言 `sum(attemptCount) === sum(rowCount) === 18`，`plannedDenominator` 取自 build-report 而不是数 dataset 行数；③ 缺 `build-report.json` 或哈希漂移都非零退出。本轮这条链在交付物上成立，`summary.json:inputs.buildReport` 记了 build-report 的 sha256 与字节数。
+2. `build` 现在重算语料 6 个文件的 sha256 与字节数并校验 `corpusManifestSha256`，不一致直接拒绝采集包；`build-report.json:corpus.verified=true` 是本轮的校验结果。
+3. `run.notRunReason` 是结构化字段（6 个原因码的枚举），只在 `not_run` 行非空；`notes` 只放自由文本，不再需要从 `notes` 里解析原因码。a-0005 的 `run.notRunReason=AUTHORIZATION_MISSING`、a-0015 是 `PROVIDER_UNAVAILABLE`，两行 `adapter` 都是 `null`。
+4. `contains_all` 现在支持 `forbidden`（AND 语义）：必须全部命中 `literals`，且不得出现任何 `forbidden`。t10 到 t12 改成 `contains_all` + `["none", 证据串]` + 原来的 forbidden，所以「只写 ANSWER: none」判 fail，必须同时给出证据串（t10 是 `pioneer-nav-hud-script`、t11 是 `viewSettings`、t12 是 `Disallowed changes`）。先导只跑 t01 到 t03，这条规则没有在 t10 到 t12 上执行过。
+5. 在 `tmp/` 下用同一份采集包重跑 build 与 analyze，`dataset.jsonl`（`0d8cbc1b...`）、`answers.ndjson`（`86607036...`）、`build-report.json`（`5101248a...`）与交付目录逐字节相同，`summary.json` 只差 `generatedAt` 与输入路径，说明这批产物可复算。
 
 ## 4. 发现的问题
 
 ### 4.1 文档与命令不一致
 
 1. analyze 的 `--tasks` 在本轮开始时漏在 [analysis-plan.json](../v1/analysis-plan.json) 的 `recomputeCommand` 与 [docs/experiments/README.md](../../README.md) 的命令段里，照文档执行会以 `experiment:analyze: missing required option --tasks` 退出 1。本轮内两处已补上，当前冻结口径的命令能直接跑通。这条留在这里是为了说明先导确实按文档执行过一次并失败了，不是已经不存在的问题。
-2. `freeze --verify` 在本轮开始时退出 1：`experiment:freeze: freeze-manifest.json not found; run --write first`。Lead 随后跑了 `freeze --write`，现在同一条命令退出 0，输出 `verified 11 files against freeze-manifest.json`（见 3.10）。剩下的问题是流程顺序：`analyze.mjs` 不会自动执行分析计划第 1 步，冻结校验只能靠人工先跑一次，没有脚本把「先 verify 再 analyze」串起来。
+2. `freeze --verify` 在本轮开始时退出 1：`experiment:freeze: freeze-manifest.json not found; run --write first`。Lead 随后跑了 `freeze --write`，现在同一条命令退出 0，输出 `verified 13 files against freeze-manifest.json`（见 3.10）。`analyze` 自己也会读这份清单、重算 protocol.json 与 tasks.json 的哈希并比对，所以「先 verify 再 analyze」在工具层面已经有了；分析计划第 1 步要求的完整 13 文件校验仍要人工先跑一次。
 
 ### 4.2 schema 与协议口径
 
@@ -250,7 +262,7 @@ EXIT=0
 2. `answers.ndjson` 与 `dataset.jsonl` 的 `answerSha256` / `answerBytes` 已经统一到同一个 canonical 文本：两者都针对 `canonicalAnswerText(answerText) = truncateUtf8(normalizeForMatch(answerText), 4096)`，按构造逐字节相同。本轮逐行核对 12 条 completed 全部相等、0 条不一致，官方用例 `tests/experiments/build-dataset.test.mjs` 也断言这条且通过。之前「两个摘要口径不同」的问题已消除；核对命令与结果见 3.8。
 3. `unknown` 行仍会按部分回答文本算 verdict，a-0009 的行内 `verdict=fail`。本轮内 [analysis-plan.json](../v1/analysis-plan.json) 新增了 `verdictCounting` 规则，`summary.json` 把计数拆成 `verdictCounts`（全部行，仅作说明）与 `completedVerdictCounts`（只统计 completed 行），主指标只用后者，`summary.md` 也把口径印在表头。行内的 `verdict=fail` 仍在，但现在有明文说明它不进入任何比率，歧义基本消掉。
 4. `capture.json.environment` 强制要求 `provider`、`modelId`、`endpointOrigin`，但协议 `modelParameters` 写明 provider 与 modelId 在冻结时点未定，受控数据也没有任何 Provider。本轮填的是 `none` / `none` / `https://none.invalid`，这是刻意占位，避免合成数据被读成真实调用；协议第 11.1 节（[2026-11-03-m5a-comparison-protocol.md](../../2026-11-03-m5a-comparison-protocol.md)）已经把这条口径写进正文，`softwareCommit`、平台与 Node/Electron 版本仍用本机真实值。剩下的建议只有一条：record-schema 里给 `controlled` 采集包写明这组占位值是合法取值，不必每个先导自己发明。
-5. `orderIndex` 的语义没有被任何校验保护。协议 `design.orderRandomization` 说它是任务格顺序、同一格 3 次重复共用；record-schema 只限制 1 到 72，工具不检查同格重复是否共用同一值。本轮按协议写成 6 个格值 1 到 6，但写错也不会被发现。正式运行前建议加一条校验。
+5. `orderIndex` 的语义仍没有被校验保护。协议 `design.orderRandomization.executionOrder` 给出 24 个格的冻结序号，同一格 3 次重复共用；record-schema 只限制 1 到 72，工具既不检查同格重复是否共用同一值，也不检查取值是否等于冻结表。本轮按冻结表写成 V1 `t01=2`、`t02=23`、`t03=4`，V0 `t01=12`、`t02=1`、`t03=3`（采集包早期版本的 1 到 6 已作废），但写错同样不会被发现。
 6. journal 的 `stopRequestedAt` 在真实宿主里总是写入（`run-manager.ts` 的 `terminateAndRelease` 固定带该字段，未停止时为 null），而采集格式里它是可选字段。本轮全部写入，但一个省略它的采集包同样能通过校验，契约一致性只做到了单向。
 
 ### 4.3 真实先导还缺什么
@@ -258,7 +270,7 @@ EXIT=0
 1. 授权字段：Provider、endpoint origin、model id、凭证注入方式、允许外发材料、输入/输出 token 上限、墙上时间上限、价目表与生效日期、有效期。清单与可复制模板已在 [real-pilot-status.md](../real-pilot-status.md) 第 2 节，本轮没有一项到位。
 2. 采集入口：产品侧没有把一次真实运行的 journal 与事件流导出成 `capture.json` + `journal.ndjson` + `events.ndjson` 的命令。journal 存在 Electron userData（`RunJournal` 整文件重写、上限 512 条记录），事件流在内存里保留（`RUN_LIMITS.retainedEvents=512`）。上一次真实运行（[issue13-real-provider.md](../../../testing/issue13-real-provider.md)）用的是一次性驱动脚本 `tmp/issue13/a09-run.mjs`，该文件本地留存、不入库，不能当正式采集入口。正式跑 72 次之前必须有一个可复用、能按 `attemptId` 落盘的导出路径，否则 72 个采集包只能靠手抄。
 3. 真实 `usage`：适配器目前不从 SDK 读 usage，正式数据大概率整批 `usage.source=missing`，那么 `reportedInputTokens` 这个主指标会没有样本。先导期间需要确认适配器是否会报 usage，否则分析计划的主指标要降级为「覆盖率 + 说明」。
-4. 冻结清单：`freeze-manifest.json` 已生成，`freeze --verify` 通过（11 个文件，见 3.10）。R5 要求的「正式运行前后各执行一次 verify」还缺归档，因为正式运行本身没有开始。
+4. 冻结清单：`freeze-manifest.json` 已生成，`freeze --verify` 通过（13 个文件，见 3.10）。R5 要求的「正式运行前后各执行一次 verify」还缺归档，因为正式运行本身没有开始。
 
 ## 5. 未验证
 
@@ -270,6 +282,9 @@ EXIT=0
 6. 没有 12 个任务的配对检验：先导只登记 t01 到 t03，符号检验只用了 3 个任务，正式方案里 12 个任务的路径没有被覆盖。
 7. 没有正式运行前后的 `freeze --verify` 归档：先导这一次 verify 已通过（见 3.10），但 R5 要求的是正式运行前后各执行一次，本轮没有正式运行。
 8. 没有 72 条正式样本、成本上限或可行性结论：正式样本量仍只有可解释上界，未经真实先导验证。
+9. 没有 V0 的弱基线证据：V0 是刻意弱的基线（无检索、无工具、单一前缀截断），衡量的是「不做检索与上下文选择时的表现」，不衡量长上下文模型的一般能力（协议 `variants[].baselineStrength`）。
+10. 没有 V0 结构性不可答的逐条复核：V0 可见窗口只有 57344 B，覆盖 `demos/00` 前 44.9%（整个语料 14.5%），12 条任务里 11 条的证据在窗口外（协议 `corpus.structuralUnanswerability`）。正式运行前要逐条复核并把结论写进运行记录，这条差距不能当 Harness 效果证据。
+11. 没有把一次真实运行的 journal 与事件流导出成采集包的入口：正式跑 72 次之前必须有一个可复用、能按 `attemptId` 落盘的导出路径（见 4.3.2）。
 
 ## 6. 复现
 
@@ -278,10 +293,10 @@ node tools/experiments/build-dataset.mjs --captures docs/experiments/m5a/capture
 node tools/experiments/analyze.mjs --dataset docs/experiments/m5a/pilot-controlled/dataset.jsonl --tasks docs/experiments/m5a/v1/tasks.json --protocol docs/experiments/m5a/v1/protocol.json --plan docs/experiments/m5a/v1/analysis-plan.json --out docs/experiments/m5a/pilot-controlled
 ```
 
-输入摘要（`summary.json:inputs`）：dataset `aa915191b410c0c6a9b192b315fb30070a8299cd5885a2aedf5972066af1ba67`（31616 字节），answers `866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842`（4021 字节），protocol `8f6beee18529dd0e452713ebe1c2e2eb6ee1ac62790436e08fd952dafe22b81f`（29398 字节），plan `a3e9cf99a9edf50c766f02e298211ce3de375c4e3f0952b26b1939c69a9bd21f`（7497 字节），tasks `25bde05f9759e1e2debc7bcb65df2845ee80bbf30f52851c3c44f2c9020719da`（32227 字节）。采集包三份输入的 SHA-256 在 [build-report.json](build-report.json) 的 `captures[].files`。
+输入摘要（`summary.json:inputs`）：dataset `0d8cbc1b2beaf387ce9f83de3ab168bf0be998af243311a4c7b37d49128227b3`（32102 字节），buildReport `5101248a7a4a1a97ee37572d060eed278e943defa6d6c16b33d0f09f446a412a`（1859 字节），answers `866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842`（4021 字节），protocol `da1e5508f027586c332dd031e78c117cf2014a74ce8898192b021318dca4b7cc`（34537 字节），plan `037df891d5d4af05ea4e17267d28d79c52abfd369c9ae05e5712d38e1325fa56`（8172 字节），tasks `67a261eb1a6ae87520c5371b8d71e01d2a54e24fa2edcaf0f5e8e9d752223b1e`（32815 字节）。采集包三份输入的 SHA-256 在 [build-report.json](build-report.json) 的 `captures[].files`。
 
-产物摘要（`Get-FileHash -Algorithm SHA256`）：dataset `aa915191b410c0c6a9b192b315fb30070a8299cd5885a2aedf5972066af1ba67`、answers `866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842`、build-report `858597dee3743173f27848a65e88487a58c0d7311ab55b8ac9fa455c4e599cb4`、summary.json `b7fa2c68a30e0ed9d1454e29308a6e7591a141a8647550bd66c318700a62f811`、summary.md `3974af7ce5ebb2611d28e76b7091833305c24ad57b2224547a055c903490fbb9`。
+产物摘要（`Get-FileHash -Algorithm SHA256`）：dataset `0d8cbc1b2beaf387ce9f83de3ab168bf0be998af243311a4c7b37d49128227b3`、answers `866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842`、build-report `5101248a7a4a1a97ee37572d060eed278e943defa6d6c16b33d0f09f446a412a`、summary.json `a7d73afe9fbe1cfc22d1ae44a9da2b1ee2fc93b7e4df82efbafe3c4c594155c6`、summary.md `3cb78a82077151c22002f144384af5151aada183ce242fba9ccc2d2c054cb880`。冻结侧：freeze-manifest `19428e35bb2fcab7a7ee40fbd26ac627ec4005f46c9e798c84852c316ef31a67`（2340 字节，13 个文件）、record-schema `61ceb93fcd75598e2a755fe70744cdff04079fc40321f3b9fc9ada30cc89991f`（14151 字节）。
 
-本轮中途 `tasks.json`、`protocol.json`、`analysis-plan.json` 与回答摘要口径都被更新过：tasks 从 31968 改到 32227 字节，protocol 增加到 29398 字节（新增 `answers.ndjson` 登记、第 11.1 节受控先导占位口径、`externalReview` 等），plan 增加到 7497 字节（新增 `verdictCounting`、`--tasks`），`answerSha256` / `answerBytes` 改为统一针对 canonical 文本。dataset.jsonl 从 `0f26e529...` 变为 `aa915191...`，行数仍是 18、字节数仍是 31616，`summary.json` 的所有计数、比率与耗时都与上一版相同，说明变的只有这两个 answer 字段的取值口径。本目录的产物是 Lead 用当前版本重跑 build 与 analyze 得到的。如果这三份冻结文件再改，必须重跑这两条命令并重新核对本报告里的数字。
+本轮迭代过几轮口径，定稿状态是：`tasks.json` 32815 字节（t10 到 t12 改成 `contains_all` + 证据串 + forbidden）、`protocol.json` 34537 字节（新增 `answers.ndjson` 登记、第 11.1 节占位口径、`executionOrder` 冻结表、V0 弱基线与可见窗口披露）、`analysis-plan.json` 8172 字节、`record-schema.json` 14151 字节（新增 `run.notRunReason`）、`freeze-manifest.json` 2340 字节。采集包同时改成 `adapter=controlled` 并按冻结表写 `orderIndex`，`dataset.jsonl` 因此从 31616 变成 32102 字节（18 行不变，新增 `run.notRunReason` 字段、`adapter` 取值改变）。`summary.json` 的统计数字与前几版一致。本目录产物由 Lead 用定稿版本重跑 build 与 analyze 得到；我在 `tmp/` 下用同一份采集包重跑，dataset、answers、build-report 三个文件与交付目录逐字节相同（见 3.11 第 5 条）。如果冻结文件再改，必须重跑这两条命令并重新核对本报告里的数字。
 
-合成采集包由一次性脚本生成（`tmp/m5a/gen-captures.mjs`，`tmp/` 被 `.gitignore` 忽略，不入库），构造规则写在 [captures/README.md](../captures/README.md)。重新生成会改变采集包字节与上面这批摘要，届时需要重跑 build 与 analyze，不要手改任何产物。
+采集包最初由一次性脚本生成（`tmp/m5a/gen-captures.mjs`，`tmp/` 被 `.gitignore` 忽略，不入库），定稿前按新口径改过 `adapter`、`orderIndex`、`corpusManifestSha256` 与 V0 前缀字段，构造规则以 [captures/README.md](../captures/README.md) 为准。改动采集包会同时改变 `build-report.json:captures[].files` 与 dataset 的 `capture` 字段，届时必须重跑 build 与 analyze，不要手改任何产物。

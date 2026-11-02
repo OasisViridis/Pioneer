@@ -18,7 +18,7 @@
     "modelId": "none",
     "endpointOrigin": "https://none.invalid",
     "corpusId": "pioneer-demos-m1-frozen",
-    "corpusManifestSha256": "8d301475a46c2af4ef6024e7fc1d2dc1fdb4872b791acb2f343323ed2807613c"
+    "corpusManifestSha256": "1557594df4dbdd7324dd4ffa4dcbf6c71607c6e99dfd5ee967f023f52bdc7f42"
   },
   "attempts": [
     {
@@ -26,7 +26,7 @@
       "taskId": "t01",
       "variantId": "fixed-prefix-no-tools",
       "repetition": 1,
-      "orderIndex": 2,
+      "orderIndex": 12,
       "runId": "run:a-0001",
       "status": "registered"
     },
@@ -35,7 +35,7 @@
       "taskId": "t01",
       "variantId": "fixed-prefix-no-tools",
       "repetition": 2,
-      "orderIndex": 2,
+      "orderIndex": 12,
       "runId": "run:a-0002",
       "status": "registered"
     },
@@ -44,7 +44,7 @@
       "taskId": "t01",
       "variantId": "fixed-prefix-no-tools",
       "repetition": 3,
-      "orderIndex": 2,
+      "orderIndex": 12,
       "runId": "run:a-0003",
       "status": "registered"
     },
@@ -53,7 +53,7 @@
       "taskId": "t02",
       "variantId": "fixed-prefix-no-tools",
       "repetition": 1,
-      "orderIndex": 4,
+      "orderIndex": 1,
       "runId": "run:a-0004",
       "status": "registered"
     },
@@ -62,7 +62,7 @@
       "taskId": "t02",
       "variantId": "fixed-prefix-no-tools",
       "repetition": 2,
-      "orderIndex": 4,
+      "orderIndex": 1,
       "runId": null,
       "status": "registered"
     },
@@ -71,7 +71,7 @@
       "taskId": "t02",
       "variantId": "fixed-prefix-no-tools",
       "repetition": 3,
-      "orderIndex": 4,
+      "orderIndex": 1,
       "runId": "run:a-0006",
       "status": "registered"
     },
@@ -80,7 +80,7 @@
       "taskId": "t03",
       "variantId": "fixed-prefix-no-tools",
       "repetition": 1,
-      "orderIndex": 6,
+      "orderIndex": 3,
       "runId": "run:a-0007",
       "status": "registered"
     },
@@ -89,7 +89,7 @@
       "taskId": "t03",
       "variantId": "fixed-prefix-no-tools",
       "repetition": 2,
-      "orderIndex": 6,
+      "orderIndex": 3,
       "runId": "run:a-0008",
       "status": "registered"
     },
@@ -98,7 +98,7 @@
       "taskId": "t03",
       "variantId": "fixed-prefix-no-tools",
       "repetition": 3,
-      "orderIndex": 6,
+      "orderIndex": 3,
       "runId": "run:a-0009",
       "status": "registered"
     }
