@@ -608,6 +608,14 @@ test('panels survive a real restart with the persisted run summary', async ({}, 
     ).toBeVisible();
     // The wire events are not persisted, so a live-stream row must not appear.
     await expect(runlog.getByText('工具请求：read_file')).toHaveCount(0);
+
+    await openPanel(page, '能力');
+    const capabilities = dockPanel(page, '能力');
+    await expect(
+      capabilities.getByText(
+        '重启后只保留本次运行的工具清单，不保留授权到期时间。',
+      ),
+    ).toBeVisible();
   } finally {
     try {
       await application.close();

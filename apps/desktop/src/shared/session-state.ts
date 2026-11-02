@@ -128,14 +128,29 @@ const BranchOriginSchema = z
   .strict();
 const SessionSchema = V7SessionSchema.extend({
   branchOrigin: BranchOriginSchema.nullable().optional(),
-}).superRefine((session, context) => {
-  if (session.branchOrigin?.sessionId === session.id)
-    context.addIssue({
-      code: 'custom',
-      path: ['branchOrigin'],
-      message: 'A session cannot branch from itself.',
-    });
-});
+})
+  .superRefine((session, context) => {
+    if (session.branchOrigin?.sessionId === session.id)
+      context.addIssue({
+        code: 'custom',
+        path: ['branchOrigin'],
+        message: 'A session cannot branch from itself.',
+      });
+  })
+  .transform((session) => {
+    const snapshot = session.lastRunView;
+    if (snapshot === null) return session;
+    if (
+      snapshot.identity.sessionId === session.id &&
+      snapshot.identity.projectId === session.project.id &&
+      snapshot.identity.revision <= session.runRevision
+    )
+      return session;
+    // A persisted snapshot naming another session/project or a revision the
+    // session never reached must not seed these panels; drop it and let the
+    // panels report the missing summary.
+    return { ...session, lastRunView: null };
+  });
 export const SessionStateSchema: z.ZodType<SessionWorkspaceState> =
   LegacyStateObjectSchema.extend({
     sessions: z.array(SessionSchema).max(10_000),
@@ -332,7 +347,11 @@ function migrateV4(input: unknown): SessionStateRecord {
   });
 }
 
-/** Loading is pure: unknown or corrupt records throw, never clear or rewrite the source. */
+/**
+ * Loading is pure: unknown or corrupt records throw, never clear or rewrite the
+ * source. The only normalization is dropping a persisted run summary whose
+ * identity does not match its session/project; the rest of the record is kept.
+ */
 export function loadRecord(input: unknown): SessionStateRecord {
   if (typeof input !== 'object' || input === null || !('version' in input))
     throw new Error('Unsupported session state record.');

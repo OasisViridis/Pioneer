@@ -10,6 +10,7 @@ import {
   formatUtcTime,
   materialReasonText,
   materialStateText,
+  runSummaryMissing,
   snapshotOutOfDate,
   toolLabel,
   visibleMaterials,
@@ -234,6 +235,16 @@ describe('run panel projections (#17)', () => {
     );
   });
 
+  it('flags a started run that left no terminal summary', () => {
+    expect(runSummaryMissing({ runRevision: 1, lastRunView: null })).toBe(true);
+    expect(runSummaryMissing({ runRevision: 0, lastRunView: null })).toBe(
+      false,
+    );
+    expect(runSummaryMissing({ runRevision: 2, lastRunView: snapshot })).toBe(
+      false,
+    );
+  });
+
   it('projects event calls without targets and formats shared copy', () => {
     const calls = eventContextCalls([requested, succeeded]);
     expect(calls).toEqual([
@@ -249,5 +260,11 @@ describe('run panel projections (#17)', () => {
     expect(callCodeText('MATERIAL_NOT_ALLOWED')).toContain('批准清单');
     expect(callCodeText('UNKNOWN_CODE')).toBe('UNKNOWN_CODE');
     expect(formatUtcTime('2026-10-27T10:00:02.000Z')).toBe('10:00:02');
+    expect(materialReasonText('CONTENT_NOT_ALLOWED', 'read')).toBe(
+      '读取后内容发生变化，后续调用已拒绝',
+    );
+    expect(materialReasonText('CONTENT_NOT_ALLOWED', 'changed')).toContain(
+      '不一致',
+    );
   });
 });

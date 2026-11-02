@@ -15,6 +15,7 @@ import {
   formatUtcTime,
   materialReasonText,
   materialStateText,
+  runSummaryMissing,
   snapshotOutOfDate,
   toolLabel,
   visibleMaterials,
@@ -41,6 +42,8 @@ interface PanelRun {
   contextState: RunViewState['contextState'];
   /** True when earlier events were dropped by the display cap or a gap. */
   omittedHistory: boolean;
+  /** A run started in this session but left no terminal snapshot. */
+  summaryMissing: boolean;
 }
 
 const SNAPSHOT_STATUS: Record<SessionRunStatus, string> = {
@@ -65,6 +68,7 @@ function panelRun(session: Session, state: RunViewState): PanelRun {
       fromSnapshot: false,
       contextState: state.contextState,
       omittedHistory: state.omittedHistory,
+      summaryMissing: false,
     };
   }
   const snapshot = session.lastRunView;
@@ -79,6 +83,7 @@ function panelRun(session: Session, state: RunViewState): PanelRun {
       fromSnapshot: false,
       contextState: 'idle',
       omittedHistory: false,
+      summaryMissing: runSummaryMissing(session),
     };
   }
   return {
@@ -91,6 +96,7 @@ function panelRun(session: Session, state: RunViewState): PanelRun {
     fromSnapshot: true,
     contextState: 'ready',
     omittedHistory: false,
+    summaryMissing: false,
   };
 }
 
@@ -106,7 +112,9 @@ function RunIdentity({
       <p className="eyebrow">会话 · {session.title}</p>
       <p className="metadata">
         {run.runId === null
-          ? '本会话尚未启动运行'
+          ? run.summaryMissing
+            ? '上次运行没有可用的终态摘要'
+            : '本会话尚未启动运行'
           : `运行 ${run.runId} · 修订 ${String(run.revision ?? '—')} · ${run.status ?? '未运行'}`}
       </p>
       {run.fromSnapshot ? (
@@ -151,10 +159,15 @@ export function RunContextPanel({
           <span className="empty-symbol" aria-hidden="true">
             ▤
           </span>
-          <h3>还没有可查看的上下文</h3>
+          <h3>
+            {run.summaryMissing
+              ? '上次运行没有可用的终态摘要'
+              : '还没有可查看的上下文'}
+          </h3>
           <p>
-            启动一次运行后，这里列出本次批准的材料和 main
-            记录的实际读取状态；不会显示未批准的内容。
+            {run.summaryMissing
+              ? '本机记录显示此会话启动过运行，但没有可用的终态摘要；不补造材料或读取状态。'
+              : '启动一次运行后，这里列出本次批准的材料和 main 记录的实际读取状态；不会显示未批准的内容。'}
           </p>
         </div>
       ) : run.contextState === 'unavailable' ? (
@@ -176,7 +189,7 @@ export function RunContextPanel({
       {run.materials.length > 0 ? (
         <ul className="run-material-list" aria-label="运行上下文材料">
           {run.materials.map((material) => {
-            const reason = materialReasonText(material.reason);
+            const reason = materialReasonText(material.reason, material.state);
             return (
               <li key={material.path} className="run-material">
                 <div className="run-material__head">
@@ -247,6 +260,11 @@ export function RunCapabilitiesPanel({
   return (
     <div className="module-content run-detail">
       <RunIdentity session={session} run={run} />
+      {run.summaryMissing ? (
+        <p className="metadata" role="status">
+          上次运行没有可用的终态摘要，无法显示授权工具或调用记录。
+        </p>
+      ) : null}
       <h3 className="run-detail__heading">可用能力</h3>
       <dl className="capability-list">
         {TOOL_ROWS.map((tool) => (
@@ -254,7 +272,9 @@ export function RunCapabilitiesPanel({
             <dt>{toolLabel(tool)}</dt>
             <dd>
               {run.runId === null
-                ? '尚未授权'
+                ? run.summaryMissing
+                  ? '摘要不可用'
+                  : '尚未授权'
                 : authorized.includes(tool)
                   ? '本次运行已授权 · 只读'
                   : '本次未授权'}
@@ -274,12 +294,18 @@ export function RunCapabilitiesPanel({
         <p className="metadata">
           {`授权于 ${state.authorization.expiresAt} 到期；授权不代表已经调用。`}
         </p>
+      ) : run.fromSnapshot && run.tools.length > 0 ? (
+        <p className="metadata">
+          重启后只保留本次运行的工具清单，不保留授权到期时间。
+        </p>
       ) : null}
       <h3 className="run-detail__heading">本次调用的工具</h3>
       {run.calls.length === 0 ? (
         <p className="metadata">
           {run.runId === null
-            ? '还没有运行，因此没有工具调用。'
+            ? run.summaryMissing
+              ? '上次运行没有可用的终态摘要，无法列出工具调用。'
+              : '还没有运行，因此没有工具调用。'
             : run.omittedHistory
               ? '事件已截断，无法确认本次运行是否请求过工具。'
               : '本次运行尚未请求工具。'}
@@ -302,7 +328,11 @@ export function RunCapabilitiesPanel({
                 </div>
                 <p className="metadata">
                   {call.callId}
-                  {call.target === null ? '' : ` · ${call.target}`}
+                  {call.target === null
+                    ? call.tool === null
+                      ? ''
+                      : ' · 目标不可显示（敏感或无效路径）'
+                    : ` · ${call.target}`}
                 </p>
                 {call.code === null ? null : (
                   <p className="capability-call__reason">
@@ -422,7 +452,9 @@ export function RunLogPanel({
           </span>
           <h3>
             {run.runId === null
-              ? '还没有运行日志'
+              ? run.summaryMissing
+                ? '上次运行没有可用的日志'
+                : '还没有运行日志'
               : run.fromSnapshot
                 ? '上次运行没有工具调用'
                 : '等待第一批事件…'}

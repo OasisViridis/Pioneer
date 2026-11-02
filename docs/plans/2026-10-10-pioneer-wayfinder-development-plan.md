@@ -4,7 +4,7 @@
 > **项目代号**：Pioneer · **代码主目录**：[apps/desktop](../../apps/desktop/)（相对根目录：[apps/desktop](apps/desktop/)）  
 > **GitHub 远端主决策地图**：[Issue #9：Pioneer 开发计划（至 2027 年 6 月）](https://github.com/OasisViridis/Pioneer/issues/9)
 > **前置计划替代说明**：本计划正式替代 [2026-10-01 冻结原型开发计划](2026-10-01-pioneer-frozen-prototype-development-plan.md) 的后续实施队列；阶段总纲仍以 [themasterplan/ROADMAP.md](../../themasterplan/ROADMAP.md) 为准。
-> **2026-10-26 更新**：P2 已通过 PR #16 合并进 `main`（`3f262fe`，后续 PR #40 到 `fd26d06`）。#12 已关闭，#13 票据仍开放、验收收口另计；当前前沿为 P3（#17、#41、#42）。两分钟简报、后续工作包与验收条件见[长期规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)。
+> **2026-10-26 更新**：P2 已通过 PR #16 合并进 `main`（`3f262fe`，后续 PR #40 到 `fd26d06`）。#12 已关闭，#13 票据仍开放、验收收口另计；P3 三票已合并并关闭（#17 由 PR #57 合并）。两分钟简报、后续工作包与验收条件见[长期规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)。
 
 ---
 
@@ -73,7 +73,7 @@ Pioneer 的研发不是单纯给现有 Agent 套壳，也不是先写完所有�
 
 ## 4. 当前施工前沿 (The Frontier: P3 面板体验与运行提示)
 
-P3 是当前活跃的前沿：让会话内面板接上真实数据，并把运行入口与提示文案收敛到「写任务、启动、看过程」这一条路径（#17、#41、#42）。P2 已完成合并，验收收口另计。
+P3 三票（#17、#41、#42）已合并并关闭；P2、P3 的验收收口另计。
 
 ### 4.1 当前施工队列（2026-10-26 核对）
 
@@ -83,7 +83,7 @@ P3 是当前活跃的前沿：让会话内面板接上真实数据，并把运�
 | --- | --- | --- |
 | 已完成 | [#12 · Runtime：读取权限与停止规则](https://github.com/OasisViridis/Pioneer/issues/12) | 已关闭；交付为已合并 PR #15，停止语义以后续人类确认评论为准 |
 | 已合并 | [#13 · Harness：只读接入与验证](https://github.com/OasisViridis/Pioneer/issues/13) | PR #16 已合并（`3f262fe`）；七轮复审修复与 PR #40 已在 `main`（`fd26d06`）；票据仍开放，验收收口另计 |
-| 当前 | [#17 · P3-A 面板](https://github.com/OasisViridis/Pioneer/issues/17)、[#41](https://github.com/OasisViridis/Pioneer/issues/41)、[#42](https://github.com/OasisViridis/Pioneer/issues/42) | #41 移除意图卡改为直接填任务，#42 修正运行提示；均在未合并工作树实施中 |
+| 当前 | [#17 · P3-A 面板](https://github.com/OasisViridis/Pioneer/issues/17)、[#41](https://github.com/OasisViridis/Pioneer/issues/41)、[#42](https://github.com/OasisViridis/Pioneer/issues/42) | #41 移除意图卡改为直接填任务，#42 修正运行提示；均已合并并关闭（#17 由 PR #57 合并） |
 
 原 #10、#11 已归并至 #12，原 #14 规格并入 #9 后归档。#9 仍为置顶总入口；#17 至 #32 十六张已发布，#33 至 #37 为设计同步票，#41、#42 于 2026-10-26 追加。
 
@@ -100,7 +100,7 @@ P3 是当前活跃的前沿：让会话内面板接上真实数据，并把运�
 
 ### 4.3 后续 Issue 导航
 
-P2 已合并；当前由 #41、#42 收敛运行入口，#17 起按各票原生依赖和完成条件进入开发。
+P2、P3 已合并；#17、#41、#42 均已关闭。
 
 | 阶段 | 已发布任务 |
 | --- | --- |

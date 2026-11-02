@@ -817,6 +817,9 @@ export class RunManager {
           // Main observes what the tool actually read or found changed; the
           // event wire still carries no arguments.
           onMaterial: (path, state) => {
+            // A tool that finishes after the run converged must not change the
+            // terminal facts a snapshot or the context query reports.
+            if (this.isTerminal(run)) return;
             this.trackMaterial(run, path, state);
           },
         });

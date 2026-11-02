@@ -4,6 +4,7 @@ import type {
   RunEvent,
   RunStatus,
 } from '../../apps/desktop/src/shared/contracts/pioneer-run';
+import type { SessionRunRecord } from '../../apps/desktop/src/shared/contracts/session-run-history';
 import type {
   RunEventBatch,
   RunPage,
@@ -80,6 +81,7 @@ function createFakeRunPort(options: {
   stopReply: RunStopReply;
   getRunContext?: () => Promise<RunContextReply>;
   startReply?: { ok: true; runId: string } | { ok: false; code: string };
+  getRun?: () => Promise<RunPage | null>;
 }): FakeRunPort {
   const ackedPages: number[] = [];
   let batchCallback: ((batch: RunEventBatch) => void) | null = null;
@@ -106,7 +108,10 @@ function createFakeRunPort(options: {
     startRun: () =>
       Promise.resolve(options.startReply ?? { ok: true, runId: RUN_ID }),
     stopRun: () => Promise.resolve(options.stopReply),
-    getRun: () => Promise.resolve(options.getRunPage),
+    getRun: () =>
+      options.getRun === undefined
+        ? Promise.resolve(options.getRunPage)
+        : options.getRun(),
     getRunContext:
       options.getRunContext ??
       (() =>
@@ -311,6 +316,195 @@ describe('run view identity isolation', () => {
     const state = store.get(SESSION_ID);
     expect(state.events.map((event) => event.seq)).toEqual([1, 3]);
     expect(state.omittedHistory).toBe(true);
+  });
+
+  it('does not let the first page regress a terminal live batch', async () => {
+    let resolvePage: (page: RunPage | null) => void = () => undefined;
+    const pending = new Promise<RunPage | null>((resolve) => {
+      resolvePage = resolve;
+    });
+    const port = createFakeRunPort({
+      getRunPage: null,
+      stopReply: { ok: true, status: 'completed' },
+      getRun: () => pending,
+    });
+    const store = new RunViewStore(port);
+    const terminals: SessionRunRecord[] = [];
+    const running = store.launch({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+      task: '读取 fixture 并回答。',
+      materials: [],
+      onTerminal: (record) => terminals.push(record),
+    });
+    await flushBatches();
+
+    const completed: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 2,
+      at: '2026-10-25T00:00:02.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: {
+        type: 'run.completed',
+        usage: { inputTokens: null, outputTokens: null },
+      },
+    };
+    port.emit({
+      page: pageOf({
+        status: 'completed',
+        events: [...sequence(1, 1), completed],
+        lastSeq: 2,
+        nextAfterSeq: 2,
+        hasMore: false,
+      }),
+    });
+    await flushBatches();
+    expect(store.get(SESSION_ID).status).toBe('completed');
+
+    resolvePage(
+      pageOf({
+        status: 'running',
+        events: sequence(1, 1),
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+    );
+    await running;
+
+    expect(store.get(SESSION_ID).status).toBe('completed');
+    expect(store.get(SESSION_ID).phase).toBe('terminal');
+    // The late page duplicates seq 1; the persisted result text must not be
+    // appended twice.
+    expect(terminals).toHaveLength(1);
+    expect(terminals[0]?.resultText).toBe('事件 1');
+  });
+
+  it('records the terminal summary when a confirming batch follows the stop receipt', async () => {
+    const port = createFakeRunPort({
+      getRunPage: null,
+      stopReply: { ok: true, status: 'stopped' },
+    });
+    const store = new RunViewStore(port);
+    const terminals: unknown[] = [];
+    const snapshots: unknown[] = [];
+    await store.launch({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+      task: '读取 fixture 并回答。',
+      materials: [],
+      onTerminal: (record) => terminals.push(record),
+      onSnapshot: (snapshot) => snapshots.push(snapshot),
+    });
+
+    await store.stop({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+    });
+    expect(store.get(SESSION_ID).status).toBe('stopped');
+
+    const stopped: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 1,
+      at: '2026-10-25T00:00:00.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: { type: 'run.stopped' },
+    };
+    port.emit({
+      page: pageOf({
+        status: 'stopped',
+        events: [stopped],
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+    });
+    await flushBatches();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(terminals).toHaveLength(1);
+    expect(snapshots).toHaveLength(1);
+  });
+
+  it('records the terminal summary when the first page arrives after the stop receipt', async () => {
+    let resolvePage: (page: RunPage | null) => void = () => undefined;
+    const pending = new Promise<RunPage | null>((resolve) => {
+      resolvePage = resolve;
+    });
+    const port = createFakeRunPort({
+      getRunPage: null,
+      stopReply: { ok: true, status: 'stopped' },
+      getRun: () => pending,
+    });
+    const store = new RunViewStore(port);
+    const terminals: SessionRunRecord[] = [];
+    const running = store.launch({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+      task: '读取 fixture 并回答。',
+      materials: [],
+      onTerminal: (record) => terminals.push(record),
+    });
+    await flushBatches();
+    await store.stop({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+    });
+    expect(store.get(SESSION_ID).status).toBe('stopped');
+
+    const stopped: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 1,
+      at: '2026-10-25T00:00:00.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: { type: 'run.stopped' },
+    };
+    resolvePage(
+      pageOf({
+        status: 'stopped',
+        events: [stopped],
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+    );
+    await running;
+
+    expect(terminals).toHaveLength(1);
+    expect(store.get(SESSION_ID).phase).toBe('terminal');
+  });
+
+  it('marks omitted history when the initial page reports a gap', async () => {
+    const page: RunPage = {
+      ...pageOf({
+        status: 'running',
+        events: sequence(1, 1),
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+      gap: true,
+    };
+    const port = createFakeRunPort({
+      getRunPage: page,
+      stopReply: { ok: true, status: 'running' },
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+
+    expect(store.get(SESSION_ID).events).toHaveLength(1);
+    expect(store.get(SESSION_ID).omittedHistory).toBe(true);
   });
 
   it('reports omitted history when the display cap drops the oldest event', async () => {

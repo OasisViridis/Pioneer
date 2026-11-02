@@ -4,11 +4,11 @@
 
 ## Test levels
 
-| Level | Scope and evidence boundary | Command |
-|---|---|---|
-| **Contract Tests** | Deterministic TypeScript units for shared schemas, normalized paths, scanner behavior, IPC/sender validation, settings write scope, runtime configuration, and tab invariants. | `pnpm test:contract` |
-| **Prototype Tests** | The frozen M1 simulator: the moved 210-case suite plus static and adversarial probes. It verifies historical prototype behavior only, not an Electron product. | Executable now: `pnpm test:prototype`. |
-| **Real E2E** | Playwright launches the real Electron process chain, crosses main → preload → renderer, exercises Library/Settings/project Tabs against a committed fixture, and verifies fixture immutability after close. | `pnpm test:e2e` |
+| Level               | Scope and evidence boundary                                                                                                                                                                                 | Command                                |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Contract Tests**  | Deterministic TypeScript units for shared schemas, normalized paths, scanner behavior, IPC/sender validation, settings write scope, runtime configuration, tab invariants, and renderer state projections.  | `pnpm test:contract`                   |
+| **Prototype Tests** | The frozen M1 simulator: the moved 210-case suite plus static and adversarial probes. It verifies historical prototype behavior only, not an Electron product.                                              | Executable now: `pnpm test:prototype`. |
+| **Real E2E**        | Playwright launches the real Electron process chain, crosses main → preload → renderer, exercises Library/Settings/project Tabs against a committed fixture, and verifies fixture immutability after close. | `pnpm test:e2e`                        |
 
 ## Aggregate gate
 
