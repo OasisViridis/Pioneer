@@ -3,7 +3,7 @@
   "date": "2026-11-02",
   "evidenceKind": "packaged-acceptance-read-only-run",
   "issue": "https://github.com/OasisViridis/Pioneer/issues/53",
-  "validatedCodeCommit": "23ddb88ae52b0edc10d73cdb4bee5fbedcb99723",
+  "validatedCodeCommit": "ee1db43f4ca723ac1908c896c0089019b00cffb1",
   "branch": "feat/p3-packaged-acceptance",
   "environment": {
     "platform": "win32-x64",
@@ -18,7 +18,7 @@
     "outcome": "passed",
     "exitCode": 0,
     "worktreeDirty": false,
-    "testDurationMs": 3200,
+    "testDurationMs": 3500,
     "executable": {
       "path": "apps/desktop/out/@pioneer-desktop-win32-x64/@pioneer-desktop.exe",
       "sha256": "341ca094b89b31dbb4484d6da14a86f0c0c4ee5db6e75a197d9aa5fc674fa550",
