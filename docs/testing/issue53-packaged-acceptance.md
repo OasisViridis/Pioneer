@@ -52,7 +52,7 @@
 | 项           | 命令                     | 结果                                                                                                                                                              |
 | ------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 仓库规范化   | `pnpm verify:repository` | 6/6                                                                                                                                                               |
-| 完整门禁     | `pnpm check`             | 退出码 0（2026-11-02）：design:check（含 102 个 node 测试）、Contract 420/420、Prototype 210/210、Real E2E 39/39、package smoke；日志 `tmp/issue53-check-r14.log` |
+| 完整门禁     | `pnpm check`             | 退出码 0（2026-11-02）：design:check（含 102 个 node 测试）、Contract 430/430、Prototype 210/210、Real E2E 39/39、package smoke；日志 `tmp/issue53-check-r14.log` |
 | 新增合同测试 | `pnpm test:contract`     | `acceptance-config.test.ts` 20 条、`acceptance-report.test.ts` 2 条、`run-host-adapter-selection.test.ts` 4 条                                                    |
 
 ## 没做的事

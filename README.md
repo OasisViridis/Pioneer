@@ -110,7 +110,7 @@ pnpm dev
 | `pnpm acceptance:packaged` | 重新打包并启动 `@pioneer-desktop.exe`，经 `PIONEER_ACCEPTANCE=1` 跑通一次只读运行；不进 `pnpm check`                  |
 | `pnpm check`               | 依次跑 design:check、格式、lint、类型、Contract / Prototype / Real E2E 三层测试与 package smoke                       |
 
-最近一次完整门禁记录在 2026-11-02（分支 `feat/p3-packaged-acceptance`，见 [Issue #53 验证记录](docs/testing/issue53-packaged-acceptance.md)）：契约 420/420（42 文件）、冻结原型 210/210（Prototype Tests）、真实 Electron 39/39、仓库规范化 6/6。数字随提交变化，引用时带上日期与版本。
+最近一次完整门禁记录在 2026-11-02（分支 `feat/p3-packaged-acceptance`，见 [Issue #53 验证记录](docs/testing/issue53-packaged-acceptance.md)）：契约 430/430（42 文件）、冻结原型 210/210（Prototype Tests）、真实 Electron 39/39、仓库规范化 6/6。数字随提交变化，引用时带上日期与版本。
 
 `test:e2e` 的 `testMatch` 列了 12 个 spec；`design-visual`、`hazel-design`、`session-persistence`、`window-chrome` 与打包验收用的 `packaged-acceptance` 不在白名单内，因此不进 `pnpm check`，也不进 CI。
 
