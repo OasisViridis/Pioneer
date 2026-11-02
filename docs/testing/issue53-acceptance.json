@@ -18,15 +18,15 @@
     "outcome": "passed",
     "exitCode": 0,
     "worktreeDirty": false,
-    "testDurationMs": 3300,
+    "testDurationMs": 4000,
     "executable": {
       "path": "apps/desktop/out/@pioneer-desktop-win32-x64/@pioneer-desktop.exe",
-      "sha256": "3e36ffd1e52bd001b312142a722e16f170f87afe81e2ae2e1f56baa2a42fa64c",
+      "sha256": "de17e0141191adf38d2ec1d7c36cf622c094b16607d55d15ddebbf2e9a80de61",
       "newerThanRunMarker": true
     },
     "packagedApp": {
       "path": "apps/desktop/out/@pioneer-desktop-win32-x64/resources/app.asar",
-      "sha256": "a81ddc4516cafa96df0ab1255d68d996bba4686c4e71982a29379a59bcfdc2ba"
+      "sha256": "62eeb783f66ba00526303067492f055f0430024c7378d08f3f0b5392693efccd"
     },
     "startupReport": {
       "isPackaged": true,

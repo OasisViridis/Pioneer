@@ -53,10 +53,12 @@ export function requireExistingAbsoluteDirectory(
 }
 
 /**
- * Resolves an output file path. The parent directory must already exist. When
- * the file itself already exists its real path is returned too, so a symbolic
- * link at the leaf cannot redirect the write somewhere the caller did not
- * validate (for example back into the workspace fixture).
+ * Resolves an output file path. The parent directory must already exist.
+ *
+ * An existing leaf is only accepted when it is a regular file: a symbolic link
+ * is refused outright, so a link can neither redirect the write to another file
+ * nor be replaced through the link itself. A new path is returned inside the
+ * canonical parent.
  */
 export function requireAbsoluteOutputFile(
   variableName: LaunchPathVariable,
@@ -68,33 +70,35 @@ export function requireAbsoluteOutputFile(
     );
   }
 
+  let canonicalParent: string;
   try {
-    const canonicalParent = realpathSync(dirname(value));
+    canonicalParent = realpathSync(dirname(value));
     if (!statSync(canonicalParent).isDirectory()) {
-      throw new Error('not a directory');
+      throw new Error('the parent path must be a directory');
     }
-    const candidate = join(canonicalParent, basename(value));
-
-    let leafExists = false;
-    try {
-      lstatSync(candidate);
-      leafExists = true;
-    } catch {
-      leafExists = false;
-    }
-    if (!leafExists) return candidate;
-
-    const resolved = realpathSync(candidate);
-    if (!statSync(resolved).isFile()) {
-      throw new Error('an existing output path must be a regular file');
-    }
-    return resolved;
   } catch (error) {
+    throw new Error(`${variableName} must be inside an existing directory`, {
+      cause: error,
+    });
+  }
+
+  const candidate = join(canonicalParent, basename(value));
+  let leafInformation: ReturnType<typeof lstatSync> | null = null;
+  try {
+    leafInformation = lstatSync(candidate);
+  } catch {
+    leafInformation = null;
+  }
+  if (leafInformation === null) return candidate;
+  if (leafInformation.isSymbolicLink()) {
     throw new Error(
-      `${variableName} must be an absolute file path inside an existing directory`,
-      { cause: error },
+      `${variableName} must not be an existing symbolic link; pass a new or regular path`,
     );
   }
+  if (!leafInformation.isFile()) {
+    throw new Error(`${variableName} must be a regular file or a new path`);
+  }
+  return candidate;
 }
 
 /**

@@ -33,17 +33,17 @@
 
 | 项           | 位置 / 命令                                                      | 结果                                                                                                                                                                |
 | ------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 一条命令     | `pnpm acceptance:packaged`                                       | 退出码 0；`1 passed (3.3s)` + 打包                                                                                                                                  |
+| 一条命令     | `pnpm acceptance:packaged`                                       | 退出码 0；`1 passed (4.0s)` + 打包                                                                                                                                  |
 | 启动报告     | `tmp/issue53-acceptance/latest/reports/startup-report.json`      | `isPackaged: true`、`electronVersion: 44.2.0`、`workspaceRoot` 为 fixture 根、3 个项目、`adapterKind: controlled`、`executablePath` 与 out 目录 exe 相同、18 条通道 |
 | 运行 journal | `tmp/issue53-acceptance/latest/evidence/journal.jsonl`           | `accept` 与 `terminal` 各一条且 `runId` 一致，`status: completed`，`adapter: controlled`，无 tombstone                                                              |
 | runlog 面板  | `tmp/issue53-acceptance/latest/evidence/packaged-run-events.png` | 元素截图：`会话 · alpha-app`、journal 记录的那个 run id、`已完成`、`#4 工具请求：read_file`、`#5 工具结果：# Alpha app / An alpha application fixture.`             |
 | 运行控制     | `tmp/issue53-acceptance/latest/evidence/packaged-run-status.png` | 整窗截图：runlog 头部 `修订 1 · 已完成`、run id、`#4 工具请求：read_file`，右侧会话面板可见；与 runlog 元素截图不是同一张图                                         |
 | 应用日志     | `tmp/issue53-acceptance/latest/evidence/packaged-app.log`        | 101 B，一行 `DevTools listening on ws://…`；日志流出错或为空会让本轮判失败                                                                                          |
-| 打包代码     | `apps/desktop/out/@pioneer-desktop-win32-x64/resources/app.asar` | SHA-256 `a81ddc45…dc2ba`，是打进成品的 app 代码；与 exe 哈希、run.json 的 commit 一起锚定这轮产物                                                                   |
+| 打包代码     | `apps/desktop/out/@pioneer-desktop-win32-x64/resources/app.asar` | SHA-256 `62eeb783…fccd`，是打进成品的 app 代码；与 exe 哈希、run.json 的 commit 一起锚定这轮产物                                                                    |
 | 真实读取内容 | `summary.json` 的 `run.readme`                                   | `tests/fixtures/workspaces/library/alpha-app/README.md`，43 字节，SHA-256 `28effecf…e010`；两行正文都出现在 runlog 里                                               |
 | fixture 不变 | `summary.json` 的 `fixture`                                      | 前后哈希同为 `1bceca98…46c5`，`unchanged: true`                                                                                                                     |
 | 聚合证据     | `tmp/issue53-acceptance/latest/summary.json`                     | `outcome: passed`、`cleanupErrors: []`、`log.errors: []`；`outcome` 在 fixture 哈希、清理与日志检查之后才定                                                         |
-| 机读摘要     | [issue53-acceptance.json](issue53-acceptance.json)               | 提交进仓库的稳定事实：app.asar SHA-256 `a81ddc45…dc2ba`、exe SHA-256 `3e36ffd1…fa64c`、通道数、journal 计数、README 哈希、fixture 前后哈希、门禁计数                |
+| 机读摘要     | [issue53-acceptance.json](issue53-acceptance.json)               | 提交进仓库的稳定事实：app.asar SHA-256 `62eeb783…fccd`、exe SHA-256 `de17e014…de61`、通道数、journal 计数、README 哈希、fixture 前后哈希、门禁计数                  |
 
 每次运行的端口、进程号、runId、时间戳都不同，`summary.json` 记录当次值；上表只列稳定事实。
 

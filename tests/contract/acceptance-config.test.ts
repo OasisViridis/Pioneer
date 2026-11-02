@@ -275,23 +275,34 @@ describe('packaged acceptance launch seam', () => {
     expect(setPath).not.toHaveBeenCalled();
   });
 
-  it('resolves an output leaf through an existing symbolic link before accepting it', async () => {
+  it('refuses an output leaf that is a symbolic link, wherever it points', async () => {
     if (!(await supportsSymlinks())) return;
     const fixture = await createAcceptanceFixture();
+    const outsideFile = join(fixture.container, 'outside.txt');
+    await writeFile(outsideFile, 'outside the workspace', 'utf-8');
     const workspaceFile = join(fixture.workspacePath, 'inside.txt');
     await writeFile(workspaceFile, 'inside the workspace', 'utf-8');
-    const reportLink = join(fixture.reportsPath, 'startup.json');
-    await symlink(workspaceFile, reportLink, 'file');
 
-    expect(() =>
-      resolvePackagedAcceptanceConfig(true, {
-        ...validEnvironment(fixture),
-        PIONEER_ACCEPTANCE_REPORT: reportLink,
-      }),
-    ).toThrow('PIONEER_ACCEPTANCE_REPORT must be outside');
+    // A link into the workspace and a link somewhere else are both refused:
+    // resolving either one would let the report overwrite that file.
+    for (const target of [workspaceFile, outsideFile]) {
+      const reportLink = join(
+        fixture.reportsPath,
+        `startup-${String(target.length)}.json`,
+      );
+      await symlink(target, reportLink, 'file');
+      expect(() =>
+        resolvePackagedAcceptanceConfig(true, {
+          ...validEnvironment(fixture),
+          PIONEER_ACCEPTANCE_REPORT: reportLink,
+        }),
+      ).toThrow(
+        'PIONEER_ACCEPTANCE_REPORT must not be an existing symbolic link',
+      );
+    }
 
     const scriptLink = join(fixture.reportsPath, 'run-link.json');
-    await symlink(workspaceFile, scriptLink, 'file');
+    await symlink(outsideFile, scriptLink, 'file');
     expect(() =>
       resolvePackagedAcceptanceConfig(true, {
         ...validEnvironment(fixture),
@@ -301,7 +312,9 @@ describe('packaged acceptance launch seam', () => {
         ),
         PIONEER_ACCEPTANCE_RUN_SCRIPT: scriptLink,
       }),
-    ).toThrow('PIONEER_ACCEPTANCE_RUN_SCRIPT must be outside');
+    ).toThrow(
+      'PIONEER_ACCEPTANCE_RUN_SCRIPT must not be an existing symbolic link',
+    );
   });
 
   it('rejects an existing output leaf that is a directory', async () => {
