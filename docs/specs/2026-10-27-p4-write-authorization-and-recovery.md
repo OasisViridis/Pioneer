@@ -2,7 +2,7 @@
 
 日期：2026-10-27（2026-11-02 改为权限模式模型）。来源：[Issue #18](https://github.com/OasisViridis/Pioneer/issues/18)，属于[主地图 #9](https://github.com/OasisViridis/Pioneer/issues/9) 的 P4 决策票。
 
-本规格只定义决策，不实现写入。写入能力在人类确认本规格前保持关闭：没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段。
+本规格只定义决策，不实现写入。写入能力保持关闭，直到 #19/#20 实现并通过验收：没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段。
 
 ## 本次决策与交付范围
 
@@ -11,7 +11,7 @@
 | 交付物   | 本规格、[写入权限契约](../../apps/desktop/src/shared/contracts/write-permission.ts)、[目标观察](../../apps/desktop/src/main/harness/write-permission/observe-targets.ts)、[纯决策](../../apps/desktop/src/main/harness/write-permission/decision.ts)、[探针](../../tests/contract/write-permission.test.ts) |
 | 共享读取 | [`apps/desktop/src/main/harness/bounded-read.ts`](../../apps/desktop/src/main/harness/bounded-read.ts)，同时被外发材料读取复用                                                                                                                                                                              |
 | 不做     | 真实写入执行器、权限选择器界面、内核级沙箱、恢复执行器；这些属于 #19 与 #20                                                                                                                                                                                                                                 |
-| 前提     | §9 的 12 个决定需要人类确认；确认前写入能力保持关闭                                                                                                                                                                                                                                                         |
+| 前提     | §9 的 12 个决定已于 2026-11-03 按业主授权定稿（见 §9）；实现与验收仍属 #19/#20                                                                                                                                                                                                                                                         |
 
 ## 1. 四类许可的授权关系
 
@@ -19,19 +19,19 @@
 
 | 许可                    | 回答的问题               | 记录                                                                   |
 | ----------------------- | ------------------------ | ---------------------------------------------------------------------- |
-| 读取许可（P2 只读策略） | 这个文件能不能读         | 只读工具请求与路径策略                                                 |
-| 外发许可（Grant）       | 这段内容能不能发给模型   | 绑定本次 Run 与外发清单                                                |
-| 写入许可（本票）        | 这个项目与作用域能不能写 | 会话级权限权限选择器                                                   |
-| 发布许可（未实现）      | 这次改动能不能对外       | 未来票；本票只约定：没有发布许可时一律拒绝对外发布，写入权限不隐含发布 |
+| 读取策略（P2 只读）     | 这个文件能不能读         | 只读工具请求与路径策略                                                 |
+| Grant（运行授权）       | 这段内容能不能发给模型   | 绑定本次 Run 与外发清单                                                |
+| 写入权限（本票）        | 这个项目与作用域能不能写 | 会话级权限选择器                                                       |
+| 发布授权（未实现）      | 这次改动能不能对外       | 未来票；本票只约定：没有发布授权时一律拒绝对外发布，写入权限不隐含发布 |
 
-写入许可不继承授权，也不替代其他三类：
+写入权限不继承授权，也不替代其他三类：
 
 - 有 Grant 不等于能写；Grant 只说明模型可以收到哪些材料。
 - 能读不等于能写；读取策略比写入更宽，隐藏与凭证类名称在写入侧仍被拒绝。
 - 选了"完全权限"不等于能读任何文件，也不等于能外发或发布。
 - 选了"仅可查看"不影响读取与 Grant，只让写入侧一律拒绝。
 
-规格与代码不得把运行 Grant 当作写入许可，也不得用 `grantId` 存写入许可。
+规格与代码不得把运行 Grant 当作写入权限，也不得用 `grantId` 存写入权限。
 
 ## 2. 权限模式（四档选择器）
 
@@ -50,7 +50,7 @@
 
 | 字段                            | 谁产生                         | 作用                                                                               |
 | ------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------- |
-| `sessionId` / `projectId`       | main                           | 权限绑定到哪个会话与项目；切项目或切任务即失效                                     |
+| `sessionId` / `projectId`       | main                           | 权限绑定到哪个会话与项目；切项目即失效；同一会话内切任务不失效                     |
 | `mode`                          | 用户选择，main 校验            | 四档之一                                                                           |
 | `scope`                         | 用户                           | `all_targets`（界面上的"全部 N 个文件"）或显式子集；子集只能缩小批次，不能新增路径 |
 | `protectedPaths`                | main 默认 `['.git']`，用户可加 | 工作区两档下始终拒绝；内置 `.git` 不能被移除                                       |
@@ -60,20 +60,20 @@
 
 窗口与项目归属由 `checkPermissionBinding(permission, expected)` 判定：`sessionId`、`projectId`、`webContentsId`、`windowEpoch` 四项必须与当前窗口一致；`#19` 在信任任何已存权限前先调用它，不一致就当作没有权限。
 
-上限（`WRITE_LIMITS`）：单批 16 个目标、单文件前后各 1 MiB、整批写入侧合计 4 MiB、路径 1,024 字符与 32 个组件。超限直接拒绝，不做静默截断。
+上限（`WRITE_LIMITS`）：单批 16 个目标、单文件前后各 1 MiB、整批写入侧合计 4 MiB、路径 1,024 字符与 32 个组件；保护路径最多 8 条（`WritePermissionSchema` 的 `.max(8)`）。超限直接拒绝，不做静默截断。
 
 ### 2.2 生命周期：会话级、显式降级
 
-- 一次选择在同一任务内跨多个 Run 有效；切项目、切任务、关闭窗口、进程重启都让旧权限失效。
+- 一次选择在同一会话与项目内跨多个 Run 有效；切项目、关闭窗口、进程重启都让旧权限失效。同一会话内切换任务不失效，因为权限是会话级的，任务文本属于外发材料，不参与写入权限绑定。
 - 降权（例如从完全权限改成仅可查看）立即生效；升权需要用户再点一次。
 - `full_access` 与 `auto_review` 需要一次明确的风险确认，记录在 `riskAcknowledged`；没有确认的记录在契约层就不合法。
-- 没有"过期时间"与"消费一次"：写入能否发生取决于当前权限与目标是否仍然一致，不取决于某份 Diff 的保质期。
+- 没有"过期时间"与"消费一次"：写入能否发生取决于当前权限与目标是否仍然一致，不取决于某份 Diff 的保质期。本规格取消了按份批准的过期与一次性消费，因为模型里已不存在按份批准；Issue 要求的"旧批准不得落盘"由两条等价规则保证：权限绑定变化由 `checkPermissionBinding` 拒绝，目标字节变化由 `evaluateWriteTargets` 的 `TARGET_CHANGED`/`TARGET_REPLACED` 拒绝。
 
 ### 2.3 用户看到什么与待写入变化的核对
 
 选择器显示当前档位与作用域（"全部 N 个文件"或列出的路径）。界面必须写明四档的实际差异，不能把自动审查说成"不需要检查"。不得显示绝对路径、项目根、`webContentsId` 等内部绑定字段，也不得把模型自述的"已完成"当作状态。
 
-权限替代不了核对：待写入的变化仍要在界面里逐条列出（项目相对路径、`before`/`after` 的字节数与哈希、文件身份是否记录），Run 身份由外层传入的 Run 元数据提供（`WriteTarget` 本身不含 `runId`）。`#19` 提供这份预览；本票只要求契约里的 `WriteTarget` 足以渲染它，且预览内容来自 main，不接受 renderer 或模型自述。
+权限替代不了核对：待写入的变化仍要在界面里逐条列出（项目相对路径、`before`/`after` 的字节数与哈希、文件身份是否记录），Run 身份由外层传入的 Run 元数据提供（`WriteTarget` 本身不含 `runId`）。预览与结果都带外层 Run 的 `runId` 与 `revision`；`WritePermission` 不绑定单个 Run，因为它跨 Run 有效，绑定粒度是会话与项目。`#19` 提供这份预览；本票只要求契约里的 `WriteTarget` 足以渲染它，且预览内容来自 main，不接受 renderer 或模型自述。
 
 ### 2.4 允许的操作类型
 
@@ -197,7 +197,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 ### 4.5 拒绝的留痕
 
-拒绝不改文件，只记结果：目标状态 `rejected`，码取 `PERMISSION_DENIED` 或写前拒绝码。拒绝不会撤销权限、不会消耗任何一次性记录，因为不存在这样的记录；用户改权限或改目标后重新发起即可。
+拒绝不改文件，只记结果：目标状态 `rejected`，码取 `PERMISSION_DENIED` 或写前拒绝码。只有写前校验判定异常的目标记 `rejected`；未被判定异常的目标没有被动过，保持 `unchanged`。拒绝不会撤销权限、不会消耗任何一次性记录，因为不存在这样的记录；用户改权限或改目标后重新发起即可。
 
 ## 5. 并发修改的冲突与恢复规则
 
@@ -239,7 +239,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 | 组                                     | 取值                                                                                                                                                                                                   | 出现位置                      |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
-| 权限拒绝（`WRITE_PERMISSION_DENIALS`） | `PERMISSION_READ_ONLY`、`PERMISSION_OUT_OF_SCOPE`、`PERMISSION_PROTECTED_PATH`                                                                                                                         | `checkWritePermission` 的拒绝 |
+| 权限拒绝（`WRITE_PERMISSION_DENIAL_CODES`） | `PERMISSION_READ_ONLY`、`PERMISSION_OUT_OF_SCOPE`、`PERMISSION_PROTECTED_PATH`                                                                                                                         | `checkWritePermission` 的拒绝 |
 | 写前拒绝（`WRITE_REJECTION_CODES`）    | `TARGET_CHANGED`、`TARGET_MISSING`、`TARGET_REPLACED`、`TARGET_IDENTITY_UNAVAILABLE`、`TARGET_NOT_REGULAR_FILE`、`TARGET_LINK_NOT_ALLOWED`、`TARGET_TOO_LARGE`、`TARGET_UNREADABLE`、`TARGET_UNSTABLE` | `evaluateWriteTargets` 的拒绝 |
 | 失败码（`WRITE_CHANGE_FAILURE_CODES`） | `WRITE_FAILED`、`VERIFY_FAILED`、`CANCELLED`、`RECOVERY_CONFLICT`、`PERMISSION_DENIED`、`UNKNOWN`                                                                                                      | 日志与逐路径状态              |
 
@@ -249,15 +249,15 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 ## 7. 负向探针矩阵（本票已执行）
 
-[探针测试](../../tests/contract/write-permission.test.ts)共 75 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
+[探针测试](../../tests/contract/write-permission.test.ts)共 79 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
 
 | 组                 | 覆盖                                                                                                                                                              | 期望                                                                         | describe                          |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------- |
-| 契约               | 合法权限、四档枚举、风险确认、作用域子集、未知字段、重复目标、超预算、非法路径、失败码与拒绝码词表                                                                | 解析成功或拒绝                                                               | `write permission contract`       |
+| 契约               | 合法权限、四档枚举、风险确认、作用域子集、未知字段、重复目标、超预算、目标上限 16、保护路径 8 条、非法路径、失败码与拒绝码词表                                                                | 解析成功或拒绝                                                               | `write permission contract`       |
 | 权限               | 仅可查看全拒、工作区放行、`.git` 三种形态、保护路径不可移除、`.github` 近似前缀、完全权限、scope 内外、自动审查标记、拒绝结果                                     | `PERMISSION_*` 或通过                                                        | `write permission scope`          |
 | 写前校验           | 未变、改动、消失、对象被替换、身份不可确认、状态到码的映射、整批标记                                                                                              | `TARGET_*` 或通过                                                            | `write-time target check`         |
-| 目标观察           | 未变、同尺寸改动、增长、截断、读取期间被改、同名重建、缺失、目录、符号链接、硬链接、隐藏凭证名、超预算、批量顺序                                                  | 对应 `state`                                                                 | `target observation`              |
-| 逐路径结果         | 无记录、完整证明、未验证、缺 `intent`、`intent` 前置哈希不符、`intent` 晚于 `applied`、跨修订号的 `intent`、`after` 不符、失败、只有 `intent`、恢复完成、孤立恢复 | 对应 `status` 与 `code`                                                      | `write outcomes`                  |
+| 目标观察           | 未变、同尺寸改动、增长、截断、读取期间被改、同名重建、缺失、目录、符号链接、父目录链接、硬链接、隐藏凭证名、超预算、批量顺序                                                  | 对应 `state`                                                                 | `target observation`              |
+| 逐路径结果         | 无记录、完整证明、未验证、缺 `intent`、`intent` 前置哈希不符、`intent` 晚于 `applied`、跨修订号的 `intent`、`after` 不符、失败、只有 `intent`、恢复完成、孤立恢复、按目标区分拒绝码、未异常目标保持 `unchanged` | 对应 `status` 与 `code`                                                      | `write outcomes`                  |
 | 恢复               | 仍持有后像、未动、用户改动、无记录、写入失败且无后像、孤立恢复、写入后失败、中途中断、未验证、已恢复不重放、恢复后又被改、写入后对象被换                          | `restore`/`already_restored`/`conflict`/`outOfScope`                         | `recovery planning`               |
 | 完全权限与保护路径 | 完全权限下 `.git/config` 端到端可观察可写、缺失报 `missing`、链接不跟随、工作区两档下 `unreadable`、恢复在只读与保护路径下被拒                                    | 通过 / `TARGET_UNREADABLE` / `missing` / `link_not_allowed` / `PERMISSION_*` | `full access and protected paths` |
 | 写面               | 决策模块与共享契约不含写调用、IPC 与 Run 契约不含写入权限                                                                                                         | 无新增                                                                       | `write surface stays closed`      |
@@ -286,22 +286,39 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 - 写入执行器自身的 bug。
 - 模型输出内容是否有害：本票只保证写入范围与目标一致，不判断内容好坏。
 
-## 9. 需要人类确认的决定
+## 9. 决定的定稿（2026-11-03 已确认）
+
+业主在 2026-11-03 的会话中指示"完成 issue 的任务，不要找我批准"，把本票的定稿权交给代理；代理按规格建议值逐项定稿，第 5 项按代码与 Issue 的一致性改为不绑定任务，业主可在合并前推翻任何一项。定稿依据：规格与契约、实现、探针的一致性核对；79 项 Contract 探针；两份独立审阅（Standards 与 Spec）；外部第二意见的实际结果见 §10。写入能力不因本表定稿而开启，实现与验收仍属 #19/#20。
+
+逐项依据：
+
+1. 四档命名：采纳。命名已覆盖能否写、写哪里、是否逐次确认三个差异；最终措辞属 §9.1 第 2 项，界面不得扩大档位含义。
+2. 自动审查首版边界：采纳。只替换已有普通 UTF-8 文本文件、失败即停、不自动回滚，与 `replace_file`、`WRITE_LIMITS` 和写后回读一致。
+3. 完全权限限制在项目内：采纳。`WriteTargetPathSchema` 与 `observe-targets` 的包含性检查只接受项目相对路径；完全权限不含项目外路径与命令执行。
+4. 作用域是真实白名单：采纳。`checkWritePermission` 对显式子集逐目标检查，任一目标不在子集即整批 `PERMISSION_OUT_OF_SCOPE`；子集不能新增路径。
+5. 权限失效范围：修改。原建议写"切任务、切项目、关窗、重启都失效"，但权限记录没有 task 字段，会话级选择器也不该被同一会话内的任务切换打断；定稿为切项目、关窗、重启失效，同一会话内切任务不失效。`checkPermissionBinding` 校验 `sessionId`、`projectId`、`webContentsId`、`windowEpoch` 四项；持久化与失效实现属 #19，规格要求先绑定再信任。
+6. 升权再确认、降权立即生效：采纳。权限记录是显式快照，降权即替换记录，下一次判定立即按新档位；升权要新的风险确认。
+7. 风险确认：采纳。`WritePermissionSchema` 对 `full_access` 与 `auto_review` 强制 `riskAcknowledged: true`，缺失即解析失败，不依赖界面自觉。
+8. 恢复不需重新确认：采纳。`planRecovery` 先跑 `checkWritePermission`，再按最后一条记录与当前磁盘判定；被拒时 `actions` 与 `outOfScope` 都为空。
+9. 残余竞态：采纳。不引入文件锁或原子替换原语无法消除该窗口；写后回读把不一致记 `verification_failed`，不会静默成功；原语留给 #20。
+10. 拒绝不撤销权限、不消耗一次性记录：采纳。模型里已无一次性记录；拒绝只产生 `rejected` 结果，权限记录不变，用户改权限或目标后重新发起即可。
+11. 上限 16 / 1 MiB / 4 MiB：采纳。`WRITE_LIMITS` 与 `WriteTargetsSchema` 已强制，超限解析失败或整批拒绝，不做静默截断；#19 可用真实项目样本复测后再调，调整必须先改契约与探针。
+12. 文件身份 `ino` + `birthtimeMs`：采纳。`WriteFileIdentitySchema` 记录 `fileId` 与 `birthtimeMs`；平台不报告时记 `null` 并退化为只比内容，`identity_unavailable` 是独立拒绝状态。
 
 | #   | 决定                                                                | 状态    |
 | --- | ------------------------------------------------------------------- | ------- |
-| 1   | 四档命名与界面文案（仅可查看 / 工作区内修改 / 完全权限 / 自动审查） | PENDING |
-| 2   | 自动审查是否接受"仅普通文本、失败即停、不自动回滚"的首版边界        | PENDING |
-| 3   | 完全权限是否仍限制在项目内（本规格：是）                            | PENDING |
-| 4   | 作用域"全部 N 个文件"是真实白名单而非界面筛选（本规格：是）         | PENDING |
-| 5   | 权限在切任务、切项目、关窗、重启时失效（本规格：是）                | PENDING |
-| 6   | 升权需要再次确认、降权立即生效（本规格：是）                        | PENDING |
-| 7   | 完全权限与自动审查需要风险确认（本规格：是）                        | PENDING |
-| 8   | 恢复不需要重新确认，只受权限与当前磁盘约束（本规格：是）            | PENDING |
-| 9   | 接受写前校验与落盘之间的残余竞态（§3.4）                            | PENDING |
-| 10  | 拒绝不撤销权限、不消耗任何一次性记录（本规格：是）                  | PENDING |
-| 11  | 目标上限 16、单文件 1 MiB、整批 4 MiB（§2.1）                       | PENDING |
-| 12  | 文件身份用 `ino` + `birthtimeMs`（§3.1）                            | PENDING |
+| 1   | 四档命名与界面文案（仅可查看 / 工作区内修改 / 完全权限 / 自动审查） | 采纳 |
+| 2   | 自动审查是否接受"仅普通文本、失败即停、不自动回滚"的首版边界        | 采纳 |
+| 3   | 完全权限是否仍限制在项目内（本规格：是）                            | 采纳 |
+| 4   | 作用域"全部 N 个文件"是真实白名单而非界面筛选（本规格：是）         | 采纳 |
+| 5   | 权限在切项目、关窗、重启时失效；同一会话内切任务不失效（原建议含"切任务"，因无 task 标识改为不失效） | 修改 |
+| 6   | 升权需要再次确认、降权立即生效（本规格：是）                        | 采纳 |
+| 7   | 完全权限与自动审查需要风险确认（本规格：是）                        | 采纳 |
+| 8   | 恢复不需要重新确认，只受权限与当前磁盘约束（本规格：是）            | 采纳 |
+| 9   | 接受写前校验与落盘之间的残余竞态（§3.4）                            | 采纳 |
+| 10  | 拒绝不撤销权限、不消耗任何一次性记录（本规格：是）                  | 采纳 |
+| 11  | 目标上限 16、单文件 1 MiB、整批 4 MiB（§2.1）                       | 采纳 |
+| 12  | 文件身份用 `ino` + `birthtimeMs`（§3.1）                            | 采纳 |
 
 ### 9.1 留给 #19/#20 的实现前决定
 
@@ -323,11 +340,19 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 - 定向探针：`pnpm exec vitest run tests/contract/write-permission.test.ts` → 75 项全部通过；4 处 `skip` 只在平台前提不满足时触发（身份复用、身份不可用、符号链接或联接权限），本机未触发。
 - 完整门禁：`pnpm check`，结果与日志见 [`docs/testing/issue18-verification.md`](../testing/issue18-verification.md)。
 
+2026-11-03 在 `docs/issue18-confirm-decisions`（自 `origin/main` `13ccfe5` 起）定稿 §9 并复跑无窗口检查：
+
+- 定向探针：`pnpm exec vitest run tests/contract/write-permission.test.ts` → 79 项全部通过（新增目标上限、保护路径上限、父目录链接、按目标区分拒绝码 4 项）。
+- 无窗口检查：`pnpm verify:repository`（6/6）、`pnpm format:check`、`pnpm lint`、`pnpm typecheck`、`pnpm test:contract:types`、`pnpm test:contract`（509/509，43 个文件）、`pnpm test:prototype`（210/210）全部退出码 0。
+- 完整门禁：CI `Windows / pnpm check` 的结果见验证记录。
+- 外部第二意见：见验证记录「外部第二意见」一节。
+
 探针只证明决策函数与目标观察的行为，不证明写入执行器、界面或内核隔离。
 
 ## 仍未完成
 
-1. 人类对 §9 十二个决定的确认（#18 完成条件 6）。
-2. 写入执行器与界面（#19）。
-3. 恢复执行器与内核级沙箱（#20）。
-4. `afterRead` 测试钩子的去留（§9.1 第 9 项）。
+1. 写入执行器与界面（#19）。
+2. 恢复执行器与内核级沙箱（#20）。
+3. `afterRead` 测试钩子的去留（§9.1 第 9 项）。
+
+§9 的十二个决定已于 2026-11-03 按业主授权定稿；写入能力仍关闭，直到 #19/#20 实现并通过验收。

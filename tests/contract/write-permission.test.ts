@@ -259,6 +259,24 @@ describe('write permission contract', () => {
     expect(WriteTargetsSchema.safeParse(targets).success).toBe(false);
   });
 
+  it('rejects a batch above the target-count budget', () => {
+    const targets = Array.from({ length: WRITE_LIMITS.targets + 1 }, (_, i) =>
+      targetOf(`src/${String(i)}.ts`, 'a', 'b'),
+    );
+    expect(WriteTargetsSchema.safeParse(targets).success).toBe(false);
+  });
+
+  it('caps the protected path list at eight entries', () => {
+    const protectedPaths = Array.from(
+      { length: 9 },
+      (_, index) => `vendor/${String(index)}`,
+    );
+    expect(
+      WritePermissionSchema.safeParse({ ...permissionOf(), protectedPaths })
+        .success,
+    ).toBe(false);
+  });
+
   it('rejects unsafe paths and accepts plain project-relative ones', () => {
     for (const path of [
       '/abs.ts',
@@ -552,6 +570,36 @@ describe('full access and protected paths', () => {
     expect(['link_not_allowed', 'unreadable']).toContain(observation?.state);
   });
 
+  it('refuses a protected path whose parent component is a link', async (context) => {
+    const permission = permissionOf({
+      mode: 'full_access',
+      riskAcknowledged: true,
+    });
+    await mkdir(join(projectRoot, '.git'), { recursive: true });
+    const outside = await makeProject();
+    await write(outside, 'config', 'outside');
+    const { symlink } = await import('node:fs/promises');
+    try {
+      await symlink(outside, join(projectRoot, '.git/objects'), 'junction');
+    } catch {
+      context.skip();
+      return;
+    }
+    const target = targetOf(
+      '.git/objects/config',
+      'outside',
+      'outside\nedited',
+    );
+    const [observation] = await observeTargetsForPermission(
+      projectRoot,
+      [target],
+      permission,
+    );
+    expect(observation).toBeDefined();
+    expect(observation?.state).not.toBe('unchanged');
+    expect(['link_not_allowed', 'unreadable']).toContain(observation?.state);
+  });
+
   it('refuses a hard-linked protected path', async () => {
     const permission = permissionOf({
       mode: 'full_access',
@@ -708,7 +756,7 @@ describe('write-time target check', () => {
     expect(rejectionCodeFor('unreadable')).toBe('TARGET_UNREADABLE');
   });
 
-  it('marks every target of a refused batch as rejected', () => {
+  it('marks only the stale targets of a refused batch as rejected', () => {
     const targets = [
       targetOf('src/a.ts', 'a', 'b'),
       targetOf('src/b.ts', 'a', 'b'),
@@ -725,7 +773,31 @@ describe('write-time target check', () => {
       }),
     ).toEqual([
       { path: 'src/a.ts', status: 'rejected', code: 'TARGET_CHANGED' },
-      { path: 'src/b.ts', status: 'rejected', code: 'TARGET_CHANGED' },
+      { path: 'src/b.ts', status: 'unchanged', code: null },
+    ]);
+  });
+
+  it('gives each stale target its own rejection code', () => {
+    const targets = [
+      targetOf('src/a.ts', 'a', 'b'),
+      targetOf('src/b.ts', 'a', 'b'),
+    ];
+    expect(
+      rejectedOutcomes(targets, {
+        ok: false,
+        error: {
+          code: 'TARGET_CHANGED',
+          message: 'stale',
+          retryable: false,
+          targets: [
+            { path: 'src/a.ts', state: 'changed' },
+            { path: 'src/b.ts', state: 'missing' },
+          ],
+        },
+      }),
+    ).toEqual([
+      { path: 'src/a.ts', status: 'rejected', code: 'TARGET_CHANGED' },
+      { path: 'src/b.ts', status: 'rejected', code: 'TARGET_MISSING' },
     ]);
   });
 });
@@ -954,10 +1026,8 @@ describe('write outcomes', () => {
 
   it('ignores records from an older session revision', () => {
     const target = at(targets, 0);
-    const staleRevision = provenWrite(target).map((record) => ({
-      ...record,
-      revision: 1,
-    }));
+    // provenWrite records revision 1; the current session is revision 2.
+    const staleRevision = provenWrite(target);
     expect(summarizeWriteOutcomes(RUN_ID, 2, targets, staleRevision)).toEqual([
       { path: 'src/a.ts', status: 'unchanged', code: null },
       { path: 'src/b.ts', status: 'unchanged', code: null },

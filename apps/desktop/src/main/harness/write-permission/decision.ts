@@ -7,9 +7,11 @@ import {
   type WriteStaleTarget,
   type WriteTarget,
   type WriteTargetOutcome,
+  type WriteTargetPath,
   type WriteTargetState,
   type WriteVerdict,
 } from '../../../shared/contracts/write-permission';
+import { matchesProtectedPath } from '../../../shared/path-safety';
 import { sameFileIdentity, sameFileState } from './file-state';
 import type { TargetObservation } from './observe-targets';
 
@@ -28,23 +30,8 @@ export type WritePermissionDecision =
       ok: false;
       code: WritePermissionDenialCode;
       /** First target that triggered the denial, for diagnostics. */
-      path: string | null;
+      path: WriteTargetPath | null;
     };
-
-/**
- * Protected paths match by whole path segment, at any depth and in any case:
- * `.git`, `.git/config`, `vendor/x/.git/config` and `.GIT/config` are all
- * refused, while a lookalike such as `.github/workflows` is not protected.
- */
-function isProtectedPath(
-  path: string,
-  protectedPaths: readonly string[],
-): boolean {
-  const wrapped = `/${path.toLowerCase()}/`;
-  return protectedPaths.some((protectedPath) =>
-    wrapped.includes(`/${protectedPath.toLowerCase()}/`),
-  );
-}
 
 /**
  * Applies the permission selector to a batch. `read_only` refuses everything;
@@ -89,7 +76,7 @@ export function checkWritePermission(
       ...permission.protectedPaths,
     ];
     const guarded = targets.find((target) =>
-      isProtectedPath(target.path, protectedPaths),
+      matchesProtectedPath(target.path, protectedPaths),
     );
     if (guarded !== undefined) {
       return {
@@ -116,13 +103,18 @@ export function permissionDeniedOutcomes(
   }));
 }
 
-export type WriteAuthorization =
+/**
+ * The composed admission decision for one batch. It is not the "write
+ * authorization" umbrella from GLOSSARY: it answers only whether this batch may
+ * proceed under the granted permission and the current bytes.
+ */
+export type WriteAdmission =
   | { ok: true; confirmation: 'per_apply' | 'none' }
   | {
       ok: false;
       stage: 'permission';
       code: WritePermissionDenialCode;
-      path: string | null;
+      path: WriteTargetPath | null;
       targets: readonly WriteStaleTarget[];
       outcomes: readonly WriteTargetOutcome[];
     }
@@ -142,7 +134,7 @@ export function authorizeWrite(
   targets: readonly WriteTarget[],
   permission: WritePermission,
   observations: readonly TargetObservation[],
-): WriteAuthorization {
+): WriteAdmission {
   const gate = checkWritePermission(targets, permission);
   if (!gate.ok) {
     return {
@@ -285,7 +277,11 @@ export function evaluateWriteTargets(
   return { ok: true };
 }
 
-/** Outcomes for a batch that the write-time check refused. */
+/**
+ * Outcomes for a batch that the write-time check refused. Only the targets the
+ * verdict names as stale were rejected; the rest were not touched, so they stay
+ * `unchanged` instead of inheriting the first stale target's code.
+ */
 export function rejectedOutcomes(
   targets: readonly WriteTarget[],
   verdict: WriteVerdict,
@@ -293,12 +289,19 @@ export function rejectedOutcomes(
   if (verdict.ok) {
     throw new Error('internal: rejectedOutcomes needs a refused verdict');
   }
-  const code: WriteRejectionCode = verdict.error.code;
-  return targets.map((target) => ({
-    path: target.path,
-    status: 'rejected' as const,
-    code,
-  }));
+  const stale = new Map(
+    verdict.error.targets.map((target) => [target.path, target.state]),
+  );
+  return targets.map((target) => {
+    const state = stale.get(target.path);
+    return state === undefined
+      ? { path: target.path, status: 'unchanged' as const, code: null }
+      : {
+          path: target.path,
+          status: 'rejected' as const,
+          code: rejectionCodeFor(state),
+        };
+  });
 }
 
 /**
@@ -309,18 +312,18 @@ export function rejectedOutcomes(
 function lastRecordFor(
   records: readonly WriteChangeJournalRecord[],
   runId: string,
-  path: string,
+  path: WriteTargetPath,
 ): WriteChangeJournalRecord | null;
 function lastRecordFor<K extends WriteChangeJournalRecord['kind']>(
   records: readonly WriteChangeJournalRecord[],
   runId: string,
-  path: string,
+  path: WriteTargetPath,
   kind: K,
 ): Extract<WriteChangeJournalRecord, { kind: K }> | null;
 function lastRecordFor(
   records: readonly WriteChangeJournalRecord[],
   runId: string,
-  path: string,
+  path: WriteTargetPath,
   kind?: WriteChangeJournalRecord['kind'],
 ): WriteChangeJournalRecord | null {
   let found: WriteChangeJournalRecord | null = null;
@@ -441,7 +444,7 @@ export function summarizeWriteOutcomes(
 }
 
 export interface RecoveryAction {
-  path: string;
+  path: WriteTargetPath;
   action: 'restore' | 'already_restored' | 'conflict';
   state: TargetObservation['state'];
   observed: TargetObservation['observed'];
@@ -451,7 +454,7 @@ export interface RecoveryPlan {
   actions: RecoveryAction[];
   conflicts: RecoveryAction[];
   /** Targets this run never applied; recovery must not touch them. */
-  outOfScope: string[];
+  outOfScope: WriteTargetPath[];
   /** Set when the permission refuses recovery for the whole batch. */
   denied: WritePermissionDenialCode | null;
 }
@@ -489,7 +492,7 @@ export function planRecovery(input: {
     input.observations.map((observation) => [observation.path, observation]),
   );
   const actions: RecoveryAction[] = [];
-  const outOfScope: string[] = [];
+  const outOfScope: WriteTargetPath[] = [];
   for (const target of input.targets) {
     const latest = lastRecordFor(input.records, input.runId, target.path);
     const observation: TargetObservation = byPath.get(target.path) ?? {
