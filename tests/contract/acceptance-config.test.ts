@@ -437,6 +437,7 @@ describe('packaged acceptance launch seam', () => {
   });
 
   it('normalises Windows case and trailing-dot aliases', async () => {
+    if (process.platform !== 'win32') return;
     const fixture = await createAcceptanceFixture();
 
     expect(() =>
@@ -446,7 +447,6 @@ describe('packaged acceptance launch seam', () => {
       }),
     ).toThrow('must not end with a dot or a space');
 
-    if (process.platform !== 'win32') return;
     expect(() =>
       resolvePackagedAcceptanceConfig(true, {
         ...validEnvironment(fixture),

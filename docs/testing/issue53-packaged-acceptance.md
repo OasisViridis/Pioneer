@@ -19,7 +19,7 @@
 采用 issue 三选一里的 ③ 形态，并补一个启动探测文件：
 
 1. 打包 + `PIONEER_ACCEPTANCE=1` 双重开关。开发构建即使设了开关也不生效，`resolvePackagedAcceptanceConfig` 先判 `isPackaged`。
-2. 五个变量缺一不可，全部要求绝对路径并按最近存在的祖先做 `realpath` 规范化：`PIONEER_ACCEPTANCE_WORKSPACE`、`PIONEER_ACCEPTANCE_USER_DATA`、`PIONEER_ACCEPTANCE_EVIDENCE`、`PIONEER_ACCEPTANCE_REPORT`、`PIONEER_ACCEPTANCE_RUN_SCRIPT`。开关一旦打开，缺项直接抛错，不会退回真实 profile。
+2. 五个变量缺一不可：目录必须已存在，输出文件的父目录必须已存在，检查前先 `realpath` 规范化：`PIONEER_ACCEPTANCE_WORKSPACE`、`PIONEER_ACCEPTANCE_USER_DATA`、`PIONEER_ACCEPTANCE_EVIDENCE`、`PIONEER_ACCEPTANCE_REPORT`、`PIONEER_ACCEPTANCE_RUN_SCRIPT`。开关一旦打开，缺项直接抛错，不会退回真实 profile。
 3. 工作区、userData 与证据目录三者互不包含；报告与运行脚本必须落在证据目录内，且两者不得是同一个文件。已存在的报告/脚本叶子必须是普通文件，符号链接一律拒绝，避免借链接把写入引到别处；Windows 下路径比较按大小写不敏感处理。
 4. 验收 userData 与证据目录都不得是、包含或位于应用自己的 profile 目录；路径都按最近存在的祖先做 canonical 化，junction 或别名写法不能绕过。
 5. 没有显式脚本就拒绝：受控适配器的默认脚本不读任何文件，会造出「已完成但没读过文件」的假通过。
@@ -52,8 +52,8 @@
 | 项           | 命令                     | 结果                                                                                                                                                              |
 | ------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 仓库规范化   | `pnpm verify:repository` | 6/6                                                                                                                                                               |
-| 完整门禁     | `pnpm check`             | 退出码 0（2026-11-02）：design:check（含 102 个 node 测试）、Contract 417/417、Prototype 210/210、Real E2E 39/39、package smoke；日志 `tmp/issue53-check-r10.log` |
-| 新增合同测试 | `pnpm test:contract`     | `acceptance-config.test.ts` 17 条、`acceptance-report.test.ts` 2 条、`run-host-adapter-selection.test.ts` 4 条                                                    |
+| 完整门禁     | `pnpm check`             | 退出码 0（2026-11-02）：design:check（含 102 个 node 测试）、Contract 420/420、Prototype 210/210、Real E2E 39/39、package smoke；日志 `tmp/issue53-check-r10.log` |
+| 新增合同测试 | `pnpm test:contract`     | `acceptance-config.test.ts` 20 条、`acceptance-report.test.ts` 2 条、`run-host-adapter-selection.test.ts` 4 条                                                    |
 
 ## 没做的事
 

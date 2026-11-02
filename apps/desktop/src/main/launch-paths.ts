@@ -110,6 +110,12 @@ export function requireAbsoluteOutputFile(
   if (!leafInformation.isFile()) {
     throw new Error(`${variableName} must be a regular file or a new path`);
   }
+  const resolvedLeaf = realpathSync(candidate);
+  if (foldPathCase(resolvedLeaf) !== foldPathCase(candidate)) {
+    throw new Error(
+      `${variableName} must not use an alias of an existing file`,
+    );
+  }
   return candidate;
 }
 

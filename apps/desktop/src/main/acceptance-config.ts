@@ -155,6 +155,11 @@ export function applyPackagedAcceptanceConfig(
       'PIONEER_ACCEPTANCE_EVIDENCE must not overlap the application profile directory',
     );
   }
+  if (pathsOverlap(applicationProfile, config.workspacePath)) {
+    throw new Error(
+      'PIONEER_ACCEPTANCE_WORKSPACE must not overlap the application profile directory',
+    );
+  }
 
   app.setPath('userData', config.userDataPath);
   return config;
