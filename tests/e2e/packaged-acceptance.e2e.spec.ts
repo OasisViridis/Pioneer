@@ -708,20 +708,23 @@ test('the packaged build completes one read-only run through the acceptance seam
     await expect(runLogPanel).toBeVisible();
 
     await page.locator('details.run-log summary').click();
+    const runLogDetails = page.locator('details.run-log');
+    const runStatusChip = runLogDetails.locator('.run-status');
     await page
       .getByRole('textbox', { name: '运行任务' })
       .fill('读取 alpha-app 的 README.md 并总结内容。');
     await page.getByRole('button', { name: '启动运行' }).click();
 
     await expect(
-      page.getByText('工具请求：read_file', { exact: true }),
+      runLogPanel.getByText('工具请求：read_file', { exact: true }),
     ).toBeVisible({ timeout: runTimeoutMs });
-    await expect(
-      page.locator('.run-status', { hasText: '已完成' }),
-    ).toBeVisible({ timeout: runTimeoutMs });
+    await expect(runStatusChip).toHaveText(/已完成/u, {
+      timeout: runTimeoutMs,
+    });
 
     transcript = await runLogPanel.innerText();
     expect(transcript).toContain('工具请求：read_file');
+    expect(transcript).toContain('已完成');
     for (const line of readme.lines) {
       expect(
         transcript,
@@ -731,9 +734,8 @@ test('the packaged build completes one read-only run through the acceptance seam
 
     // Two distinct frames: the window with the run controls and terminal
     // status in view, then the run-log panel with the tool exchange.
-    const runStatus = page.locator('.run-status');
-    await runStatus.scrollIntoViewIfNeeded();
-    await expect(runStatus).toBeInViewport();
+    await runStatusChip.scrollIntoViewIfNeeded();
+    await expect(runStatusChip).toBeInViewport();
     await page.screenshot({ path: statusScreenshotPath });
     await runLogPanel.screenshot({ path: eventsScreenshotPath });
     await attachEvidence(testInfo, [

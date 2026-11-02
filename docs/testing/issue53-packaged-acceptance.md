@@ -1,6 +1,6 @@
 # Issue #53 验证记录：打包成品完成一次只读运行
 
-核对日期：2026-11-02。来源：[Issue #53](https://github.com/OasisViridis/Pioneer/issues/53)。基线 `main` `28e6882`（合并 PR #61 后），分支 `feat/p3-packaged-acceptance`，验证代码提交 `f62317e`。机读摘要见 [issue53-acceptance.json](issue53-acceptance.json)。本机环境：Windows，Node 24.17.0，pnpm 11.7.0，Electron 44.2.0，electron-forge 7.11.2，Playwright 1.62.1。
+核对日期：2026-11-02。来源：[Issue #53](https://github.com/OasisViridis/Pioneer/issues/53)。基线 `main` `abe8202`（合并 PR #62 后），分支 `feat/p3-packaged-acceptance`，验证代码提交 `f62317e`。机读摘要见 [issue53-acceptance.json](issue53-acceptance.json)。本机环境：Windows，Node 24.17.0，pnpm 11.7.0，Electron 44.2.0，electron-forge 7.11.2，Playwright 1.62.1。
 
 ## 结论
 
