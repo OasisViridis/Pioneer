@@ -53,9 +53,9 @@ P2 只接通一条只读链路，边界都放在主进程里：
 | 模型接入 | `pi-ai` 与 `pi-agent-core` 1.4.0，经主进程适配器调用；运行未启动时不发请求                                                                           |
 | 只读工具 | `read_file`（单次 64 KiB）、`list_directory`（200 条目）、`search_in_files`（深度 16、1000 文件、每文件 64 KiB、合计 4 MiB、100 命中）；路径先过预检 |
 | 外发材料 | 运行前勾选可外发文件；主进程绑定相对路径、字节数与 SHA-256。未列入清单返回 `MATERIAL_NOT_ALLOWED`，清单文件内容变化返回 `CONTENT_NOT_ALLOWED` 并停止 |
-| 运行时   | 主进程管理 Run 生命周期，append-only 事件日志；停止先等收敛，宽限期（默认 5 秒）到期由主进程强制结束并记固定失败码（含 `ADAPTER_DISCONNECTED`）       |
-| 会话历史 | 每次终态把任务与有界结果摘要写入 session state v6，每会话最多 20 条，重启后恢复；主进程日志只存摘要                                                   |
-| 授权     | 每次运行签发一次性 Grant，绑定任务内容、会话、revision、发起窗口与材料清单，超时或内容变更后重新授权                                                  |
+| 运行时   | 主进程管理 Run 生命周期，append-only 事件日志；停止先等收敛，宽限期（默认 5 秒）到期由主进程强制结束并记固定失败码（含 `ADAPTER_DISCONNECTED`）      |
+| 会话历史 | 每次终态把任务与有界结果摘要写入 session state v6，每会话最多 20 条，重启后恢复；主进程日志只存摘要                                                  |
+| 授权     | 每次运行签发一次性 Grant，绑定任务内容、会话、revision、发起窗口与材料清单，超时或内容变更后重新授权                                                 |
 | 凭证     | 只在主进程内从环境变量读取后交给适配器；不进仓库，不写日志，事件与错误码里也不出现                                                                   |
 | 未接通   | 写入、命令、通用文件系统 IPC、Runtime 子进程                                                                                                         |
 
@@ -101,14 +101,14 @@ pnpm dev
 
 质量门禁按证据层级分开跑，不要用一层的结果代替另一层：
 
-| 命令                     | 检查什么                                                                                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `pnpm verify:repository` | 仓库规范化：公开身份与旧路径、绝对 `file://` 链接、210 声明必须限定为 Prototype Tests、README 必须链到 `apps/desktop` |
-| `pnpm test:contract`     | 共享契约、路径遏制、IPC 与 sender 校验、设置存储与 Tabs                                                               |
-| `pnpm test:prototype`    | 冻结的 M1 模拟器 210 项用例，属 Prototype Tests 证据，不是 Electron 证据                                              |
-| `pnpm test:e2e`          | Playwright 启动真实 Electron，跨 main → preload → renderer，并校验 fixture 未被改动                                   |
+| 命令                       | 检查什么                                                                                                              |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `pnpm verify:repository`   | 仓库规范化：公开身份与旧路径、绝对 `file://` 链接、210 声明必须限定为 Prototype Tests、README 必须链到 `apps/desktop` |
+| `pnpm test:contract`       | 共享契约、路径遏制、IPC 与 sender 校验、设置存储与 Tabs                                                               |
+| `pnpm test:prototype`      | 冻结的 M1 模拟器 210 项用例，属 Prototype Tests 证据，不是 Electron 证据                                              |
+| `pnpm test:e2e`            | Playwright 启动真实 Electron，跨 main → preload → renderer，并校验 fixture 未被改动                                   |
 | `pnpm acceptance:packaged` | 重新打包并启动 `@pioneer-desktop.exe`，经 `PIONEER_ACCEPTANCE=1` 跑通一次只读运行；不进 `pnpm check`                  |
-| `pnpm check`             | 依次跑格式、lint、类型、上述三层测试与 package smoke                                                                  |
+| `pnpm check`               | 依次跑 design:check、格式、lint、类型、上述三层测试与 package smoke                                                   |
 
 最近一次完整门禁记录在 2026-10-27（分支 `codex/issue13-remaining`，见 [Issue #13 验证记录](docs/testing/issue13-verification.md)）：契约 348/348（36 文件）、冻结原型 210/210（Prototype Tests）、真实 Electron 27/27、仓库规范化 6/6。数字随提交变化，引用时带上日期与版本。
 

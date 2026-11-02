@@ -6,6 +6,19 @@ import {
   SESSION_IPC_CHANNELS,
 } from '../shared/contracts/session-ipc';
 
+/** One project as the package scanner saw it. */
+export interface PackagedAcceptanceProject {
+  id: string;
+  name: string;
+  absolutePath: string;
+}
+
+/** One workspace-scan warning as the package scanner saw it. */
+export interface PackagedAcceptanceWarning {
+  code: string;
+  path: string;
+}
+
 /** Facts the main process knows before it builds the report. */
 interface PackagedAcceptanceStartupFacts {
   isPackaged: boolean;
@@ -29,8 +42,8 @@ export interface PackagedAcceptanceReport extends PackagedAcceptanceStartupFacts
   schemaVersion: 1;
   reportedAt: string;
   workspaceRoot: string | null;
-  projects: { id: string; name: string; absolutePath: string }[];
-  warnings: { code: string; path: string }[];
+  projects: PackagedAcceptanceProject[];
+  warnings: PackagedAcceptanceWarning[];
   adapterKind: 'controlled' | 'pi';
   adapterAvailable: boolean;
   modelName: string | null;
@@ -55,8 +68,8 @@ export function acceptanceChannels(): string[] {
 export interface PackagedAcceptanceReportInput extends PackagedAcceptanceStartupFacts {
   catalog: {
     rootPath: string | null;
-    projects: { id: string; name: string; absolutePath: string }[];
-    warnings: { code: string; path: string }[];
+    projects: readonly PackagedAcceptanceProject[];
+    warnings: readonly PackagedAcceptanceWarning[];
   };
   runHost: {
     adapterKind: 'controlled' | 'pi';
@@ -82,15 +95,8 @@ export function buildPackagedAcceptanceReport(
     userDataRoot: input.userDataRoot,
     executablePath: input.executablePath,
     workspaceRoot: input.catalog.rootPath,
-    projects: input.catalog.projects.map((project) => ({
-      id: project.id,
-      name: project.name,
-      absolutePath: project.absolutePath,
-    })),
-    warnings: input.catalog.warnings.map((warning) => ({
-      code: warning.code,
-      path: warning.path,
-    })),
+    projects: input.catalog.projects.map((project) => ({ ...project })),
+    warnings: input.catalog.warnings.map((warning) => ({ ...warning })),
     adapterKind: input.runHost.adapterKind,
     adapterAvailable: input.runHost.adapterAvailable,
     modelName: input.runHost.modelName,

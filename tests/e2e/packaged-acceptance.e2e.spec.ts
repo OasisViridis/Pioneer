@@ -59,6 +59,15 @@ const packagedExecutablePath = path.join(
   '@pioneer-desktop-win32-x64',
   '@pioneer-desktop.exe',
 );
+const packagedAsarPath = path.join(
+  repositoryRoot,
+  'apps',
+  'desktop',
+  'out',
+  '@pioneer-desktop-win32-x64',
+  'resources',
+  'app.asar',
+);
 const fixtureRoot = path.join(
   repositoryRoot,
   'tests',
@@ -362,6 +371,40 @@ const findPackagedWindow = (browser: Browser): Promise<Page> =>
 /** A journal read that landed on a half-written line; the caller retries. */
 class PartialJournalRead extends Error {}
 
+/** The startup facts this spec relies on must be present and well typed. */
+const parseStartupReport = (parsed: unknown): PackagedAcceptanceReport => {
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw new Error('WORKSPACE_NOT_READY: the startup report is not an object');
+  }
+  const report = parsed as Partial<PackagedAcceptanceReport>;
+  if (
+    report.kind !== 'pioneer-packaged-acceptance-startup' ||
+    report.schemaVersion !== 1 ||
+    typeof report.isPackaged !== 'boolean' ||
+    typeof report.processId !== 'number' ||
+    typeof report.adapterKind !== 'string' ||
+    typeof report.adapterAvailable !== 'boolean' ||
+    typeof report.executablePath !== 'string' ||
+    typeof report.userDataRoot !== 'string' ||
+    !Array.isArray(report.projects) ||
+    !Array.isArray(report.warnings) ||
+    !Array.isArray(report.channels) ||
+    report.projects.some(
+      (project) =>
+        typeof project !== 'object' ||
+        typeof project.id !== 'string' ||
+        typeof project.name !== 'string' ||
+        typeof project.absolutePath !== 'string',
+    ) ||
+    report.channels.some((channel) => typeof channel !== 'string')
+  ) {
+    throw new Error(
+      'WORKSPACE_NOT_READY: the startup report does not match the expected shape',
+    );
+  }
+  return report as PackagedAcceptanceReport;
+};
+
 const readJournalRecords = (journalPath: string): RunJournalRecord[] => {
   const content = readFileSync(journalPath, 'utf-8');
   const records: RunJournalRecord[] = [];
@@ -413,9 +456,7 @@ const readStartupReport = (
       if (!existsSync(reportPath)) return null;
       try {
         const parsed: unknown = JSON.parse(readFileSync(reportPath, 'utf-8'));
-        return typeof parsed === 'object' && parsed !== null
-          ? (parsed as PackagedAcceptanceReport)
-          : null;
+        return parseStartupReport(parsed);
       } catch {
         return null;
       }
@@ -456,6 +497,47 @@ const readReadmeEvidence = (): ReadmeEvidence => {
   };
 };
 
+/**
+ * A fresh profile must commit exactly one accepted run and one terminal, for
+ * the project under test, with the run id the visible panel showed.
+ */
+const assertJournalRecords = (
+  records: RunJournalRecord[],
+  alphaProjectId: string,
+  transcript: string,
+): RunJournalTerminal => {
+  const accepts = records.filter(
+    (record): record is RunJournalAccept => record.kind === 'accept',
+  );
+  const terminals = records.filter(
+    (record): record is RunJournalTerminal => record.kind === 'terminal',
+  );
+  const tombstones = records.filter((record) => record.kind === 'tombstone');
+  expect(
+    accepts,
+    'a fresh profile must contain exactly one accepted run',
+  ).toHaveLength(1);
+  expect(terminals, 'the accepted run must commit one terminal').toHaveLength(
+    1,
+  );
+  expect(tombstones, 'no run may be left as host_restarted').toHaveLength(0);
+
+  const [accepted] = accepts;
+  const [terminal] = terminals;
+  if (accepted === undefined || terminal === undefined) {
+    throw new Error('JOURNAL_MISMATCH: accept or terminal record is missing');
+  }
+  expect(accepted.adapter).toBe('controlled');
+  expect(accepted.projectId).toBe(alphaProjectId);
+  expect(terminal.runId).toBe(accepted.runId);
+  expect(terminal.status).toBe('completed');
+  expect(
+    transcript,
+    'the run-log panel must show the run id the journal recorded',
+  ).toContain(terminal.runId);
+  return terminal;
+};
+
 test('the packaged build completes one read-only run through the acceptance seam', async ({}, testInfo) => {
   expect(
     existsSync(packagedExecutablePath),
@@ -475,7 +557,12 @@ test('the packaged build completes one read-only run through the acceptance seam
     executableMtimeMs,
     'STALE_EXECUTABLE: the packaged executable predates this run, so the build did not produce it',
   ).toBeGreaterThan(runStartedAtMs);
+  expect(
+    existsSync(packagedAsarPath),
+    `missing packaged asar: ${packagedAsarPath}`,
+  ).toBe(true);
   const executableSha256 = await sha256File(packagedExecutablePath);
+  const appAsarSha256 = await sha256File(packagedAsarPath);
   const readme = readReadmeEvidence();
   const beforeHash = await captureFixtureHash(fixtureRoot);
 
@@ -615,10 +702,11 @@ test('the packaged build completes one read-only run through the acceptance seam
       ).toContain(line);
     }
 
-    // Two distinct element frames: the run controls with the terminal status,
-    // then the run-log panel with the tool exchange.
+    // Two distinct frames: the window with the run controls and terminal
+    // status in view, then the run-log panel with the tool exchange.
     const runControls = window.locator('details.run-log');
-    await runControls.screenshot({ path: statusScreenshotPath });
+    await runControls.scrollIntoViewIfNeeded();
+    await window.screenshot({ path: statusScreenshotPath });
     await runLogPanel.screenshot({ path: eventsScreenshotPath });
     await testInfo.attach('packaged-run-status.png', {
       path: statusScreenshotPath,
@@ -630,36 +718,7 @@ test('the packaged build completes one read-only run through the acceptance seam
     });
 
     journal = await waitForJournal(journalPath);
-    const accepts = journal.filter(
-      (record): record is RunJournalAccept => record.kind === 'accept',
-    );
-    const terminals = journal.filter(
-      (record): record is RunJournalTerminal => record.kind === 'terminal',
-    );
-    const tombstones = journal.filter((record) => record.kind === 'tombstone');
-    expect(
-      accepts,
-      'a fresh profile must contain exactly one accepted run',
-    ).toHaveLength(1);
-    expect(terminals, 'the accepted run must commit one terminal').toHaveLength(
-      1,
-    );
-    expect(tombstones, 'no run may be left as host_restarted').toHaveLength(0);
-
-    const [accepted] = accepts;
-    const [terminal] = terminals;
-    if (accepted === undefined || terminal === undefined) {
-      throw new Error('JOURNAL_MISMATCH: accept or terminal record is missing');
-    }
-    expect(accepted.adapter).toBe('controlled');
-    expect(accepted.projectId).toBe(alphaProject.id);
-    expect(terminal.runId).toBe(accepted.runId);
-    expect(terminal.status).toBe('completed');
-    // The panel a person reads must name the same run the journal committed.
-    expect(
-      transcript,
-      'the run-log panel must show the run id the journal recorded',
-    ).toContain(terminal.runId);
+    assertJournalRecords(journal, alphaProject.id, transcript);
 
     await copyFile(journalPath, path.join(evidenceFilesPath, 'journal.jsonl'));
     await copyFile(
@@ -710,6 +769,7 @@ test('the packaged build completes one read-only run through the acceptance seam
         path: packagedExecutablePath,
         sha256: executableSha256,
         mtimeMs: executableMtimeMs,
+        appAsar: { path: packagedAsarPath, sha256: appAsarSha256 },
       },
       launch: {
         processId: app?.child.pid ?? null,

@@ -6,6 +6,7 @@
  * proof.
  */
 import { execFileSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -42,8 +43,11 @@ const run = {
   commit,
   dirty,
 };
-const temporaryRunPath = `${runPath}.tmp`;
-writeFileSync(temporaryRunPath, `${JSON.stringify(run, null, 2)}\n`, 'utf-8');
+const temporaryRunPath = `${runPath}.${randomUUID()}.tmp`;
+writeFileSync(temporaryRunPath, `${JSON.stringify(run, null, 2)}\n`, {
+  encoding: 'utf-8',
+  flag: 'wx',
+});
 renameSync(temporaryRunPath, runPath);
 console.log(
   `[acceptance] cleared previous evidence and package output; run started at ${run.startedAt}`,
