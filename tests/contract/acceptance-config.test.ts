@@ -388,4 +388,75 @@ describe('packaged acceptance launch seam', () => {
       'PIONEER_ACCEPTANCE_REPORT and PIONEER_ACCEPTANCE_RUN_SCRIPT must differ',
     );
   });
+
+  it('keeps the evidence directory disjoint from the isolated profile', async () => {
+    const fixture = await createAcceptanceFixture();
+
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_USER_DATA: fixture.container,
+      }),
+    ).toThrow('must be disjoint');
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_EVIDENCE: fixture.userDataPath,
+      }),
+    ).toThrow('PIONEER_ACCEPTANCE_EVIDENCE must be disjoint');
+  });
+
+  it('refuses an evidence directory that overlaps the application profile', async () => {
+    const fixture = await createAcceptanceFixture();
+    const applicationProfile = join(fixture.container, 'application-profile');
+    await mkdir(applicationProfile, { recursive: true });
+    const profileScript = join(applicationProfile, 'run-script.json');
+    await writeFile(
+      profileScript,
+      JSON.stringify({ steps: [{ action: 'complete' }] }),
+      'utf-8',
+    );
+    const setPath = vi.fn();
+    const app = {
+      isPackaged: true,
+      getPath: () => applicationProfile,
+      setPath,
+    };
+
+    expect(() =>
+      applyPackagedAcceptanceConfig(app, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_EVIDENCE: applicationProfile,
+        PIONEER_ACCEPTANCE_REPORT: join(applicationProfile, 'startup.json'),
+        PIONEER_ACCEPTANCE_RUN_SCRIPT: profileScript,
+      }),
+    ).toThrow(
+      'PIONEER_ACCEPTANCE_EVIDENCE must not overlap the application profile directory',
+    );
+    expect(setPath).not.toHaveBeenCalled();
+  });
+
+  it('normalises Windows case and trailing-dot aliases', async () => {
+    const fixture = await createAcceptanceFixture();
+
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_REPORT: join(fixture.evidencePath, 'startup.json.'),
+      }),
+    ).toThrow('must not end with a dot or a space');
+
+    if (process.platform !== 'win32') return;
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_REPORT: join(
+          fixture.evidencePath,
+          'RUN-SCRIPT.json',
+        ),
+      }),
+    ).toThrow(
+      'PIONEER_ACCEPTANCE_REPORT and PIONEER_ACCEPTANCE_RUN_SCRIPT must differ',
+    );
+  });
 });

@@ -87,7 +87,14 @@ export function requireAbsoluteOutputFile(
     });
   }
 
-  const candidate = join(canonicalParent, basename(value));
+  const leafName = basename(value);
+  // Windows silently strips trailing dots and spaces from names, so such a
+  // spelling could alias another file the collision check never compared.
+  if (process.platform === 'win32' && /[ .]$/u.test(leafName)) {
+    throw new Error(`${variableName} must not end with a dot or a space`);
+  }
+
+  const candidate = join(canonicalParent, leafName);
   let leafInformation: ReturnType<typeof lstatSync> | null = null;
   try {
     leafInformation = lstatSync(candidate);
@@ -125,6 +132,14 @@ export function canonicalizeExistingPath(value: string): string {
       current = parent;
     }
   }
+}
+
+/** True when both paths name the same location under the host's rules. */
+export function pathsEqual(firstPath: string, secondPath: string): boolean {
+  return (
+    isPathInsideOrEqual(firstPath, secondPath) &&
+    isPathInsideOrEqual(secondPath, firstPath)
+  );
 }
 
 /** True when either path is inside or equal to the other. */

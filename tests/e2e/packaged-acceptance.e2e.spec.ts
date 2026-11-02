@@ -20,7 +20,10 @@ import {
 } from '@playwright/test';
 
 import type { PackagedAcceptanceConfig } from '../../apps/desktop/src/main/acceptance-config';
-import { canonicalizeExistingPath } from '../../apps/desktop/src/main/launch-paths';
+import {
+  canonicalizeExistingPath,
+  pathsEqual,
+} from '../../apps/desktop/src/main/launch-paths';
 import {
   acceptanceChannels,
   type PackagedAcceptanceReport,
@@ -96,28 +99,18 @@ const runTimeoutMs = 90_000;
 
 const expectedChannels = acceptanceChannels().sort();
 
-/** Development-only variables must not leak into the packaged launch. */
-const inheritedLaunchVariables = [
-  'ELECTRON_RUN_AS_NODE',
-  'PIONEER_E2E',
-  'PIONEER_E2E_ROOT',
-  'PIONEER_E2E_USER_DATA',
-  'PIONEER_E2E_RUN_ADAPTER',
-  'PIONEER_E2E_RUN_SCRIPT',
-  'PIONEER_E2E_PICKER_MODE',
-  'PIONEER_E2E_PICKER_ROOT',
-  'PIONEER_E2E_PICKER_DELAY_MS',
-  'PIONEER_E2E_SESSION_SAVE_DELAY_MS',
-  'PIONEER_E2E_REJECT_SAVE_ONCE',
-  'PIONEER_E2E_RESCAN_DELAY_MS',
-  'PIONEER_E2E_RESCAN_FAIL_ONCE',
-  'PIONEER_PI_PROBE_OUT',
-  'PIONEER_PI_PROBE_EXIT',
-  'PIONEER_PI_PROVIDER_ID',
-  'PIONEER_PI_MODEL_ID',
-  'PIONEER_PI_ENDPOINT',
-  'PIONEER_PI_API_KEY_ENV',
-] as const;
+/**
+ * Development-only variables must not leak into the packaged launch. Any
+ * PIONEER_ variable is dropped, so a future seam cannot be inherited just
+ * because this list went stale.
+ */
+const dropInheritedVariables = (environment: NodeJS.ProcessEnv): void => {
+  for (const name of Object.keys(environment)) {
+    if (name === 'ELECTRON_RUN_AS_NODE' || name.startsWith('PIONEER_')) {
+      Reflect.deleteProperty(environment, name);
+    }
+  }
+};
 
 const readOnlyRunScript = {
   steps: [
@@ -199,9 +192,7 @@ const createAcceptanceEnvironment = (
   paths: PackagedAcceptanceConfig,
 ): NodeJS.ProcessEnv => {
   const environment: NodeJS.ProcessEnv = { ...process.env };
-  for (const variable of inheritedLaunchVariables) {
-    Reflect.deleteProperty(environment, variable);
-  }
+  dropInheritedVariables(environment);
   environment.PIONEER_ACCEPTANCE = '1';
   environment.PIONEER_ACCEPTANCE_WORKSPACE = paths.workspacePath;
   environment.PIONEER_ACCEPTANCE_USER_DATA = paths.userDataPath;
@@ -472,9 +463,13 @@ const expectSamePath = (
   if (actual === null) {
     throw new Error(`${label}: expected ${expected} but the path was null`);
   }
-  expect(canonicalizeExistingPath(actual).toLowerCase(), label).toBe(
-    canonicalizeExistingPath(expected).toLowerCase(),
-  );
+  expect(
+    pathsEqual(
+      canonicalizeExistingPath(actual),
+      canonicalizeExistingPath(expected),
+    ),
+    label,
+  ).toBe(true);
 };
 
 interface ReadmeEvidence {

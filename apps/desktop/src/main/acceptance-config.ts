@@ -1,6 +1,7 @@
 import {
   canonicalizeExistingPath,
   isPathInsideOrEqual,
+  pathsEqual,
   pathsOverlap,
   requireAbsoluteOutputFile,
   requireExistingAbsoluteDirectory,
@@ -98,6 +99,11 @@ export function resolvePackagedAcceptanceConfig(
       'PIONEER_ACCEPTANCE_EVIDENCE must be disjoint from PIONEER_ACCEPTANCE_WORKSPACE',
     );
   }
+  if (pathsOverlap(userDataPath, evidencePath)) {
+    throw new Error(
+      'PIONEER_ACCEPTANCE_EVIDENCE must be disjoint from PIONEER_ACCEPTANCE_USER_DATA',
+    );
+  }
 
   const reportPath = requireEvidenceFile(
     'PIONEER_ACCEPTANCE_REPORT',
@@ -109,10 +115,7 @@ export function resolvePackagedAcceptanceConfig(
     evidencePath,
     environment.PIONEER_ACCEPTANCE_RUN_SCRIPT,
   );
-  if (
-    isPathInsideOrEqual(reportPath, runScriptPath) &&
-    isPathInsideOrEqual(runScriptPath, reportPath)
-  ) {
+  if (pathsEqual(reportPath, runScriptPath)) {
     throw new Error(
       'PIONEER_ACCEPTANCE_REPORT and PIONEER_ACCEPTANCE_RUN_SCRIPT must differ',
     );
@@ -145,6 +148,11 @@ export function applyPackagedAcceptanceConfig(
   if (pathsOverlap(applicationProfile, userDataPath)) {
     throw new Error(
       'PIONEER_ACCEPTANCE_USER_DATA must not overlap the application profile directory',
+    );
+  }
+  if (pathsOverlap(applicationProfile, config.evidencePath)) {
+    throw new Error(
+      'PIONEER_ACCEPTANCE_EVIDENCE must not overlap the application profile directory',
     );
   }
 
