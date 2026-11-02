@@ -57,7 +57,7 @@ const launchStartedAt = new Date().toISOString();
  * selected and the window exists, so it describes what this launch assembled.
  * Every other launch writes nothing.
  */
-async function writeAcceptanceReportIfConfigured(dependencies: {
+async function writeAcceptanceReport(dependencies: {
   config: PackagedAcceptanceConfig;
   catalog: ReturnType<CatalogService['getCurrentCatalog']>;
   runHost: AssembledRunHost;
@@ -456,7 +456,7 @@ void app.whenReady().then(async () => {
   appLifecycle.markReady();
 
   if (acceptanceConfig !== null) {
-    await writeAcceptanceReportIfConfigured({
+    await writeAcceptanceReport({
       config: acceptanceConfig,
       catalog: catalogService.getCurrentCatalog(),
       runHost: assembledRunHost,

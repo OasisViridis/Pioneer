@@ -95,8 +95,15 @@ export function buildPackagedAcceptanceReport(
     userDataRoot: input.userDataRoot,
     executablePath: input.executablePath,
     workspaceRoot: input.catalog.rootPath,
-    projects: input.catalog.projects.map((project) => ({ ...project })),
-    warnings: input.catalog.warnings.map((warning) => ({ ...warning })),
+    projects: input.catalog.projects.map((project) => ({
+      id: project.id,
+      name: project.name,
+      absolutePath: project.absolutePath,
+    })),
+    warnings: input.catalog.warnings.map((warning) => ({
+      code: warning.code,
+      path: warning.path,
+    })),
     adapterKind: input.runHost.adapterKind,
     adapterAvailable: input.runHost.adapterAvailable,
     modelName: input.runHost.modelName,

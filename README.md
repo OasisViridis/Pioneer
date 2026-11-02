@@ -112,7 +112,7 @@ pnpm dev
 
 最近一次完整门禁记录在 2026-11-02（分支 `feat/p3-packaged-acceptance`，见 [Issue #53 验证记录](docs/testing/issue53-packaged-acceptance.md)）：契约 430/430（42 文件）、冻结原型 210/210（Prototype Tests）、真实 Electron 39/39、仓库规范化 6/6。数字随提交变化，引用时带上日期与版本。
 
-`test:e2e` 的 `testMatch` 列了 12 个 spec；`design-visual`、`hazel-design`、`session-persistence`、`window-chrome` 与打包验收用的 `packaged-acceptance` 不在白名单内，因此不进 `pnpm check`，也不进 CI。
+`test:e2e` 的 `testMatch` 列了 12 个 spec；`hazel-design`、`session-persistence`、`window-chrome` 与打包验收用的 `packaged-acceptance` 不在白名单内，因此不进 `pnpm check`；其中 `design-visual` 由独立的视觉基线 job 运行。
 
 ## 目录结构
 
@@ -137,7 +137,7 @@ tests/
 | 里程碑与阶段状态                 | [ROADMAP](themasterplan/ROADMAP.md)                                                 |
 | 当前施工前沿与后续票             | [Wayfinder 开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)   |
 | 长期交付范围与验收条件           | [长期开发规格](docs/specs/2026-10-24-pioneer-long-term-development-spec.md)         |
-| 三层测试的证据边界               | [TEST_INFRA](TEST_INFRA.md)                                                         |
+| 四层测试的证据边界               | [TEST_INFRA](TEST_INFRA.md)                                                         |
 | 术语：Session、Run、Grant、收敛  | [GLOSSARY](GLOSSARY.md)                                                             |
 | 课题定位（题目、双主线、时间线） | [选题收敛说明](选题收敛说明.md)                                                     |
 | 产品形态与美学                   | [产品定义与美学纲领](产品定义与美学纲领.md)（v2.1，题名已同步 2026-10-08 正式题目） |

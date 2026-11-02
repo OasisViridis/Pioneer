@@ -1,6 +1,7 @@
-import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { writeFileAtomic } from './atomic-file';
 
 import { RunJournal, type RunJournalStore } from './harness/run-journal';
 import {
@@ -22,8 +23,8 @@ import {
 } from './harness/pi-adapter';
 
 /**
- * Atomic whole-file journal storage: a uniquely named temporary sibling plus a
- * rename, cleaned up on failure, so two writers can never share one temp file.
+ * Atomic whole-file journal storage on top of the shared writer, so two writers
+ * can never share one temporary file and a failed write leaves no fragment.
  */
 export function createFileJournalStore(userDataPath: string): RunJournalStore {
   const directory = join(userDataPath, 'runs');
@@ -38,14 +39,7 @@ export function createFileJournalStore(userDataPath: string): RunJournalStore {
     },
     save: async (content: string) => {
       await mkdir(directory, { recursive: true });
-      const temp = join(directory, `journal.${randomUUID()}.tmp`);
-      try {
-        await writeFile(temp, content, { encoding: 'utf-8', flag: 'wx' });
-        await rename(temp, file);
-      } catch (error) {
-        await rm(temp, { force: true }).catch(() => undefined);
-        throw error;
-      }
+      await writeFileAtomic(file, content);
     },
   };
 }

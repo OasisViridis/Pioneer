@@ -1,11 +1,5 @@
-import {
-  mkdir,
-  mkdtemp,
-  rm,
-  symlink,
-  unlink,
-  writeFile,
-} from 'node:fs/promises';
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -67,20 +61,19 @@ function validEnvironment(
   };
 }
 
-const supportsSymlinks = async (): Promise<boolean> => {
-  const directory = await mkdtemp(join(tmpdir(), 'pioneer-symlink-probe-'));
-  temporaryDirectories.push(directory);
-  const target = join(directory, 'target.txt');
-  const link = join(directory, 'link.txt');
-  await writeFile(target, 'probe', 'utf-8');
+const symlinksAvailable = (() => {
+  const directory = mkdtempSync(join(tmpdir(), 'pioneer-symlink-probe-'));
   try {
-    await symlink(target, link, 'file');
-    await unlink(link);
+    const target = join(directory, 'target.txt');
+    writeFileSync(target, 'probe', 'utf-8');
+    symlinkSync(target, join(directory, 'link.txt'), 'file');
     return true;
   } catch {
     return false;
+  } finally {
+    rmSync(directory, { force: true, recursive: true });
   }
-};
+})();
 
 afterEach(async () => {
   await Promise.all(
@@ -301,47 +294,49 @@ describe('packaged acceptance launch seam', () => {
     expect(setPath).not.toHaveBeenCalled();
   });
 
-  it('refuses an output leaf that is a symbolic link, wherever it points', async () => {
-    if (!(await supportsSymlinks())) return;
-    const fixture = await createAcceptanceFixture();
-    const outsideFile = join(fixture.container, 'outside.txt');
-    await writeFile(outsideFile, 'outside the workspace', 'utf-8');
-    const workspaceFile = join(fixture.workspacePath, 'inside.txt');
-    await writeFile(workspaceFile, 'inside the workspace', 'utf-8');
+  it.skipIf(!symlinksAvailable)(
+    'refuses an output leaf that is a symbolic link, wherever it points',
+    async () => {
+      const fixture = await createAcceptanceFixture();
+      const outsideFile = join(fixture.container, 'outside.txt');
+      await writeFile(outsideFile, 'outside the workspace', 'utf-8');
+      const workspaceFile = join(fixture.workspacePath, 'inside.txt');
+      await writeFile(workspaceFile, 'inside the workspace', 'utf-8');
 
-    // A link into the workspace and a link somewhere else are both refused:
-    // resolving either one would let the report overwrite that file.
-    for (const target of [workspaceFile, outsideFile]) {
-      const reportLink = join(
-        fixture.evidencePath,
-        `startup-${String(target.length)}.json`,
-      );
-      await symlink(target, reportLink, 'file');
+      // A link into the workspace and a link somewhere else are both refused:
+      // resolving either one would let the report overwrite that file.
+      for (const target of [workspaceFile, outsideFile]) {
+        const reportLink = join(
+          fixture.evidencePath,
+          `startup-${String(target.length)}.json`,
+        );
+        await symlink(target, reportLink, 'file');
+        expect(() =>
+          resolvePackagedAcceptanceConfig(true, {
+            ...validEnvironment(fixture),
+            PIONEER_ACCEPTANCE_REPORT: reportLink,
+          }),
+        ).toThrow(
+          'PIONEER_ACCEPTANCE_REPORT must not be an existing symbolic link',
+        );
+      }
+
+      const scriptLink = join(fixture.evidencePath, 'run-link.json');
+      await symlink(outsideFile, scriptLink, 'file');
       expect(() =>
         resolvePackagedAcceptanceConfig(true, {
           ...validEnvironment(fixture),
-          PIONEER_ACCEPTANCE_REPORT: reportLink,
+          PIONEER_ACCEPTANCE_REPORT: join(
+            fixture.evidencePath,
+            'script-case.json',
+          ),
+          PIONEER_ACCEPTANCE_RUN_SCRIPT: scriptLink,
         }),
       ).toThrow(
-        'PIONEER_ACCEPTANCE_REPORT must not be an existing symbolic link',
+        'PIONEER_ACCEPTANCE_RUN_SCRIPT must not be an existing symbolic link',
       );
-    }
-
-    const scriptLink = join(fixture.evidencePath, 'run-link.json');
-    await symlink(outsideFile, scriptLink, 'file');
-    expect(() =>
-      resolvePackagedAcceptanceConfig(true, {
-        ...validEnvironment(fixture),
-        PIONEER_ACCEPTANCE_REPORT: join(
-          fixture.evidencePath,
-          'script-case.json',
-        ),
-        PIONEER_ACCEPTANCE_RUN_SCRIPT: scriptLink,
-      }),
-    ).toThrow(
-      'PIONEER_ACCEPTANCE_RUN_SCRIPT must not be an existing symbolic link',
-    );
-  });
+    },
+  );
 
   it('rejects an existing output leaf that is a directory', async () => {
     const fixture = await createAcceptanceFixture();
@@ -436,27 +431,32 @@ describe('packaged acceptance launch seam', () => {
     expect(setPath).not.toHaveBeenCalled();
   });
 
-  it('normalises Windows case and trailing-dot aliases', async () => {
-    if (process.platform !== 'win32') return;
-    const fixture = await createAcceptanceFixture();
+  it.skipIf(process.platform !== 'win32')(
+    'normalises Windows case and trailing-dot aliases',
+    async () => {
+      const fixture = await createAcceptanceFixture();
 
-    expect(() =>
-      resolvePackagedAcceptanceConfig(true, {
-        ...validEnvironment(fixture),
-        PIONEER_ACCEPTANCE_REPORT: join(fixture.evidencePath, 'startup.json.'),
-      }),
-    ).toThrow('must not end with a dot or a space');
+      expect(() =>
+        resolvePackagedAcceptanceConfig(true, {
+          ...validEnvironment(fixture),
+          PIONEER_ACCEPTANCE_REPORT: join(
+            fixture.evidencePath,
+            'startup.json.',
+          ),
+        }),
+      ).toThrow('must not end with a dot or a space');
 
-    expect(() =>
-      resolvePackagedAcceptanceConfig(true, {
-        ...validEnvironment(fixture),
-        PIONEER_ACCEPTANCE_REPORT: join(
-          fixture.evidencePath,
-          'RUN-SCRIPT.json',
-        ),
-      }),
-    ).toThrow(
-      'PIONEER_ACCEPTANCE_REPORT and PIONEER_ACCEPTANCE_RUN_SCRIPT must differ',
-    );
-  });
+      expect(() =>
+        resolvePackagedAcceptanceConfig(true, {
+          ...validEnvironment(fixture),
+          PIONEER_ACCEPTANCE_REPORT: join(
+            fixture.evidencePath,
+            'RUN-SCRIPT.json',
+          ),
+        }),
+      ).toThrow(
+        'PIONEER_ACCEPTANCE_REPORT and PIONEER_ACCEPTANCE_RUN_SCRIPT must differ',
+      );
+    },
+  );
 });

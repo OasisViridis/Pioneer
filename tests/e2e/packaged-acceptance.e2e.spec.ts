@@ -447,12 +447,14 @@ const readStartupReport = (
     timeoutMs: cdpStartupTimeoutMs,
     probe: () => {
       if (!existsSync(reportPath)) return null;
+      let parsed: unknown;
       try {
-        const parsed: unknown = JSON.parse(readFileSync(reportPath, 'utf-8'));
-        return parseStartupReport(parsed);
+        parsed = JSON.parse(readFileSync(reportPath, 'utf-8'));
       } catch {
+        // A half-written report is retried; a malformed shape is reported.
         return null;
       }
+      return parseStartupReport(parsed);
     },
   });
 

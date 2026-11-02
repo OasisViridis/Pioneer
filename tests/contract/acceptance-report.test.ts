@@ -77,7 +77,9 @@ describe('packaged acceptance startup report', () => {
       modelName: null,
       channels: acceptanceChannels(),
     });
-    expect(report.channels).not.toBe(acceptanceChannels());
+    // The builder must copy the channel list, not share the source array.
+    report.channels.push('mutated:after-build');
+    expect(acceptanceChannels()).not.toContain('mutated:after-build');
   });
 
   it('writes the report through a temporary sibling and leaves no temp file', async () => {
