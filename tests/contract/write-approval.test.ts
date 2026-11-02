@@ -1264,6 +1264,18 @@ describe('write outcomes', () => {
     });
   });
 
+  it('rejects an intent that describes a different pre-image', () => {
+    const outcomes = summarizeWriteOutcomes(approval, [
+      record('intent', 'src/a.ts', { beforeSha256: sha256Of('stale') }),
+      record('applied', 'src/a.ts'),
+    ]);
+    expect(outcomes[0]).toEqual({
+      path: 'src/a.ts',
+      status: 'verification_failed',
+      code: 'VERIFY_FAILED',
+    });
+  });
+
   it('uses the last journal record for a path', () => {
     const outcomes = summarizeWriteOutcomes(approval, [
       record('applied', 'src/a.ts'),

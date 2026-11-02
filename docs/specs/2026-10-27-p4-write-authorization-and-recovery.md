@@ -234,7 +234,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 恢复只处理该 Run 的变更，逐个目标判定。判定以**该路径的最后一条日志记录**为准，而不是"历史上出现过 applied"：
 
 1. 没有记录 → `outOfScope`。最后一条是 `failed` 且此前没有 `applied` → 同样 `outOfScope`（确实没写成，没有可撤销的写入）。
-2. 最后一条是 `applied`：该路径此前必须有 `intent`（且 `intent.at` 不晚于 `applied.at`），记录必须是 `verified`、`afterSha256` 等于本批准的 `after`、`observedSha256` 等于 `afterSha256`，否则 `conflict`（写入是否成立无法证明）。
+2. 最后一条是 `applied`：该路径此前必须有 `intent`，`intent.at` 不晚于 `applied.at`，且 `intent.beforeSha256` 等于本批准的 `before`，记录必须是 `verified`、`afterSha256` 等于本批准的 `after`、`observedSha256` 等于 `afterSha256`，否则 `conflict`（写入是否成立无法证明）。
 3. 最后一条是 `recovery`：只有 `observedSha256` 等于 `before`、此前存在**已证明的** `applied`、并且当前磁盘仍等于 `before` 时才是 `already_restored`；孤立的恢复记录、哈希不符或恢复后文件又被改动，一律 `conflict`，不重放、不改写。
 4. 最后一条是 `intent`，或 `applied` 之后又出现 `failed`：真实状态未知（可能已写、可能没写），一律 `conflict`，留给人工。
 5. 当前观察结果等于 `before`（`unchanged`）→ `already_restored`，不做任何事。
@@ -245,7 +245,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 ### 5.3 幂等
 
-恢复计划是纯函数，可重复计算。恢复成功后当前内容等于 `before`，再次计算得到 `already_restored`，不会重复写、重复撤销或再次执行任务。恢复失败时日志保留可诊断状态，不用旧快照覆盖来伪造成功。执行级的"第二次恢复请求不重复写入"由 #20 用恢复请求编号验证，本票只保证计划层的判定是幂等的。
+恢复计划是纯函数，可重复计算。恢复成功后内容回到 `before`；若写入时记录了文件身份，写回后文件对象可能已变，此时再次计算按"内容相同、身份不同"记 `conflict` 而不是 `already_restored`，这是有意的：恢复计划不假设自己知道写回方式。平台不报告身份时只比内容，重复计算得到 `already_restored`。两种情况都不会重复写、重复撤销或再次执行任务。恢复失败时日志保留可诊断状态，不用旧快照覆盖来伪造成功。执行级的"第二次恢复请求不重复写入"由 #20 用恢复请求编号验证，本票只保证计划层的判定是幂等的。
 
 ### 5.4 冲突呈现字段
 
@@ -276,7 +276,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 ## 7. 负向探针矩阵（本票已执行）
 
-[探针测试](../../tests/contract/write-approval.test.ts)共 115 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
+[探针测试](../../tests/contract/write-approval.test.ts)共 116 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
 
 | 组 | 输入 | 期望 | 位置 |
 | --- | --- | --- | --- |
@@ -293,15 +293,15 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 | 撤销与完成 | 撤销记录、标记完成后再次应用 | schema 复验通过；`APPROVAL_REVOKED`/`APPROVAL_CONSUMED` | 同上 |
 | 日志不变量 | `verified` 但观察哈希与 `after` 不同 | schema 解析失败 | 同上 |
 | 逐路径结果 | 无记录、已校验、未校验、失败、只有 `intent`、恢复完成、恢复冲突 | `unchanged`/`applied`/`verification_failed`/`failed`/`unknown`/`restored`/`failed(RECOVERY_CONFLICT)` | `write outcomes` |
-| 日志真实性 | 记录哈希与本批准的 `after` 不符、恢复记录观察哈希与 `before` 不符、`applied` 没有前置 `intent` | `verification_failed` / `failed(RECOVERY_CONFLICT)` | 同上 |
-| 恢复归属 | 已有 `recovery` 记录且当前仍为 `before`、恢复后文件又被改动、最后一条是 `intent`、最后一条是 `failed`、`applied` 未 verified | `already_restored` / `conflict` / `outOfScope` / `conflict` | `recovery planning` |
+| 日志真实性 | 记录哈希与本批准的 `after` 不符、恢复记录观察哈希与 `before` 不符、`applied` 没有前置 `intent`、`intent` 的 `beforeSha256` 与本批准不符 | `verification_failed` / `failed(RECOVERY_CONFLICT)` | 同上 |
+| 恢复归属 | 已有 `recovery` 记录且当前仍为 `before` → `already_restored`；恢复后文件又被改动 → `conflict`；最后一条是 `intent` → `conflict`；最后一条是 `failed` 且无 `applied` → `outOfScope`；`applied` 未 verified → `conflict` | 见左列逐项 | `recovery planning` |
 | 恢复 | 当前等于 `after`、等于 `before`、用户改动、文件被删、类型改变、身份不同、身份无法确认、未应用目标、重复计划 | `restore`/`already_restored`/`conflict`/`outOfScope` | `recovery planning` |
 | 能力关闭 | 扫描 `apps/desktop/src` 的写调用字面量；检查 `run-ipc.ts` 与 `pioneer-run.ts` | 四个既有文件之外没有出现写调用字面量；无 `write`/`approval` 通道、无能力位 | `write surface stays closed` |
 
 矩阵的边界，逐条说清：
 
 - "同名重建"有一条真实删除后重建的探针，平台复用同一身份时会显式 `skip` 而不是静默通过；另有一条用改变的身份构造的确定性探针覆盖判定分支。
-- 有 2 条探针在平台不满足前提时显式 `skip`（身份复用、无符号链接权限）；本机门禁未触发 skip，因此记录报 115/115，并以日志中的实际计数为准。
+- 有 2 条探针在平台不满足前提时显式 `skip`（身份复用、无符号链接权限）；本机门禁未触发 skip，因此记录报 116/116，并以日志中的实际计数为准。
 - `readStableFile` 有一个 `afterRead` 测试钩子，用来确定性地制造"读取期间被改动"。这是本票对 Issue "不另建测试替换点" 的一次偏离：没有它测不到 `unstable` 分支；钩子只在构造选项时传入，生产调用不传，验证记录里单列。
 - `identity_unavailable` 由平台"批准时报告身份、本次读取不报告"产生，NTFS 上无法稳定制造；确定性探针用伪造的观察对象覆盖判定分支，观察函数的该分支不在本轮探针内。
 - `computeDiffDigest` 的探针复算规范 JSON 的 SHA-256，并断言输入变化会改变摘要；它不证明将来的预览界面渲染出的文本与摘要绑定，那属于 #19。
@@ -356,7 +356,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 2026-10-27 在 `docs/issue18-write-authorization`（自 `origin/main` `28e6882`）执行：
 
-- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 115/115 通过；其中 2 条只在平台复用文件身份或无符号链接权限时显式 `skip`，本机未触发。
+- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 116/116 通过；其中 2 条只在平台复用文件身份或无符号链接权限时显式 `skip`，本机未触发。
 - 受影响既有测试：`egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` 共 123 项通过（共享读取重构未改变行为）。
 - `pnpm typecheck`、`pnpm test:contract:types` 通过；新文件 ESLint 0 问题；Prettier 检查通过。
 - 完整 `pnpm check` 与 `pnpm verify:repository` 记录见[验证记录](../testing/issue18-verification.md)；本文件的证据范围仅到 Contract Tests，不代表写入功能已实现。

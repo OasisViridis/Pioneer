@@ -350,6 +350,9 @@ function isProvenApplied(
   return (
     intent !== null &&
     intent.at <= record.at &&
+    // The recorded intent must describe this approval's pre-image, otherwise a
+    // stale or foreign intent would "prove" a write that never reviewed it.
+    intent.beforeSha256 === target.before.sha256 &&
     record.verification === 'verified' &&
     record.afterSha256 === target.after.sha256 &&
     record.observedSha256 === record.afterSha256

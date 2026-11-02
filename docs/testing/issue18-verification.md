@@ -13,7 +13,7 @@
 | 目标观察 | [`apps/desktop/src/main/harness/write-approval/observe-targets.ts`](../../apps/desktop/src/main/harness/write-approval/observe-targets.ts)：只读句柄读取、内容哈希、文件身份；不写、不删、不改名 |
 | 共享读取 | [`apps/desktop/src/main/harness/bounded-read.ts`](../../apps/desktop/src/main/harness/bounded-read.ts)：外发清单与写入观察共用的有界稳定读取；`egress-materials.ts` 改为调用它，错误码映射不变 |
 | 纯决策 | [`apps/desktop/src/main/harness/write-approval/decision.ts`](../../apps/desktop/src/main/harness/write-approval/decision.ts)：批准判定、保留内容核对、撤销、完成标记、逐路径结果、恢复计划、沙箱作用域判定；不触碰文件系统 |
-| 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：115 项 Contract Tests |
+| 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：116 项 Contract Tests |
 | 词表 | [`GLOSSARY.md`](../../GLOSSARY.md)：新增「写入批准（Write Approval）」「变更日志（Change Journal）」 |
 
 没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段；`run-ipc.ts` 与 `pioneer-run.ts` 未改动。`egress-materials.ts` 只改了内部读取实现，对外错误码映射不变（`UNSTABLE` → `MATERIAL_NOT_ALLOWED`，其余读取失败 → `INVALID_REQUEST`）；短读与关闭失败的处理移入共享读取，边界行为有变化，见下方记录。
@@ -23,7 +23,7 @@
 | 项 | 命令/位置 | 结果 |
 | --- | --- | --- |
 | 仓库规范化 | `pnpm verify:repository` | 6/6 通过 |
-| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 115/115 通过；其中 2 条只在平台复用文件身份或无符号链接权限时显式 `skip`（本机未触发，日志保留实际计数） |
+| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 116/116 通过；其中 2 条只在平台复用文件身份或无符号链接权限时显式 `skip`（本机未触发，日志保留实际计数） |
 | 受影响既有测试 | `egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` | 123/123 通过 |
 | 完整门禁 | `pnpm check` | 见下方"门禁结果" |
 | 类型 | `pnpm typecheck`、`pnpm test:contract:types` | 通过 |
@@ -32,9 +32,9 @@
 
 ### 门禁结果
 
-最终 `pnpm check`（日志 `tmp/issue18/full-check-15.log`，2026-11-02）退出码 0：
+最终 `pnpm check`（日志 `tmp/issue18/full-check-16.log`，2026-11-02）退出码 0：
 
-- Contract Tests：509/509 通过（40 个测试文件，含本票 115 项）；
+- Contract Tests：510/510 通过（40 个测试文件，含本票 116 项）；
 - Prototype Tests：210/210 通过；
 - Real Electron E2E：39/39 通过（先 build 再运行）；
 - 最终 package smoke：Electron Forge 打包完成，`Packaging for x64 on win32` 与 postPackage hook 均成功。
@@ -180,7 +180,7 @@
 | 保护路径可被策略移除 | `checkWriteScope` 始终并入 `WRITE_PROTECTED_PATHS`，策略不能删掉 `.git`。新增 1 条探针 |
 | 规格与代码不一致 | §2.5 说明 digest 里的 `before`/`after` 是完整状态对象（含 `kind`）；§3.2 说明记录由 main 的存储取出；§2.2 说明撤销函数与调用点归属；§9 说明第 7 条没有代码；§9.1 新增第 9 项 `afterRead` 接缝待裁 |
 
-探针从 103 增至 115；本轮同时修掉两处会掩盖缺陷的测试夹具，并补上孤立的恢复记录、写入后又失败两条负例（`record()` 与 `appliedRecord()` 用的是与批准无关的哈希）。
+探针从 103 增至 116；本轮同时修掉两处会掩盖缺陷的测试夹具，并补上孤立的恢复记录、写入后又失败两条负例（`record()` 与 `appliedRecord()` 用的是与批准无关的哈希）。
 
 仍未解决、且不是代码能解决的：人类对 §9 的确认；`egress-materials.ts` 重构属判断项；`write-approval` 模块没有生产 importer 是决策票的预期；`afterRead` 接缝保留还是移除需要人类裁决。
 
