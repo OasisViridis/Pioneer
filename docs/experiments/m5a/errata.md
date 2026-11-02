@@ -1,28 +1,26 @@
-# M5-A 勘误记录
+# M5-A 勘误与发布前修订记录
 
-按 `docs/experiments/m5a/v1/protocol.json` 的 R2 规则：不影响任务内容、评分规则、指标定义、分母、预算、变体定义、提示模板、模型参数、执行顺序与随机种子的纯文字勘误，记在这里后重生成 `freeze-manifest.json`，可以不升 `protocolVersion`。一旦存在 `real-provider` 数据，勘误同样必须升版本。
+本文件记两类改动，别混写：
 
-格式：
+1. **R2 纯文字勘误**：不影响任务内容、评分规则、指标定义、分母、预算、变体定义、提示模板、模型参数、执行顺序与随机种子。记在这里后重生成 `freeze-manifest.json`，不升 `protocolVersion`。
+2. **发布前语义修订（R7）**：影响上述任一项的改动。只有在**尚未合并进 `main`、且没有任何 `real-provider` 数据**时才允许记在这里；一旦合并或产生第一条真实数据，任何语义修订都必须升 `protocolVersion` 并新建 `v2/` 目录，旧数据不重算、不并入新分母。
 
-```
-## YYYY-MM-DD 第 N 条
+## 2026-11-03 发布前修订（R7，未合并、无真实数据）
 
-- 文件：
-- 原文：
-- 改为：
-- 动机：
-- 影响的数据版本：无 / v1
-```
+本分支的第一版 `freeze-manifest.json` 在提交 `f84da0b` 生成，随后评审在 `f4e8e0d` 与后续提交里改了以下语义项。这些改动**不是** R2 纯文字勘误，按 R7 记录如下：
 
-## 2026-11-03 第 1 条（数据产生前的措辞与口径修正）
+| #   | 项             | 原文                                                                 | 改为                                                                              | 依据                                   |
+| --- | -------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------- |
+| 1   | 负向题评分     | t10–t12 用 `contains_none` + `literals: ["none"]`，题面直接给出 none | `contains_all` + `["none", 证据串]` + 原 `forbidden`；题面改两分支中性问法        | Spec 审查：不读材料即可 pass           |
+| 2   | 评分语义       | `contains_all` 不允许带 `forbidden`                                  | `contains_all` = literals 全出现且 forbidden 全不出现                             | 让负向题同时校验证据与结论             |
+| 3   | 运行生产者     | dataset 行 `adapter` 只有 `pi` / `controlled`                        | 增 `baseline-runner`，V0 正式运行用它，永不是产品 Run host                        | Standards 审查：V0 不经过产品 Run host |
+| 4   | not_run 原因   | 只写在 `notes` 文本，分析时 `split(':')`                             | 新增 `run.notRunReason` 枚举，`notes` 只放自由文本                                | Standards 审查：去掉字符串反解         |
+| 5   | V0 输入预算    | 材料 65536 B，叠加指令会破 64 KiB                                    | 材料前缀 57344 B + 指令预留 8192 B，合计 65536 B                                  | Spec 审查：超出产品输入契约            |
+| 6   | 语料清单哈希   | 只在未入库脚本里生成，无工具校验                                     | 定义 `corpusManifestSha256` 复算公式，build 重算并拒绝不一致                      | Spec 审查：不可复算                    |
+| 7   | 冻结与分析前置 | `freeze --verify` 靠人手跑；分母只等于行数                           | analyze 启动校验 manifest 哈希，并断言 `sum(attemptCount)===sum(rowCount)===行数` | Spec 审查：条件 5、6 半个              |
 
-- 文件：`docs/experiments/m5a/v1/protocol.json`、`analysis-plan.json`、`record-schema.json`
-- 原文：首版冻结草稿把 V0 的材料前缀写成 65536 B、把工具名写成 `search`、把 `not_run` 原因只用 `notes` 文本承载，且未定义 `corpusManifestSha256` 的算法。
-- 改为：材料前缀 57344 B + 指令预留 8192 B；工具名改为产品枚举 `search_in_files`；新增 `run.notRunReason` 枚举与 `run.adapter` 的 `baseline-runner`；补上 `corpusManifestSha256` 的复算定义与冻结清单校验步骤。
-- 动机：Spec/Standards 双轴审查发现上述四处与实际产品契约或可复算性不一致。改动发生在任何真实数据产生之前，`datasetVersion` 未变，没有旧数据需要迁移或隔离。
-- 影响的数据版本：无（受控先导在改动后重跑，旧产物被覆盖前已用 `--write` 重新生成清单）。
+范围声明：以上改动发生在任何 `real-provider` 数据存在之前，受控先导产物全部按最终口径重新生成；本分支尚未合并进 `main`，没有外部接收方拿过旧版清单。R7 是在同一发布前窗口内对「不可原地修改」边界的澄清，`docs/experiments/README.md` 已同步为「随合并发布后不可原地修改」。合并之后或产生第一条真实数据之后，`v1/` 的任何语义改动都按 R1 升 `v2/`。
 
 ## 使用规则
 
-发现需要修正的地方时按上面格式追加，不要改写历史条目。`freeze-manifest.json` 在每次追加后重新生成，并在 issue 或 PR 里留下对应的检查命令与输出。
-
+发现需要修正的地方时按上面格式追加，不要改写历史条目。每次追加后重生成 `freeze-manifest.json`，并在 issue 或 PR 里留下对应检查命令与输出。

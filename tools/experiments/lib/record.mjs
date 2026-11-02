@@ -1566,6 +1566,16 @@ export function buildCaptureResult({
       capture: { ...captureHashes },
       notes,
     });
+    // The fixed-prefix baseline never runs inside the product Run host, so it
+    // must not borrow the product pi adapter identity.
+    if (
+      attempt.variantId === 'fixed-prefix-no-tools' &&
+      accept.adapter === 'pi'
+    ) {
+      fail(
+        `capture: attempt "${attempt.attemptId}" is the fixed-prefix baseline but records adapter=pi; use baseline-runner for a real run or controlled for a capture writer`,
+      );
+    }
   }
 
   return { rows, answers };

@@ -15,7 +15,7 @@
   "map": 9,
   "prerequisites": {
     "issue13ReadonlyHarness": "CLOSED（2026-10-27）；只读 Harness 已交付，真实 Provider 证据见 docs/testing/issue13-real-provider.md",
-    "entryCheck": "只把已交付能力放进可执行样本：read_file / list_directory / search 三个只读工具、会话、运行状态与停止。写入、命令执行、会话分支、Windows 独立安装包不在样本内。"
+    "entryCheck": "只把已交付能力放进可执行样本：read_file / list_directory / search_in_files 三个只读工具、会话、运行状态与停止。写入、命令执行、会话分支、Windows 独立安装包不在样本内。"
   },
   "comparisonQuestion": {
     "primary": "在同一 Provider、同一模型、同一任务文本、同一预算与时限下，「按需只读工具 + 随需取用材料」（V1）与「固定前缀全量材料 + 无工具」（V0）两种信息供给配置，在 12 个只读检索任务上的任务完成率、Provider 报告 token 用量与端到端耗时是否存在可复核差异？",
@@ -40,7 +40,7 @@
         "contextAssembly": "on-demand",
         "toolsEnabled": true
       },
-      "definition": "使用产品现有只读 Harness：系统提示 + 任务文本 + 允许材料清单；模型自行决定调用 read_file / list_directory / search，工具结果回到模型后继续，直到给出最终回答。",
+      "definition": "使用产品现有只读 Harness：系统提示 + 任务文本 + 允许材料清单；模型自行决定调用 read_file / list_directory / search_in_files，工具结果回到模型后继续，直到给出最终回答。",
       "implementation": "apps/desktop 现有 pi 适配器与只读工具策略，不修改产品代码；通过产品会话启动一次任务。",
       "runProducer": "pi",
       "runProducerNote": "真实运行时该变体的 journal 与事件由产品主进程的 pi 适配器写出，run 身份来自产品 Run host。",
@@ -169,7 +169,7 @@
       {
         "id": "aggregate-count",
         "count": 3,
-        "capability": "search + read_file"
+        "capability": "search_in_files + read_file"
       },
       {
         "id": "cross-file-synthesis",
@@ -179,7 +179,7 @@
       {
         "id": "negative-scope",
         "count": 3,
-        "capability": "search absence without fabrication"
+        "capability": "search_in_files absence without fabrication"
       }
     ],
     "selectionRule": "任务只能用已交付的三个只读工具与 demos/ 冻结材料作答；答案必须能由材料内容唯一确定；任务位置与类别在运行前固定，不按结果挑选。",
@@ -412,10 +412,10 @@
     "perAttempt": {
       "runMs": 120000,
       "modelOutputTokens": 4096,
-      "materialBytes": 65536,
       "toolCalls": 32,
       "stopGraceMs": 5000,
-      "singleToolConcurrency": 1
+      "singleToolConcurrency": 1,
+      "inputBudgetBytes": 65536
     },
     "perAttemptSource": "apps/desktop/src/shared/contracts/pioneer-run.ts RUN_LIMITS 与 P2 运行合同 §5；实验不改产品上限，也不放大到超过产品上限的预算。",
     "formalRunCap": {
@@ -427,7 +427,12 @@
       "tokenEstimateMethod": "工程估算，按 4 字节/token 把 65536 B 折算为 16384 tokens，加 4096 输出，单次约 20480 tokens；72 次约 1474560 tokens。字节到 token 的比例不是硬上界，因此 token 上限是安全余量 2 倍的预算停机线，不宣称是推导出来的理论上界。",
       "wallClockBasis": "72 × (120 s 运行 + 180 s 准备与收尾) ≈ 6 小时。"
     },
-    "costConversion": "货币成本不在本版本固定：正式运行前必须从取得授权的 Provider 价目表抄录价格、生效日期与来源，按 输入 tokens × 输入单价 + 输出 tokens × 输出单价 计算；价目表未确认前，只以 token 与墙上时间作为上限。不得编造价格或换算金额。"
+    "costConversion": "货币成本不在本版本固定：正式运行前必须从取得授权的 Provider 价目表抄录价格、生效日期与来源，按 输入 tokens × 输入单价 + 输出 tokens × 输出单价 计算；价目表未确认前，只以 token 与墙上时间作为上限。不得编造价格或换算金额。",
+    "perAttemptSplit": {
+      "note": "产品上限是「任务材料与消息正文」合计 65536 B；V0 把其中 57344 B 给材料前缀、8192 B 留给提示与指令，V1 用产品原有的累计计量。",
+      "v0MaterialPrefixBytes": 57344,
+      "v0InstructionReserveBytes": 8192
+    }
   },
   "outcomes": {
     "statusValues": [
@@ -584,7 +589,8 @@
       "R3 正式运行开始后不得新增或删除任务、不得修改评分字面量、不得调整执行顺序或提示模板。",
       "R4 发现评分实现缺陷时，保留旧版本与旧数据，用新版本重新评分并同时报告新旧结果；不得只覆盖旧结果。",
       "R5 正式运行前后各执行一次 freeze --verify，输出归档；verify 失败时不得开始或采信该批数据。",
-      "R6 每次变更必须写明动机、时间、影响的数据版本，并在 issue #29 的 resolution/评论里留记录。"
+      "R6 每次变更必须写明动机、时间、影响的数据版本，并在 issue #29 的 resolution/评论里留记录。",
+      "R7 发布前（尚未合并、且没有任何 real-provider 数据）的语义修订，记入 errata 的 pre-release 段落并重生成清单即可；一旦本分支合并进 main 或产生第一条 real-provider 数据，任何语义修订都必须升 protocolVersion 并新建 v2/ 目录，v1 数据不重算、不并入新分母。"
     ]
   },
   "pilot": {

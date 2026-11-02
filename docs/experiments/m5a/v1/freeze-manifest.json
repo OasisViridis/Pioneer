@@ -1,7 +1,7 @@
 {
   "protocolId": "m5a-harness-context-comparison",
   "protocolVersion": 1,
-  "frozenAt": "2026-11-02T17:56:58.667Z",
+  "frozenAt": "2026-11-02T18:17:00.453Z",
   "files": [
     {
       "path": "docs/experiments/m5a/v1/analysis-plan.json",
@@ -10,8 +10,8 @@
     },
     {
       "path": "docs/experiments/m5a/v1/protocol.json",
-      "sha256": "da1e5508f027586c332dd031e78c117cf2014a74ce8898192b021318dca4b7cc",
-      "bytes": 34537
+      "sha256": "b7c82d0d75cecf3c5a1ac9bbabe7f8b0e04b780cad89e3950798d93278b0ec58",
+      "bytes": 35219
     },
     {
       "path": "docs/experiments/m5a/v1/record-schema.json",
@@ -60,8 +60,8 @@
     },
     {
       "path": "tools/experiments/lib/record.mjs",
-      "sha256": "20fbe9ce39951be5d0215075c8e95002ebfdc23d16f7ab51be69faadd6bae7d5",
-      "bytes": 51533
+      "sha256": "4f842e61bf11b8863967b35f6726145c71a440914865428d73eaa4d00bd19d1d",
+      "bytes": 51971
     },
     {
       "path": "tools/experiments/lib/stats.mjs",

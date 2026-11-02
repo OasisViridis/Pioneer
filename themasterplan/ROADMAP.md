@@ -1,4 +1,4 @@
-# ROADMAP · Pioneer Agent
+﻿# ROADMAP · Pioneer Agent
 
 > **工程研发里程碑、功能优先级矩阵与 jj 工作流指南 (2026.09 — 2027.06)**
 > 课题：基于TypeScript的模块化智能体交互系统设计与实现（2026-10-08 按导师意见确认）
@@ -57,13 +57,13 @@
 
 ### 2026-11-03 M5-A 方案冻结与受控先导（M5 仍未完成）
 
-Issue #29 的对比方案冻结为 v1：两个变体（`pioneer-readonly-tools` / `fixed-prefix-no-tools`）、12 条任务分 4 类、三层分母、任务级统计，以及 `tools/experiments` 的记录与分析工具。冻结清单 `docs/experiments/m5a/v1/freeze-manifest.json` 覆盖 4 份 v1 JSON 与 7 个工具源码。
+Issue #29 的对比方案冻结为 v1：两个变体（`pioneer-readonly-tools` / `fixed-prefix-no-tools`）、12 条任务分 4 类、三层分母、任务级统计，以及 `tools/experiments` 的记录与分析工具。冻结清单 `docs/experiments/m5a/v1/freeze-manifest.json` 覆盖 4 份 v1 JSON 与 9 个工具源码。
 
 受控先导（`evidenceKind=controlled`）跑通 build → analyze → freeze 全链路：18 条登记尝试、16 条执行、2 条 `not_run`；缺 usage 保持 null，`MODEL_FAILED`、`RUN_DEADLINE`、用户停止与 `host_restarted` 墓碑各按枚举分类；`answers.ndjson` 复算 12/12 一致。这组数据只证明记录与分析流程正确，不是模型结果，不进入论文结果章节。
 
 真实 Provider 先导为 **NOT_RUN**：没有点名 Provider、模型与外发材料授权，且产品侧还缺「把 journal 与事件流导出成采集包」的入口。因此「先导结果」与「样本量、成本已由真实先导验证」两项保持待办，M5 不因本票据关闭而完成。
 
-`pnpm check` 退出码 0（含 Real Electron E2E 39/39 与 package smoke）；`pnpm test:experiments` 31/31。协议、披露与限制见[冻结方案](../docs/experiments/2026-11-03-m5a-comparison-protocol.md)。
+`pnpm check` 退出码 0（含 Real Electron E2E 39/39 与 package smoke）；`pnpm test:experiments` 37/37。协议、披露与限制见[冻结方案](../docs/experiments/2026-11-03-m5a-comparison-protocol.md)。
 
 ---
 

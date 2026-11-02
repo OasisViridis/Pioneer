@@ -1,4 +1,4 @@
-# M5-A 受控先导报告：记录与分析流程验证
+﻿# M5-A 受控先导报告：记录与分析流程验证
 
 | 项           | 值                                                                                                                                                                                    |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -239,7 +239,7 @@ experiment:freeze: verified 13 files against freeze-manifest.json
 EXIT=0
 ```
 
-[freeze-manifest.json](../v1/freeze-manifest.json) 由 Lead 用 `--write` 生成（2340 字节，sha256 `19428e35bb2fcab7a7ee40fbd26ac627ec4005f46c9e798c84852c316ef31a67`），`frozenAt` 是 `2026-11-02T17:56:58.667Z`，覆盖 v1 目录四个 JSON（protocol、tasks、analysis-plan、record-schema）与 `tools/experiments` 下 9 个 `.mjs`（analyze、build-dataset、freeze 与 lib 下 6 个），共 13 个文件。本轮开始时清单还不存在，`--verify` 退出 1；这条证据是在清单定稿后补跑的。
+[freeze-manifest.json](../v1/freeze-manifest.json) 由 Lead 用 `--write` 生成（2340 字节，sha256 `1da2e9a2598ac14898bf5bcae1a227ee549293143516544724f75e4e0b9d7e06`），`frozenAt` 是 `2026-11-02T18:17:00.453Z`，覆盖 v1 目录四个 JSON（protocol、tasks、analysis-plan、record-schema）与 `tools/experiments` 下 9 个 `.mjs`（analyze、build-dataset、freeze 与 lib 下 6 个），共 13 个文件。本轮开始时清单还不存在，`--verify` 退出 1；这条证据是在清单定稿后补跑的。
 
 ### 3.11 本版新增的自检与口径
 
@@ -293,10 +293,10 @@ node tools/experiments/build-dataset.mjs --captures docs/experiments/m5a/capture
 node tools/experiments/analyze.mjs --dataset docs/experiments/m5a/pilot-controlled/dataset.jsonl --tasks docs/experiments/m5a/v1/tasks.json --protocol docs/experiments/m5a/v1/protocol.json --plan docs/experiments/m5a/v1/analysis-plan.json --out docs/experiments/m5a/pilot-controlled
 ```
 
-输入摘要（`summary.json:inputs`）：dataset `0d8cbc1b2beaf387ce9f83de3ab168bf0be998af243311a4c7b37d49128227b3`（32102 字节），buildReport `5101248a7a4a1a97ee37572d060eed278e943defa6d6c16b33d0f09f446a412a`（1859 字节），answers `866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842`（4021 字节），protocol `da1e5508f027586c332dd031e78c117cf2014a74ce8898192b021318dca4b7cc`（34537 字节），plan `037df891d5d4af05ea4e17267d28d79c52abfd369c9ae05e5712d38e1325fa56`（8172 字节），tasks `67a261eb1a6ae87520c5371b8d71e01d2a54e24fa2edcaf0f5e8e9d752223b1e`（32815 字节）。采集包三份输入的 SHA-256 在 [build-report.json](build-report.json) 的 `captures[].files`。
+输入摘要（`summary.json:inputs`）：dataset `0d8cbc1b2beaf387ce9f83de3ab168bf0be998af243311a4c7b37d49128227b3`（32102 字节），buildReport `5101248a7a4a1a97ee37572d060eed278e943defa6d6c16b33d0f09f446a412a`（1859 字节），answers `866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842`（4021 字节），protocol `b7c82d0d75cecf3c5a1ac9bbabe7f8b0e04b780cad89e3950798d93278b0ec58`（35219 字节），plan `037df891d5d4af05ea4e17267d28d79c52abfd369c9ae05e5712d38e1325fa56`（8172 字节），tasks `67a261eb1a6ae87520c5371b8d71e01d2a54e24fa2edcaf0f5e8e9d752223b1e`（32815 字节）。采集包三份输入的 SHA-256 在 [build-report.json](build-report.json) 的 `captures[].files`。
 
-产物摘要（`Get-FileHash -Algorithm SHA256`）：dataset `0d8cbc1b2beaf387ce9f83de3ab168bf0be998af243311a4c7b37d49128227b3`、answers `866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842`、build-report `5101248a7a4a1a97ee37572d060eed278e943defa6d6c16b33d0f09f446a412a`、summary.json `a7d73afe9fbe1cfc22d1ae44a9da2b1ee2fc93b7e4df82efbafe3c4c594155c6`、summary.md `3cb78a82077151c22002f144384af5151aada183ce242fba9ccc2d2c054cb880`。冻结侧：freeze-manifest `19428e35bb2fcab7a7ee40fbd26ac627ec4005f46c9e798c84852c316ef31a67`（2340 字节，13 个文件）、record-schema `61ceb93fcd75598e2a755fe70744cdff04079fc40321f3b9fc9ada30cc89991f`（14151 字节）。
+产物摘要（`Get-FileHash -Algorithm SHA256`）：dataset `0d8cbc1b2beaf387ce9f83de3ab168bf0be998af243311a4c7b37d49128227b3`、answers `866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842`、build-report `5101248a7a4a1a97ee37572d060eed278e943defa6d6c16b33d0f09f446a412a`、summary.json `3dab7c3eecbaa26e69bf81000825747cb6bb82a9c984af893f6589974820022f`、summary.md `20ef2008695db0ad906a69bc0dc32be937a37ac7f751e47296435215bef6970c`。冻结侧：freeze-manifest `1da2e9a2598ac14898bf5bcae1a227ee549293143516544724f75e4e0b9d7e06`（2340 字节，13 个文件）、record-schema `61ceb93fcd75598e2a755fe70744cdff04079fc40321f3b9fc9ada30cc89991f`（14151 字节）。
 
-本轮迭代过几轮口径，定稿状态是：`tasks.json` 32815 字节（t10 到 t12 改成 `contains_all` + 证据串 + forbidden）、`protocol.json` 34537 字节（新增 `answers.ndjson` 登记、第 11.1 节占位口径、`executionOrder` 冻结表、V0 弱基线与可见窗口披露）、`analysis-plan.json` 8172 字节、`record-schema.json` 14151 字节（新增 `run.notRunReason`）、`freeze-manifest.json` 2340 字节。采集包同时改成 `adapter=controlled` 并按冻结表写 `orderIndex`，`dataset.jsonl` 因此从 31616 变成 32102 字节（18 行不变，新增 `run.notRunReason` 字段、`adapter` 取值改变）。`summary.json` 的统计数字与前几版一致。本目录产物由 Lead 用定稿版本重跑 build 与 analyze 得到；我在 `tmp/` 下用同一份采集包重跑，dataset、answers、build-report 三个文件与交付目录逐字节相同（见 3.11 第 5 条）。如果冻结文件再改，必须重跑这两条命令并重新核对本报告里的数字。
+本轮迭代过几轮口径，定稿状态是：`tasks.json` 32815 字节（t10 到 t12 改成 `contains_all` + 证据串 + forbidden）、`protocol.json` 35219 字节（新增 `answers.ndjson` 登记、第 11.1 节占位口径、`executionOrder` 冻结表、V0 弱基线与可见窗口披露）、`analysis-plan.json` 8172 字节、`record-schema.json` 14151 字节（新增 `run.notRunReason`）、`freeze-manifest.json` 2340 字节。采集包同时改成 `adapter=controlled` 并按冻结表写 `orderIndex`，`dataset.jsonl` 因此从 31616 变成 32102 字节（18 行不变，新增 `run.notRunReason` 字段、`adapter` 取值改变）。`summary.json` 的统计数字与前几版一致。本目录产物由 Lead 用定稿版本重跑 build 与 analyze 得到；我在 `tmp/` 下用同一份采集包重跑，dataset、answers、build-report 三个文件与交付目录逐字节相同（见 3.11 第 5 条）。如果冻结文件再改，必须重跑这两条命令并重新核对本报告里的数字。
 
 采集包最初由一次性脚本生成（`tmp/m5a/gen-captures.mjs`，`tmp/` 被 `.gitignore` 忽略，不入库），定稿前按新口径改过 `adapter`、`orderIndex`、`corpusManifestSha256` 与 V0 前缀字段，构造规则以 [captures/README.md](../captures/README.md) 为准。改动采集包会同时改变 `build-report.json:captures[].files` 与 dataset 的 `capture` 字段，届时必须重跑 build 与 analyze，不要手改任何产物。

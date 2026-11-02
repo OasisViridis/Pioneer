@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';
+﻿import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
@@ -309,7 +309,7 @@ test('duplicate attemptId across captures fails the build', () => {
           variantId,
         }),
         journal: [
-          makeAccept({ runId, time: at(0) }),
+          makeAccept({ runId, time: at(0), adapter: 'controlled' }),
           makeTerminal({
             runId,
             status: 'completed',
@@ -319,12 +319,14 @@ test('duplicate attemptId across captures fails the build', () => {
         ],
         events: [
           makeEvent({
+            adapter: 'controlled',
             runId,
             seq: 1,
             time: at(0),
             body: { type: 'run.accepted' },
           }),
           makeEvent({
+            adapter: 'controlled',
             runId,
             seq: 2,
             time: at(1000),

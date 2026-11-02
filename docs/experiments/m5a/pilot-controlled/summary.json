@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-02T17:57:03.472Z",
+  "generatedAt": "2026-11-02T18:15:26.477Z",
   "inputs": {
     "dataset": {
       "path": "docs/experiments/m5a/pilot-controlled/dataset.jsonl",
@@ -19,8 +19,8 @@
     },
     "protocol": {
       "path": "docs/experiments/m5a/v1/protocol.json",
-      "sha256": "da1e5508f027586c332dd031e78c117cf2014a74ce8898192b021318dca4b7cc",
-      "bytes": 34537
+      "sha256": "b7c82d0d75cecf3c5a1ac9bbabe7f8b0e04b780cad89e3950798d93278b0ec58",
+      "bytes": 35219
     },
     "plan": {
       "path": "docs/experiments/m5a/v1/analysis-plan.json",

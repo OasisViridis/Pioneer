@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';
+﻿import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
@@ -676,4 +676,56 @@ test('HTML fragments and comments are not treated as absolute paths', () => {
   } finally {
     cleanup(root);
   }
+});
+test('the fixed-prefix baseline cannot record the product pi adapter', () => {
+  const attempts = [
+    makeAttempt({
+      attemptId: 'c-0001',
+      taskId: 't01',
+      runId: 'run:21',
+      variantId: 'fixed-prefix-no-tools',
+      orderIndex: 1,
+    }),
+  ];
+  const capture = makeCapture({
+    attempts,
+    variantId: 'fixed-prefix-no-tools',
+  });
+  const journal = [makeAccept({ runId: 'run:21', time: at(0) })];
+  const events = [
+    makeEvent({
+      runId: 'run:21',
+      seq: 1,
+      time: at(0),
+      body: { type: 'run.accepted' },
+    }),
+    makeEvent({
+      runId: 'run:21',
+      seq: 2,
+      time: at(10),
+      body: { type: 'run.started' },
+    }),
+    makeEvent({
+      runId: 'run:21',
+      seq: 3,
+      time: at(20),
+      body: {
+        type: 'run.completed',
+        usage: { inputTokens: null, outputTokens: null },
+      },
+    }),
+  ];
+
+  assert.throws(
+    () =>
+      buildCaptureResult({
+        capture,
+        journalRecords: journal,
+        events,
+        tasks: tasksFor(['t01']),
+        captureHashes: CAPTURE_HASHES,
+        label: 'test capture',
+      }),
+    /fixed-prefix baseline but records adapter=pi/,
+  );
 });

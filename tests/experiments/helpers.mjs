@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Fixture builders for the experiment tool tests.
  * Every fixture is schema-valid synthetic data; nothing here depends on the
  * Lead's pilot captures.
@@ -607,9 +607,9 @@ export function createPilotFixture(root) {
       variantId: 'fixed-prefix-no-tools',
     }),
     journal: [
-      makeAccept({ runId: 'run:11', time: at(0) }),
-      makeAccept({ runId: 'run:12', time: at(2000) }),
-      makeAccept({ runId: 'run:13', time: at(4000) }),
+      makeAccept({ runId: 'run:11', time: at(0), adapter: 'controlled' }),
+      makeAccept({ runId: 'run:12', time: at(2000), adapter: 'controlled' }),
+      makeAccept({ runId: 'run:13', time: at(4000), adapter: 'controlled' }),
       makeTerminal({
         runId: 'run:11',
         status: 'completed',
@@ -631,36 +631,42 @@ export function createPilotFixture(root) {
     ],
     events: [
       makeEvent({
+        adapter: 'controlled',
         runId: 'run:11',
         seq: 1,
         time: at(0),
         body: { type: 'run.accepted' },
       }),
       makeEvent({
+        adapter: 'controlled',
         runId: 'run:11',
         seq: 2,
         time: at(10),
         body: { type: 'text.delta', text: 'beta' },
       }),
       makeEvent({
+        adapter: 'controlled',
         runId: 'run:11',
         seq: 3,
         time: at(800),
         body: { type: 'run.completed', usage: null },
       }),
       makeEvent({
+        adapter: 'controlled',
         runId: 'run:12',
         seq: 1,
         time: at(2000),
         body: { type: 'run.accepted' },
       }),
       makeEvent({
+        adapter: 'controlled',
         runId: 'run:12',
         seq: 2,
         time: at(2010),
         body: { type: 'text.delta', text: 'beta' },
       }),
       makeEvent({
+        adapter: 'controlled',
         runId: 'run:12',
         seq: 3,
         time: at(2900),
@@ -670,18 +676,21 @@ export function createPilotFixture(root) {
         },
       }),
       makeEvent({
+        adapter: 'controlled',
         runId: 'run:13',
         seq: 1,
         time: at(4000),
         body: { type: 'run.accepted' },
       }),
       makeEvent({
+        adapter: 'controlled',
         runId: 'run:13',
         seq: 2,
         time: at(4010),
         body: { type: 'text.delta', text: 'gamma' },
       }),
       makeEvent({
+        adapter: 'controlled',
         runId: 'run:13',
         seq: 3,
         time: at(5000),
