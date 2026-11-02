@@ -3,7 +3,7 @@
   "date": "2026-11-02",
   "evidenceKind": "packaged-acceptance-read-only-run",
   "issue": "https://github.com/OasisViridis/Pioneer/issues/53",
-  "validatedCodeCommit": "447e6e0920428220808194b34158de5beeab776b",
+  "validatedCodeCommit": "4e18362ef970323201e989699d77a2e57fab6cf9",
   "branch": "feat/p3-packaged-acceptance",
   "environment": {
     "platform": "win32-x64",
