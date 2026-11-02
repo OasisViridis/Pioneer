@@ -6,24 +6,28 @@ import {
   SESSION_IPC_CHANNELS,
 } from '../shared/contracts/session-ipc';
 
-/**
- * Startup facts a packaged acceptance run can read back without trusting the
- * renderer. The main process writes the report after the workspace scan, the
- * run host and the window exist, so it describes what this launch actually
- * assembled; the acceptance test reads it while the app keeps running.
- */
-export interface PackagedAcceptanceReport {
-  kind: 'pioneer-packaged-acceptance-startup';
-  schemaVersion: 1;
+/** Facts the main process knows before it builds the report. */
+interface PackagedAcceptanceStartupFacts {
   isPackaged: boolean;
   electronVersion: string;
   nodeVersion: string;
   platform: string;
   processId: number;
   startedAt: string;
-  reportedAt: string;
   userDataRoot: string;
   executablePath: string;
+}
+
+/**
+ * Startup facts a packaged acceptance run can read back without trusting the
+ * renderer. The main process writes the report after the workspace scan, the
+ * run host and the window exist, so it describes what this launch actually
+ * assembled; the acceptance test reads it while the app keeps running.
+ */
+export interface PackagedAcceptanceReport extends PackagedAcceptanceStartupFacts {
+  kind: 'pioneer-packaged-acceptance-startup';
+  schemaVersion: 1;
+  reportedAt: string;
   workspaceRoot: string | null;
   projects: { id: string; name: string; absolutePath: string }[];
   warnings: { code: string; path: string }[];
@@ -48,15 +52,7 @@ export function acceptanceChannels(): string[] {
 }
 
 /** Everything the main process already knows when it builds the report. */
-export interface PackagedAcceptanceReportInput {
-  isPackaged: boolean;
-  electronVersion: string;
-  nodeVersion: string;
-  platform: string;
-  processId: number;
-  startedAt: string;
-  userDataRoot: string;
-  executablePath: string;
+export interface PackagedAcceptanceReportInput extends PackagedAcceptanceStartupFacts {
   catalog: {
     rootPath: string | null;
     projects: { id: string; name: string; absolutePath: string }[];

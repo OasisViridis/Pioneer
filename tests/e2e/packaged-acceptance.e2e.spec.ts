@@ -5,7 +5,6 @@ import {
   createWriteStream,
   existsSync,
   readFileSync,
-  realpathSync,
   statSync,
   type WriteStream,
 } from 'node:fs';
@@ -21,6 +20,7 @@ import {
 } from '@playwright/test';
 
 import type { PackagedAcceptanceConfig } from '../../apps/desktop/src/main/acceptance-config';
+import { canonicalizeExistingPath } from '../../apps/desktop/src/main/launch-paths';
 import {
   acceptanceChannels,
   type PackagedAcceptanceReport,
@@ -163,7 +163,15 @@ const readAcceptanceRunState = (): AcceptanceRunState => {
       `STALE_EXECUTABLE: ${runStatePath} is missing; run \`pnpm acceptance:packaged\` instead of invoking playwright directly`,
     );
   }
-  const parsed: unknown = JSON.parse(readFileSync(runStatePath, 'utf-8'));
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(runStatePath, 'utf-8'));
+  } catch (error) {
+    throw new Error(
+      `STALE_EXECUTABLE: ${runStatePath} is unreadable; run \`pnpm acceptance:packaged\` again`,
+      { cause: error },
+    );
+  }
   if (typeof parsed !== 'object' || parsed === null) {
     throw new Error(`STALE_EXECUTABLE: ${runStatePath} is not a run marker`);
   }
@@ -216,6 +224,7 @@ interface PackagedApp {
   child: ChildProcess;
   port: number;
   logStream: WriteStream;
+  logErrors: string[];
 }
 
 const readDevToolsPort = (userDataPath: string): number | null => {
@@ -302,7 +311,10 @@ const launchPackagedApp = async (options: {
   userDataPath: string;
 }): Promise<PackagedApp> => {
   const logStream = createWriteStream(options.logPath, { flags: 'w' });
-  logStream.on('error', () => undefined);
+  const logErrors: string[] = [];
+  logStream.on('error', (error) => {
+    logErrors.push(describeError(error));
+  });
   const child = spawn(packagedExecutablePath, ['--remote-debugging-port=0'], {
     env: options.environment,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -320,7 +332,7 @@ const launchPackagedApp = async (options: {
       waitForDevToolsPort(options.userDataPath),
       spawnFailure,
     ]);
-    return { child, port, logStream };
+    return { child, port, logStream, logErrors };
   } catch (error) {
     await stopChild(child).catch(() => undefined);
     await closeStream(logStream);
@@ -410,14 +422,6 @@ const readStartupReport = (
     },
   });
 
-const canonicalPath = (value: string): string => {
-  try {
-    return realpathSync(value);
-  } catch {
-    return path.resolve(value);
-  }
-};
-
 const expectSamePath = (
   actual: string | null,
   expected: string,
@@ -426,8 +430,8 @@ const expectSamePath = (
   if (actual === null) {
     throw new Error(`${label}: expected ${expected} but the path was null`);
   }
-  expect(canonicalPath(actual).toLowerCase(), label).toBe(
-    canonicalPath(expected).toLowerCase(),
+  expect(canonicalizeExistingPath(actual).toLowerCase(), label).toBe(
+    canonicalizeExistingPath(expected).toLowerCase(),
   );
 };
 
@@ -666,6 +670,7 @@ test('the packaged build completes one read-only run through the acceptance seam
     failure = error;
   } finally {
     const cleanupErrors: string[] = [];
+    const logErrors = app?.logErrors ?? [];
     try {
       if (browser !== null) await browser.close();
     } catch (error) {
@@ -685,8 +690,13 @@ test('the packaged build completes one read-only run through the acceptance seam
     const terminalRecord = journal.find(
       (record): record is RunJournalTerminal => record.kind === 'terminal',
     );
+    const logSize = existsSync(logPath) ? statSync(logPath).size : 0;
     const outcome =
-      failure === undefined && fixtureUnchanged && cleanupErrors.length === 0
+      failure === undefined &&
+      fixtureUnchanged &&
+      cleanupErrors.length === 0 &&
+      logErrors.length === 0 &&
+      logSize > 0
         ? ('passed' as const)
         : ('failed' as const);
 
@@ -733,6 +743,7 @@ test('the packaged build completes one read-only run through the acceptance seam
         journal: existsSync(journalPath) ? journalPath : null,
       },
       cleanupErrors,
+      log: { path: logPath, bytes: logSize, errors: logErrors },
       failure: failure === undefined ? null : describeError(failure),
     };
     await mkdir(path.dirname(summaryPath), { recursive: true });
@@ -754,6 +765,14 @@ test('the packaged build completes one read-only run through the acceptance seam
       } else if (cleanupErrors.length > 0) {
         failure = new Error(
           `EVIDENCE_INCOMPLETE: ${cleanupErrors.join(' | ')}`,
+        );
+      } else if (logErrors.length > 0) {
+        failure = new Error(
+          `EVIDENCE_INCOMPLETE: the packaged log stream failed: ${logErrors.join(' | ')}`,
+        );
+      } else if (logSize === 0) {
+        failure = new Error(
+          'EVIDENCE_INCOMPLETE: the packaged app wrote no log output',
         );
       } else {
         console.log(

@@ -50,7 +50,8 @@ It must not expose `ipcRenderer`, Node globals, arbitrary channels, or generic f
 - **Contract Tests** are deterministic TypeScript units for shared schemas, normalized paths, the scanner, IPC, settings, security, runtime configuration, and the tab reducer. Run `pnpm test:contract`.
 - **Prototype Tests** are the frozen M1 simulator plus static/adversarial probes. `pnpm test:prototype` executes them now; the historical 210-case result is Prototype Tests evidence, never Electron proof.
 - **Real E2E** uses Playwright to launch Electron and cross main → preload → renderer against filesystem fixtures, including fixture immutability. Run `pnpm test:e2e`.
-- `pnpm check` is the primary gate and runs formatting, lint, typecheck, all three evidence layers, and a final package smoke in a fixed order.
+- **Packaged Acceptance** packages the desktop app and drives the shipped `@pioneer-desktop.exe` through the doubly gated `PIONEER_ACCEPTANCE=1` seam for one read-only run. Run `pnpm acceptance:packaged`; it stays outside `pnpm check` because it repackages the app.
+- `pnpm check` is the primary gate and runs formatting, lint, typecheck, the three check-time evidence layers, and a final package smoke in a fixed order.
 
 The native directory picker is outside the deterministic E2E fixture seam. A renderer mock cannot establish a Real E2E claim.
 

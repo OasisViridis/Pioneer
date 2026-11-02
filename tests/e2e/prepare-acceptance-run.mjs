@@ -1,18 +1,23 @@
 /**
- * Starts a packaged acceptance run: clears the previous evidence directory and
- * records the run's own start time before the package is rebuilt. The spec
- * compares that timestamp with the executable's mtime, so an artifact carried
- * over from an earlier build cannot pass as this run's proof.
+ * Starts a packaged acceptance run: clears the previous evidence directory, the
+ * previous package output and then records the run's own start time before the
+ * package is rebuilt. The spec refuses an executable that predates the marker,
+ * so an artifact carried over from an earlier build cannot pass as this run's
+ * proof.
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 const repositoryRoot = process.cwd();
 const acceptanceRoot = path.join(repositoryRoot, 'tmp', 'issue53-acceptance');
 const runPath = path.join(acceptanceRoot, 'run.json');
+const packagedOutput = path.join(repositoryRoot, 'apps', 'desktop', 'out');
 
 rmSync(path.join(acceptanceRoot, 'latest'), { recursive: true, force: true });
+// Regenerable build output: removing it means the later assertion "the exe
+// exists" proves this run packaged it, not that an old file survived.
+rmSync(packagedOutput, { recursive: true, force: true });
 mkdirSync(acceptanceRoot, { recursive: true });
 
 let commit = null;
@@ -37,7 +42,9 @@ const run = {
   commit,
   dirty,
 };
-writeFileSync(runPath, `${JSON.stringify(run, null, 2)}\n`, 'utf-8');
+const temporaryRunPath = `${runPath}.tmp`;
+writeFileSync(temporaryRunPath, `${JSON.stringify(run, null, 2)}\n`, 'utf-8');
+renameSync(temporaryRunPath, runPath);
 console.log(
-  `[acceptance] previous evidence cleared; run started at ${run.startedAt}`,
+  `[acceptance] cleared previous evidence and package output; run started at ${run.startedAt}`,
 );

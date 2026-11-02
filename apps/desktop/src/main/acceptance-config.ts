@@ -1,8 +1,7 @@
-import { realpathSync } from 'node:fs';
-import { resolve } from 'node:path';
-
 import {
+  canonicalizeExistingPath,
   isPathInsideOrEqual,
+  pathsOverlap,
   requireAbsoluteOutputFile,
   requireExistingAbsoluteDirectory,
   type LaunchProfileApp,
@@ -39,15 +38,6 @@ export type PackagedAcceptanceEnvironment = Readonly<
     >
   >
 >;
-
-/** Canonicalises a path even when it does not exist yet. */
-const canonicalPath = (value: string): string => {
-  try {
-    return realpathSync(value);
-  } catch {
-    return resolve(value);
-  }
-};
 
 /**
  * The packaged acceptance run must name its script explicitly: the controlled
@@ -96,10 +86,7 @@ export function resolvePackagedAcceptanceConfig(
     environment.PIONEER_ACCEPTANCE_REPORT,
   );
 
-  if (
-    isPathInsideOrEqual(workspacePath, userDataPath) ||
-    isPathInsideOrEqual(userDataPath, workspacePath)
-  ) {
+  if (pathsOverlap(workspacePath, userDataPath)) {
     throw new Error(
       'PIONEER_ACCEPTANCE_WORKSPACE and PIONEER_ACCEPTANCE_USER_DATA must be disjoint',
     );
@@ -136,12 +123,9 @@ export function applyPackagedAcceptanceConfig(
   const config = resolvePackagedAcceptanceConfig(app.isPackaged, environment);
   if (config === null) return null;
 
-  const applicationProfile = canonicalPath(app.getPath('userData'));
-  const userDataPath = canonicalPath(config.userDataPath);
-  if (
-    isPathInsideOrEqual(applicationProfile, userDataPath) ||
-    isPathInsideOrEqual(userDataPath, applicationProfile)
-  ) {
+  const applicationProfile = canonicalizeExistingPath(app.getPath('userData'));
+  const userDataPath = canonicalizeExistingPath(config.userDataPath);
+  if (pathsOverlap(applicationProfile, userDataPath)) {
     throw new Error(
       'PIONEER_ACCEPTANCE_USER_DATA must not overlap the application profile directory',
     );

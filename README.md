@@ -107,6 +107,7 @@ pnpm dev
 | `pnpm test:contract`     | 共享契约、路径遏制、IPC 与 sender 校验、设置存储与 Tabs                                                               |
 | `pnpm test:prototype`    | 冻结的 M1 模拟器 210 项用例，属 Prototype Tests 证据，不是 Electron 证据                                              |
 | `pnpm test:e2e`          | Playwright 启动真实 Electron，跨 main → preload → renderer，并校验 fixture 未被改动                                   |
+| `pnpm acceptance:packaged` | 重新打包并启动 `@pioneer-desktop.exe`，经 `PIONEER_ACCEPTANCE=1` 跑通一次只读运行；不进 `pnpm check`                  |
 | `pnpm check`             | 依次跑格式、lint、类型、上述三层测试与 package smoke                                                                  |
 
 最近一次完整门禁记录在 2026-10-27（分支 `codex/issue13-remaining`，见 [Issue #13 验证记录](docs/testing/issue13-verification.md)）：契约 348/348（36 文件）、冻结原型 210/210（Prototype Tests）、真实 Electron 27/27、仓库规范化 6/6。数字随提交变化，引用时带上日期与版本。

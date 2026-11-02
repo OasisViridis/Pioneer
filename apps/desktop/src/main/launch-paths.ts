@@ -1,5 +1,13 @@
 import { lstatSync, realpathSync, statSync } from 'node:fs';
-import { basename, dirname, isAbsolute, join, relative, sep } from 'node:path';
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
+} from 'node:path';
 
 /** Launch variables whose values must be validated before the app reads them. */
 export type LaunchPathVariable =
@@ -87,6 +95,35 @@ export function requireAbsoluteOutputFile(
       { cause: error },
     );
   }
+}
+
+/**
+ * Canonicalises a path that may not exist yet: the nearest existing ancestor is
+ * resolved through `realpath`, and the missing tail is appended unchanged. This
+ * keeps a junction or an alias in a parent directory from hiding an overlap.
+ */
+export function canonicalizeExistingPath(value: string): string {
+  let current = resolve(value);
+  const missing: string[] = [];
+  for (;;) {
+    try {
+      const resolvedAncestor = realpathSync(current);
+      return join(resolvedAncestor, ...missing);
+    } catch {
+      const parent = dirname(current);
+      if (parent === current) return resolve(value);
+      missing.unshift(basename(current));
+      current = parent;
+    }
+  }
+}
+
+/** True when either path is inside or equal to the other. */
+export function pathsOverlap(firstPath: string, secondPath: string): boolean {
+  return (
+    isPathInsideOrEqual(firstPath, secondPath) ||
+    isPathInsideOrEqual(secondPath, firstPath)
+  );
 }
 
 /**

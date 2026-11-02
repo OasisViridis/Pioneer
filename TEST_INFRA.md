@@ -24,7 +24,7 @@ Packaged Acceptance is deliberately outside `pnpm check` because it repackages t
 - No renderer mock can support a Real E2E claim: that claim requires the Electron main → preload → renderer flow against filesystem fixtures.
 - Packaged Acceptance is a packaged-artifact proof, not a provider proof: it uses the deterministic controlled adapter, so it does not show a real model provider working inside the shipped build. See [`docs/testing/issue53-packaged-acceptance.md`](docs/testing/issue53-packaged-acceptance.md) and [`docs/testing/issue13-real-provider.md`](docs/testing/issue13-real-provider.md).
 - Playwright's `_electron.launch` cannot attach to the shipped build because the `EnableNodeCliInspectArguments` fuse is off; the packaged acceptance spec therefore drives the renderer over CDP. Terminal state comes from the main-process startup report and the run journal, while the renderer is only asked what a person would see: the run status, the run-log panel and the tool result text.
-- The report's `channels` field lists every IPC channel name this build wires, and the spec compares the whole list with the shared contract maps; it is a wiring inventory, not a claim that a channel was exercised.
+- The report's `channels` field and the spec's expectation both come from `acceptanceChannels()`, which reads the shared contract maps. Agreeing lists therefore prove the packaged asar carries the current channel table rather than a stale one; they do not prove a handler was registered or exercised at runtime.
 - See [`TEST_READY.md`](TEST_READY.md) for the historical M1 readiness record, not a current product-runtime certification.
 
 ## Current commands
