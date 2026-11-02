@@ -5,7 +5,10 @@ import { scanWorkspace } from './catalog/scanner';
 import { registerCatalogIpc } from './ipc';
 import { IPC_CHANNELS } from '../shared/contracts/ipc';
 import { applyLaunchRuntimeConfig } from './runtime-config';
-import { applyPackagedAcceptanceConfig } from './acceptance-config';
+import {
+  applyPackagedAcceptanceConfig,
+  type PackagedAcceptanceConfig,
+} from './acceptance-config';
 import {
   buildPackagedAcceptanceReport,
   writePackagedAcceptanceReport,
@@ -48,6 +51,32 @@ let windowEpochCounter = 0;
 let activeWindowBinding: { webContentsId: number; epoch: number } | null = null;
 const acceptedSaves = createPendingSaveTracker();
 const launchStartedAt = new Date().toISOString();
+
+/**
+ * Writes the packaged acceptance startup report after the workspace is
+ * selected and the window exists, so it describes what this launch assembled.
+ * Every other launch writes nothing.
+ */
+async function writeAcceptanceReportIfConfigured(dependencies: {
+  config: PackagedAcceptanceConfig;
+  catalog: ReturnType<CatalogService['getCurrentCatalog']>;
+  runHost: AssembledRunHost;
+}): Promise<void> {
+  const report = buildPackagedAcceptanceReport({
+    isPackaged: app.isPackaged,
+    electronVersion: process.versions.electron,
+    nodeVersion: process.versions.node,
+    platform: process.platform,
+    processId: process.pid,
+    startedAt: launchStartedAt,
+    userDataRoot: app.getPath('userData'),
+    executablePath: app.getPath('exe'),
+    catalog: dependencies.catalog,
+    runHost: dependencies.runHost,
+    now: () => new Date(),
+  });
+  await writePackagedAcceptanceReport(dependencies.config.reportPath, report);
+}
 
 // This must run before app readiness can construct Chromium session state.
 const launchRuntimeConfig = applyLaunchRuntimeConfig(app);
@@ -427,20 +456,11 @@ void app.whenReady().then(async () => {
   appLifecycle.markReady();
 
   if (acceptanceConfig !== null) {
-    const report = buildPackagedAcceptanceReport({
-      isPackaged: app.isPackaged,
-      electronVersion: process.versions.electron,
-      nodeVersion: process.versions.node,
-      platform: process.platform,
-      processId: process.pid,
-      startedAt: launchStartedAt,
-      userDataRoot: app.getPath('userData'),
-      executablePath: app.getPath('exe'),
+    await writeAcceptanceReportIfConfigured({
+      config: acceptanceConfig,
       catalog: catalogService.getCurrentCatalog(),
       runHost: assembledRunHost,
-      now: () => new Date(),
     });
-    await writePackagedAcceptanceReport(acceptanceConfig.reportPath, report);
   }
 
   app.on('activate', () => {

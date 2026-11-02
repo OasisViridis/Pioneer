@@ -17,6 +17,7 @@ import {
   test,
   type Browser,
   type Page,
+  type TestInfo,
 } from '@playwright/test';
 
 import type { PackagedAcceptanceConfig } from '../../apps/desktop/src/main/acceptance-config';
@@ -355,8 +356,8 @@ const findPackagedWindow = (browser: Browser): Promise<Page> =>
           `AMBIGUOUS_WINDOW: ${windows.map((page) => page.url()).join(', ')}`,
         );
       }
-      const [window] = windows;
-      return window ?? null;
+      const [page] = windows;
+      return page ?? null;
     },
   });
 
@@ -534,6 +535,66 @@ const assertJournalRecords = (
   return terminal;
 };
 
+/**
+ * Checks the main-process startup report against this launch: the packaged
+ * build, the child process that produced it, the fixture workspace, the
+ * isolated profile and the full IPC channel table.
+ */
+const assertStartupReport = (options: {
+  report: PackagedAcceptanceReport;
+  processId: number | undefined;
+  userDataPath: string;
+}): { id: string; name: string; absolutePath: string } => {
+  const { report } = options;
+  expect(report.kind).toBe('pioneer-packaged-acceptance-startup');
+  expect(report.schemaVersion).toBe(1);
+  expect(
+    report.isPackaged,
+    'the acceptance run must exercise a packaged build',
+  ).toBe(true);
+  expect(report.processId).toBe(options.processId);
+  expect(report.adapterKind).toBe('controlled');
+  expect(report.adapterAvailable).toBe(true);
+  expectSamePath(
+    report.workspaceRoot,
+    fixtureRoot,
+    'startup report workspace root',
+  );
+  expectSamePath(
+    report.userDataRoot,
+    options.userDataPath,
+    'startup report user data root',
+  );
+  expectSamePath(
+    report.executablePath,
+    packagedExecutablePath,
+    'startup report executable path',
+  );
+  expect(report.projects.map((project) => project.name).sort()).toEqual([
+    'alpha-app',
+    'beta-notes',
+    'broken-metadata',
+  ]);
+  expect([...report.channels].sort()).toEqual(expectedChannels);
+  const alphaProject = report.projects.find(
+    (project) => project.name === 'alpha-app',
+  );
+  if (alphaProject === undefined) {
+    throw new Error('WORKSPACE_NOT_READY: startup report lacks alpha-app');
+  }
+  return alphaProject;
+};
+
+/** Attaches each captured file to the Playwright report. */
+const attachEvidence = async (
+  testInfo: TestInfo,
+  files: readonly (readonly [name: string, filePath: string])[],
+): Promise<void> => {
+  for (const [name, filePath] of files) {
+    await testInfo.attach(name, { path: filePath, contentType: 'image/png' });
+  }
+};
+
 test('the packaged build completes one read-only run through the acceptance seam', async ({}, testInfo) => {
   expect(
     existsSync(packagedExecutablePath),
@@ -612,56 +673,27 @@ test('the packaged build completes one read-only run through the acceptance seam
       `http://127.0.0.1:${String(launchedApp.port)}`,
       { timeout: 30_000 },
     );
-    const window = await findPackagedWindow(browser);
-    await expect(window).toHaveTitle('Pioneer');
+    const page = await findPackagedWindow(browser);
+    await expect(page).toHaveTitle('Pioneer');
 
     startupReport = await readStartupReport(reportPath);
-    expect(startupReport.kind).toBe('pioneer-packaged-acceptance-startup');
-    expect(startupReport.schemaVersion).toBe(1);
-    expect(
-      startupReport.isPackaged,
-      'the acceptance run must exercise a packaged build',
-    ).toBe(true);
-    expect(startupReport.processId).toBe(launchedApp.child.pid);
-    expect(startupReport.adapterKind).toBe('controlled');
-    expect(startupReport.adapterAvailable).toBe(true);
-    expectSamePath(
-      startupReport.workspaceRoot,
-      fixtureRoot,
-      'startup report workspace root',
-    );
-    expectSamePath(
-      startupReport.userDataRoot,
+    const alphaProject = assertStartupReport({
+      report: startupReport,
+      processId: launchedApp.child.pid,
       userDataPath,
-      'startup report user data root',
-    );
-    expectSamePath(
-      startupReport.executablePath,
-      packagedExecutablePath,
-      'startup report executable path',
-    );
-    expect(
-      startupReport.projects.map((project) => project.name).sort(),
-    ).toEqual(['alpha-app', 'beta-notes', 'broken-metadata']);
-    expect([...startupReport.channels].sort()).toEqual(expectedChannels);
-    const alphaProject = startupReport.projects.find(
-      (project) => project.name === 'alpha-app',
-    );
-    if (alphaProject === undefined) {
-      throw new Error('WORKSPACE_NOT_READY: startup report lacks alpha-app');
-    }
+    });
 
     // The renderer must show the same workspace main reported.
     await expect(
-      window.getByRole('button', {
+      page.getByRole('button', {
         name: 'Open project alpha-app',
         exact: true,
       }),
     ).toBeVisible({ timeout: 30_000 });
-    await newSessionForProject(window, 'alpha-app');
+    await newSessionForProject(page, 'alpha-app');
 
     // Every dockable panel the packaged workbench offers, read from the UI.
-    const moduleMenu = window.locator('details.module-picker');
+    const moduleMenu = page.locator('details.module-picker');
     await moduleMenu.locator('summary').click();
     for (const panelName of ['上下文', '能力', '运行日志', '改动', '产物']) {
       await expect(
@@ -671,21 +703,21 @@ test('the packaged build completes one read-only run through the acceptance seam
     await moduleMenu
       .getByRole('button', { name: '+ 运行日志', exact: true })
       .click();
-    await window.keyboard.press('Escape');
-    const runLogPanel = window.locator('.dock-panel[data-panel-id="runlog"]');
+    await page.keyboard.press('Escape');
+    const runLogPanel = page.locator('.dock-panel[data-panel-id="runlog"]');
     await expect(runLogPanel).toBeVisible();
 
-    await window.locator('details.run-log summary').click();
-    await window
+    await page.locator('details.run-log summary').click();
+    await page
       .getByRole('textbox', { name: '运行任务' })
       .fill('读取 alpha-app 的 README.md 并总结内容。');
-    await window.getByRole('button', { name: '启动运行' }).click();
+    await page.getByRole('button', { name: '启动运行' }).click();
 
     await expect(
-      window.getByText('工具请求：read_file', { exact: true }),
+      page.getByText('工具请求：read_file', { exact: true }),
     ).toBeVisible({ timeout: runTimeoutMs });
     await expect(
-      window.locator('.run-status', { hasText: '已完成' }),
+      page.locator('.run-status', { hasText: '已完成' }),
     ).toBeVisible({ timeout: runTimeoutMs });
 
     transcript = await runLogPanel.innerText();
@@ -699,19 +731,15 @@ test('the packaged build completes one read-only run through the acceptance seam
 
     // Two distinct frames: the window with the run controls and terminal
     // status in view, then the run-log panel with the tool exchange.
-    const runStatus = window.locator('.run-status');
+    const runStatus = page.locator('.run-status');
     await runStatus.scrollIntoViewIfNeeded();
     await expect(runStatus).toBeInViewport();
-    await window.screenshot({ path: statusScreenshotPath });
+    await page.screenshot({ path: statusScreenshotPath });
     await runLogPanel.screenshot({ path: eventsScreenshotPath });
-    await testInfo.attach('packaged-run-status.png', {
-      path: statusScreenshotPath,
-      contentType: 'image/png',
-    });
-    await testInfo.attach('packaged-run-events.png', {
-      path: eventsScreenshotPath,
-      contentType: 'image/png',
-    });
+    await attachEvidence(testInfo, [
+      ['packaged-run-status.png', statusScreenshotPath],
+      ['packaged-run-events.png', eventsScreenshotPath],
+    ]);
 
     journal = await waitForJournal(journalPath);
     assertJournalRecords(journal, alphaProject.id, transcript);

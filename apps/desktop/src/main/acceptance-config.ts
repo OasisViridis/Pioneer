@@ -63,6 +63,15 @@ function requireEvidenceFile(
   return filePath;
 }
 
+/** Two launch paths may not be, contain or sit inside one another. */
+function requireDisjoint(
+  firstPath: string,
+  secondPath: string,
+  message: string,
+): void {
+  if (pathsOverlap(firstPath, secondPath)) throw new Error(message);
+}
+
 /**
  * Resolves the packaged acceptance seam. A launch without the exact switch
  * returns null, so an unrelated or leftover environment variable cannot change
@@ -89,21 +98,21 @@ export function resolvePackagedAcceptanceConfig(
     environment.PIONEER_ACCEPTANCE_EVIDENCE,
   );
 
-  if (pathsOverlap(workspacePath, userDataPath)) {
-    throw new Error(
-      'PIONEER_ACCEPTANCE_WORKSPACE and PIONEER_ACCEPTANCE_USER_DATA must be disjoint',
-    );
-  }
-  if (pathsOverlap(workspacePath, evidencePath)) {
-    throw new Error(
-      'PIONEER_ACCEPTANCE_EVIDENCE must be disjoint from PIONEER_ACCEPTANCE_WORKSPACE',
-    );
-  }
-  if (pathsOverlap(userDataPath, evidencePath)) {
-    throw new Error(
-      'PIONEER_ACCEPTANCE_EVIDENCE must be disjoint from PIONEER_ACCEPTANCE_USER_DATA',
-    );
-  }
+  requireDisjoint(
+    workspacePath,
+    userDataPath,
+    'PIONEER_ACCEPTANCE_WORKSPACE and PIONEER_ACCEPTANCE_USER_DATA must be disjoint',
+  );
+  requireDisjoint(
+    workspacePath,
+    evidencePath,
+    'PIONEER_ACCEPTANCE_EVIDENCE must be disjoint from PIONEER_ACCEPTANCE_WORKSPACE',
+  );
+  requireDisjoint(
+    userDataPath,
+    evidencePath,
+    'PIONEER_ACCEPTANCE_EVIDENCE must be disjoint from PIONEER_ACCEPTANCE_USER_DATA',
+  );
 
   const reportPath = requireEvidenceFile(
     'PIONEER_ACCEPTANCE_REPORT',
@@ -144,22 +153,21 @@ export function applyPackagedAcceptanceConfig(
   if (config === null) return null;
 
   const applicationProfile = canonicalizeExistingPath(app.getPath('userData'));
-  const userDataPath = canonicalizeExistingPath(config.userDataPath);
-  if (pathsOverlap(applicationProfile, userDataPath)) {
-    throw new Error(
-      'PIONEER_ACCEPTANCE_USER_DATA must not overlap the application profile directory',
-    );
-  }
-  if (pathsOverlap(applicationProfile, config.evidencePath)) {
-    throw new Error(
-      'PIONEER_ACCEPTANCE_EVIDENCE must not overlap the application profile directory',
-    );
-  }
-  if (pathsOverlap(applicationProfile, config.workspacePath)) {
-    throw new Error(
-      'PIONEER_ACCEPTANCE_WORKSPACE must not overlap the application profile directory',
-    );
-  }
+  requireDisjoint(
+    applicationProfile,
+    canonicalizeExistingPath(config.userDataPath),
+    'PIONEER_ACCEPTANCE_USER_DATA must not overlap the application profile directory',
+  );
+  requireDisjoint(
+    applicationProfile,
+    config.evidencePath,
+    'PIONEER_ACCEPTANCE_EVIDENCE must not overlap the application profile directory',
+  );
+  requireDisjoint(
+    applicationProfile,
+    config.workspacePath,
+    'PIONEER_ACCEPTANCE_WORKSPACE must not overlap the application profile directory',
+  );
 
   app.setPath('userData', config.userDataPath);
   return config;

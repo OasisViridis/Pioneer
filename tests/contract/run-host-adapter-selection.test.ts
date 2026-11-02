@@ -12,20 +12,16 @@ const developmentGate = {
 
 describe('run host adapter selection', () => {
   it('uses the Pi adapter when no launch seam is active', () => {
-    expect(selectRunHostAdapter({}, developmentGate)).toEqual({
-      kind: 'pi',
-      scriptPath: null,
-    });
+    expect(selectRunHostAdapter({}, developmentGate)).toEqual({ kind: 'pi' });
     expect(
       selectRunHostAdapter(
         { PIONEER_E2E_RUN_ADAPTER: 'controlled' },
         developmentGate,
       ),
-    ).toEqual({ kind: 'pi', scriptPath: null });
+    ).toEqual({ kind: 'pi' });
     expect(selectRunHostAdapter({ PIONEER_E2E: '1' }, developmentGate)).toEqual(
       {
         kind: 'pi',
-        scriptPath: null,
       },
     );
   });
@@ -64,7 +60,7 @@ describe('run host adapter selection', () => {
         },
         { isPackaged: true, acceptanceRunScriptPath: null },
       ),
-    ).toEqual({ kind: 'pi', scriptPath: null });
+    ).toEqual({ kind: 'pi' });
   });
 
   it('selects the controlled adapter only from a packaged acceptance script', () => {

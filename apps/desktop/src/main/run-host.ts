@@ -1,4 +1,5 @@
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { RunJournal, type RunJournalStore } from './harness/run-journal';
@@ -20,11 +21,13 @@ import {
   resolvePiRuntimeConfig,
 } from './harness/pi-adapter';
 
-/** Atomic whole-file journal storage: temp write + rename in userData/runs. */
+/**
+ * Atomic whole-file journal storage: a uniquely named temporary sibling plus a
+ * rename, cleaned up on failure, so two writers can never share one temp file.
+ */
 export function createFileJournalStore(userDataPath: string): RunJournalStore {
   const directory = join(userDataPath, 'runs');
   const file = join(directory, 'journal.jsonl');
-  const temp = join(directory, 'journal.tmp');
   return {
     load: async () => {
       try {
@@ -35,8 +38,14 @@ export function createFileJournalStore(userDataPath: string): RunJournalStore {
     },
     save: async (content: string) => {
       await mkdir(directory, { recursive: true });
-      await writeFile(temp, content, 'utf-8');
-      await rename(temp, file);
+      const temp = join(directory, `journal.${randomUUID()}.tmp`);
+      try {
+        await writeFile(temp, content, { encoding: 'utf-8', flag: 'wx' });
+        await rename(temp, file);
+      } catch (error) {
+        await rm(temp, { force: true }).catch(() => undefined);
+        throw error;
+      }
     },
   };
 }
@@ -63,10 +72,14 @@ export interface AssembledRunHost {
 type RunManagerResolveProject = RunManagerDependencies['resolveProject'];
 export type { ProjectBinding, WindowBindingPort, RunSenderPort };
 
-export interface RunHostAdapterSelection {
-  kind: 'controlled' | 'pi';
-  scriptPath: string | null;
-}
+/**
+ * The adapter source this launch may use. `controlled` carries the script it
+ * must load (null means the adapter's default script); `pi` carries nothing, so
+ * an illegal "Pi with a script" state cannot be written down.
+ */
+export type RunHostAdapterSelection =
+  | { readonly kind: 'controlled'; readonly scriptPath: string | null }
+  | { readonly kind: 'pi' };
 
 export interface RunHostLaunchGate {
   isPackaged: boolean;
@@ -87,7 +100,7 @@ export function selectRunHostAdapter(
 ): RunHostAdapterSelection {
   if (gate.isPackaged) {
     return gate.acceptanceRunScriptPath === null
-      ? { kind: 'pi', scriptPath: null }
+      ? { kind: 'pi' }
       : { kind: 'controlled', scriptPath: gate.acceptanceRunScriptPath };
   }
 
@@ -103,7 +116,7 @@ export function selectRunHostAdapter(
     };
   }
 
-  return { kind: 'pi', scriptPath: null };
+  return { kind: 'pi' };
 }
 
 /**
