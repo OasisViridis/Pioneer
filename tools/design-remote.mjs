@@ -1,5 +1,10 @@
 import { execFileSync } from 'node:child_process';
 
+// A plain rerun can resolve these; permanent input, scope or credential errors
+// need a human to change something first.
+const transientStates = new Set(['rate-limited', 'retryable-error']);
+export const retryableState = (state) => transientStates.has(state);
+
 // Credentials stay in the transport; errors never echo server bodies or tokens.
 export function remoteFailure(error) {
   const status = Number(error.status) || null;
@@ -13,7 +18,9 @@ export function remoteFailure(error) {
             ? 'invalid-input'
             : error.code === 'ENOENT' || status === 404
               ? 'missing-input'
-              : 'retryable-error')),
+              : [400, 422].includes(status)
+                ? 'invalid-input'
+                : 'retryable-error')),
     status,
     retryAfter: error.retryAfter ?? null,
   };

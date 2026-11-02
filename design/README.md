@@ -4,7 +4,7 @@
 
 ## 唯一生产输入
 
-- [tokens/pioneer.tokens.json](tokens/pioneer.tokens.json)：26 个 DTCG token，单 Light。Git 审阅接受，Figma 提出设计变更。
+- [tokens/pioneer.tokens.json](tokens/pioneer.tokens.json)：27 个 DTCG token，单 Light。Git 审阅接受，Figma 提出设计变更。
 - [生成 CSS](../apps/desktop/src/renderer/styles/tokens.css)：Style Dictionary 5.7.1 的标准 CSS transform/format，保留语义引用。只运行 `pnpm tokens:build`，禁止手改。
 - [逐项差异](sync/token-diff.md)和 [101 项决定/版本/哈希](sync/evidence.json)：颜色、字体、几何、别名、F9 补充值、原生 modes 和历史材料的处理依据。
 

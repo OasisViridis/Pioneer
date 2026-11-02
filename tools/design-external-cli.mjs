@@ -7,7 +7,12 @@ import {
   eventRequest,
   persistEventMaterial,
 } from './design-events.mjs';
-import { figmaApi, githubApi, remoteFailure } from './design-remote.mjs';
+import {
+  figmaApi,
+  githubApi,
+  remoteFailure,
+  retryableState,
+} from './design-remote.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command, ...args] = process.argv.slice(2);
@@ -85,7 +90,7 @@ try {
     process.exitCode = 1;
 } catch (error) {
   const failure = remoteFailure(error);
-  const result = { ...failure, retryable: failure.state !== 'review-required' };
+  const result = { ...failure, retryable: retryableState(failure.state) };
   await save('receipt.json', result);
   console.log(JSON.stringify(result));
   process.exitCode = 1;

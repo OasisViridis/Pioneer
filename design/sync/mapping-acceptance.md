@@ -28,9 +28,9 @@ PanelTab 由 S0 的被否决候选 LocalTabs 改为已接受 main 中的 DockSur
 - `design-mappings.e2e.spec.ts`：真实目录卡片、目录不可验证时拒绝打开、Rescan 恢复；两条会话的 Active/Inactive 样式、关闭与重开；面板焦点、拖动、收起及草稿不变。
 - `p2-run.e2e.spec.ts`：已运行会话关闭标签后重新打开仍在运行，随后由用户显式停止；保留真实 main → preload → renderer 与 fixture 哈希验证。
 - `tab-strip.e2e.spec.ts` 与 `p1-session.e2e.spec.ts`：沿用键盘导航、关闭后的焦点恢复与布局持久化证据。
-- `design-decoration.e2e.spec.ts`：当前单工作区的十一种会话主题、运行时资源哈希、尺寸、文字安全间距、窄屏隐藏、重启稳定性与消息/错误状态。
+- `design-decoration.e2e.spec.ts`：当前单工作区的十一种会话主题、运行时资源哈希、尺寸、文字安全间距、窄屏隐藏、重启稳定性与消息状态；目录错误/重试由 `catalog-state` 覆盖。
 
-这些文件必须出现在 Playwright 的实际 `testMatch` 中。`design:check` 校验索引与测试注册，不能替代执行；`design:acceptance` 会运行完整 `pnpm check`，包括真实 Electron 用例，再检查三个映射无未完成项。CI 上传 `s1-visual-evidence` 截图供回读。结果以具体提交的 CI 为准，不将测试名称或截图计划当作通过记录。
+这些文件必须出现在 Playwright 的实际 `testMatch` 中。`design:check` 校验索引与测试注册，不能替代执行；`design:acceptance` 会运行完整 `pnpm check`，包括真实 Electron 用例，再检查三个映射无未完成项。CI 上传 `electron-evidence-<sha>`（行为与设计证据）和 `visual-comparison-<sha>`（视觉比较报告）供回读。结果以具体提交的 CI 为准，不将测试名称或截图计划当作通过记录。
 
 ## 回退
 

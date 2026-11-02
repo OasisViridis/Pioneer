@@ -8,6 +8,7 @@ import {
 } from '../../tools/design-delivery.mjs';
 import { writeback } from '../../tools/design-writeback-apply.mjs';
 import { planWriteback } from '../../tools/design-writeback.mjs';
+import { remoteFailure, retryableState } from '../../tools/design-remote.mjs';
 
 const policy = JSON.parse(
   await readFile('design/delivery/features.json', 'utf8'),
@@ -323,4 +324,27 @@ test('readback failure reports an unknown write outcome and remains retryable', 
   assert.equal(result.writeOutcome, 'unknown');
   assert.equal(result.retryable, true);
   assert.equal(writes, 1);
+});
+
+test('transport failure classes separate permanent input/scope errors from retryable ones', () => {
+  assert.equal(remoteFailure({ status: 400 }).state, 'invalid-input');
+  assert.equal(remoteFailure({ status: 422 }).state, 'invalid-input');
+  assert.equal(remoteFailure({ status: 401 }).state, 'permission-denied');
+  assert.equal(remoteFailure({ status: 403 }).state, 'permission-denied');
+  assert.equal(remoteFailure({ status: 404 }).state, 'missing-input');
+  assert.equal(remoteFailure({ status: 429 }).state, 'rate-limited');
+  assert.equal(remoteFailure({ status: 503 }).state, 'retryable-error');
+  assert.equal(
+    remoteFailure(new Error('socket reset')).state,
+    'retryable-error',
+  );
+  for (const state of [
+    'invalid-input',
+    'permission-denied',
+    'missing-input',
+    'review-required',
+  ])
+    assert.equal(retryableState(state), false, state);
+  for (const state of ['rate-limited', 'retryable-error'])
+    assert.equal(retryableState(state), true, state);
 });

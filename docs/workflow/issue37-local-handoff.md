@@ -124,13 +124,15 @@ pnpm design:delivery verify <RETURNED_PR>
 | 项目           | 必须保留的真实证据                                                                                  |
 | -------------- | --------------------------------------------------------------------------------------------------- |
 | 回填           | merge SHA、同 SHA CI、原节点上的 Issue/PR/commit/CI/package/验收链接、回读结果                      |
-| 重试           | 真实部分失败/超时或可审计失败演练；恢复后只补缺项、不重复评论、不删除人工资源                       |
+| 重试           | 真实部分失败/超时**或**可审计失败演练；2026-11-03 已有本地演练 6/6（[记录](../testing/issue37-writeback-drill.md)），真实 Figma 部分失败仍未执行，不能算真实证据。恢复后只补缺项、不重复评论、不删除人工资源 |
 | Code Connect   | 官方 CLI 版本、dry-run、发布输出、节点读回；账户拒绝则保持 blocked                                  |
 | 事件成功       | Figma 投递记录 → 获准接收器 → S2 → Draft PR → 最终 head CI                                          |
 | 去重与错误路径 | 同一真实事件重放三次只有一个 PR；错 passcode、文件/节点越界、旧版本、普通编辑、循环、过期凭证、限流 |
 | 状态边界       | #33 Open、无自动 COMPLETED、真人/Provider 验收按实际记录，不借自动测试冒充                          |
 
 证据脱敏后写入 `docs/testing/issue37-verification.md` 并更新 PR；没有真实结果的格子保留未完成。所有提交最终重新执行 Windows `pnpm check` 与视觉 job。不要自动关闭 #37，直到它的回传、事件和错误路径全部满足。
+
+本地可复跑的回填故障演练：`node --test tests/design-sync/writeback-drill.test.mjs`（localhost 假服务，不使用 Figma 令牌）。
 
 ## 官方接口依据
 
