@@ -3,7 +3,7 @@
   "date": "2026-11-02",
   "evidenceKind": "packaged-acceptance-read-only-run",
   "issue": "https://github.com/OasisViridis/Pioneer/issues/53",
-  "validatedCodeCommit": "189353c9414fc559e504aae2e37df2f622893ec5",
+  "validatedCodeCommit": "0069d27300ab67636125f0ddf152e83c209acd63",
   "branch": "feat/p3-packaged-acceptance",
   "environment": {
     "platform": "win32-x64",
@@ -18,15 +18,15 @@
     "outcome": "passed",
     "exitCode": 0,
     "worktreeDirty": false,
-    "testDurationMs": 3000,
+    "testDurationMs": 3200,
     "executable": {
       "path": "apps/desktop/out/@pioneer-desktop-win32-x64/@pioneer-desktop.exe",
-      "sha256": "6d19930a96e7121fa0a3c8b1cfb2f7288ac134a654c03bbe2ebbb8694e257224",
+      "sha256": "13856f5bf3dc201038e89ae363b8567c9192606f9a952bc114f7886d89a903ad",
       "newerThanRunMarker": true
     },
     "packagedApp": {
       "path": "apps/desktop/out/@pioneer-desktop-win32-x64/resources/app.asar",
-      "sha256": "002602721e6f9665d6c7354aa6ec49d70846d0ff73f1a0552ef0ca7d3d4b9a94"
+      "sha256": "73b9cbdc9af88e7fb8ead5c5a696785f20d3b54496e17175cd88ed46d0c6f412"
     },
     "startupReport": {
       "isPackaged": true,
