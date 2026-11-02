@@ -1,10 +1,10 @@
 # Issue #53 验证记录：打包成品完成一次只读运行
 
-核对日期：2026-11-02。来源：[Issue #53](https://github.com/OasisViridis/Pioneer/issues/53)。基线 `main` `28e6882`（合并 PR #61 后），分支 `feat/p3-packaged-acceptance`，验证代码提交 `ee1db43`。机读摘要见 [issue53-acceptance.json](issue53-acceptance.json)。本机环境：Windows，Node 24.17.0，pnpm 11.7.0，Electron 44.2.0，electron-forge 7.11.2，Playwright 1.62.1。
+核对日期：2026-11-02。来源：[Issue #53](https://github.com/OasisViridis/Pioneer/issues/53)。基线 `main` `28e6882`（合并 PR #61 后），分支 `feat/p3-packaged-acceptance`，验证代码提交 `bb2d380`。机读摘要见 [issue53-acceptance.json](issue53-acceptance.json)。本机环境：Windows，Node 24.17.0，pnpm 11.7.0，Electron 44.2.0，electron-forge 7.11.2，Playwright 1.62.1。
 
 ## 结论
 
-`pnpm acceptance:packaged` 一次跑通：清空上一轮证据与打包产物并写本次运行标记 → 重新打包 → 启动 `@pioneer-desktop.exe` → 读到 fixture 工作区 → 外发材料自动勾选 → 写任务 → 启动运行 → `已完成` → 校验 journal、runlog 面板与 fixture 哈希。退出码 0，测试本体 3.3 秒，打包另计。
+`pnpm acceptance:packaged` 一次跑通：清空上一轮证据与打包产物并写本次运行标记 → 重新打包 → 启动 `@pioneer-desktop.exe` → 读到 fixture 工作区 → 外发材料自动勾选 → 写任务 → 启动运行 → `已完成` → 校验 journal、runlog 面板与 fixture 哈希。退出码 0，测试本体 3.2 秒，打包另计。
 
 ## 为什么不用 Playwright `_electron.launch`
 
@@ -33,7 +33,7 @@
 
 | 项           | 位置 / 命令                                                      | 结果                                                                                                                                                                |
 | ------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 一条命令     | `pnpm acceptance:packaged`                                       | 退出码 0；`1 passed (3.3s)` + 打包                                                                                                                                  |
+| 一条命令     | `pnpm acceptance:packaged`                                       | 退出码 0；`1 passed (3.2s)` + 打包                                                                                                                                  |
 | 启动报告     | `tmp/issue53-acceptance/latest/evidence/startup-report.json`     | `isPackaged: true`、`electronVersion: 44.2.0`、`workspaceRoot` 为 fixture 根、3 个项目、`adapterKind: controlled`、`executablePath` 与 out 目录 exe 相同、18 条通道 |
 | 运行 journal | `tmp/issue53-acceptance/latest/evidence/journal.jsonl`           | `accept` 与 `terminal` 各一条且 `runId` 一致，`status: completed`，`adapter: controlled`，无 tombstone                                                              |
 | runlog 面板  | `tmp/issue53-acceptance/latest/evidence/packaged-run-events.png` | 元素截图：`会话 · alpha-app`、journal 记录的那个 run id、`已完成`、`#4 工具请求：read_file`、`#5 工具结果：# Alpha app / An alpha application fixture.`             |
