@@ -14,7 +14,8 @@ import {
   type WriteStaleTarget,
   type WriteTarget,
   type WriteTargetOutcome,
-} from '../../shared/contracts/write-approval';
+} from '../../../shared/contracts/write-approval';
+import { sameFileIdentity, sameFileState, sha256OfBytes } from './file-state';
 import type { TargetObservation } from './observe-targets';
 
 /**
@@ -82,14 +83,6 @@ export interface RetainedPostImage {
   content: Uint8Array;
 }
 
-function sameState(a: WriteFileState, b: WriteFileState): boolean {
-  return a.bytes === b.bytes && a.sha256 === b.sha256;
-}
-
-function digestOf(content: Uint8Array): string {
-  return createHash('sha256').update(content).digest('hex');
-}
-
 /**
  * Checks the retained post-image before any write: every approved target must
  * have exactly one retained entry whose bytes hash to the reviewed SHA-256 and
@@ -115,7 +108,7 @@ export function checkRetainedPostImages(
       return { ok: false, rejection: reject('APPROVAL_REQUIRED') };
     if (
       content.byteLength !== target.after.bytes ||
-      digestOf(content) !== target.after.sha256
+      sha256OfBytes(content) !== target.after.sha256
     ) {
       return { ok: false, rejection: reject('APPROVAL_DIGEST_MISMATCH') };
     }
@@ -242,6 +235,32 @@ export type WriteScopeDecision =
  * the project root) is already enforced by the path schema and main's read-only
  * path policy, so this function owns the mode and protected-path rules only.
  */
+/**
+ * Protected paths match by path segment, at any depth and in any case: `.git`,
+ * `.git/config`, `vendor/x/.git/config` and `.GIT/config` are all refused,
+ * while a lookalike such as `.github/workflows` is not protected.
+ */
+function containsSegmentRun(
+  path: readonly string[],
+  protectedSegments: readonly string[],
+): boolean {
+  for (
+    let start = 0;
+    start + protectedSegments.length <= path.length;
+    start += 1
+  ) {
+    let matches = true;
+    for (let offset = 0; offset < protectedSegments.length; offset += 1) {
+      if (path[start + offset] !== protectedSegments[offset]) {
+        matches = false;
+        break;
+      }
+    }
+    if (matches) return true;
+  }
+  return false;
+}
+
 export function checkWriteScope(
   targets: readonly WriteTarget[],
   policy: WriteSandboxPolicy,
@@ -249,14 +268,13 @@ export function checkWriteScope(
   if (policy.mode === 'read_only')
     return { ok: false, code: 'SCOPE_READ_ONLY' };
   if (policy.mode === 'full_access') return { ok: true };
+  const protectedSegments = policy.protectedPaths.map((protectedPath) =>
+    protectedPath.toLowerCase().split('/'),
+  );
   for (const target of targets) {
-    for (const protectedPath of policy.protectedPaths) {
-      if (
-        target.path === protectedPath ||
-        target.path.startsWith(`${protectedPath}/`)
-      ) {
-        return { ok: false, code: 'SCOPE_PROTECTED_PATH' };
-      }
+    const segments = target.path.toLowerCase().split('/');
+    if (protectedSegments.some((run) => containsSegmentRun(segments, run))) {
+      return { ok: false, code: 'SCOPE_PROTECTED_PATH' };
     }
   }
   return { ok: true };
@@ -297,14 +315,32 @@ export function rejectedOutcomes(
   }));
 }
 
+/**
+ * Last journal record for one approved target. `kind` narrows the scan when a
+ * caller needs the applied record specifically (recovery) rather than the
+ * latest record of any kind (outcome summary).
+ */
 function lastRecordFor(
   records: readonly WriteChangeJournalRecord[],
   approvalId: string,
   path: string,
+): WriteChangeJournalRecord | null;
+function lastRecordFor(
+  records: readonly WriteChangeJournalRecord[],
+  approvalId: string,
+  path: string,
+  kind: 'applied',
+): Extract<WriteChangeJournalRecord, { kind: 'applied' }> | null;
+function lastRecordFor(
+  records: readonly WriteChangeJournalRecord[],
+  approvalId: string,
+  path: string,
+  kind?: WriteChangeJournalRecord['kind'],
 ): WriteChangeJournalRecord | null {
   let found: WriteChangeJournalRecord | null = null;
   for (const record of records) {
     if (record.approvalId !== approvalId || record.path !== path) continue;
+    if (kind !== undefined && record.kind !== kind) continue;
     found = record;
   }
   return found;
@@ -380,13 +416,6 @@ export interface RecoveryPlan {
   outOfScope: string[];
 }
 
-function sameIdentity(
-  a: NonNullable<TargetObservation['identity']>,
-  b: NonNullable<TargetObservation['identity']>,
-): boolean {
-  return a.fileId === b.fileId && a.birthtimeMs === b.birthtimeMs;
-}
-
 /**
  * Plans a recovery that only touches what this run applied. `restore` requires
  * the current bytes to still equal the post-image this run wrote and, when both
@@ -406,13 +435,13 @@ export function planRecovery(input: {
   const actions: RecoveryAction[] = [];
   const outOfScope: string[] = [];
   for (const target of input.approval.targets) {
-    const applied = input.records.find(
-      (record) =>
-        record.kind === 'applied' &&
-        record.approvalId === input.approval.approvalId &&
-        record.path === target.path,
+    const applied = lastRecordFor(
+      input.records,
+      input.approval.approvalId,
+      target.path,
+      'applied',
     );
-    if (applied === undefined) {
+    if (applied === null) {
       outOfScope.push(target.path);
       continue;
     }
@@ -437,17 +466,16 @@ export function planRecovery(input: {
     // run recorded an identity but the current observation cannot report one,
     // identity is unproven and the file stays a conflict; when the run itself
     // had no identity, content is the only evidence and it decides.
-    const appliedIdentity =
-      applied.kind === 'applied' ? applied.observedIdentity : null;
+    const appliedIdentity = applied.observedIdentity;
     const identityMatches =
       appliedIdentity === null ||
       (observation.identity !== null &&
-        sameIdentity(appliedIdentity, observation.identity));
+        sameFileIdentity(appliedIdentity, observation.identity));
     if (
       observation.state === 'changed' &&
       observation.observed !== null &&
       identityMatches &&
-      sameState(observation.observed, target.after)
+      sameFileState(observation.observed, target.after)
     ) {
       actions.push({
         path: target.path,

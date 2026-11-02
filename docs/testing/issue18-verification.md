@@ -1,8 +1,8 @@
 # Issue #18 验证记录：P4-D1 写入授权与恢复决策
 
-核对日期：2026-10-27。来源：[Issue #18](https://github.com/OasisViridis/Pioneer/issues/18)。基线：`origin/main` `b93d8e9`（PR #52 合并后）。分支：`docs/issue18-write-authorization`（自该基线检出）。交付：[PR #56](https://github.com/OasisViridis/Pioneer/pull/56)。
+核对日期：2026-11-02（rebase 到当前 `origin/main` 后复核）。来源：[Issue #18](https://github.com/OasisViridis/Pioneer/issues/18)。基线：`origin/main` `28e6882`。分支：`docs/issue18-write-authorization`（已 rebase 到该基线）。交付：[PR #56](https://github.com/OasisViridis/Pioneer/pull/56)。
 
-本记录只证明决策规格与规格探针的可执行结果，不证明写入功能已实现、已接线或已获人类确认。写入能力在本记录发布时仍为关闭状态。
+本记录只证明决策规格与规格探针的可执行结果，不证明写入功能已实现、已接入执行器或已获人类确认。写入能力在本记录发布时仍为关闭状态。
 
 ## 交付范围
 
@@ -10,9 +10,9 @@
 | --- | --- |
 | 决策规格 | [`docs/specs/2026-10-27-p4-write-authorization-and-recovery.md`](../specs/2026-10-27-p4-write-authorization-and-recovery.md)：四类许可关系、写入批准生命周期、保留内容、diffDigest 编码、陈旧审批拦截、沙箱边界（照抄 Codex 的权限分层）、部分完成状态、并发冲突与恢复规则、拒绝码、探针矩阵、威胁范围、12 项待人类确认决定、8 项留给 #19/#20 的决定 |
 | 数据契约 | [`apps/desktop/src/shared/contracts/write-approval.ts`](../../apps/desktop/src/shared/contracts/write-approval.ts)：批准记录、摘要、目标状态、逐路径结果、变更日志记录、撤销原因、沙箱模式与保护路径 |
-| 目标观察 | [`apps/desktop/src/main/write-approval/observe-targets.ts`](../../apps/desktop/src/main/write-approval/observe-targets.ts)：只读句柄读取、内容哈希、文件身份；不写、不删、不改名 |
+| 目标观察 | [`apps/desktop/src/main/harness/write-approval/observe-targets.ts`](../../apps/desktop/src/main/harness/write-approval/observe-targets.ts)：只读句柄读取、内容哈希、文件身份；不写、不删、不改名 |
 | 共享读取 | [`apps/desktop/src/main/harness/bounded-read.ts`](../../apps/desktop/src/main/harness/bounded-read.ts)：外发清单与写入观察共用的有界稳定读取；`egress-materials.ts` 改为调用它，错误码映射不变 |
-| 纯决策 | [`apps/desktop/src/main/write-approval/decision.ts`](../../apps/desktop/src/main/write-approval/decision.ts)：批准判定、保留内容核对、撤销、完成标记、逐路径结果、恢复计划、沙箱作用域判定；不触碰文件系统 |
+| 纯决策 | [`apps/desktop/src/main/harness/write-approval/decision.ts`](../../apps/desktop/src/main/harness/write-approval/decision.ts)：批准判定、保留内容核对、撤销、完成标记、逐路径结果、恢复计划、沙箱作用域判定；不触碰文件系统 |
 | 探针测试 | [`tests/contract/write-approval.test.ts`](../../tests/contract/write-approval.test.ts)：103 项 Contract Tests |
 | 词表 | [`GLOSSARY.md`](../../GLOSSARY.md)：新增「写入批准（Write Approval）」「变更日志（Change Journal）」 |
 
@@ -23,7 +23,7 @@
 | 项 | 命令/位置 | 结果 |
 | --- | --- | --- |
 | 仓库规范化 | `pnpm verify:repository` | 6/6 通过 |
-| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 103/103 通过 |
+| 定向探针 | `pnpm exec vitest run tests/contract/write-approval.test.ts` | 103/103 通过；其中 2 条在平台不报告文件身份或无符号链接权限时会显式 `skip`（本机未触发，日志保留实际计数） |
 | 受影响既有测试 | `egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` | 123/123 通过 |
 | 完整门禁 | `pnpm check` | 见下方"门禁结果" |
 | 类型 | `pnpm typecheck`、`pnpm test:contract:types` | 通过 |
@@ -32,14 +32,14 @@
 
 ### 门禁结果
 
-最终 `pnpm check`（日志 `tmp/issue18/full-check-8.log`，2026-10-29）退出码 0：
+最终 `pnpm check`（日志 `tmp/issue18/full-check-10.log`，2026-11-02）退出码 0：
 
-- Contract Tests：451/451 通过（37 个测试文件，含本票 103 项）；
+- Contract Tests：497/497 通过（40 个测试文件，含本票 103 项）；
 - Prototype Tests：210/210 通过；
-- Real Electron E2E：27/27 通过（先 build 再运行）；
+- Real Electron E2E：39/39 通过（先 build 再运行）；
 - 最终 package smoke：Electron Forge 打包完成，`Packaging for x64 on win32` 与 postPackage hook 均成功。
 
-该门禁覆盖第四轮改动（沙箱模式、保护路径、作用域判定与 `SCOPE_DENIED`）之后的最终代码树。之后的改动只有 Markdown 规格与验证记录文本，不进入 `pnpm check`；仓库规范化的最终结果见上方"验证证据"表。
+该门禁跑在 rebase 到 `origin/main` `28e6882` 之后的代码树上，覆盖第一轮审查修复（模块移入 harness、保护路径按段与大小写匹配、共享 file-state 助手、拒绝码收窄、cwd 无关的测试路径）。之后的改动只有 Markdown 文本，不进入 `pnpm check`。
 
 ### 编辑过程事故与修复
 

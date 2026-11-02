@@ -14,6 +14,7 @@ import {
   writeFile,
 } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { join, sep } from 'node:path';
 
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -46,11 +47,11 @@ import {
   summarizeWriteOutcomes,
   type WriteApprovalContext,
   type WriteApprovalDecision,
-} from '../../apps/desktop/src/main/write-approval/decision';
+} from '../../apps/desktop/src/main/harness/write-approval/decision';
 import {
   observeWriteTarget,
   observeWriteTargets,
-} from '../../apps/desktop/src/main/write-approval/observe-targets';
+} from '../../apps/desktop/src/main/harness/write-approval/observe-targets';
 
 /**
  * Contract probes for the P4-D1 decision spec (#18). Every probe asserts an
@@ -60,6 +61,9 @@ import {
  */
 
 const AT = Date.parse('2026-10-27T12:00:00.000Z');
+
+/** Repo root resolved from this module, so the probes do not depend on cwd. */
+const sourceRootPath = fileURLToPath(new URL('../..', import.meta.url));
 
 function rejectionOf(decision: WriteApprovalDecision): WriteApprovalRejection {
   if (decision.ok) throw new Error('expected the approval to be rejected');
@@ -516,7 +520,13 @@ describe('write sandbox scope', () => {
   });
 
   it('keeps .git read-only even with an approval', () => {
-    for (const path of ['.git', '.git/config', '.git/hooks/pre-commit']) {
+    for (const path of [
+      '.git',
+      '.git/config',
+      '.git/hooks/pre-commit',
+      'vendor/x/.git/config',
+      '.GIT/config',
+    ]) {
       const targets = [targetOf(path, 'a', 'a2')];
       expect(
         checkWriteScope(targets, {
@@ -1495,7 +1505,7 @@ describe('write surface stays closed', () => {
   }
 
   it('keeps production write calls inside the existing reviewed files', async () => {
-    const sourceRoot = join(process.cwd(), 'apps/desktop/src');
+    const sourceRoot = join(sourceRootPath, 'apps/desktop/src');
     const files = await listSourceFiles(sourceRoot);
     const offenders: string[] = [];
     for (const file of files) {
@@ -1512,12 +1522,12 @@ describe('write surface stays closed', () => {
 
   it('adds no IPC channel or capability that exposes write approval', async () => {
     const ipc = await readFile(
-      join(process.cwd(), 'apps/desktop/src/shared/contracts/run-ipc.ts'),
+      join(sourceRootPath, 'apps/desktop/src/shared/contracts/run-ipc.ts'),
       'utf-8',
     );
     expect(ipc).not.toMatch(/write|approval/i);
     const run = await readFile(
-      join(process.cwd(), 'apps/desktop/src/shared/contracts/pioneer-run.ts'),
+      join(sourceRootPath, 'apps/desktop/src/shared/contracts/pioneer-run.ts'),
       'utf-8',
     );
     expect(run).not.toMatch(/capabilit/i);

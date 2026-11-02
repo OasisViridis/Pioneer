@@ -1,14 +1,14 @@
-import { createHash } from 'node:crypto';
-
 import {
   WRITE_APPROVAL_LIMITS,
   type WriteFileIdentity,
   type WriteFileState,
   type WriteTarget,
   type WriteTargetState,
-} from '../../shared/contracts/write-approval';
-import { BoundedReadError, readStableFile } from '../harness/bounded-read';
-import { checkReadOnlyToolRequest } from '../harness/read-only-tool-policy';
+} from '../../../shared/contracts/write-approval';
+import type { ReadOnlyToolRejection } from '../../../shared/contracts/read-only-tools';
+import { BoundedReadError, readStableFile } from '../bounded-read';
+import { checkReadOnlyToolRequest } from '../read-only-tool-policy';
+import { sameFileIdentity, sha256OfBytes } from './file-state';
 
 /**
  * Read-only target observation for the P4-D1 decision spec (#18).
@@ -33,7 +33,9 @@ export interface ObserveTargetOptions {
   afterRead?: () => Promise<void>;
 }
 
-function stateForRejection(code: string): WriteTargetState {
+function stateForRejection(
+  code: ReadOnlyToolRejection['error']['code'],
+): WriteTargetState {
   switch (code) {
     case 'LINK_NOT_ALLOWED':
       return 'link_not_allowed';
@@ -42,6 +44,8 @@ function stateForRejection(code: string): WriteTargetState {
     case 'PATH_UNAVAILABLE':
       return 'missing';
     default:
+      // Sensitive names, unavailable projects and malformed requests are all
+      // "this read cannot prove anything about the target".
       return 'unreadable';
   }
 }
@@ -59,10 +63,6 @@ function stateForReadFailure(code: BoundedReadError['code']): WriteTargetState {
   }
 }
 
-function digest(buffer: Buffer): string {
-  return createHash('sha256').update(buffer).digest('hex');
-}
-
 /**
  * `ino` is 0 on filesystems that do not report a file index; a birth time of 0
  * is likewise indistinguishable from "unknown". Either makes the identity
@@ -74,10 +74,6 @@ function identityOf(stats: {
 }): WriteFileIdentity | null {
   if (stats.ino === 0 || stats.birthtimeMs === 0) return null;
   return { fileId: String(stats.ino), birthtimeMs: stats.birthtimeMs };
-}
-
-function sameIdentity(a: WriteFileIdentity, b: WriteFileIdentity): boolean {
-  return a.fileId === b.fileId && a.birthtimeMs === b.birthtimeMs;
 }
 
 /** Observes one approved target; every failure is a named state, never silent. */
@@ -121,7 +117,7 @@ export async function observeWriteTarget(
   const observed: WriteFileState = {
     kind: 'file',
     bytes: read.bytesRead,
-    sha256: digest(read.buffer.subarray(0, read.bytesRead)),
+    sha256: sha256OfBytes(read.buffer.subarray(0, read.bytesRead)),
   };
   const identity = identityOf(read.before);
   // Content is the primary signal: a different byte stream is `changed` even
@@ -144,7 +140,7 @@ export async function observeWriteTarget(
         identity,
       };
     }
-    if (!sameIdentity(target.identity, identity)) {
+    if (!sameFileIdentity(target.identity, identity)) {
       return { path: target.path, state: 'replaced', observed, identity };
     }
   }

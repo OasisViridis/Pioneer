@@ -1,12 +1,12 @@
 # P4 写入授权与恢复规则（Issue #18）
 
-来源：[Issue #18](https://github.com/OasisViridis/Pioneer/issues/18)，属于[主地图 #9](https://github.com/OasisViridis/Pioneer/issues/9)。前置 [#13](https://github.com/OasisViridis/Pioneer/issues/13) 已于 2026-10-27 随 PR #52、PR #54 关闭，只读链在 `main` 可用。本票交付决策、威胁范围、状态与错误呈现和负向探针，**不开放任何写入能力**；基线为 `origin/main` `b93d8e9`。
+来源：[Issue #18](https://github.com/OasisViridis/Pioneer/issues/18)，属于[主地图 #9](https://github.com/OasisViridis/Pioneer/issues/9)。前置 [#13](https://github.com/OasisViridis/Pioneer/issues/13) 已于 2026-10-27 随 PR #52、PR #54 关闭，只读链在 `main` 可用。本票交付决策、威胁范围、状态与错误呈现和负向探针，**不开放任何写入能力**；基线为 `origin/main` `28e6882`。
 
 本票对应长期规格的用户故事 6、19—27，范围由[长期规格](2026-10-24-pioneer-long-term-development-spec.md) §5 与 #19、#20 两张实施票界定。写入执行、预览界面和恢复执行分别属于 #19、#20；本票只回答它们必须先遵守的规则。
 
 ## 本次决策与交付范围
 
-- 交付本规格、[写入批准契约](../../apps/desktop/src/shared/contracts/write-approval.ts)、[目标观察](../../apps/desktop/src/main/write-approval/observe-targets.ts)、[纯决策函数](../../apps/desktop/src/main/write-approval/decision.ts)、共享的[有界稳定读取](../../apps/desktop/src/main/harness/bounded-read.ts)与[探针测试](../../tests/contract/write-approval.test.ts)。
+- 交付本规格、[写入批准契约](../../apps/desktop/src/shared/contracts/write-approval.ts)、[目标观察](../../apps/desktop/src/main/harness/write-approval/observe-targets.ts)、[纯决策函数](../../apps/desktop/src/main/harness/write-approval/decision.ts)、共享的[有界稳定读取](../../apps/desktop/src/main/harness/bounded-read.ts)与[探针测试](../../tests/contract/write-approval.test.ts)。
 - 源码只做两件事：用只读句柄核对目标字节与文件身份，和对手里的记录做纯函数判定。它们不写、不删、不改名、不回滚任何文件，未接 IPC、preload、renderer 或 Run 管理器，`RunAuthorizationSummary` 与 `RUN_IPC_CHANNELS` 均未新增字段或通道。
 - 有界稳定读取从 `egress-materials.ts` 的私有实现提取为共享模块，外发清单与写入观察共用同一段读取与稳定性检查，避免两条安全路径漂移；外发侧的错误码映射保持不变。
 - 仍然关闭：用户项目文件写入、删除、改名、回滚、shell、命令执行、通用文件系统 IPC。仓库现有写入点只有 `userData` 目录下的设置、会话状态与运行日志，外加按环境变量写出的测试探针报告（[`run-host.ts`](../../apps/desktop/src/main/run-host.ts)、[`settings-store.ts`](../../apps/desktop/src/main/settings-store.ts)、[`session-state-store.ts`](../../apps/desktop/src/main/session-state-store.ts)、[`index.ts`](../../apps/desktop/src/main/index.ts)）。
@@ -167,7 +167,7 @@ renderer 只能看到序列化的 `WriteApprovalSummary`：批准编号、操作
 
 `full_access` 不等于任意磁盘访问：它只是不再额外施加"只写项目内"与保护路径这两层，路径语法与项目根确认仍然拦在前面；它也不是内核隔离，进程本身仍有宿主权限。
 
-保护路径默认 `.git`（`WRITE_PROTECTED_PATHS`）：`workspace_write` 下即使批准了也拒绝，恢复同样拒绝。按路径段比较，`.github/` 这类近似前缀不算保护路径。
+保护路径默认 `.git`（`WRITE_PROTECTED_PATHS`）：`workspace_write` 下即使批准了也拒绝，恢复同样拒绝。匹配按路径段、任意深度、大小写不敏感，因此 `.git/config`、`vendor/x/.git/config`、`.GIT/config` 都被拒绝；`.github/` 这类近似前缀不算保护路径。
 
 越界检查由两层组成：契约层拒绝绝对路径、`..`、反斜杠与设备名；main 在落盘前用只读路径策略解析真实路径并确认仍在项目根内（P2 已实现）。沙箱只补"模式"与"保护路径"，不重复实现这两层。
 
@@ -296,6 +296,8 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 矩阵的边界，逐条说清：
 
 - "同名重建"有一条真实删除后重建的探针，平台复用同一身份时会显式 `skip` 而不是静默通过；另有一条用改变的身份构造的确定性探针覆盖判定分支。
+- 当前有 2 条探针在平台限制下显式 `skip`（身份复用、无符号链接权限），验证记录的"定向探针"一行必须把它们与通过分开写，不能只报 103/103。
+- `readStableFile` 有一个 `afterRead` 测试钩子，用来确定性地制造"读取期间被改动"。这是本票对 Issue "不另建测试替换点" 的一次偏离：没有它测不到 `unstable` 分支；钩子只在构造选项时传入，生产调用不传，验证记录里单列。
 - `identity_unavailable` 由平台"批准时报告身份、本次读取不报告"产生，NTFS 上无法稳定制造；确定性探针用伪造的观察对象覆盖判定分支，观察函数的该分支不在本轮探针内。
 - `computeDiffDigest` 的探针复算规范 JSON 的 SHA-256，并断言输入变化会改变摘要；它不证明将来的预览界面渲染出的文本与摘要绑定，那属于 #19。
 - 沙箱探针只证明 `checkWriteScope` 的纯判定：模式、保护路径、近似前缀、默认值与非法模式。它不是内核级隔离的证明；Windows 上的受限 Token、job object 或 `mxc` 由 #19/#20 实测。
@@ -346,7 +348,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 ## 10. 验证记录
 
-2026-10-27 在 `docs/issue18-write-authorization`（自 `origin/main` `b93d8e9`）执行：
+2026-10-27 在 `docs/issue18-write-authorization`（自 `origin/main` `28e6882`）执行：
 
 - 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 103/103 通过。
 - 受影响既有测试：`egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` 共 123 项通过（共享读取重构未改变行为）。
