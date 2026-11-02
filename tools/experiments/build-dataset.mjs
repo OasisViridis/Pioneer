@@ -18,6 +18,7 @@ import path from 'node:path';
 
 import { parseArgs, requiredValue, runCli } from './lib/cli.mjs';
 import { validateDatasetRow } from './lib/dataset.mjs';
+import { findRepositoryRoot } from './lib/manifest.mjs';
 import {
   ExperimentError,
   PROTOCOL_ID,
@@ -81,7 +82,7 @@ function errorMessage(error) {
   return error instanceof Error ? error.message : String(error);
 }
 
-function assertUniqueAttemptIds(rows, attemptOwners, captureDir) {
+function assertUniqueAttemptIds(rows, attemptOwners) {
   for (const row of rows) {
     const owner = attemptOwners.get(row.attemptId);
     if (owner !== undefined) {
@@ -90,6 +91,78 @@ function assertUniqueAttemptIds(rows, attemptOwners, captureDir) {
       );
     }
   }
+}
+
+/**
+ * Recompute every corpus file hash from the repository root, then derive the
+ * corpus manifest hash that capture.json must carry. A missing corpus root is a
+ * hard failure (shallow checkout), never a silent skip.
+ */
+function verifyCorpus(tasks) {
+  if (tasks.corpus === undefined) {
+    throw new ExperimentError(
+      'tasks.json.corpus is required for corpus hash verification',
+    );
+  }
+  const root = findRepositoryRoot(process.cwd());
+  if (root === null) {
+    throw new ExperimentError(
+      'could not locate the repository root; run build-dataset from the repository root',
+    );
+  }
+  const corpusRoot = path.resolve(root, tasks.corpus.root);
+  if (!fs.existsSync(corpusRoot) || !fs.statSync(corpusRoot).isDirectory()) {
+    throw new ExperimentError(
+      `corpus root not found: ${tasks.corpus.root}; run build-dataset from the repository root (shallow checkout?)`,
+    );
+  }
+  const files = [...tasks.corpus.files].sort((left, right) =>
+    left.path < right.path ? -1 : left.path > right.path ? 1 : 0,
+  );
+  const verifiedFiles = [];
+  for (const file of files) {
+    const absolute = path.resolve(root, file.path);
+    const relative = path.relative(root, absolute);
+    if (relative.startsWith('..') || path.isAbsolute(relative)) {
+      throw new ExperimentError(
+        `corpus file is outside the repository: ${file.path}`,
+      );
+    }
+    if (!fs.existsSync(absolute)) {
+      throw new ExperimentError(`corpus file not found: ${file.path}`);
+    }
+    const buffer = fs.readFileSync(absolute);
+    const digest = sha256Hex(buffer);
+    if (digest !== file.sha256 || buffer.byteLength !== file.bytes) {
+      throw new ExperimentError(
+        `corpus file mismatch: ${file.path} (expected ${file.sha256}/${file.bytes}B, actual ${digest}/${buffer.byteLength}B)`,
+      );
+    }
+    verifiedFiles.push({
+      path: file.path,
+      sha256: digest,
+      bytes: buffer.byteLength,
+    });
+  }
+  const totalBytes = verifiedFiles.reduce(
+    (total, file) => total + file.bytes,
+    0,
+  );
+  if (
+    tasks.corpus.totalBytes !== undefined &&
+    tasks.corpus.totalBytes !== totalBytes
+  ) {
+    throw new ExperimentError(
+      `corpus totalBytes mismatch: expected ${tasks.corpus.totalBytes}, actual ${totalBytes}`,
+    );
+  }
+  return {
+    corpusId: tasks.corpus.corpusId,
+    manifestSha256: sha256Hex(JSON.stringify(verifiedFiles)),
+    fileCount: verifiedFiles.length,
+    totalBytes,
+    verified: true,
+  };
 }
 
 async function main() {
@@ -126,6 +199,7 @@ async function main() {
     );
   }
   const tasks = validateTasksDocument(tasksDocument, 'tasks.json');
+  const corpus = verifyCorpus(tasks);
 
   const captureDirectories = findCaptureDirectories(capturesRoot);
   if (captureDirectories.length === 0) {
@@ -142,6 +216,7 @@ async function main() {
       ...fileDigest(tasksBuffer),
       taskCount: tasks.tasks.size,
     },
+    corpus,
     captures: [],
     totals: {
       captures: 0,
@@ -213,12 +288,14 @@ async function main() {
           `capture.json.datasetVersion ${capture.datasetVersion} does not match tasks.json datasetVersion ${tasks.datasetVersion}`,
         );
       }
-      if (
-        tasks.corpus !== undefined &&
-        tasks.corpus.corpusId !== capture.environment.corpusId
-      ) {
+      if (capture.environment.corpusId !== corpus.corpusId) {
         throw new ExperimentError(
-          `capture.json.environment.corpusId does not match tasks.json corpus.corpusId`,
+          `capture.json.environment.corpusId does not match tasks.json corpus.corpusId "${corpus.corpusId}"`,
+        );
+      }
+      if (capture.environment.corpusManifestSha256 !== corpus.manifestSha256) {
+        throw new ExperimentError(
+          `capture.json.environment.corpusManifestSha256 mismatch (expected ${corpus.manifestSha256}, actual ${capture.environment.corpusManifestSha256})`,
         );
       }
 
@@ -246,7 +323,7 @@ async function main() {
           `emitted ${result.rows.length} rows for ${capture.attempts.length} registered attempts`,
         );
       }
-      assertUniqueAttemptIds(result.rows, attemptOwners, captureKey);
+      assertUniqueAttemptIds(result.rows, attemptOwners);
       for (const row of result.rows) {
         attemptOwners.set(row.attemptId, captureKey);
       }

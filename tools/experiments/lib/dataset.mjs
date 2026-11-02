@@ -7,12 +7,27 @@
  */
 
 import {
+  ExperimentError,
+  assertBoolean,
+  assertDatetime,
+  assertEnum,
+  assertExactKeys,
+  assertHash,
+  assertInteger,
+  assertObject,
+  assertString,
+  fail,
+  requireKeys,
+} from './assertions.mjs';
+import {
   ANSWER_BYTE_CAP,
   DATASET_RUN_STATUSES,
   DATASET_VERDICTS,
   EVIDENCE_KINDS,
+  NOT_RUN_REASON_CODES,
   OUTCOME_CLASSES,
   PROTOCOL_ID,
+  RUN_ADAPTERS,
   RUN_FAILURE_CODES,
   STOP_REASONS,
   TASK_CATEGORIES,
@@ -24,7 +39,7 @@ import {
 import {
   mean,
   median,
-  percentile,
+  quantile,
   round4,
   signTest,
   sum,
@@ -67,6 +82,7 @@ const RUN_KEYS = [
   'durationMs',
   'lastSeq',
   'toolCalls',
+  'notRunReason',
 ];
 const TOOL_CALL_KEYS = [
   'requested',
@@ -108,106 +124,9 @@ const ANSWERS_KEYS = [
   'answerBytes',
 ];
 
-const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const ATTEMPT_ID_PATTERN = /^[a-z0-9][a-z0-9-]{1,63}$/;
 const TASK_ID_PATTERN = /^t[0-9]{2}$/;
 const RUBRIC_ID_PATTERN = /^r[0-9]{2}$/;
-const ISO_DATETIME_PATTERN =
-  /^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?Z$/;
-
-class DatasetError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'DatasetError';
-  }
-}
-
-function fail(message) {
-  throw new DatasetError(message);
-}
-
-function isPlainObject(value) {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
-function assertObject(value, path) {
-  if (!isPlainObject(value)) fail(`${path}: expected an object`);
-}
-
-function assertExactKeys(value, path, allowed) {
-  for (const key of Object.keys(value)) {
-    if (!allowed.includes(key)) fail(`${path}: unknown field "${key}"`);
-  }
-}
-
-function requireKeys(value, path, keys) {
-  for (const key of keys) {
-    if (!Object.prototype.hasOwnProperty.call(value, key)) {
-      fail(`${path}: missing field "${key}"`);
-    }
-  }
-}
-
-function assertArray(value, path, options = {}) {
-  if (!Array.isArray(value)) fail(`${path}: expected an array`);
-  if (value.length < (options.min ?? 0)) {
-    fail(`${path}: expected at least ${options.min} item(s)`);
-  }
-}
-
-function assertString(value, path, options = {}) {
-  const {
-    min = 0,
-    max = Number.POSITIVE_INFINITY,
-    pattern = null,
-    nullable = false,
-  } = options;
-  if (value === null && nullable) return;
-  if (typeof value !== 'string') {
-    fail(`${path}: expected a string${nullable ? ' or null' : ''}`);
-  }
-  if (value.length < min) fail(`${path}: must be at least ${min} characters`);
-  if (value.length > max) fail(`${path}: must be at most ${max} characters`);
-  if (pattern !== null && !pattern.test(value)) {
-    fail(`${path}: has an invalid format`);
-  }
-}
-
-function assertInteger(value, path, options = {}) {
-  const {
-    min = Number.NEGATIVE_INFINITY,
-    max = Number.POSITIVE_INFINITY,
-    nullable = false,
-  } = options;
-  if (value === null && nullable) return;
-  if (typeof value !== 'number' || !Number.isSafeInteger(value)) {
-    fail(`${path}: expected a safe integer${nullable ? ' or null' : ''}`);
-  }
-  if (value < min) fail(`${path}: must be >= ${min}`);
-  if (value > max) fail(`${path}: must be <= ${max}`);
-}
-
-function assertBoolean(value, path) {
-  if (typeof value !== 'boolean') fail(`${path}: expected a boolean`);
-}
-
-function assertDatetime(value, path, nullable = false) {
-  assertString(value, path, { min: 20, nullable });
-  if (value === null) return;
-  if (!ISO_DATETIME_PATTERN.test(value)) {
-    fail(`${path}: expected an ISO 8601 UTC date-time`);
-  }
-}
-
-function assertEnum(value, path, allowed) {
-  if (!allowed.includes(value)) {
-    fail(`${path}: expected one of ${allowed.join(', ')}`);
-  }
-}
-
-function assertHash(value, path, nullable = false) {
-  assertString(value, path, { pattern: SHA256_PATTERN, nullable });
-}
 
 function validateToolCalls(toolCalls, path) {
   assertObject(toolCalls, path);
@@ -380,11 +299,7 @@ export function validateDatasetRow(row, label = 'dataset row') {
     min: 1,
     nullable: true,
   });
-  assertEnum(row.run.adapter, `${label}.run.adapter`, [
-    'pi',
-    'controlled',
-    null,
-  ]);
+  assertEnum(row.run.adapter, `${label}.run.adapter`, [...RUN_ADAPTERS, null]);
   assertEnum(row.run.status, `${label}.run.status`, DATASET_RUN_STATUSES);
   assertEnum(row.run.failureCode, `${label}.run.failureCode`, [
     ...RUN_FAILURE_CODES,
@@ -394,8 +309,16 @@ export function validateDatasetRow(row, label = 'dataset row') {
     ...STOP_REASONS,
     null,
   ]);
-  assertDatetime(row.run.startedAt, `${label}.run.startedAt`, true);
-  assertDatetime(row.run.terminalAt, `${label}.run.terminalAt`, true);
+  assertEnum(row.run.notRunReason, `${label}.run.notRunReason`, [
+    ...NOT_RUN_REASON_CODES,
+    null,
+  ]);
+  assertDatetime(row.run.startedAt, `${label}.run.startedAt`, {
+    nullable: true,
+  });
+  assertDatetime(row.run.terminalAt, `${label}.run.terminalAt`, {
+    nullable: true,
+  });
   assertInteger(row.run.durationMs, `${label}.run.durationMs`, {
     min: 0,
     nullable: true,
@@ -426,7 +349,9 @@ export function validateDatasetRow(row, label = 'dataset row') {
     `${label}.result.requiredLiterals`,
     { min: 0 },
   );
-  assertHash(row.result.answerSha256, `${label}.result.answerSha256`, true);
+  assertHash(row.result.answerSha256, `${label}.result.answerSha256`, {
+    nullable: true,
+  });
   assertInteger(row.result.answerBytes, `${label}.result.answerBytes`, {
     min: 0,
     nullable: true,
@@ -476,8 +401,8 @@ export function validateDatasetRow(row, label = 'dataset row') {
     if (row.result.answerSha256 !== null || row.result.answerBytes !== null) {
       fail(`${label}: not_run rows must not have answer digests`);
     }
-    if (row.notes === null || row.notes.length === 0) {
-      fail(`${label}.notes: not_run rows require a reason code`);
+    if (row.run.notRunReason === null) {
+      fail(`${label}.run.notRunReason: not_run rows require a reason code`);
     }
     for (const key of TOOL_CALL_KEYS) {
       if (row.run.toolCalls[key] !== 0) {
@@ -485,6 +410,9 @@ export function validateDatasetRow(row, label = 'dataset row') {
       }
     }
   } else {
+    if (row.run.notRunReason !== null) {
+      fail(`${label}.run.notRunReason: must be null when status is ${status}`);
+    }
     for (const key of [
       'sessionId',
       'projectId',
@@ -578,11 +506,11 @@ export function parseDatasetJsonl(text, label = 'dataset.jsonl') {
       value = JSON.parse(line);
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
-      throw new DatasetError(`${lineLabel}: invalid JSON (${reason})`);
+      throw new ExperimentError(`${lineLabel}: invalid JSON (${reason})`);
     }
     validateDatasetRow(value, lineLabel);
     if (seen.has(value.attemptId)) {
-      throw new DatasetError(
+      throw new ExperimentError(
         `${lineLabel}: duplicate attemptId "${value.attemptId}"`,
       );
     }
@@ -605,7 +533,7 @@ export function parseAnswersNdjson(text, label = 'answers.ndjson') {
       value = JSON.parse(line);
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
-      throw new DatasetError(`${lineLabel}: invalid JSON (${reason})`);
+      throw new ExperimentError(`${lineLabel}: invalid JSON (${reason})`);
     }
     assertObject(value, lineLabel);
     assertExactKeys(value, lineLabel, ANSWERS_KEYS);
@@ -622,12 +550,12 @@ export function parseAnswersNdjson(text, label = 'answers.ndjson') {
     assertInteger(value.answerBytes, `${lineLabel}.answerBytes`, { min: 0 });
     const bytes = byteLength(value.normalizedAnswer);
     if (bytes > 4096) {
-      throw new DatasetError(
+      throw new ExperimentError(
         `${lineLabel}.normalizedAnswer: exceeds the 4096-byte budget`,
       );
     }
     if (seen.has(value.attemptId)) {
-      throw new DatasetError(
+      throw new ExperimentError(
         `${lineLabel}: duplicate attemptId "${value.attemptId}"`,
       );
     }
@@ -645,18 +573,11 @@ function rate(numerator, denominator) {
   return denominator === 0 ? null : round4(numerator / denominator);
 }
 
-function proportion(numerator, denominator) {
-  const interval =
-    denominator === 0 ? null : wilsonInterval(numerator, denominator);
-  return {
-    numerator,
-    denominator,
-    pointEstimate: rate(numerator, denominator),
-    wilson95:
-      interval === null
-        ? null
-        : { low: round4(interval.low), high: round4(interval.high) },
-  };
+function wilson95(numerator, denominator) {
+  if (denominator === 0) return null;
+  const interval = wilsonInterval(numerator, denominator);
+  if (interval === null) return null;
+  return { low: round4(interval.low), high: round4(interval.high) };
 }
 
 function countBy(values, keys) {
@@ -686,9 +607,7 @@ function isTimedOut(row) {
 }
 
 function notRunReasonOf(row) {
-  if (row.notes === null) return null;
-  const separator = row.notes.indexOf(':');
-  return separator === -1 ? row.notes : row.notes.slice(0, separator);
+  return row.run.notRunReason;
 }
 
 function usageMetrics(rows) {
@@ -753,8 +672,7 @@ function durationMetrics(rows) {
       ).length,
     },
     medianMs: durations.length === 0 ? null : Math.round(median(durations)),
-    p90Ms:
-      durations.length === 0 ? null : Math.round(percentile(durations, 0.9)),
+    p90Ms: durations.length === 0 ? null : Math.round(quantile(durations, 0.9)),
     completedPass: {
       count: completedPassDurations.length,
       medianMs:
@@ -786,7 +704,7 @@ function answerByteMetrics(rows) {
   return {
     count: values.length,
     medianBytes: values.length === 0 ? null : Math.round(median(values)),
-    p90Bytes: values.length === 0 ? null : Math.round(percentile(values, 0.9)),
+    p90Bytes: values.length === 0 ? null : Math.round(quantile(values, 0.9)),
   };
 }
 
@@ -854,8 +772,18 @@ function aggregateRows(rows) {
       plannedDenominator: rows.length,
       executedCount,
       completedPass,
-      completionRate: proportion(completedPass, rows.length),
-      successRateAmongExecuted: proportion(completedPass, executedCount),
+      completionRate: {
+        numerator: completedPass,
+        denominator: rows.length,
+        pointEstimate: rate(completedPass, rows.length),
+        wilson95: wilson95(completedPass, rows.length),
+      },
+      successRateAmongExecuted: {
+        numerator: completedPass,
+        denominator: executedCount,
+        pointEstimate: rate(completedPass, executedCount),
+        wilson95: wilson95(completedPass, executedCount),
+      },
     },
     usageCoverage: usageMetrics(rows),
     duration: durationMetrics(rows),
@@ -1136,7 +1064,7 @@ export function verifyAnswers({ rows, answers, tasks, answerByteCap }) {
     }
   }
 
-  for (const [attemptId, entry] of answerById) {
+  for (const attemptId of answerById.keys()) {
     const row = rowById.get(attemptId);
     if (row === undefined) {
       mismatches.push({ attemptId, reason: 'UNKNOWN_ATTEMPT' });
@@ -1161,8 +1089,15 @@ export function verifyAnswers({ rows, answers, tasks, answerByteCap }) {
  * Compute the full summary object. `meta` carries input paths/hashes and the
  * answers verification block produced by the CLI.
  */
-export function computeSummary({ rows, meta, answersVerification }) {
+export function computeSummary({
+  rows,
+  meta,
+  answersVerification,
+  plannedDenominator = null,
+}) {
   const root = aggregateRows(rows);
+  const planned = plannedDenominator ?? root.plannedDenominator;
+  const completedPass = root.counts.completedPass;
   const cells = buildCells(rows);
   const taskLevel = buildTaskLevel(rows, cells);
   const evidenceKinds = [...new Set(rows.map((row) => row.evidenceKind))];
@@ -1175,18 +1110,31 @@ export function computeSummary({ rows, meta, answersVerification }) {
     datasetVersion: rows[0]?.datasetVersion ?? null,
     evidenceKind: evidenceKinds.length === 1 ? evidenceKinds[0] : 'mixed',
     denominator: {
-      plannedDenominator: root.plannedDenominator,
+      plannedDenominator: planned,
       executedCount: root.executedCount,
-      coverage: root.coverage,
+      coverage: rate(root.executedCount, planned),
     },
-    plannedDenominator: root.plannedDenominator,
+    plannedDenominator: planned,
     executedCount: root.executedCount,
-    completionRate: root.completionRate,
+    completionRate: rate(completedPass, planned),
     successRateAmongExecuted: root.successRateAmongExecuted,
-    coverage: root.coverage,
+    coverage: rate(root.executedCount, planned),
     counts: root.counts,
-    descriptiveAttemptLevel: root.descriptiveAttemptLevel,
-    usageCoverage: root.usageCoverage,
+    descriptiveAttemptLevel: {
+      ...root.descriptiveAttemptLevel,
+      plannedDenominator: planned,
+      completionRate: {
+        numerator: completedPass,
+        denominator: planned,
+        pointEstimate: rate(completedPass, planned),
+        wilson95: wilson95(completedPass, planned),
+      },
+    },
+    usageCoverage: {
+      ...root.usageCoverage,
+      plannedDenominator: planned,
+      coverageRate: rate(root.usageCoverage.reported, planned),
+    },
     duration: root.duration,
     toolCalls: root.toolCalls,
     answerBytes: root.answerBytes,
@@ -1201,10 +1149,6 @@ export function computeSummary({ rows, meta, answersVerification }) {
 
 function formatRate(value) {
   return value === null ? 'n/a' : value.toFixed(4);
-}
-
-function formatPercent(value) {
-  return value === null ? 'n/a' : `${(value * 100).toFixed(2)}%`;
 }
 
 function formatInt(value) {

@@ -400,7 +400,8 @@ test('not_run rows are retained with null usage, zero tool calls and a reason no
   });
   assert.equal(row.result.answerSha256, null);
   assert.equal(row.result.answerBytes, null);
-  assert.match(row.notes, /^AUTHORIZATION_MISSING/);
+  assert.equal(row.run.notRunReason, 'AUTHORIZATION_MISSING');
+  assert.equal(row.notes, 'no Provider authorization');
 });
 
 test('tool calls are paired by callId', () => {
@@ -516,6 +517,20 @@ test('scoring normalizes Markdown and supports word boundaries and negative rubr
     scoreAnswer(task, 'a'.repeat(ANSWER_BYTE_CAP + 1)).verdict,
     'unscorable',
   );
+});
+
+test('contains_all with forbidden requires literals present and forbidden absent', () => {
+  const task = {
+    rubric: {
+      kind: 'contains_all',
+      match: 'substring',
+      literals: ['alpha', 'beta'],
+      forbidden: ['cdn.example'],
+    },
+  };
+  assert.equal(scoreAnswer(task, 'alpha beta').verdict, 'pass');
+  assert.equal(scoreAnswer(task, 'alpha beta cdn.example').verdict, 'fail');
+  assert.equal(scoreAnswer(task, 'alpha only').verdict, 'fail');
 });
 
 test('answer text never reaches dataset.jsonl; answers.ndjson only has normalized text', () => {

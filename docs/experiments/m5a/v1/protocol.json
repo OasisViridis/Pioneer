@@ -36,12 +36,21 @@
     {
       "variantId": "pioneer-readonly-tools",
       "label": "V1 按需只读工具 + 随需取用材料",
-      "factors": { "contextAssembly": "on-demand", "toolsEnabled": true },
+      "factors": {
+        "contextAssembly": "on-demand",
+        "toolsEnabled": true
+      },
       "definition": "使用产品现有只读 Harness：系统提示 + 任务文本 + 允许材料清单；模型自行决定调用 read_file / list_directory / search，工具结果回到模型后继续，直到给出最终回答。",
       "implementation": "apps/desktop 现有 pi 适配器与只读工具策略，不修改产品代码；通过产品会话启动一次任务。",
-      "promptTemplate": "<system: Pioneer 只读任务，允许使用 read_file/list_directory/search，材料根为 demos/>\n<user: {task.prompt}>\n<format: {answerFormatInstruction}>",
+      "runProducer": "pi",
+      "runProducerNote": "真实运行时该变体的 journal 与事件由产品主进程的 pi 适配器写出，run 身份来自产品 Run host。",
+      "promptTemplate": "<system: Pioneer 只读任务，允许使用 read_file / list_directory / search_in_files，材料根为 demos/>\n<user: {task.prompt}>\n<format: {answerFormatInstruction}>",
       "toolPolicy": {
-        "allowedTools": ["read_file", "list_directory", "search"],
+        "allowedTools": [
+          "read_file",
+          "list_directory",
+          "search_in_files"
+        ],
         "materialScope": "仅 tasks.json 中该任务 materialScope.allowedFiles 覆盖的 demos/ 文件",
         "egress": "提示文本 + 工具结果；不发送材料清单以外的文件"
       }
@@ -49,18 +58,29 @@
     {
       "variantId": "fixed-prefix-no-tools",
       "label": "V0 固定前缀全量材料 + 无工具",
-      "factors": { "contextAssembly": "fixed-prefix", "toolsEnabled": false },
+      "factors": {
+        "contextAssembly": "fixed-prefix",
+        "toolsEnabled": false
+      },
       "definition": "同模型、同任务文本；把允许材料按固定路径顺序（tasks.json corpus.files 顺序）拼接进单条提示，超过 64 KiB 输入预算即按字节截断（保留前缀，不跳读、不摘要），禁用工具，单次模型调用，输出上限同为 4096 tokens。",
       "implementation": "同一 Provider 与模型的单次对话请求；不经过只读工具执行器，避免把 V0 变成另一种 Harness。",
-      "promptTemplate": "<user: 以下是允许材料的固定前缀拼接，共 {prefixBytes} 字节，超出 65536 字节的部分已截断并标记 [TRUNCATED_AT_64KiB]。\n{materialPrefix}\n\n{task.prompt}\n{answerFormatInstruction}>",
-      "toolPolicy": { "allowedTools": [], "materialScope": "同上，但以拼接文本形式一次性发送" },
+      "runProducer": "baseline-runner",
+      "runProducerNote": "该变体不经过产品 Run host。真实运行时 run 身份由实验运行器分配，记录写 adapter=baseline-runner；受控先导的合成记录写 adapter=controlled，都不得记成 pi。",
+      "promptTemplate": "<user: 以下是允许材料按固定顺序拼接的 57344 字节前缀（语料共 396500 字节，超出部分已截断并标记 [TRUNCATED_AT_64KiB]）。\n{materialPrefix}\n\n{task.prompt}\n{answerFormatInstruction}>",
+      "toolPolicy": {
+        "allowedTools": [],
+        "materialScope": "同上，但以拼接文本形式一次性发送"
+      },
       "truncationRule": {
-        "budgetBytes": 65536,
-        "order": "tasks.json corpus.files 的固定顺序",
+        "materialPrefixBytes": 57344,
+        "instructionReserveBytes": 8192,
+        "totalInputBudgetBytes": 65536,
+        "order": "tasks.json corpus.files 的固定顺序（00、01、02、03、04、README）",
         "cut": "按字节前缀截断，若切断在多字节字符中间则回退到最近字符边界",
         "marker": "[TRUNCATED_AT_64KiB]",
-        "disclosure": "该标记不参与评分，也不得包含答案提示；截断位置随任务固定，不在运行间变化"
-      }
+        "disclosure": "前缀 57344 B 全部用于材料；提示模板、任务题面与 ANSWER 格式指令合计不得超过 8192 B 的预留额度。标记字符串不参与评分，也不含答案提示。"
+      },
+      "baselineStrength": "刻意弱的基线：无检索、无工具、单一前缀截断。它衡量的是「不做任何检索与上下文选择时的表现」，不衡量长上下文模型的一般能力。"
     }
   ],
   "modelParameters": {
@@ -117,20 +137,55 @@
         "bytes": 1657,
         "sha256": "625d3303147427ed04eef20807e0a2f052c9e089c27bcc1167c3e62c7cf95038"
       }
-    ]
+    ],
+    "visibleWindowForFixedPrefix": {
+      "order": [
+        "demos/00-pioneer-workbench.html",
+        "demos/01-bookshelf-workspace.html",
+        "demos/02-session-intent-card.html",
+        "demos/03-wrapup-and-gallery.html",
+        "demos/04-ppt-presentation-demo.html",
+        "demos/README.md"
+      ],
+      "visibleBytes": 57344,
+      "visibleShareOfCorpus": "14.5%（0.1446）",
+      "note": "57344 B 前缀落在 demos/00-pioneer-workbench.html 的前 44.9%（57344 / 127662 B），其余 5 个文件对 V0 完全不可见。该覆盖范围在运行前固定，可由 corpus.files 顺序与字节数复算。"
+    },
+    "manifestHashFormula": {
+      "definition": "把 corpus.files 按 path 升序排列，每项取 {path, sha256, bytes}（固定键顺序），JSON.stringify 成数组后取 UTF-8 的 SHA-256。",
+      "computed": "1557594df4dbdd7324dd4ffa4dcbf6c71607c6e99dfd5ee967f023f52bdc7f42",
+      "enforcement": "build 重算并与 capture.json 的 environment.corpusManifestSha256 比对，不一致即拒绝该采集包；同时在 build-report.json 顶层记录 corpus 校验结果。"
+    }
   },
   "taskSet": {
     "source": "docs/experiments/m5a/v1/tasks.json",
     "count": 12,
     "categories": [
-      { "id": "locate-exact-fact", "count": 3, "capability": "read_file" },
-      { "id": "aggregate-count", "count": 3, "capability": "search + read_file" },
-      { "id": "cross-file-synthesis", "count": 3, "capability": "read_file across two files" },
-      { "id": "negative-scope", "count": 3, "capability": "search absence without fabrication" }
+      {
+        "id": "locate-exact-fact",
+        "count": 3,
+        "capability": "read_file"
+      },
+      {
+        "id": "aggregate-count",
+        "count": 3,
+        "capability": "search + read_file"
+      },
+      {
+        "id": "cross-file-synthesis",
+        "count": 3,
+        "capability": "read_file across two files"
+      },
+      {
+        "id": "negative-scope",
+        "count": 3,
+        "capability": "search absence without fabrication"
+      }
     ],
     "selectionRule": "任务只能用已交付的三个只读工具与 demos/ 冻结材料作答；答案必须能由材料内容唯一确定；任务位置与类别在运行前固定，不按结果挑选。",
     "exclusionRule": "不收录写入、命令执行、会话分支、安装包、真实用户、时延敏感或需要外部网络的题；不收录答案随时间变化的题。",
-    "debugVsFormal": "调试用题与正式题分离：调试只使用先导子集 t01-t03，正式题一经运行不得替换。"
+    "debugVsFormal": "调试用题与正式题分离：调试只使用先导子集 t01-t03，正式题一经运行不得替换。",
+    "structuralUnanswerability": "按上述可见窗口复核 tasks.json 的 groundTruth.evidence：只有 t05 的证据（00 文件 43140–52246 B 区间）落在 V0 可见范围内，其余 11 条需要读取不可见文件或 57344 B 之后的内容。正式运行前必须逐条复核并把结论写进运行记录；该结构性差距单列报告，不得当作 Harness 效果的证据。"
   },
   "scoring": {
     "mode": "deterministic",
@@ -140,7 +195,10 @@
       "大小写不敏感比较"
     ],
     "answerFormat": "题面统一附加 answerFormatInstruction，要求末行输出 ANSWER: <ASCII 值>；评分仍按字面量判定，不解析 JSON。",
-    "matchKinds": ["contains_all", "contains_none"],
+    "matchKinds": [
+      "contains_all",
+      "contains_none"
+    ],
     "literalPolicy": "只使用 ASCII 字面量；每条字面量必须是答对时必然出现的最小事实（id、类名、计数值、字符串常量）。",
     "verdicts": {
       "pass": "status=completed 且 rubric 满足",
@@ -163,7 +221,12 @@
       "sample": "对 real-provider 数据按 attemptId 排序取每变体前 3 条 pass 与 3 条 fail 做人工复核",
       "status": "未执行（无 real-provider 数据）",
       "role": "只作为评分规则有效性的旁证，不进入主指标计算"
-    }
+    },
+    "rubricSemantics": {
+      "contains_all": "全部 literals 出现，且全部 forbidden 不出现（forbidden 为空时只要求前者）。",
+      "contains_none": "全部 forbidden 不出现，且至少一个 literals 出现。"
+    },
+    "negativeTaskRule": "负向题必须用 contains_all 同时要求结论词 none 与至少一个只有读过材料才写得出的 ASCII 证据串，并可用 forbidden 挡住编造的资源名；只写 none 的回答判 fail。"
   },
   "design": {
     "registeredAttempts": 72,
@@ -185,30 +248,150 @@
       "rationale": "同一轮内把 V0/V1 交错，降低 Provider 侧随时间漂移带来的系统性偏置。排序只控制执行顺序，不能控制模型自身随机性。",
       "frozen": true,
       "executionOrder": [
-        { "orderIndex": 1, "variantId": "fixed-prefix-no-tools", "taskId": "t02", "cellKeySha256": "15f96f9e1c1b90fa" },
-        { "orderIndex": 2, "variantId": "pioneer-readonly-tools", "taskId": "t01", "cellKeySha256": "1a14548eed8fe143" },
-        { "orderIndex": 3, "variantId": "fixed-prefix-no-tools", "taskId": "t03", "cellKeySha256": "2939f607ffbcd3d3" },
-        { "orderIndex": 4, "variantId": "pioneer-readonly-tools", "taskId": "t03", "cellKeySha256": "29decf7d958e3efb" },
-        { "orderIndex": 5, "variantId": "pioneer-readonly-tools", "taskId": "t11", "cellKeySha256": "2b2ed6613db99957" },
-        { "orderIndex": 6, "variantId": "fixed-prefix-no-tools", "taskId": "t11", "cellKeySha256": "30f54df4b365c375" },
-        { "orderIndex": 7, "variantId": "fixed-prefix-no-tools", "taskId": "t07", "cellKeySha256": "4fec29ad572d7049" },
-        { "orderIndex": 8, "variantId": "pioneer-readonly-tools", "taskId": "t12", "cellKeySha256": "5ec56873756e228a" },
-        { "orderIndex": 9, "variantId": "pioneer-readonly-tools", "taskId": "t06", "cellKeySha256": "64cb93e9ac710c4f" },
-        { "orderIndex": 10, "variantId": "pioneer-readonly-tools", "taskId": "t07", "cellKeySha256": "760baa879eee00d4" },
-        { "orderIndex": 11, "variantId": "fixed-prefix-no-tools", "taskId": "t09", "cellKeySha256": "8f12c9b5520a060c" },
-        { "orderIndex": 12, "variantId": "fixed-prefix-no-tools", "taskId": "t01", "cellKeySha256": "944a44f9c674cce8" },
-        { "orderIndex": 13, "variantId": "pioneer-readonly-tools", "taskId": "t05", "cellKeySha256": "98db1803cfaec3c1" },
-        { "orderIndex": 14, "variantId": "pioneer-readonly-tools", "taskId": "t09", "cellKeySha256": "9a5e9acc8f6b99f0" },
-        { "orderIndex": 15, "variantId": "fixed-prefix-no-tools", "taskId": "t10", "cellKeySha256": "b7e42df586b43507" },
-        { "orderIndex": 16, "variantId": "fixed-prefix-no-tools", "taskId": "t06", "cellKeySha256": "bb911904dc23e51f" },
-        { "orderIndex": 17, "variantId": "pioneer-readonly-tools", "taskId": "t04", "cellKeySha256": "c29439521f8bd57b" },
-        { "orderIndex": 18, "variantId": "fixed-prefix-no-tools", "taskId": "t05", "cellKeySha256": "c58723b278e720e0" },
-        { "orderIndex": 19, "variantId": "fixed-prefix-no-tools", "taskId": "t12", "cellKeySha256": "ca5c688976d4ea0e" },
-        { "orderIndex": 20, "variantId": "pioneer-readonly-tools", "taskId": "t08", "cellKeySha256": "d8c2de0cf5d6509a" },
-        { "orderIndex": 21, "variantId": "fixed-prefix-no-tools", "taskId": "t04", "cellKeySha256": "dc8b0e580273748f" },
-        { "orderIndex": 22, "variantId": "fixed-prefix-no-tools", "taskId": "t08", "cellKeySha256": "e328999e70ce4534" },
-        { "orderIndex": 23, "variantId": "pioneer-readonly-tools", "taskId": "t02", "cellKeySha256": "f1d76e2da33cbef3" },
-        { "orderIndex": 24, "variantId": "pioneer-readonly-tools", "taskId": "t10", "cellKeySha256": "f1ff2078c520c237" }
+        {
+          "orderIndex": 1,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t02",
+          "cellKeySha256": "15f96f9e1c1b90fa"
+        },
+        {
+          "orderIndex": 2,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t01",
+          "cellKeySha256": "1a14548eed8fe143"
+        },
+        {
+          "orderIndex": 3,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t03",
+          "cellKeySha256": "2939f607ffbcd3d3"
+        },
+        {
+          "orderIndex": 4,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t03",
+          "cellKeySha256": "29decf7d958e3efb"
+        },
+        {
+          "orderIndex": 5,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t11",
+          "cellKeySha256": "2b2ed6613db99957"
+        },
+        {
+          "orderIndex": 6,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t11",
+          "cellKeySha256": "30f54df4b365c375"
+        },
+        {
+          "orderIndex": 7,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t07",
+          "cellKeySha256": "4fec29ad572d7049"
+        },
+        {
+          "orderIndex": 8,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t12",
+          "cellKeySha256": "5ec56873756e228a"
+        },
+        {
+          "orderIndex": 9,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t06",
+          "cellKeySha256": "64cb93e9ac710c4f"
+        },
+        {
+          "orderIndex": 10,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t07",
+          "cellKeySha256": "760baa879eee00d4"
+        },
+        {
+          "orderIndex": 11,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t09",
+          "cellKeySha256": "8f12c9b5520a060c"
+        },
+        {
+          "orderIndex": 12,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t01",
+          "cellKeySha256": "944a44f9c674cce8"
+        },
+        {
+          "orderIndex": 13,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t05",
+          "cellKeySha256": "98db1803cfaec3c1"
+        },
+        {
+          "orderIndex": 14,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t09",
+          "cellKeySha256": "9a5e9acc8f6b99f0"
+        },
+        {
+          "orderIndex": 15,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t10",
+          "cellKeySha256": "b7e42df586b43507"
+        },
+        {
+          "orderIndex": 16,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t06",
+          "cellKeySha256": "bb911904dc23e51f"
+        },
+        {
+          "orderIndex": 17,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t04",
+          "cellKeySha256": "c29439521f8bd57b"
+        },
+        {
+          "orderIndex": 18,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t05",
+          "cellKeySha256": "c58723b278e720e0"
+        },
+        {
+          "orderIndex": 19,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t12",
+          "cellKeySha256": "ca5c688976d4ea0e"
+        },
+        {
+          "orderIndex": 20,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t08",
+          "cellKeySha256": "d8c2de0cf5d6509a"
+        },
+        {
+          "orderIndex": 21,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t04",
+          "cellKeySha256": "dc8b0e580273748f"
+        },
+        {
+          "orderIndex": 22,
+          "variantId": "fixed-prefix-no-tools",
+          "taskId": "t08",
+          "cellKeySha256": "e328999e70ce4534"
+        },
+        {
+          "orderIndex": 23,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t02",
+          "cellKeySha256": "f1d76e2da33cbef3"
+        },
+        {
+          "orderIndex": 24,
+          "variantId": "pioneer-readonly-tools",
+          "taskId": "t10",
+          "cellKeySha256": "f1ff2078c520c237"
+        }
       ]
     },
     "pairing": "按 taskId 配对：同一任务在两个变体下使用完全相同的任务文本与允许材料；分析按任务配对，不按重复配对。",
@@ -247,7 +430,13 @@
     "costConversion": "货币成本不在本版本固定：正式运行前必须从取得授权的 Provider 价目表抄录价格、生效日期与来源，按 输入 tokens × 输入单价 + 输出 tokens × 输出单价 计算；价目表未确认前，只以 token 与墙上时间作为上限。不得编造价格或换算金额。"
   },
   "outcomes": {
-    "statusValues": ["completed", "failed", "stopped", "unknown", "not_run"],
+    "statusValues": [
+      "completed",
+      "failed",
+      "stopped",
+      "unknown",
+      "not_run"
+    ],
     "taxonomy": [
       {
         "status": "completed",
@@ -314,7 +503,8 @@
       "not_run 计入 plannedDenominator 并单独报告原因码计数；未授权不得计入模型答错。",
       "失败、超时、取消、unknown 一律保留；不得从样本剔除、不得改判为成功。",
       "看到结果后不得补跑未登记尝试、不得改变重复次数、不得删除任务。补跑必须用新 attemptId 且新版本协议，旧 attempt 仍留在旧分母里。",
-      "构建时被脱敏扫描拒绝的采集包视为构建失败；不得只丢那一行继续出汇总。"
+      "构建时被脱敏扫描拒绝的采集包视为构建失败；不得只丢那一行继续出汇总。",
+      "not_run 的原因写在 run.notRunReason（枚举），notes 只放自由文本细节；分析不得解析 notes 文本。"
     ]
   },
   "deidentification": {
@@ -408,7 +598,8 @@
       "status": "NOT_RUN",
       "reason": "没有具体 Provider、模型与外发材料授权；按本票与 P2 合同，票据 ready 不自动授予真实调用许可。",
       "record": "docs/experiments/m5a/real-pilot-status.md",
-      "consequence": "正式样本量与成本上限只有可解释上界依据，未由真实先导验证；不得把第 4 条完成条件写成已验证。"
+      "consequence": "正式样本量与成本上限只有可解释上界依据，未由真实先导验证；不得把第 4 条完成条件写成已验证。",
+      "captureProcedureGap": "产品当前只把 journal 落到 userData，事件流只在内存环形缓冲里，没有导出成「capture.json + journal.ndjson + events.ndjson」的入口。正式运行前必须先决定：在 main 增加受控导出命令，或用独立驱动脚本按同一 wire 格式写出采集包。本票不实现该入口，只记录这个前置缺口。"
     }
   },
   "externalReview": {
@@ -430,7 +621,10 @@
     ]
   },
   "risks": [
-    { "risk": "V0/V1 因子混淆", "mitigation": "作为限制披露，不做单因子归因。" },
+    {
+      "risk": "V0/V1 因子混淆",
+      "mitigation": "作为限制披露，不做单因子归因。"
+    },
     {
       "risk": "确定性字面量误判同义正确回答",
       "mitigation": "字面量限定为 ASCII 事实；题面要求末行 ANSWER 值；保留 unscorable 与人工盲检样本作旁证。"

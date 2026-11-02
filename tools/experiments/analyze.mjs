@@ -28,6 +28,11 @@ import {
   verifyAnswers,
 } from './lib/dataset.mjs';
 import {
+  findRepositoryRoot,
+  frozenFileDifference,
+  readFreezeManifest,
+} from './lib/manifest.mjs';
+import {
   ExperimentError,
   sha256Hex,
   validateTasksDocument,
@@ -39,6 +44,104 @@ function toPosix(value) {
 
 function relativePosix(from, to) {
   return toPosix(path.relative(from, to)) || '.';
+}
+
+function repositoryRelative(root, file) {
+  const relative = path.relative(root, file);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) return null;
+  return toPosix(relative);
+}
+
+/**
+ * Analysis-plan step 1: verify the freeze manifest for protocol.json and
+ * tasks.json from the protocol directory. Prints every difference and returns
+ * false when drift is found.
+ */
+function verifyFrozenInputs(protocolPath, tasksPath) {
+  const protocolDir = path.dirname(protocolPath);
+  const manifest = readFreezeManifest(protocolDir);
+  const root = findRepositoryRoot(process.cwd());
+  if (root === null) {
+    throw new ExperimentError(
+      'could not locate the repository root; run analyze from the repository root',
+    );
+  }
+  const differences = [];
+  for (const [label, file] of [
+    ['protocol.json', protocolPath],
+    ['tasks.json', tasksPath],
+  ]) {
+    const relative = repositoryRelative(root, file);
+    if (relative === null) {
+      differences.push(`${label} is outside the repository`);
+      continue;
+    }
+    const difference = frozenFileDifference(manifest, relative, file);
+    if (difference !== null) differences.push(difference);
+  }
+  if (differences.length > 0) {
+    process.stderr.write(
+      `experiment:analyze: freeze verification failed: ${differences.length} difference(s)\n`,
+    );
+    for (const difference of differences) {
+      process.stderr.write(`- ${difference}\n`);
+    }
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Analysis-plan step 3: the denominator comes from build-report.json, not from
+ * the row count. Both independent totals must agree with the dataset.
+ */
+function readBuildReport(datasetPath, datasetRowCount) {
+  const reportPath = path.join(path.dirname(datasetPath), 'build-report.json');
+  if (!fs.existsSync(reportPath)) {
+    throw new ExperimentError(
+      'build-report.json not found next to dataset.jsonl; rerun build-dataset',
+    );
+  }
+  const buffer = fs.readFileSync(reportPath);
+  let report;
+  try {
+    report = JSON.parse(buffer.toString('utf8').replace(/^\uFEFF/, ''));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new ExperimentError(`build-report.json: invalid JSON (${reason})`);
+  }
+  if (
+    report === null ||
+    typeof report !== 'object' ||
+    !Array.isArray(report.captures)
+  ) {
+    throw new ExperimentError('build-report.json: expected a captures array');
+  }
+  let attemptCount = 0;
+  let rowCount = 0;
+  for (const [index, capture] of report.captures.entries()) {
+    if (
+      !Number.isSafeInteger(capture.attemptCount) ||
+      !Number.isSafeInteger(capture.rowCount)
+    ) {
+      throw new ExperimentError(
+        `build-report.json.captures[${index}]: attemptCount and rowCount must be integers`,
+      );
+    }
+    attemptCount += capture.attemptCount;
+    rowCount += capture.rowCount;
+  }
+  if (attemptCount !== rowCount || rowCount !== datasetRowCount) {
+    throw new ExperimentError(
+      `build-report.json mismatch: sum(attemptCount)=${attemptCount}, sum(rowCount)=${rowCount}, dataset rows=${datasetRowCount}`,
+    );
+  }
+  return {
+    path: relativePosix(process.cwd(), reportPath),
+    sha256: sha256Hex(buffer),
+    bytes: buffer.byteLength,
+    plannedDenominator: attemptCount,
+  };
 }
 
 function readJsonFile(file, label) {
@@ -152,6 +255,11 @@ async function main() {
     throw new ExperimentError(`plan file not found: ${values.get('plan')}`);
   }
 
+  if (!verifyFrozenInputs(protocolPath, tasksPath)) {
+    process.exitCode = 1;
+    return;
+  }
+
   const datasetBuffer = fs.readFileSync(datasetPath);
   const datasetRows = parseDatasetJsonl(
     datasetBuffer.toString('utf8').replace(/^\uFEFF/, ''),
@@ -161,6 +269,7 @@ async function main() {
     throw new ExperimentError('dataset.jsonl has no rows');
   }
   assertHomogeneousDataset(datasetRows);
+  const buildReport = readBuildReport(datasetPath, datasetRows.length);
 
   const protocol = readJsonFile(protocolPath, 'protocol.json');
   assertProtocolMatches(protocol.value, datasetRows);
@@ -226,6 +335,11 @@ async function main() {
           sha256: sha256Hex(datasetBuffer),
           bytes: datasetBuffer.byteLength,
         },
+        buildReport: {
+          path: buildReport.path,
+          sha256: buildReport.sha256,
+          bytes: buildReport.bytes,
+        },
         answers: answersInput,
         protocol: {
           path: relativePosix(process.cwd(), protocolPath),
@@ -242,6 +356,7 @@ async function main() {
       },
     },
     answersVerification,
+    plannedDenominator: buildReport.plannedDenominator,
   });
 
   fs.mkdirSync(outDir, { recursive: true });

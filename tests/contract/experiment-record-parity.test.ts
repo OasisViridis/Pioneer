@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { RunJournalRecordSchema } from '../../apps/desktop/src/main/harness/run-journal';
+import {
+  RunJournalAcceptSchema,
+  RunJournalRecordSchema,
+} from '../../apps/desktop/src/main/harness/run-journal';
 import {
   RunEventSchema,
   RunFailureCodeSchema,
@@ -8,7 +11,9 @@ import {
 } from '../../apps/desktop/src/shared/contracts/pioneer-run';
 import {
   DATASET_RUN_STATUSES,
+  PRODUCT_RUN_ADAPTERS,
   PRODUCT_RUN_STATUSES,
+  RUN_ADAPTERS,
   RUN_FAILURE_CODES,
   TERMINAL_RUN_STATUSES,
   deriveUsage,
@@ -111,6 +116,18 @@ const journalCases: { name: string; value: unknown }[] = [
   },
   { name: 'terminal with numeric code', value: { ...terminal, code: 7 } },
   {
+    name: 'terminal with empty code string (zod allows it)',
+    value: { ...terminal, code: '' },
+  },
+  {
+    name: 'terminal with null code (zod allows it)',
+    value: { ...terminal, code: null },
+  },
+  {
+    name: 'accept with the experiment-only baseline-runner adapter',
+    value: { ...accept, adapter: 'baseline-runner' },
+  },
+  {
     name: 'terminal with negative lastSeq',
     value: { ...terminal, lastSeq: -1 },
   },
@@ -121,24 +138,43 @@ const journalCases: { name: string; value: unknown }[] = [
   { name: 'tombstone with unknown field', value: { ...tombstone, extra: 1 } },
 ];
 
-describe('experiment journal validation matches RunJournalRecordSchema', () => {
-  it('accepts and rejects exactly the same journal records', () => {
+describe('experiment journal validation tracks RunJournalRecordSchema', () => {
+  it('accepts every product-valid record and only the documented experiment extension', () => {
     for (const testCase of journalCases) {
-      expect(zodAcceptsJournal(testCase.value), testCase.name).toBe(
-        toolAcceptsJournal(testCase.value),
-      );
-    }
-  });
-
-  it('accepts every record zod accepts among the valid cases', () => {
-    for (const testCase of journalCases) {
-      if (!zodAcceptsJournal(testCase.value)) continue;
-      expect(toolAcceptsJournal(testCase.value), testCase.name).toBe(true);
+      const toolOk = toolAcceptsJournal(testCase.value);
+      const zodOk = zodAcceptsJournal(testCase.value);
+      if (zodOk) {
+        expect(toolOk, testCase.name).toBe(true);
+        continue;
+      }
+      if (!toolOk) continue;
+      const value = testCase.value as { kind?: string; adapter?: string };
+      expect(value.kind, testCase.name).toBe('accept');
+      expect(value.adapter, testCase.name).toBe('baseline-runner');
     }
   });
 
   it('keeps the failure code enum identical', () => {
     expect([...RUN_FAILURE_CODES]).toEqual([...RunFailureCodeSchema.options]);
+  });
+});
+
+describe('experiment adapters extend the product enum by exactly one value', () => {
+  it('keeps product adapters as a strict subset of the collection adapters', () => {
+    expect([...PRODUCT_RUN_ADAPTERS]).toEqual([
+      ...RunJournalAcceptSchema.shape.adapter.options,
+    ]);
+    expect([...PRODUCT_RUN_ADAPTERS]).toEqual([
+      ...RunEventSchema.shape.adapter.options,
+    ]);
+    for (const adapter of PRODUCT_RUN_ADAPTERS) {
+      expect(RUN_ADAPTERS).toContain(adapter);
+    }
+    expect(
+      [...RUN_ADAPTERS].filter(
+        (adapter) => !PRODUCT_RUN_ADAPTERS.includes(adapter),
+      ),
+    ).toEqual(['baseline-runner']);
   });
 });
 

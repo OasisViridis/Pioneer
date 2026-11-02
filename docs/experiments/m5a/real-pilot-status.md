@@ -1,4 +1,4 @@
-# M5-A 真实模型先导：NOT_RUN
+﻿# M5-A 真实模型先导：NOT_RUN
 
 - 记录时间：2026-11-03（Asia/Shanghai）
 - 证据级别：`real-provider`（本记录本身不是运行证据，是未运行记录）
@@ -46,6 +46,7 @@ Provider = <名称>；endpoint origin = https://<host>；model = <目录里的�
 
 ## 3. 授权到位后的执行步骤
 
+0. 先补采集导出入口。产品当前只把 journal 写到 userData，事件流只在内存环形缓冲里，没有把一次运行导出成 `capture.json` + `journal.ndjson` + `events.ndjson` 的入口。开跑前必须先决定：在 main 增加受控导出命令，或用独立驱动脚本按同一 wire 格式写采集包。这一步没做完，下面的步骤无法产生符合冻结格式的采集包。
 1. 在冻结基线上检出独立分支，记录实际 commit 与 dirty 状态。
 2. `node tools/experiments/freeze.mjs --protocol-dir docs/experiments/m5a/v1 --verify`，输出归档。
 3. 按 `orderIndex` 顺序，对 72 个登记尝试逐个启动产品只读运行；V0 用同一 Provider 的单次请求，V1 用产品现有只读 Harness。每次运行前把采集包写入 `docs/experiments/m5a/captures/real-provider/<attemptId>/`。

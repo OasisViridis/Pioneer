@@ -12,6 +12,24 @@
 
 import { createHash } from 'node:crypto';
 
+import {
+  ExperimentError,
+  ISO_DATETIME_PATTERN,
+  SHA256_PATTERN,
+  assertArray,
+  assertBoolean,
+  assertDatetime,
+  assertEnum,
+  assertExactKeys,
+  assertInteger,
+  assertObject,
+  assertString,
+  fail,
+  requireKeys,
+} from './assertions.mjs';
+
+export { ExperimentError, ISO_DATETIME_PATTERN, SHA256_PATTERN };
+
 /** Frozen protocol identity (protocol.json). */
 export const PROTOCOL_ID = 'm5a-harness-context-comparison';
 export const CAPTURE_SCHEMA_VERSION = 1;
@@ -138,106 +156,36 @@ export const ID_PATTERN = /^[a-zA-Z0-9:_-]+$/;
 export const ATTEMPT_ID_PATTERN = /^[a-z0-9][a-z0-9-]{1,63}$/;
 export const TASK_ID_PATTERN = /^t[0-9]{2}$/;
 export const RUBRIC_ID_PATTERN = /^r[0-9]{2}$/;
-export const SHA256_PATTERN = /^[0-9a-f]{64}$/;
-export const NOT_RUN_REASON_PATTERN = /^[A-Z][A-Z0-9_]*$/;
+
+/** Structured not_run reasons allowed by record-schema.json run.notRunReason. */
+export const NOT_RUN_REASON_CODES = Object.freeze([
+  'AUTHORIZATION_MISSING',
+  'PROVIDER_UNAVAILABLE',
+  'MATERIAL_MISSING',
+  'BUDGET_EXHAUSTED',
+  'OPERATOR_ABORT',
+  'TOOL_UNAVAILABLE',
+]);
 
 /**
- * Exact ISO date-time shape accepted by `z.iso.datetime()` in the pinned zod
- * version (seconds required, fractional seconds optional, `Z` only).
+ * Adapters accepted by the collection layer.
+ * - `pi` = the product Pi adapter.
+ * - `controlled` = the product deterministic adapter, or a capture writer
+ *   standing in for it.
+ * - `baseline-runner` = the M5-A fixed-prefix baseline runner; it is never a
+ *   product Run host, but V0 captures still need an adapter value.
+ * The product schemas only allow controlled|pi; the parity test documents the
+ * one intentional experiment-only addition.
  */
-export const ISO_DATETIME_PATTERN =
-  /^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?Z$/;
-
-export class ExperimentError extends Error {
-  constructor(message, details = []) {
-    super(message);
-    this.name = 'ExperimentError';
-    this.details = details;
-  }
-}
-
-function fail(message) {
-  throw new ExperimentError(message);
-}
-
-function assertPlainObject(value, path) {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    fail(`${path}: expected an object`);
-  }
-}
-
-function assertExactKeys(value, path, allowed) {
-  for (const key of Object.keys(value)) {
-    if (!allowed.includes(key)) fail(`${path}: unknown field "${key}"`);
-  }
-}
-
-function requireKeys(value, path, keys) {
-  for (const key of keys) {
-    if (!Object.prototype.hasOwnProperty.call(value, key)) {
-      fail(`${path}: missing field "${key}"`);
-    }
-  }
-}
-
-function assertArray(value, path, { min = 0 } = {}) {
-  if (!Array.isArray(value)) fail(`${path}: expected an array`);
-  if (value.length < min) fail(`${path}: expected at least ${min} item(s)`);
-}
-
-function assertString(value, path, options = {}) {
-  const {
-    min = 0,
-    max = Number.POSITIVE_INFINITY,
-    pattern = null,
-    nullable = false,
-  } = options;
-  if (value === null && nullable) return;
-  if (typeof value !== 'string') {
-    fail(`${path}: expected a string${nullable ? ' or null' : ''}`);
-  }
-  if (value.length < min) fail(`${path}: must be at least ${min} characters`);
-  if (value.length > max) fail(`${path}: must be at most ${max} characters`);
-  if (pattern !== null && !pattern.test(value)) {
-    fail(`${path}: has an invalid format`);
-  }
-}
-
-function assertInteger(value, path, options = {}) {
-  const {
-    min = Number.NEGATIVE_INFINITY,
-    max = Number.POSITIVE_INFINITY,
-    nullable = false,
-  } = options;
-  if (value === null && nullable) return;
-  if (typeof value !== 'number' || !Number.isSafeInteger(value)) {
-    fail(`${path}: expected a safe integer${nullable ? ' or null' : ''}`);
-  }
-  if (value < min) fail(`${path}: must be >= ${min}`);
-  if (value > max) fail(`${path}: must be <= ${max}`);
-}
-
-function assertBoolean(value, path) {
-  if (typeof value !== 'boolean') fail(`${path}: expected a boolean`);
-}
-
-function assertDatetime(value, path, { nullable = false } = {}) {
-  assertString(value, path, { min: 20, nullable });
-  if (value === null) return;
-  if (!ISO_DATETIME_PATTERN.test(value)) {
-    fail(`${path}: expected an ISO 8601 UTC date-time`);
-  }
-}
+export const PRODUCT_RUN_ADAPTERS = Object.freeze(['controlled', 'pi']);
+export const RUN_ADAPTERS = Object.freeze([
+  ...PRODUCT_RUN_ADAPTERS,
+  'baseline-runner',
+]);
 
 function assertByteLength(value, path, maxBytes) {
   if (Buffer.byteLength(value, 'utf8') > maxBytes) {
     fail(`${path}: exceeds the ${maxBytes}-byte budget`);
-  }
-}
-
-function assertEnum(value, path, allowed) {
-  if (!allowed.includes(value)) {
-    fail(`${path}: expected one of ${allowed.join(', ')}`);
   }
 }
 
@@ -466,7 +414,7 @@ const ATTEMPT_KEYS = [
 const NOT_RUN_KEYS = ['attemptId', 'reason', 'note'];
 
 function validateEnvironment(environment, path) {
-  assertPlainObject(environment, path);
+  assertObject(environment, path);
   assertExactKeys(environment, path, ENVIRONMENT_KEYS);
   requireKeys(environment, path, ENVIRONMENT_KEYS);
   assertString(environment.softwareCommit, `${path}.softwareCommit`, {
@@ -512,7 +460,7 @@ function validateEnvironment(environment, path) {
  * hard error (spec §3) and the attempt/notRun cross rules are enforced here.
  */
 export function validateCaptureManifest(manifest, label = 'capture.json') {
-  assertPlainObject(manifest, label);
+  assertObject(manifest, label);
   assertExactKeys(manifest, label, CAPTURE_KEYS);
   requireKeys(manifest, label, CAPTURE_KEYS);
   assertInteger(manifest.schemaVersion, `${label}.schemaVersion`);
@@ -549,7 +497,7 @@ export function validateCaptureManifest(manifest, label = 'capture.json') {
   const runIds = new Set();
   manifest.attempts.forEach((attempt, index) => {
     const path = `${label}.attempts[${index}]`;
-    assertPlainObject(attempt, path);
+    assertObject(attempt, path);
     assertExactKeys(attempt, path, ATTEMPT_KEYS);
     requireKeys(attempt, path, ATTEMPT_KEYS);
     assertString(attempt.attemptId, `${path}.attemptId`, {
@@ -590,7 +538,7 @@ export function validateCaptureManifest(manifest, label = 'capture.json') {
   const notRunIds = new Set();
   manifest.notRun.forEach((entry, index) => {
     const path = `${label}.notRun[${index}]`;
-    assertPlainObject(entry, path);
+    assertObject(entry, path);
     assertExactKeys(entry, path, NOT_RUN_KEYS);
     requireKeys(entry, path, ['attemptId', 'reason']);
     assertString(entry.attemptId, `${path}.attemptId`, {
@@ -600,11 +548,7 @@ export function validateCaptureManifest(manifest, label = 'capture.json') {
       fail(`${path}.attemptId: duplicate notRun entry`);
     }
     notRunIds.add(entry.attemptId);
-    assertString(entry.reason, `${path}.reason`, {
-      min: 1,
-      max: 64,
-      pattern: NOT_RUN_REASON_PATTERN,
-    });
+    assertEnum(entry.reason, `${path}.reason`, NOT_RUN_REASON_CODES);
     if (entry.note !== undefined) {
       assertString(entry.note, `${path}.note`, { min: 0, max: 512 });
     }
@@ -660,7 +604,7 @@ function validateLiteralList(value, path) {
 
 function validateTaskDocumentEntry(task, index, label) {
   const path = `${label}.tasks[${index}]`;
-  assertPlainObject(task, path);
+  assertObject(task, path);
   requireKeys(task, path, TASK_REQUIRED_KEYS);
   assertString(task.taskId, `${path}.taskId`, { pattern: TASK_ID_PATTERN });
   assertEnum(task.category, `${path}.category`, TASK_CATEGORIES);
@@ -691,7 +635,7 @@ function validateTaskDocumentEntry(task, index, label) {
     fail(`${path}: requires either prompt or promptSha256`);
   }
 
-  assertPlainObject(task.rubric, `${path}.rubric`);
+  assertObject(task.rubric, `${path}.rubric`);
   const rubric = task.rubric;
   assertEnum(rubric.kind, `${path}.rubric.kind`, [
     'contains_all',
@@ -724,18 +668,15 @@ function validateTaskDocumentEntry(task, index, label) {
         `${path}.rubric.literals: contains_all requires at least one literal`,
       );
     }
-    if (forbidden.length > 0) {
-      fail(
-        `${path}.rubric.forbidden: contains_all does not define forbidden literals`,
-      );
-    }
+    // contains_all may also carry forbidden literals: all required literals
+    // must be present AND none of the forbidden literals may appear.
   } else if (literals.length === 0 && forbidden.length === 0) {
     fail(
       `${path}.rubric: contains_none requires literals or forbidden literals`,
     );
   }
 
-  assertPlainObject(task.groundTruth, `${path}.groundTruth`);
+  assertObject(task.groundTruth, `${path}.groundTruth`);
   assertString(
     task.groundTruth.answerSummary,
     `${path}.groundTruth.answerSummary`,
@@ -746,7 +687,7 @@ function validateTaskDocumentEntry(task, index, label) {
   });
   task.groundTruth.evidence.forEach((evidence, evidenceIndex) => {
     const evidencePath = `${path}.groundTruth.evidence[${evidenceIndex}]`;
-    assertPlainObject(evidence, evidencePath);
+    assertObject(evidence, evidencePath);
     assertString(evidence.path, `${evidencePath}.path`, { min: 1 });
     assertString(evidence.sha256, `${evidencePath}.sha256`, {
       pattern: SHA256_PATTERN,
@@ -755,7 +696,7 @@ function validateTaskDocumentEntry(task, index, label) {
   });
 
   if (task.materialScope !== undefined) {
-    assertPlainObject(task.materialScope, `${path}.materialScope`);
+    assertObject(task.materialScope, `${path}.materialScope`);
     assertString(task.materialScope.root, `${path}.materialScope.root`, {
       min: 1,
     });
@@ -791,7 +732,7 @@ function validateTaskDocumentEntry(task, index, label) {
  * but every field the scorer reads is checked.
  */
 export function validateTasksDocument(document, label = 'tasks.json') {
-  assertPlainObject(document, label);
+  assertObject(document, label);
   assertInteger(document.schemaVersion, `${label}.schemaVersion`);
   if (document.schemaVersion !== 1) {
     fail(`${label}.schemaVersion: expected 1`);
@@ -812,7 +753,7 @@ export function validateTasksDocument(document, label = 'tasks.json') {
     });
   }
   if (document.corpus !== undefined) {
-    assertPlainObject(document.corpus, `${label}.corpus`);
+    assertObject(document.corpus, `${label}.corpus`);
     assertString(document.corpus.corpusId, `${label}.corpus.corpusId`, {
       min: 1,
       max: 64,
@@ -821,7 +762,7 @@ export function validateTasksDocument(document, label = 'tasks.json') {
     assertArray(document.corpus.files, `${label}.corpus.files`);
     document.corpus.files.forEach((file, index) => {
       const path = `${label}.corpus.files[${index}]`;
-      assertPlainObject(file, path);
+      assertObject(file, path);
       assertString(file.path, `${path}.path`, { min: 1 });
       assertString(file.sha256, `${path}.sha256`, { pattern: SHA256_PATTERN });
       assertInteger(file.bytes, `${path}.bytes`, { min: 0 });
@@ -834,7 +775,7 @@ export function validateTasksDocument(document, label = 'tasks.json') {
   }
   let answerByteCap = ANSWER_BYTE_CAP;
   if (document.scoring !== undefined) {
-    assertPlainObject(document.scoring, `${label}.scoring`);
+    assertObject(document.scoring, `${label}.scoring`);
     if (document.scoring.answerByteCap !== undefined) {
       assertInteger(
         document.scoring.answerByteCap,
@@ -905,7 +846,7 @@ function validateJournalAccept(record, label) {
   assertString(record.projectId, `${label}.projectId`, { min: 1, max: 512 });
   assertInteger(record.revision, `${label}.revision`, { min: 1 });
   assertString(record.taskDigest, `${label}.taskDigest`, { min: 1, max: 512 });
-  assertEnum(record.adapter, `${label}.adapter`, ['controlled', 'pi']);
+  assertEnum(record.adapter, `${label}.adapter`, RUN_ADAPTERS);
   assertInteger(record.windowEpoch, `${label}.windowEpoch`, { min: 0 });
   assertInteger(record.rootRevision, `${label}.rootRevision`, { min: 0 });
   assertString(record.requestId, `${label}.requestId`, { min: 1, max: 512 });
@@ -917,8 +858,9 @@ function validateJournalTerminal(record, label) {
   requireKeys(record, label, JOURNAL_TERMINAL_REQUIRED_KEYS);
   assertString(record.runId, `${label}.runId`, { min: 1, max: 512 });
   assertEnum(record.status, `${label}.status`, TERMINAL_RUN_STATUSES);
+  // Matches RunJournalTerminalSchema.code: z.string().max(64).nullable().
+  // The empty string is accepted here; status/code consistency is a build rule.
   assertString(record.code, `${label}.code`, {
-    min: 1,
     max: 64,
     nullable: true,
   });
@@ -942,11 +884,14 @@ function validateJournalTombstone(record, label) {
 }
 
 /**
- * Validate one RunJournalRecord exactly as RunJournalRecordSchema would.
- * Exported so the contract parity test can compare both implementations.
+ * Validate one RunJournalRecord against the product schema shape, except that
+ * the collection layer also accepts the experiment-only adapter
+ * `baseline-runner` (see RUN_ADAPTERS). The parity test in
+ * tests/contract/experiment-record-parity.test.ts checks the accept and reject
+ * behaviour against RunJournalRecordSchema for its case table.
  */
 export function validateJournalRecord(record, label = 'journal record') {
-  assertPlainObject(record, label);
+  assertObject(record, label);
   if (record.kind === undefined) fail(`${label}: missing field "kind"`);
   if (record.kind === 'accept') {
     validateJournalAccept(record, label);
@@ -961,7 +906,12 @@ export function validateJournalRecord(record, label = 'journal record') {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Run event validation (mirrors RunEventSchema)                              */
+/* Run event validation                                                       */
+/*                                                                            */
+/* Product RunEventSchema allows adapter `controlled|pi`. The collection layer */
+/* additionally accepts `baseline-runner` for the M5-A fixed-prefix baseline,  */
+/* which is never a product Run host. This validator is therefore not a strict */
+/* mirror of RunEventSchema; the parity test documents the difference.         */
 /* -------------------------------------------------------------------------- */
 
 const EVENT_KEYS = [
@@ -991,7 +941,7 @@ const EVENT_BODY_KEYS = {
 };
 
 function validateEventBody(body, label) {
-  assertPlainObject(body, label);
+  assertObject(body, label);
   if (typeof body.type !== 'string') fail(`${label}.type: expected a string`);
   const allowed = EVENT_BODY_KEYS[body.type];
   if (allowed === undefined) {
@@ -1016,7 +966,7 @@ function validateEventBody(body, label) {
       break;
     case 'tool.result': {
       assertString(body.callId, `${label}.callId`, { pattern: ID_PATTERN });
-      assertPlainObject(body.result, `${label}.result`);
+      assertObject(body.result, `${label}.result`);
       const result = body.result;
       if (result.status === 'succeeded') {
         assertExactKeys(result, `${label}.result`, [
@@ -1055,7 +1005,7 @@ function validateEventBody(body, label) {
       break;
     case 'run.completed':
       if (body.usage !== null) {
-        assertPlainObject(body.usage, `${label}.usage`);
+        assertObject(body.usage, `${label}.usage`);
         assertExactKeys(body.usage, `${label}.usage`, [
           'inputTokens',
           'outputTokens',
@@ -1083,11 +1033,12 @@ function validateEventBody(body, label) {
 }
 
 /**
- * Validate one RunEvent exactly as RunEventSchema would (including the source
- * mapping and the 16 KiB wire budget). Exported for the parity test.
+ * Validate one RunEvent shape. The product schema admits controlled|pi; the
+ * collection layer also admits baseline-runner (never a product Run host).
+ * Exported for the parity test.
  */
 export function validateRunEvent(event, label = 'run event') {
-  assertPlainObject(event, label);
+  assertObject(event, label);
   assertExactKeys(event, label, EVENT_KEYS);
   requireKeys(event, label, EVENT_KEYS);
   assertString(event.sessionId, `${label}.sessionId`, { pattern: ID_PATTERN });
@@ -1098,7 +1049,7 @@ export function validateRunEvent(event, label = 'run event') {
   assertInteger(event.seq, `${label}.seq`, { min: 1 });
   assertDatetime(event.at, `${label}.at`);
   assertEnum(event.source, `${label}.source`, ['host', 'model', 'tool']);
-  assertEnum(event.adapter, `${label}.adapter`, ['controlled', 'pi']);
+  assertEnum(event.adapter, `${label}.adapter`, RUN_ADAPTERS);
   validateEventBody(event.body, `${label}.body`);
   const expectedSource =
     event.body.type === 'text.delta'
@@ -1209,19 +1160,16 @@ export function scoreAnswer(task, answerText, answerByteCap = ANSWER_BYTE_CAP) {
     literalPresent(normalizedAnswer, normalizeForMatch(literal), rubric.match),
   ).length;
   const rawAnswerBytes = byteLength(answerText);
+  const forbiddenPresent = rubric.forbidden.some((literal) =>
+    literalPresent(normalizedAnswer, normalizeForMatch(literal), rubric.match),
+  );
   let verdict;
   if (normalizedAnswer.length === 0 || rawAnswerBytes > answerByteCap) {
     verdict = 'unscorable';
   } else if (rubric.kind === 'contains_all') {
-    verdict = matchedLiterals === rubric.literals.length ? 'pass' : 'fail';
+    const requiredSatisfied = matchedLiterals === rubric.literals.length;
+    verdict = requiredSatisfied && !forbiddenPresent ? 'pass' : 'fail';
   } else {
-    const forbiddenPresent = rubric.forbidden.some((literal) =>
-      literalPresent(
-        normalizedAnswer,
-        normalizeForMatch(literal),
-        rubric.match,
-      ),
-    );
     const requiredSatisfied =
       rubric.literals.length === 0 || matchedLiterals >= 1;
     verdict = !forbiddenPresent && requiredSatisfied ? 'pass' : 'fail';
@@ -1602,6 +1550,7 @@ export function buildCaptureResult({
         durationMs,
         lastSeq,
         toolCalls: countToolCalls(runEvents, `run "${runId}"`),
+        notRunReason: null,
       },
       usage: deriveUsage(runEvents),
       result: {
@@ -1624,11 +1573,13 @@ export function buildCaptureResult({
 
 function buildNotRunRow({ capture, attempt, task, notRun, captureHashes }) {
   const reason = notRun.reason;
+  // notes carries only the free-text detail; the reason code is structured in
+  // run.notRunReason so analysis never has to parse notes.
   const notes =
     typeof notRun.note === 'string' && notRun.note.length > 0
-      ? `${reason}: ${notRun.note}`
-      : reason;
-  if (notes.length > 512) {
+      ? notRun.note
+      : null;
+  if (notes !== null && notes.length > 512) {
     fail(
       `capture: notRun note for attempt "${attempt.attemptId}" is too long for notes (max 512)`,
     );
@@ -1673,6 +1624,7 @@ function buildNotRunRow({ capture, attempt, task, notRun, captureHashes }) {
         failed: 0,
         cancelled: 0,
       },
+      notRunReason: reason,
     },
     usage: {
       inputTokens: null,

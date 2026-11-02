@@ -1,4 +1,4 @@
-# M5-A 实验方案冻结与先导：Pioneer 只读 Harness 上下文装配对照
+﻿# M5-A 实验方案冻结与先导：Pioneer 只读 Harness 上下文装配对照
 
 - 对应票据：[#29 [M5-A] 实验：冻结对比方案与先导结果](https://github.com/OasisViridis/Pioneer/issues/29)（总图 [#9](https://github.com/OasisViridis/Pioneer/issues/9)）
 - 协议标识：`m5a-harness-context-comparison` v1
@@ -48,14 +48,18 @@
 | --- | --- | --- |
 | 上下文装配 | 按需：任务文本 + 材料清单，模型自行决定读哪个文件 | 固定前缀：允许材料按固定顺序拼接进单条提示 |
 | 提示模板 | 系统提示写明只读工具与材料根，用户消息为任务题面 | 用户消息为「固定前缀材料 + 截断标记 + 任务题面」 |
-| 工具 | `read_file`、`list_directory`、`search` 三个只读工具 | 无工具，单次模型调用 |
-| 输入上限 | 每次发往 Provider 的材料与正文累计 64 KiB（产品既有上限） | 拼接文本 65,536 B，超出按字节前缀截断并追加 `[TRUNCATED_AT_64KiB]` |
+| 工具 | `read_file`、`list_directory`、`search_in_files` 三个只读工具 | 无工具，单次模型调用 |
+| 输入上限 | 每次发往 Provider 的材料与正文累计 64 KiB（产品既有上限） | 材料前缀 57,344 B + 指令预留 8,192 B，合计 65,536 B；超出材料前缀的部分按字节截断并追加 `[TRUNCATED_AT_64KiB]` |
 | 输出上限 | 4,096 tokens | 4,096 tokens |
 | 时限 | 120,000 ms | 120,000 ms（单次调用，通常远早于此） |
 | 模型与 Provider | 相同 | 相同 |
 | 任务文本 | 相同 | 相同 |
 
-截断规则先固定：按 `tasks.json` 的 `corpus.files` 顺序拼接，累计到 65,536 B 截止，切断多字节字符时回退到最近字符边界，末尾追加固定标记字符串。标记字符串不含任何答案线索，也不参与评分。
+截断规则先固定：按 `tasks.json` 的 `corpus.files` 顺序拼接，材料前缀累计到 57,344 B 截止，切断多字节字符时回退到最近字符边界，末尾追加固定标记字符串。提示模板、任务题面与 ANSWER 格式指令共用 8,192 B 预留额度，两者相加不超过 65,536 B。标记字符串不含任何答案线索，也不参与评分。
+
+V0 的可见窗口在运行前固定并披露：57,344 B 前缀落在 `demos/00-pioneer-workbench.html` 的前 44.9%（57,344 / 127,662 B），其余 5 个文件对 V0 完全不可见，全语料可见比例 14.5%。对照 `tasks.json` 的 `groundTruth.evidence`，只有 t05 的证据（00 文件 43,140 到 52,246 B 区间）落在可见范围内，其余 11 条需要读取不可见文件或 57,344 B 之后的内容。这一结构性差距不是测量结果，是基线定义的直接后果，分析时必须单列，不能算作 Harness 效果的证据。
+
+V0 是刻意弱的基线：无检索、无工具、单一前缀截断。它衡量「完全不检索、把材料一次塞进去」的表现，不衡量长上下文模型的一般能力；结论不外推到其他 eager 或长上下文方案。
 
 混淆披露：V1 与 V0 同时改变了上下文装配方式与工具可用性，因此测到的差异**不能**单独归因给「上下文量」或「工具能力」。论文把 V1 当作已交付配置整体来描述，实验只回答「这套交付配置在同类任务上的表现」，不回答「是哪个因素造成的」。若要单因子结论，需要第三臂（例如预载材料 + 允许工具），本票不追加，留给 M5-B 决定。
 
@@ -74,7 +78,7 @@
 | `demos/04-ppt-presentation-demo.html` | 116,981 | `79cee4b3a6173d1c` |
 | `demos/README.md` | 1,657 | `625d3303147427ed` |
 
-完整哈希与字节数在 `tasks.json` 的 `corpus.files`；数据集行只存 `corpusManifestSha256`，不存材料内容。
+完整哈希与字节数在 `tasks.json` 的 `corpus.files`；数据集行只存 `corpusManifestSha256`，不存材料内容。该哈希可复算：把 `corpus.files` 按 `path` 升序排列，每项取 `{path, sha256, bytes}`，`JSON.stringify` 后取 UTF-8 的 SHA-256，当前值为 `1557594df4dbdd7324dd4ffa4dcbf6c71607c6e99dfd5ee967f023f52bdc7f42`。`build-dataset.mjs` 会重算语料哈希并与 `capture.json` 比对，不一致即拒绝该采集包。
 
 ### 4.2 任务集
 
@@ -83,9 +87,9 @@
 | 类别 | 条数 | 需要的已交付能力 | 考什么 |
 | --- | --- | --- | --- |
 | `locate-exact-fact` | 3 | `read_file` | 在指定文件里找出一个唯一事实 |
-| `aggregate-count` | 3 | `search` + `read_file` | 跨文件计数或聚合，答案是唯一整数 |
+| `aggregate-count` | 3 | `search_in_files` + `read_file` | 跨文件计数或聚合，答案是唯一整数 |
 | `cross-file-synthesis` | 3 | 两个文件的 `read_file` | 只看一个文件答不出，必须交叉 |
-| `negative-scope` | 3 | `search` + 回答纪律 | 正确回答「材料里没有」，不编造 |
+| `negative-scope` | 3 | `search_in_files` + 回答纪律 | 正确回答「材料里没有」，不编造 |
 
 任务只使用已交付的三个只读工具与冻结材料；不收录写入、命令执行、会话分支、安装包、真实用户、需要外部网络或答案随时间变化的题。逐条题面、评分字面量与 ground truth 见 `tasks.json`。
 
@@ -97,7 +101,7 @@
 
 1. 归一化：去掉 Markdown 装饰符（反引号、强调符、标题号），Unicode 空白折叠为单个空格，比较时大小写不敏感。
 2. 四种判定：`pass`（运行 completed 且规则满足）、`fail`（completed 但规则不满足）、`unscorable`（completed 但回答为空或超过 65,536 B）、`not_run`（未执行）。
-3. 两种规则：`contains_all` 要求全部 `literals` 出现；`contains_none` 要求全部 `forbidden` 不出现且至少一个 `literals` 出现。`match` 取 `substring` 或 `word`，整题统一。
+3. 两种规则：`contains_all` 要求全部 `literals` 出现**且**全部 `forbidden` 不出现；`contains_none` 要求全部 `forbidden` 不出现**且**至少一个 `literals` 出现。`match` 取 `substring` 或 `word`，整题统一。负向题用 `contains_all`，同时要求结论词 `none` 与一个只有读过材料才写得出的 ASCII 证据串，这样「只写 none」拿不到分。
 4. 字面量只用 ASCII：id、类名、计数值、字符串常量。这样「三个」和「3」的写法差异不会把正确答案判错，代价是题必须设计成答对时必然出现该 ASCII 事实。
 5. 两个上限分工：原始回答超过 65,536 B 判 `unscorable`；存进 `answers.ndjson` 的归一化文本另按 4,096 B 截断，摘要与字节数针对这份截断后的文本。前者决定能否评分，后者决定能存多少证据。
 
@@ -119,7 +123,7 @@
 | 停止宽限 | 5,000 ms | `RUN_LIMITS.stopGraceMs` |
 | `read_file` 单文件 | 64 KiB | P2 运行合同 §5 |
 | `list_directory` | 200 项 | P2 运行合同 §5 |
-| `search` | 深度 16、1,000 文件、单文件 64 KiB、累计 4 MiB、100 命中 | P2 运行合同 §5 |
+| `search_in_files` | 深度 16、1,000 文件、单文件 64 KiB、累计 4 MiB、100 命中 | P2 运行合同 §5 |
 
 ### 6.2 正式运行的总上限
 
@@ -159,7 +163,7 @@
 | `failed` | 带固定失败码：`START_FAILED`、`MODEL_FAILED`、`TOOL_FAILED`、`PROTOCOL_ERROR`、`OUTPUT_LIMIT`、`RUN_DEADLINE`、`AUTHORIZATION_REVOKED`、`STOP_TIMEOUT`、`ADAPTER_DISCONNECTED` | 否 | 是 |
 | `stopped` | 停止已收敛，原因 `user`、`window_closed`、`deadline`、`authorization_revoked`、`host_failure` | 否 | 是 |
 | `unknown` | 崩溃或重启后的历史墓碑 `host_restarted` | 否，不推断回答质量；其 verdict 只是该行文本的匹配记录 | 是 |
-| `not_run` | 未执行，原因码 `AUTHORIZATION_MISSING`、`PROVIDER_UNAVAILABLE`、`MATERIAL_MISSING`、`BUDGET_EXHAUSTED`、`OPERATOR_ABORT`、`TOOL_UNAVAILABLE` | 否 | 是 |
+| `not_run` | 未执行，原因码写在 `run.notRunReason`：`AUTHORIZATION_MISSING`、`PROVIDER_UNAVAILABLE`、`MATERIAL_MISSING`、`BUDGET_EXHAUSTED`、`OPERATOR_ABORT`、`TOOL_UNAVAILABLE`；`notes` 只放自由文本细节 | 否 | 是 |
 
 超时用派生标记，不新增状态：`timedOut = (failed 且 RUN_DEADLINE) 或 (stopped 且 deadline)`，避免同一个 run 被计两次。
 
@@ -183,8 +187,8 @@
 | `taskId`、`category`、`promptSha256`、`rubricId` | `dataset.jsonl` 中的模型回答原文 |
 | `variantId`、`harnessVersion` | 材料文件内容 |
 | `repetition`、`orderIndex` | 绝对路径、盘符、UNC、用户目录 |
-| `sessionId`、`projectId`、`runId`、`revision`、`adapter`（主进程生成的 opaque id） | 用户名、邮箱、学号、联系方式 |
-| `status`、`failureCode`、`stopReason` | API key、`Bearer` 头、凭证片段 |
+| `sessionId`、`projectId`、`runId`、`revision`（opaque id）与 `adapter`（`pi`、`controlled`、`baseline-runner`） | 用户名、邮箱、学号、联系方式 |
+| `status`、`failureCode`、`stopReason`、`notRunReason` | API key、`Bearer` 头、凭证片段 |
 | `startedAt`、`terminalAt`、`durationMs`、`lastSeq` | 窗口标题、剪贴板、对话转录 |
 | `toolCalls` 五项计数 | |
 | `usage` 数字与 `source`、`estimated` 分离标记 | |
@@ -275,7 +279,7 @@ node tools/experiments/freeze.mjs --protocol-dir docs/experiments/m5a/v1 --verif
 
 用合成的、符合 schema 的采集包走通「采集 → 构建数据集 → 汇总 → 冻结校验」整条链路，覆盖缺 usage、失败、停止、deadline、`host_restarted` 墓碑与 `not_run` 六种边界。产物在 `docs/experiments/m5a/pilot-controlled/`，采集包在 `docs/experiments/m5a/captures/`。
 
-这一部分的定位必须说清：它验证的是记录与分析流程正确，**不是真实模型结果**，不支撑任何 Harness 效果结论，也不进入论文的结果章节。具体行数、分母、完成率与 usage 覆盖率以该目录 `report.md` 与 `summary.json` 为准；冻结时点的完成情况也以那两个文件的实际内容为准，本文不复述数字。
+这一部分的定位必须说清：它验证的是记录与分析流程正确，**不是真实模型结果**，不支撑任何 Harness 效果结论，也不进入论文的结果章节。具体行数、分母、完成率与 usage 覆盖率以该目录 `report.md` 与 `summary.json` 为准；本文下面那张表是冻结时点一次运行的转录，重跑后如有差异以后两者为准。
 
 冻结时点实际跑出的流程数字如下，全部来自 `build-report.json` 与 `summary.json`，只说明链路跑通，不作效果解释：
 
@@ -295,13 +299,13 @@ node tools/experiments/freeze.mjs --protocol-dir docs/experiments/m5a/v1 --verif
 
 状态：`NOT_RUN`。原因：没有具体 Provider、模型与外发材料的授权；按 #29 与 P2 运行合同，票据 ready 不自动授予真实调用许可，也不从 #13 的历史授权推导。
 
-记录与所需授权字段见 [real-pilot-status.md](m5a/real-pilot-status.md)。补齐授权后按该文件列出的命令执行，产物必须是 `evidenceKind=real-provider` 的新数据集目录，不得覆盖受控先导的产物。
+记录与所需授权字段见 [real-pilot-status.md](m5a/real-pilot-status.md)。另有一个前置缺口必须点名：产品当前只把 journal 落到 userData，事件流只在内存环形缓冲里，没有导出成 `capture.json` + `journal.ndjson` + `events.ndjson` 的入口。正式运行前必须先决定在 main 增加受控导出命令，还是用独立驱动脚本按同一 wire 格式写采集包；本票只记录这个缺口，不实现入口。补齐授权后按该文件列出的命令执行，产物必须是 `evidenceKind=real-provider` 的新数据集目录，不得覆盖受控先导的产物。
 
 ## 12. 完成条件对照
 
 | # | 票据完成条件 | 证据 | 状态 |
 | --- | --- | --- | --- |
-| 1 | 有可审阅的比较问题、任务类别、评分规则、基线和变体说明 | 本文第 2、3、4、5 节；`protocol.json`；`tasks.json` | 完成 |
+| 1 | 有可审阅的比较问题、任务类别、评分规则、基线和变体说明 | 本文第 2、3、4、5 节（含 V0 可见窗口与结构性不可答披露）；`protocol.json`；`tasks.json` | 完成 |
 | 2 | 定义统一输入、运行预算、失败/超时/取消/未运行处理规则及所有预定尝试的分母 | 本文第 6、7 节；`protocol.json` 的 `budgets`、`outcomes`、`denominator` | 完成 |
 | 3 | 输出先导结果或明确未运行原因；真实先导未完成不能把正式样本和成本已验证标为完成 | 第 11.1 节受控先导；第 11.2 节 `NOT_RUN` 记录 | 部分完成：受控先导已完成，真实先导未运行且已如实记录 |
 | 4 | 样本量、重复次数与成本上限有先导或可解释的可行性依据，并在正式运行前固定 | 本文 6.2、6.3 节；`protocol.json` 的 `design.sampleSizeBasis` 与 `budgets.formalRunCap` | 部分完成：依据是可解释上界，未由真实先导验证 |
@@ -321,6 +325,8 @@ node tools/experiments/freeze.mjs --protocol-dir docs/experiments/m5a/v1 --verif
 7. 120 秒总时限会截断长任务；超时按失败计入，不重跑成成功。
 8. 现有适配器不读取 usage 时，token 指标只覆盖 `reported` 子集，覆盖率必须随结果一起报告。
 9. 没有真实用户研究，不能把界面设计覆盖当作可用性结论。
+10. V0 是刻意弱的基线，且材料前缀只覆盖 `demos/00` 的前 44.9%；11 条任务的证据落在可见窗口外。这使 V0 的完成率接近结构性下限，只能说明该配置在此预算下的表现，不能说明「长上下文模型不行」。
+11. 采集导出入口尚不存在，真实先导开跑前必须先补，否则无法产生符合冻结格式的采集包。
 
 ## 14. 复现命令
 

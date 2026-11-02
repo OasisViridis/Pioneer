@@ -1,42 +1,47 @@
 {
   "protocolId": "m5a-harness-context-comparison",
   "protocolVersion": 1,
-  "frozenAt": "2026-11-02T17:34:55.332Z",
+  "frozenAt": "2026-11-02T17:56:58.667Z",
   "files": [
     {
       "path": "docs/experiments/m5a/v1/analysis-plan.json",
-      "sha256": "a3e9cf99a9edf50c766f02e298211ce3de375c4e3f0952b26b1939c69a9bd21f",
-      "bytes": 7497
+      "sha256": "037df891d5d4af05ea4e17267d28d79c52abfd369c9ae05e5712d38e1325fa56",
+      "bytes": 8172
     },
     {
       "path": "docs/experiments/m5a/v1/protocol.json",
-      "sha256": "4bd8ca0c95612af0b979086fee35c8ad918c59e2ab862ab3e0e79c6b333ade3f",
-      "bytes": 29682
+      "sha256": "da1e5508f027586c332dd031e78c117cf2014a74ce8898192b021318dca4b7cc",
+      "bytes": 34537
     },
     {
       "path": "docs/experiments/m5a/v1/record-schema.json",
-      "sha256": "e3dc5a7aba941bc3a0f4de3a6888cb49c9ed3ea8a0ba97c9f05eeb55fb3d88d8",
-      "bytes": 11130
+      "sha256": "61ceb93fcd75598e2a755fe70744cdff04079fc40321f3b9fc9ada30cc89991f",
+      "bytes": 14151
     },
     {
       "path": "docs/experiments/m5a/v1/tasks.json",
-      "sha256": "25bde05f9759e1e2debc7bcb65df2845ee80bbf30f52851c3c44f2c9020719da",
-      "bytes": 32227
+      "sha256": "67a261eb1a6ae87520c5371b8d71e01d2a54e24fa2edcaf0f5e8e9d752223b1e",
+      "bytes": 32815
     },
     {
       "path": "tools/experiments/analyze.mjs",
-      "sha256": "58e7a694ef6258f7864ab27ac0d26677c1ae556092633d51e6e934812a163e30",
-      "bytes": 8298
+      "sha256": "75aea16afb86a6a508d3b34c359004d6f22d873b493ebc4ba637f3ef86190f17",
+      "bytes": 12057
     },
     {
       "path": "tools/experiments/build-dataset.mjs",
-      "sha256": "b7940d3fcd148ba8ca49c1b87e4add80fc5d807e0253262536b6939562e58e6e",
-      "bytes": 10898
+      "sha256": "1e5c4fb7fe20fc08bc127e6561a0e52960ba7873e2cbdd60ffcf1a528529587b",
+      "bytes": 13689
     },
     {
       "path": "tools/experiments/freeze.mjs",
-      "sha256": "e0014505157ae8305baf354e7641e00f4d62a20a02ab77dfcbd479a01adab271",
-      "bytes": 11170
+      "sha256": "fff9f02eee143c416c437edbd6126147a5f415c17e69a909f0bcb40ea3a60ef5",
+      "bytes": 7306
+    },
+    {
+      "path": "tools/experiments/lib/assertions.mjs",
+      "sha256": "d05aac39c12938886596b6bd312b505414c33e0fae235827a98e262fa8023271",
+      "bytes": 3583
     },
     {
       "path": "tools/experiments/lib/cli.mjs",
@@ -45,18 +50,23 @@
     },
     {
       "path": "tools/experiments/lib/dataset.mjs",
-      "sha256": "06f61783a8bd1982e3ffe4456c4c8b3d8c98d772f91a0339cc8ff653bbf7db50",
-      "bytes": 49194
+      "sha256": "7075dbb4f4ff8054d3a79b8a59559e4d7398b545a0e7b10a665dcac13943c078",
+      "bytes": 47266
+    },
+    {
+      "path": "tools/experiments/lib/manifest.mjs",
+      "sha256": "03b5c526dbea288183a0d93ea4c6d1e888816e4c166f8e986ad73e3ac074b297",
+      "bytes": 5513
     },
     {
       "path": "tools/experiments/lib/record.mjs",
-      "sha256": "ac9863f71601dd1dd0db375de08a5f2ab83f8eaedcaa3050b7fc43473acb6c01",
-      "bytes": 52530
+      "sha256": "20fbe9ce39951be5d0215075c8e95002ebfdc23d16f7ab51be69faadd6bae7d5",
+      "bytes": 51533
     },
     {
       "path": "tools/experiments/lib/stats.mjs",
-      "sha256": "d1de0da51ed5958a216473a95d7dfc1c74e7102ba528061d8d2889cf14779179",
-      "bytes": 3702
+      "sha256": "7fe8bc2d84ab5c60d31d02729929ff14de4b864051706303b8b76c8447e2c194",
+      "bytes": 3629
     }
   ]
 }

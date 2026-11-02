@@ -25,12 +25,25 @@
     "notes"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "protocolId": { "const": "m5a-harness-context-comparison" },
-    "protocolVersion": { "type": "integer", "minimum": 1 },
-    "datasetVersion": { "type": "integer", "minimum": 1 },
+    "schemaVersion": {
+      "const": 1
+    },
+    "protocolId": {
+      "const": "m5a-harness-context-comparison"
+    },
+    "protocolVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "datasetVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
     "evidenceKind": {
-      "enum": ["controlled", "real-provider"],
+      "enum": [
+        "controlled",
+        "real-provider"
+      ],
       "description": "controlled = pipeline dry run on synthetic captures, never a model result. real-provider = authorized live Provider run."
     },
     "attemptId": {
@@ -46,9 +59,17 @@
     "task": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["taskId", "category", "promptSha256", "rubricId"],
+      "required": [
+        "taskId",
+        "category",
+        "promptSha256",
+        "rubricId"
+      ],
       "properties": {
-        "taskId": { "type": "string", "pattern": "^t[0-9]{2}$" },
+        "taskId": {
+          "type": "string",
+          "pattern": "^t[0-9]{2}$"
+        },
         "category": {
           "enum": [
             "locate-exact-fact",
@@ -57,22 +78,42 @@
             "negative-scope"
           ]
         },
-        "promptSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "rubricId": { "type": "string", "pattern": "^r[0-9]{2}$" }
+        "promptSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rubricId": {
+          "type": "string",
+          "pattern": "^r[0-9]{2}$"
+        }
       }
     },
     "variant": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["variantId", "harnessVersion"],
+      "required": [
+        "variantId",
+        "harnessVersion"
+      ],
       "properties": {
         "variantId": {
-          "enum": ["pioneer-readonly-tools", "fixed-prefix-no-tools"]
+          "enum": [
+            "pioneer-readonly-tools",
+            "fixed-prefix-no-tools"
+          ]
         },
-        "harnessVersion": { "type": "string", "minLength": 1, "maxLength": 32 }
+        "harnessVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        }
       }
     },
-    "repetition": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "repetition": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3
+    },
     "orderIndex": {
       "type": "integer",
       "minimum": 1,
@@ -95,22 +136,54 @@
         "terminalAt",
         "durationMs",
         "lastSeq",
-        "toolCalls"
+        "toolCalls",
+        "notRunReason"
       ],
       "properties": {
         "sessionId": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Opaque main-assigned id. null only when status is not_run."
         },
-        "projectId": { "type": ["string", "null"] },
+        "projectId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "runId": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "null only when status is not_run."
         },
-        "revision": { "type": ["integer", "null"], "minimum": 1 },
-        "adapter": { "enum": ["pi", "controlled", null] },
+        "revision": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "adapter": {
+          "enum": [
+            "pi",
+            "controlled",
+            "baseline-runner",
+            null
+          ],
+          "description": "Producer of the captured run. pi = product pi adapter; controlled = product deterministic adapter or the capture writer standing in for it; baseline-runner = the M5-A fixed-prefix baseline runner, never a product Run host. null only when status is not_run."
+        },
         "status": {
-          "enum": ["completed", "failed", "stopped", "unknown", "not_run"],
+          "enum": [
+            "completed",
+            "failed",
+            "stopped",
+            "unknown",
+            "not_run"
+          ],
           "description": "Product statuses come from the run journal; not_run is an experiment-layer status and never a product state."
         },
         "failureCode": {
@@ -139,18 +212,36 @@
           ],
           "description": "Mirrors run.stop_requested.reason; non-null iff status is stopped."
         },
-        "startedAt": { "type": ["string", "null"], "format": "date-time" },
+        "startedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
         "terminalAt": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "format": "date-time",
           "description": "Journal terminal timestamp. A tombstoned run (unknown) has no terminal timestamp."
         },
         "durationMs": {
-          "type": ["integer", "null"],
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0,
           "description": "terminalAt - startedAt in milliseconds; null when either endpoint is missing."
         },
-        "lastSeq": { "type": ["integer", "null"], "minimum": 0 },
+        "lastSeq": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
         "toolCalls": {
           "type": "object",
           "additionalProperties": false,
@@ -162,44 +253,102 @@
             "cancelled"
           ],
           "properties": {
-            "requested": { "type": "integer", "minimum": 0 },
-            "succeeded": { "type": "integer", "minimum": 0 },
-            "rejected": { "type": "integer", "minimum": 0 },
-            "failed": { "type": "integer", "minimum": 0 },
-            "cancelled": { "type": "integer", "minimum": 0 }
+            "requested": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "succeeded": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "rejected": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "failed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cancelled": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
+        },
+        "notRunReason": {
+          "enum": [
+            null,
+            "AUTHORIZATION_MISSING",
+            "PROVIDER_UNAVAILABLE",
+            "MATERIAL_MISSING",
+            "BUDGET_EXHAUSTED",
+            "OPERATOR_ABORT",
+            "TOOL_UNAVAILABLE"
+          ],
+          "description": "Structured not_run reason code; non-null iff status is not_run. notes carries the free-text detail so nothing has to parse notes."
         }
       }
     },
     "usage": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["inputTokens", "outputTokens", "source", "estimated"],
+      "required": [
+        "inputTokens",
+        "outputTokens",
+        "source",
+        "estimated"
+      ],
       "properties": {
         "inputTokens": {
-          "type": ["integer", "null"],
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0,
           "description": "Provider-reported prompt tokens. null means not reported; it is never replaced by 0."
         },
         "outputTokens": {
-          "type": ["integer", "null"],
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0
         },
         "source": {
-          "enum": ["reported", "missing", "estimated"],
+          "enum": [
+            "reported",
+            "missing",
+            "estimated"
+          ],
           "description": "missing iff both token values are null. estimated requires usage.estimated."
         },
         "estimated": {
           "oneOf": [
-            { "type": "null" },
+            {
+              "type": "null"
+            },
             {
               "type": "object",
               "additionalProperties": false,
-              "required": ["inputTokens", "outputTokens", "method"],
+              "required": [
+                "inputTokens",
+                "outputTokens",
+                "method"
+              ],
               "properties": {
-                "inputTokens": { "type": "integer", "minimum": 0 },
-                "outputTokens": { "type": "integer", "minimum": 0 },
-                "method": { "enum": ["bytes/4"] }
+                "inputTokens": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "outputTokens": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "method": {
+                  "enum": [
+                    "bytes/4"
+                  ]
+                }
               }
             }
           ],
@@ -220,21 +369,45 @@
         "answerBytes"
       ],
       "properties": {
-        "scoringMode": { "enum": ["deterministic"] },
+        "scoringMode": {
+          "enum": [
+            "deterministic"
+          ]
+        },
         "verdict": {
-          "enum": ["pass", "fail", "unscorable", "not_run"],
+          "enum": [
+            "pass",
+            "fail",
+            "unscorable",
+            "not_run"
+          ],
           "description": "not_run iff status is not_run; otherwise scored from the answer text."
         },
-        "rubricId": { "type": "string", "pattern": "^r[0-9]{2}$" },
-        "matchedLiterals": { "type": "integer", "minimum": 0 },
-        "requiredLiterals": { "type": "integer", "minimum": 0 },
+        "rubricId": {
+          "type": "string",
+          "pattern": "^r[0-9]{2}$"
+        },
+        "matchedLiterals": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requiredLiterals": {
+          "type": "integer",
+          "minimum": 0
+        },
         "answerSha256": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "pattern": "^[0-9a-f]{64}$",
           "description": "SHA-256 of the normalized answer text stored in answers.ndjson. The same value appears there, so a third party can verify the row against the stored normalized text. Raw answer text is never retained."
         },
         "answerBytes": {
-          "type": ["integer", "null"],
+          "type": [
+            "integer",
+            "null"
+          ],
           "minimum": 0,
           "description": "UTF-8 byte length of the normalized answer text; equals answers.ndjson.answerBytes."
         }
@@ -256,20 +429,52 @@
         "corpusManifestSha256"
       ],
       "properties": {
-        "softwareCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-        "dirty": { "type": "boolean" },
-        "platform": { "type": "string", "minLength": 1, "maxLength": 64 },
-        "nodeVersion": { "type": "string", "minLength": 1, "maxLength": 32 },
-        "electronVersion": { "type": "string", "minLength": 1, "maxLength": 32 },
-        "provider": { "type": "string", "minLength": 1, "maxLength": 64 },
-        "modelId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "softwareCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "nodeVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "electronVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "modelId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
         "endpointOrigin": {
           "type": "string",
           "pattern": "^https://[^/?#@]+$",
           "description": "Scheme and host only; never credentials, paths or query strings."
         },
-        "corpusId": { "type": "string", "minLength": 1, "maxLength": 64 },
-        "corpusManifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        "corpusId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "corpusManifestSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
       }
     },
     "capture": {
@@ -281,16 +486,28 @@
         "eventsSha256"
       ],
       "properties": {
-        "captureManifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "journalSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "eventsSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        "captureManifestSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "journalSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "eventsSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
       }
     },
     "notes": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "maxLength": 512,
-      "description": "Required for not_run (reason code plus one line of detail). Must not contain paths, credentials or answer text."
+      "description": "Optional free text detail. For not_run, run.notRunReason carries the reason code and notes may add one line of context. Must not contain paths, credentials or answer text."
     }
   },
-  "$comment": "Cross-field invariants enforced by tools/experiments and tests/experiments: (1) usage.source=missing iff inputTokens=outputTokens=null; (2) status=completed => failureCode=null and stopReason=null; status=failed => failureCode non-null; status=stopped => stopReason non-null; status=unknown => terminalAt=null; status=not_run => run ids null, durationMs null, verdict not_run, notes non-empty; (3) verdict=not_run iff status=not_run; (4) every attempt in capture.json appears exactly once and the dataset row count equals the registered denominator; (5) no row may contain absolute paths, prompt text, answer text or credential-shaped strings."
+  "$comment": "Cross-field invariants enforced by tools/experiments and tests/experiments: (1) usage.source=missing iff inputTokens=outputTokens=null; (2) status=completed => failureCode=null and stopReason=null; status=failed => failureCode non-null; status=stopped => stopReason non-null; status=unknown => terminalAt=null; status=not_run => run identity fields null, durationMs null, verdict not_run, notRunReason non-null, notes optional; (3) verdict=not_run iff status=not_run; (4) every attempt in capture.json appears exactly once and the dataset row count equals the registered denominator; (5) no row may contain absolute paths, prompt text, answer text or credential-shaped strings."
 }

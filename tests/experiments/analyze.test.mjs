@@ -9,59 +9,79 @@ import {
   wilsonInterval,
 } from '../../tools/experiments/lib/stats.mjs';
 import {
+  PROTOCOL_ID,
   REPOSITORY_ROOT,
   cleanup,
   createPilotFixture,
-  createTempRoot,
+  createRepositoryTempRoot,
   readJson,
   readJsonl,
   runExperimentCli,
   sha256,
+  writeJson,
   writeNdjson,
 } from './helpers.mjs';
 
-const PROTOCOL_PATH = path.join(
-  REPOSITORY_ROOT,
-  'docs',
-  'experiments',
-  'm5a',
-  'v1',
-  'protocol.json',
-);
-const PLAN_PATH = path.join(
-  REPOSITORY_ROOT,
-  'docs',
-  'experiments',
-  'm5a',
-  'v1',
-  'analysis-plan.json',
-);
+function createProtocolDirectory(root, tasksSourcePath) {
+  const protocolDir = path.join(root, 'protocol');
+  fs.mkdirSync(protocolDir, { recursive: true });
+  writeJson(path.join(protocolDir, 'protocol.json'), {
+    schemaVersion: 1,
+    protocolId: PROTOCOL_ID,
+    protocolVersion: 1,
+    datasetVersion: 1,
+  });
+  fs.copyFileSync(tasksSourcePath, path.join(protocolDir, 'tasks.json'));
+  writeJson(path.join(protocolDir, 'analysis-plan.json'), {
+    schemaVersion: 1,
+    protocolId: PROTOCOL_ID,
+    protocolVersion: 1,
+    planVersion: 1,
+  });
+  writeJson(path.join(protocolDir, 'record-schema.json'), {
+    $id: 'pioneer:m5a/record-schema/1',
+  });
+  const freeze = runExperimentCli('freeze.mjs', [
+    '--protocol-dir',
+    protocolDir,
+    '--write',
+  ]);
+  assert.equal(freeze.status, 0, freeze.stderr);
+  return {
+    protocolDir,
+    protocolPath: path.join(protocolDir, 'protocol.json'),
+    planPath: path.join(protocolDir, 'analysis-plan.json'),
+    tasksPath: path.join(protocolDir, 'tasks.json'),
+    manifestPath: path.join(protocolDir, 'freeze-manifest.json'),
+  };
+}
 
 function prepare(root) {
   const fixture = createPilotFixture(root);
+  const protocol = createProtocolDirectory(root, fixture.tasksPath);
   const outDir = path.join(root, 'out');
   const build = runExperimentCli('build-dataset.mjs', [
     '--captures',
     fixture.capturesRoot,
     '--tasks',
-    fixture.tasksPath,
+    protocol.tasksPath,
     '--out',
     outDir,
   ]);
   assert.equal(build.status, 0, build.stderr);
-  return { fixture, outDir };
+  return { fixture, outDir, ...protocol };
 }
 
-function analyzeArgs(outDir, tasksPath, extra = []) {
+function analyzeArgs(outDir, protocol, extra = []) {
   return [
     '--dataset',
     path.join(outDir, 'dataset.jsonl'),
     '--tasks',
-    tasksPath,
+    protocol.tasksPath,
     '--protocol',
-    PROTOCOL_PATH,
+    protocol.protocolPath,
     '--plan',
-    PLAN_PATH,
+    protocol.planPath,
     '--out',
     outDir,
     ...extra,
@@ -103,12 +123,13 @@ test('sign test is exact and excludes zero differences', () => {
 });
 
 test('analyze emits the three denominators, task-level primary and descriptive Wilson', () => {
-  const root = createTempRoot();
+  const root = createRepositoryTempRoot();
   try {
-    const { fixture, outDir } = prepare(root);
+    const prepared = prepare(root);
+    const { outDir } = prepared;
     const result = runExperimentCli(
       'analyze.mjs',
-      analyzeArgs(outDir, fixture.tasksPath),
+      analyzeArgs(outDir, prepared),
     );
     assert.equal(result.status, 0, result.stderr);
 
@@ -201,9 +222,10 @@ test('analyze emits the three denominators, task-level primary and descriptive W
 });
 
 test('analyze exits non-zero and lists attemptIds when answers disagree', () => {
-  const root = createTempRoot();
+  const root = createRepositoryTempRoot();
   try {
-    const { fixture, outDir } = prepare(root);
+    const prepared = prepare(root);
+    const { outDir } = prepared;
     const answersPath = path.join(outDir, 'answers.ndjson');
     const answers = readJsonl(answersPath);
     const target = answers.find((entry) => entry.attemptId === 'a-0001');
@@ -215,7 +237,7 @@ test('analyze exits non-zero and lists attemptIds when answers disagree', () => 
 
     const result = runExperimentCli(
       'analyze.mjs',
-      analyzeArgs(outDir, fixture.tasksPath),
+      analyzeArgs(outDir, prepared),
     );
     assert.equal(result.status, 1);
     assert.match(result.stderr, /answers\.ndjson verification failed/);
@@ -241,13 +263,14 @@ test('analyze exits non-zero and lists attemptIds when answers disagree', () => 
 });
 
 test('analyze skips the score recheck when answers.ndjson is absent', () => {
-  const root = createTempRoot();
+  const root = createRepositoryTempRoot();
   try {
-    const { fixture, outDir } = prepare(root);
+    const prepared = prepare(root);
+    const { outDir } = prepared;
     fs.rmSync(path.join(outDir, 'answers.ndjson'));
     const result = runExperimentCli(
       'analyze.mjs',
-      analyzeArgs(outDir, fixture.tasksPath),
+      analyzeArgs(outDir, prepared),
     );
     assert.equal(result.status, 0, result.stderr);
     const summary = readJson(path.join(outDir, 'summary.json'));
@@ -258,17 +281,82 @@ test('analyze skips the score recheck when answers.ndjson is absent', () => {
   }
 });
 
-test('analyze requires --tasks instead of silently skipping the recheck', () => {
-  const root = createTempRoot();
+test('analyze verifies the freeze manifest before reading the dataset', () => {
+  const root = createRepositoryTempRoot();
   try {
-    const { outDir } = prepare(root);
+    const prepared = prepare(root);
+    const manifest = readJson(prepared.manifestPath);
+    const protocolRelative = path
+      .relative(REPOSITORY_ROOT, prepared.protocolPath)
+      .split(path.sep)
+      .join('/');
+    const entry = manifest.files.find((file) => file.path === protocolRelative);
+    assert.ok(entry !== undefined);
+    entry.sha256 = '0'.repeat(64);
+    writeJson(prepared.manifestPath, manifest);
+
+    const result = runExperimentCli(
+      'analyze.mjs',
+      analyzeArgs(prepared.outDir, prepared),
+    );
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /freeze verification failed/);
+    assert.match(result.stderr, /hash mismatch: .*protocol\.json/);
+  } finally {
+    cleanup(root);
+  }
+});
+
+test('analyze refuses a dataset without build-report.json', () => {
+  const root = createRepositoryTempRoot();
+  try {
+    const prepared = prepare(root);
+    fs.rmSync(path.join(prepared.outDir, 'build-report.json'));
+    const result = runExperimentCli(
+      'analyze.mjs',
+      analyzeArgs(prepared.outDir, prepared),
+    );
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /build-report\.json not found/);
+  } finally {
+    cleanup(root);
+  }
+});
+
+test('analyze prints all three counts when build-report disagrees with rows', () => {
+  const root = createRepositoryTempRoot();
+  try {
+    const prepared = prepare(root);
+    const reportPath = path.join(prepared.outDir, 'build-report.json');
+    const report = readJson(reportPath);
+    report.captures[0].rowCount += 1;
+    writeJson(reportPath, report);
+    const result = runExperimentCli(
+      'analyze.mjs',
+      analyzeArgs(prepared.outDir, prepared),
+    );
+    assert.equal(result.status, 1);
+    assert.match(
+      result.stderr,
+      /sum\(attemptCount\)=11, sum\(rowCount\)=12, dataset rows=11/,
+    );
+  } finally {
+    cleanup(root);
+  }
+});
+
+test('analyze requires --tasks instead of silently skipping the recheck', () => {
+  const root = createRepositoryTempRoot();
+  try {
+    const prepared = prepare(root);
+    const { outDir } = prepared;
     const result = runExperimentCli('analyze.mjs', [
       '--dataset',
       path.join(outDir, 'dataset.jsonl'),
       '--protocol',
-      PROTOCOL_PATH,
+      prepared.protocolPath,
       '--plan',
-      PLAN_PATH,
+      prepared.planPath,
       '--out',
       outDir,
     ]);

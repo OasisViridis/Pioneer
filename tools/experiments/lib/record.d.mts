@@ -21,6 +21,9 @@ export declare const DATASET_VERDICTS: readonly string[];
 export declare const OUTCOME_CLASSES: readonly string[];
 export declare const RUN_FAILURE_CODES: readonly string[];
 export declare const STOP_REASONS: readonly string[];
+export declare const NOT_RUN_REASON_CODES: readonly string[];
+export declare const PRODUCT_RUN_ADAPTERS: readonly string[];
+export declare const RUN_ADAPTERS: readonly string[];
 export declare const TOOL_NAMES: readonly string[];
 export declare const ANSWER_BYTE_CAP: number;
 export declare const ANSWERS_ANSWER_BYTE_CAP: number;
@@ -29,7 +32,6 @@ export declare const ATTEMPT_ID_PATTERN: RegExp;
 export declare const TASK_ID_PATTERN: RegExp;
 export declare const RUBRIC_ID_PATTERN: RegExp;
 export declare const SHA256_PATTERN: RegExp;
-export declare const NOT_RUN_REASON_PATTERN: RegExp;
 export declare const ISO_DATETIME_PATTERN: RegExp;
 
 export declare class ExperimentError extends Error {
@@ -40,6 +42,7 @@ export declare class ExperimentError extends Error {
 export declare function sha256Hex(input: string | Uint8Array): string;
 export declare function byteLength(value: string): number;
 export declare function truncateUtf8(value: string, maxBytes: number): string;
+export declare function canonicalAnswerText(answerText: string): string;
 export declare function scanSensitiveValue(value: string): string | null;
 export declare function validateJournalRecord(
   record: unknown,

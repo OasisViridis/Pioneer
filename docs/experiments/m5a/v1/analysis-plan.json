@@ -10,14 +10,15 @@
     "answers": "<outDir>/answers.ndjson（可选；存在则做评分复算一致性检查）",
     "protocol": "docs/experiments/m5a/v1/protocol.json",
     "tasks": "docs/experiments/m5a/v1/tasks.json",
-    "recordSchema": "docs/experiments/m5a/v1/record-schema.json"
+    "recordSchema": "docs/experiments/m5a/v1/record-schema.json",
+    "buildReport": "<outDir>/build-report.json（必需；提供登记尝试数与语料校验结果）"
   },
   "steps": [
     {
       "step": 1,
-      "name": "freeze-verify",
-      "operation": "node tools/experiments/freeze.mjs --protocol-dir docs/experiments/m5a/v1 --verify",
-      "passCondition": "退出码 0；否则停止分析"
+      "name": "freeze-verify-inline",
+      "operation": "analyze 启动时重算 freeze-manifest.json 里 protocol.json 与 tasks.json 的 sha256/bytes 并比对；不一致或清单缺失即非零退出。等价于 freeze --verify 对这两份输入的校验。",
+      "passCondition": "清单存在且两份输入逐字节一致；否则停止分析"
     },
     {
       "step": 2,
@@ -27,9 +28,14 @@
     },
     {
       "step": 3,
-      "name": "denominators",
-      "operation": "plannedDenominator = 行数（断言等于登记数）；executedCount = 非 not_run 行数；coverage = executedCount / plannedDenominator",
-      "output": ["plannedDenominator", "executedCount", "coverage"]
+      "name": "denominators-from-build-report",
+      "operation": "读 dataset 同目录 build-report.json，断言 sum(captures[].attemptCount) === sum(captures[].rowCount) === dataset 行数；plannedDenominator 取该独立来源；executedCount = 非 not_run 行数；coverage = executedCount / plannedDenominator",
+      "output": [
+        "plannedDenominator",
+        "executedCount",
+        "coverage"
+      ],
+      "passCondition": "三个数字相等且 build-report.json 存在；否则非零退出"
     },
     {
       "step": 4,
@@ -41,7 +47,10 @@
       "step": 5,
       "name": "primary-rates",
       "operation": "completionRate = completed_pass / plannedDenominator；successRateAmongExecuted = completed_pass / executedCount",
-      "outputs": ["completionRate", "successRateAmongExecuted"]
+      "outputs": [
+        "completionRate",
+        "successRateAmongExecuted"
+      ]
     },
     {
       "step": 6,
@@ -78,7 +87,10 @@
       "step": 11,
       "name": "group-by-variant-and-category",
       "operation": "按 variantId 与 variantId × task.category 聚合步骤 4-8 的计数与比率",
-      "output": ["byVariant", "byVariantCategory"]
+      "output": [
+        "byVariant",
+        "byVariantCategory"
+      ]
     },
     {
       "step": 12,
@@ -90,7 +102,10 @@
       "step": 13,
       "name": "emit",
       "operation": "写 summary.json 与 summary.md；所有数字由程序生成，不手工编辑",
-      "outputs": ["summary.json", "summary.md"]
+      "outputs": [
+        "summary.json",
+        "summary.md"
+      ]
     }
   ],
   "primaryMetrics": [
@@ -128,7 +143,10 @@
   },
   "verdictCounting": {
     "rule": "主表只统计 completed 行的 verdict（completedVerdictCounts）；全行 verdictCounts 另列并注明非 completed 行的 verdict 不进入任何比率。",
-    "summaryJsonFields": ["verdictCounts", "completedVerdictCounts"],
+    "summaryJsonFields": [
+      "verdictCounts",
+      "completedVerdictCounts"
+    ],
     "summaryLine": "非 completed 行的 verdict 只表示该行已有的回答文本能否匹配 rubric，不进入任何比率；主指标只用 completed 且 pass 的行。"
   },
   "statistics": {
@@ -136,8 +154,19 @@
     "pairing": "按 taskId 配对，每个任务两变体各 3 次重复",
     "taskSuccessRate": "该任务某变体 3 次里 pass 的个数 / 3",
     "difference": "V1 成功率 − V0 成功率，逐任务计算后等权汇总",
-    "signTest": { "method": "exact-binomial-sign-test", "sides": 2, "label": "exploratory-only", "ignoreZeroDifferences": true },
-    "attemptLevelCi": { "method": "wilson", "level": 0.95, "z": 1.959963984540054, "label": "descriptive-only", "caveat": "重复不是独立试验" },
+    "signTest": {
+      "method": "exact-binomial-sign-test",
+      "sides": 2,
+      "label": "exploratory-only",
+      "ignoreZeroDifferences": true
+    },
+    "attemptLevelCi": {
+      "method": "wilson",
+      "level": 0.95,
+      "z": 1.959963984540054,
+      "label": "descriptive-only",
+      "caveat": "重复不是独立试验"
+    },
     "noPValueAsPrimary": "主指标只给差值分布与等权均值；不做显著性宣称。"
   },
   "recomputeCommand": "node tools/experiments/analyze.mjs --dataset <outDir>/dataset.jsonl --tasks docs/experiments/m5a/v1/tasks.json --protocol docs/experiments/m5a/v1/protocol.json --plan docs/experiments/m5a/v1/analysis-plan.json --out <outDir>",

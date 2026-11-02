@@ -19,6 +19,22 @@ export const PROTOCOL_ID = 'm5a-harness-context-comparison';
 export const SOFTWARE_COMMIT = '13ccfe5f0c9f8cc376aec08eb21cd91162719237';
 export const BASE_TIME = Date.parse('2026-11-03T00:00:00.000Z');
 
+export function sha256(value) {
+  return createHash('sha256').update(value).digest('hex');
+}
+
+const demoBuffer = fs.readFileSync(
+  path.join(REPOSITORY_ROOT, 'demos', 'README.md'),
+);
+export const CORPUS_FILES = Object.freeze([
+  {
+    path: 'demos/README.md',
+    sha256: sha256(demoBuffer),
+    bytes: demoBuffer.byteLength,
+  },
+]);
+export const CORPUS_MANIFEST_SHA256 = sha256(JSON.stringify([...CORPUS_FILES]));
+
 export const ENVIRONMENT = Object.freeze({
   softwareCommit: SOFTWARE_COMMIT,
   dirty: false,
@@ -29,12 +45,8 @@ export const ENVIRONMENT = Object.freeze({
   modelId: 'deepseek-flash',
   endpointOrigin: 'https://api.deepseek.com',
   corpusId: 'pioneer-demos-m1-frozen',
-  corpusManifestSha256: 'a'.repeat(64),
+  corpusManifestSha256: CORPUS_MANIFEST_SHA256,
 });
-
-export function sha256(value) {
-  return createHash('sha256').update(value).digest('hex');
-}
 
 export function at(offsetMs) {
   return new Date(BASE_TIME + offsetMs).toISOString();
@@ -89,8 +101,8 @@ export function makeTask(taskId, overrides = {}) {
       answerSummary: 'alpha',
       evidence: [
         {
-          path: 'demos/README.md',
-          sha256: 'b'.repeat(64),
+          path: CORPUS_FILES[0].path,
+          sha256: CORPUS_FILES[0].sha256,
           hint: 'rg -n alpha demos/README.md',
         },
       ],
@@ -109,14 +121,8 @@ export function makeTasksDocument(tasks, overrides = {}) {
     corpus: {
       corpusId: 'pioneer-demos-m1-frozen',
       root: 'demos',
-      files: [
-        {
-          path: 'demos/README.md',
-          sha256: 'b'.repeat(64),
-          bytes: 10,
-        },
-      ],
-      totalBytes: 10,
+      files: CORPUS_FILES.map((file) => ({ ...file })),
+      totalBytes: CORPUS_FILES.reduce((total, file) => total + file.bytes, 0),
     },
     tasks,
     ...overrides,

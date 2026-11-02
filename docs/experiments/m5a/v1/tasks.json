@@ -413,7 +413,7 @@
     {
       "taskId": "t10",
       "category": "negative-scope",
-      "prompt": "冻结材料根目录是 demos/，共 6 个文件，其中 5 个是 HTML 单文件原型。请检查这 5 个 HTML 是否通过 <script src=...>、<link ...>、@import 或 CSS url(...) 引用任何外部文件或远程资源。如果一处外部引用都不存在，请回答 none，并说明它们全部使用内联 <style> 与内联 <script>。请在末行 ANSWER 后只写 none，或你实际找到的第一个外部引用。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件，其中 5 个是 HTML 单文件原型。请检查这 5 个 HTML 是否通过 <script src=...>、<link ...>、@import 或 CSS url(...) 加载外部文件或远程资源。为便于复核，请以 03-wrapup-and-gallery.html 里那个带 id 的独立 script 块为入口：先写出该 script 块的 id，再说明它和其余 4 个文件的内联 style/script 是否带 src 或外部 href，最后给出结论。末行 ANSWER 按约定写结论：若存在外部引用，写出你找到的那个引用；若确认不存在，写 none。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
       "materialScope": {
         "root": "demos",
         "allowedFiles": [
@@ -427,13 +427,13 @@
       },
       "rubricId": "r10",
       "rubric": {
-        "kind": "contains_none",
+        "kind": "contains_all",
         "match": "substring",
-        "literals": ["none"],
+        "literals": ["none", "pioneer-nav-hud-script"],
         "forbidden": ["cdn.jsdelivr.net", "unpkg.com", "fonts.googleapis.com"]
       },
       "groundTruth": {
-        "answerSummary": "5 个 HTML 都没有外部资源引用：src= 属性 0 个、<link> 0 个、@import 0 个、CSS url(...) 0 个，样式与脚本全部内联。全语料里唯一的 http(s) 字符串是 00 的两个模型端点，以及 README 里指向 Figma 的文档链接，都不是页面加载的资源。",
+        "answerSummary": "5 个 HTML 都没有外部资源引用：src= 属性 0 个、<link> 0 个、@import 0 个、CSS url(...) 0 个，样式与脚本全部内联。全语料里唯一的 http(s) 字符串是 00 的两个模型端点，以及 README 里指向 Figma 的文档链接，都不是页面加载的资源。回答须先给出 03 那个独立 script 块的 id `pioneer-nav-hud-script` 作为复核入口。",
         "evidence": [
           {
             "path": "demos/00-pioneer-workbench.html",
@@ -467,7 +467,7 @@
     {
       "taskId": "t11",
       "category": "negative-scope",
-      "prompt": "冻结材料根目录是 demos/，共 6 个文件。00-pioneer-workbench.html 的系统设置页有一个「保存设置」按钮，点击后的 toast 文案声称所有系统配置已持久化至本地存储。请核实该文件的脚本里是否真的调用了 localStorage、sessionStorage 或 indexedDB。如果没有任何这类调用，请回答 none，并说明该文案只是演示用的提示文本。请在末行 ANSWER 后只写 none，或你实际找到的第一个存储调用。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。00-pioneer-workbench.html 的系统设置视图里有一个「保存设置」按钮，点击后弹出的 toast 声称所有系统配置已持久化至本地存储。请先写出该设置视图那个 section 元素的 id（作为你实际检查的入口），再核对该文件脚本里是否真的调用了 localStorage、sessionStorage 或 indexedDB，最后给出结论。末行 ANSWER 按约定写结论：若找到这类调用，写出你找到的调用；若确认不存在，写 none。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
       "materialScope": {
         "root": "demos",
         "allowedFiles": [
@@ -481,13 +481,13 @@
       },
       "rubricId": "r11",
       "rubric": {
-        "kind": "contains_none",
+        "kind": "contains_all",
         "match": "substring",
-        "literals": ["none"],
+        "literals": ["none", "viewSettings"],
         "forbidden": ["setItem", "indexedDB.open", "sessionStorage.setItem"]
       },
       "groundTruth": {
-        "answerSummary": "没有持久化调用：00 全文件内 localStorage、sessionStorage、indexedDB、setItem 都是 0 命中；「已持久化至本地存储」只是「保存设置」按钮的 showToast 文案（第 2550 行），改完状态并不写盘。",
+        "answerSummary": "没有持久化调用：00 全文件内 localStorage、sessionStorage、indexedDB、setItem 都是 0 命中；「已持久化至本地存储」只是「保存设置」按钮的 showToast 文案（第 2550 行），改完状态并不写盘。回答须先给出设置视图的 section id `viewSettings` 作为复核入口。",
         "evidence": [
           {
             "path": "demos/00-pioneer-workbench.html",
@@ -501,7 +501,7 @@
     {
       "taskId": "t12",
       "category": "negative-scope",
-      "prompt": "冻结材料根目录是 demos/，共 6 个文件（含 README.md）。请检查这些文件里有没有开源许可证声明（license、MIT、Apache 等字样）。如果没有任何许可证声明，请回答 none，并指出 README.md 只规定了允许与禁止的改动范围。请在末行 ANSWER 后只写 none，或你实际找到的许可证名称。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件（含 README.md）。请检查这些文件里有没有开源许可证声明（license、MIT、Apache 等字样）。为便于复核，请先照抄 README.md 里规定「禁止的改动」那一节的英文小节标题，再给出许可证检查结论。末行 ANSWER 按约定写结论：若找到许可证名称，写出该名称；若确认不存在，写 none。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
       "materialScope": {
         "root": "demos",
         "allowedFiles": [
@@ -515,9 +515,9 @@
       },
       "rubricId": "r12",
       "rubric": {
-        "kind": "contains_none",
+        "kind": "contains_all",
         "match": "substring",
-        "literals": ["none"],
+        "literals": ["none", "Disallowed changes"],
         "forbidden": [
           "Apache License",
           "MIT License",
@@ -525,7 +525,7 @@
         ]
       },
       "groundTruth": {
-        "answerSummary": "6 个文件都没有许可证声明：license、Apache、SPDX、版权、许可证 全部 0 命中（小写的 mit 只出现在 Uncommitted / emit / Limit 这类词里，不是许可证名）。README.md 只写了允许与禁止的改动范围，没有授权条款。",
+        "answerSummary": "6 个文件都没有许可证声明：license、Apache、SPDX、版权、许可证 全部 0 命中（小写的 mit 只出现在 Uncommitted / emit / Limit 这类词里，不是许可证名）。README.md 只写了允许与禁止的改动范围，没有授权条款。回答须先照抄 README 的 `Disallowed changes` 小节标题作为复核入口。",
         "evidence": [
           {
             "path": "demos/README.md",

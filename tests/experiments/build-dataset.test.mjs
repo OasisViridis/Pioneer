@@ -77,6 +77,23 @@ test('build writes a sorted dataset, answers and a report with input hashes', ()
       }
     }
     assert.equal(report.tasks.taskCount, 7);
+    assert.equal(report.corpus.corpusId, 'pioneer-demos-m1-frozen');
+    assert.equal(report.corpus.verified, true);
+    assert.equal(report.corpus.fileCount, 1);
+    assert.match(report.corpus.manifestSha256, /^[0-9a-f]{64}$/);
+
+    const byAttempt = new Map(rows.map((row) => [row.attemptId, row]));
+    assert.equal(byAttempt.get('a-0001').run.adapter, 'pi');
+    assert.equal(byAttempt.get('a-0001').run.notRunReason, null);
+    assert.equal(
+      byAttempt.get('a-0007').run.notRunReason,
+      'AUTHORIZATION_MISSING',
+    );
+    assert.equal(byAttempt.get('a-0007').notes, 'no Provider authorization');
+    assert.equal(
+      byAttempt.get('b-0004').run.notRunReason,
+      'PROVIDER_UNAVAILABLE',
+    );
   } finally {
     cleanup(root);
   }
@@ -230,6 +247,48 @@ test('normalized answers are scanned before answers.ndjson is written', () => {
     assert.equal(result.status, 1);
     assert.match(result.stderr, /answers\.ndjson:\d+:normalizedAnswer/);
     assert.equal(fs.existsSync(path.join(outDir, 'answers.ndjson')), false);
+  } finally {
+    cleanup(root);
+  }
+});
+
+test('build rejects a corpus file whose recorded bytes do not match disk', () => {
+  const root = createTempRoot();
+  try {
+    const fixture = createPilotFixture(root);
+    const tasks = readJson(fixture.tasksPath);
+    tasks.corpus.files[0].bytes += 1;
+    writeJson(fixture.tasksPath, tasks);
+    const outDir = path.join(root, 'out');
+    const result = runExperimentCli(
+      'build-dataset.mjs',
+      buildArgs(fixture, outDir),
+    );
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /corpus file mismatch: demos\/README\.md/);
+    assert.equal(fs.existsSync(path.join(outDir, 'dataset.jsonl')), false);
+  } finally {
+    cleanup(root);
+  }
+});
+
+test('capture corpusManifestSha256 must match the recomputed corpus manifest', () => {
+  const root = createTempRoot();
+  try {
+    const fixture = createPilotFixture(root);
+    const file = captureFile(fixture, 'v1-pioneer', 'capture.json');
+    const capture = readJson(file);
+    capture.environment.corpusManifestSha256 = 'e'.repeat(64);
+    writeJson(file, capture);
+    const outDir = path.join(root, 'out');
+    const result = runExperimentCli(
+      'build-dataset.mjs',
+      buildArgs(fixture, outDir),
+    );
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /corpusManifestSha256 mismatch/);
+    assert.match(result.stderr, /expected [0-9a-f]{64}, actual e{64}/);
+    assert.equal(fs.existsSync(path.join(outDir, 'dataset.jsonl')), false);
   } finally {
     cleanup(root);
   }

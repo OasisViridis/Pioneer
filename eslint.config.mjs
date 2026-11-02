@@ -1,4 +1,4 @@
-import { fixupPluginRules } from '@eslint/compat';
+﻿import { fixupPluginRules } from '@eslint/compat';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import globals from 'globals';
@@ -85,7 +85,9 @@ export default [
     files: [
       '*.config.{js,mjs,cjs}',
       'tools/design-*.mjs',
+      'tools/experiments/**/*.mjs',
       'tests/design-sync/*.mjs',
+      'tests/experiments/*.mjs',
     ],
     languageOptions: {
       ecmaVersion: 'latest',

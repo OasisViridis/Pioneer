@@ -15,30 +15,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { parseArgs, requiredValue, runCli } from './lib/cli.mjs';
+import {
+  FREEZE_MANIFEST_NAME,
+  FROZEN_PROTOCOL_FILE_NAMES,
+  findRepositoryRoot,
+  readFreezeManifest,
+  relativePosix,
+  toPosix,
+} from './lib/manifest.mjs';
 import { ExperimentError, sha256Hex } from './lib/record.mjs';
-
-const PROTOCOL_FILE_NAMES = [
-  'protocol.json',
-  'tasks.json',
-  'analysis-plan.json',
-  'record-schema.json',
-];
-const MANIFEST_NAME = 'freeze-manifest.json';
-const SHA256_PATTERN = /^[0-9a-f]{64}$/;
-
-function toPosix(value) {
-  return value.split(path.sep).join('/');
-}
-
-function findRepositoryRoot(start) {
-  let current = path.resolve(start);
-  for (;;) {
-    if (fs.existsSync(path.join(current, '.git'))) return current;
-    const parent = path.dirname(current);
-    if (parent === current) return null;
-    current = parent;
-  }
-}
 
 function collectToolFiles(root) {
   const toolsRoot = path.join(root, 'tools', 'experiments');
@@ -66,12 +51,12 @@ function collectToolFiles(root) {
 }
 
 function expectedFiles(root, protocolDir) {
-  const protocolFiles = PROTOCOL_FILE_NAMES.map((name) =>
+  const protocolFiles = FROZEN_PROTOCOL_FILE_NAMES.map((name) =>
     path.join(protocolDir, name),
   );
   return [...protocolFiles, ...collectToolFiles(root)].sort((left, right) => {
-    const leftKey = toPosix(path.relative(root, left));
-    const rightKey = toPosix(path.relative(root, right));
+    const leftKey = relativePosix(root, left);
+    const rightKey = relativePosix(root, right);
     return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
   });
 }
@@ -84,102 +69,6 @@ function assertInsideRepository(root, file) {
     );
   }
   return toPosix(relative);
-}
-
-function assertIsoDatetime(value) {
-  if (
-    typeof value !== 'string' ||
-    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(
-      value,
-    )
-  ) {
-    throw new ExperimentError(
-      'freeze-manifest.json.frozenAt: expected an ISO date-time',
-    );
-  }
-}
-
-function validateManifest(manifest) {
-  if (
-    manifest === null ||
-    typeof manifest !== 'object' ||
-    Array.isArray(manifest)
-  ) {
-    throw new ExperimentError('freeze-manifest.json: expected a JSON object');
-  }
-  const allowed = ['protocolId', 'protocolVersion', 'frozenAt', 'files'];
-  for (const key of Object.keys(manifest)) {
-    if (!allowed.includes(key)) {
-      throw new ExperimentError(`freeze-manifest.json: unknown field "${key}"`);
-    }
-  }
-  for (const key of allowed) {
-    if (!Object.prototype.hasOwnProperty.call(manifest, key)) {
-      throw new ExperimentError(`freeze-manifest.json: missing field "${key}"`);
-    }
-  }
-  if (
-    typeof manifest.protocolId !== 'string' ||
-    manifest.protocolId.length === 0
-  ) {
-    throw new ExperimentError(
-      'freeze-manifest.json.protocolId: expected a non-empty string',
-    );
-  }
-  if (
-    !Number.isSafeInteger(manifest.protocolVersion) ||
-    manifest.protocolVersion < 1
-  ) {
-    throw new ExperimentError(
-      'freeze-manifest.json.protocolVersion: expected a positive integer',
-    );
-  }
-  assertIsoDatetime(manifest.frozenAt);
-  if (!Array.isArray(manifest.files)) {
-    throw new ExperimentError('freeze-manifest.json.files: expected an array');
-  }
-  const seen = new Set();
-  for (const [index, file] of manifest.files.entries()) {
-    const label = `freeze-manifest.json.files[${index}]`;
-    if (file === null || typeof file !== 'object' || Array.isArray(file)) {
-      throw new ExperimentError(`${label}: expected an object`);
-    }
-    const fileKeys = Object.keys(file).sort();
-    if (
-      fileKeys.length !== 3 ||
-      fileKeys[0] !== 'bytes' ||
-      fileKeys[1] !== 'path' ||
-      fileKeys[2] !== 'sha256'
-    ) {
-      throw new ExperimentError(
-        `${label}: expected exactly path, sha256 and bytes`,
-      );
-    }
-    if (typeof file.path !== 'string' || file.path.length === 0) {
-      throw new ExperimentError(`${label}.path: expected a non-empty string`);
-    }
-    if (file.path.includes('\\')) {
-      throw new ExperimentError(
-        `${label}.path: manifest paths must use forward slashes`,
-      );
-    }
-    if (path.isAbsolute(file.path)) {
-      throw new ExperimentError(`${label}.path: expected a relative path`);
-    }
-    if (seen.has(file.path)) {
-      throw new ExperimentError(`${label}.path: duplicate entry`);
-    }
-    seen.add(file.path);
-    if (typeof file.sha256 !== 'string' || !SHA256_PATTERN.test(file.sha256)) {
-      throw new ExperimentError(`${label}.sha256: expected 64 lowercase hex`);
-    }
-    if (!Number.isSafeInteger(file.bytes) || file.bytes < 0) {
-      throw new ExperimentError(
-        `${label}.bytes: expected a non-negative integer`,
-      );
-    }
-  }
-  return manifest;
 }
 
 function readProtocolIdentity(protocolDir) {
@@ -235,28 +124,17 @@ function writeManifest(root, protocolDir) {
     files,
   };
   fs.writeFileSync(
-    path.join(protocolDir, MANIFEST_NAME),
+    path.join(protocolDir, FREEZE_MANIFEST_NAME),
     `${JSON.stringify(manifest, null, 2)}\n`,
     'utf8',
   );
   process.stdout.write(
-    `experiment:freeze: wrote ${MANIFEST_NAME} (${files.length} files)\n`,
+    `experiment:freeze: wrote ${FREEZE_MANIFEST_NAME} (${files.length} files)\n`,
   );
 }
 
 function verifyManifest(root, protocolDir) {
-  const manifestPath = path.join(protocolDir, MANIFEST_NAME);
-  if (!fs.existsSync(manifestPath)) {
-    throw new ExperimentError(`${MANIFEST_NAME} not found; run --write first`);
-  }
-  let rawManifest;
-  try {
-    rawManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    throw new ExperimentError(`freeze-manifest.json: invalid JSON (${reason})`);
-  }
-  const manifest = validateManifest(rawManifest);
+  const manifest = readFreezeManifest(protocolDir);
   const manifestFiles = new Map(
     manifest.files.map((file) => [file.path, file]),
   );
@@ -321,7 +199,7 @@ function verifyManifest(root, protocolDir) {
     return;
   }
   process.stdout.write(
-    `experiment:freeze: verified ${manifest.files.length} files against ${MANIFEST_NAME}\n`,
+    `experiment:freeze: verified ${manifest.files.length} files against ${FREEZE_MANIFEST_NAME}\n`,
   );
 }
 

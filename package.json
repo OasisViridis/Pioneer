@@ -12,7 +12,7 @@
     "dev": "pnpm --filter @pioneer/desktop start",
     "format": "prettier --write apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync tools/experiments tests/experiments",
     "format:check": "prettier --check apps/desktop tests/contract tests/e2e tests/helpers package.json pnpm-workspace.yaml eslint.config.mjs vitest.config.ts design tools/design-*.mjs tests/design-sync tools/experiments tests/experiments",
-    "lint": "eslint apps/desktop/src apps/desktop/design tests/contract tests/e2e *.config.* tools/design-*.mjs tests/design-sync",
+    "lint": "eslint apps/desktop/src apps/desktop/design tests/contract tests/e2e tools/experiments tests/experiments *.config.*",
     "typecheck": "pnpm --filter @pioneer/desktop typecheck",
     "package:smoke": "pnpm --filter @pioneer/desktop build",
     "verify:repository": "node --test tests/repository/normalization.test.mjs",

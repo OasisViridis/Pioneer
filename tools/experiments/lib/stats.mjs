@@ -82,10 +82,6 @@ export function median(values) {
   return quantile(values, 0.5);
 }
 
-export function percentile(values, q) {
-  return quantile(values, q);
-}
-
 /**
  * Exact two-sided sign test over task-level differences.
  * Zero differences are ties and are excluded, matching the standard sign test.
