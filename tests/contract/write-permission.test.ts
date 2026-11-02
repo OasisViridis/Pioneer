@@ -1,5 +1,13 @@
 import { createHash } from 'node:crypto';
-import { lstat, mkdir, mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
+import {
+  lstat,
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  realpath,
+  rm,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -500,7 +508,12 @@ describe('write-time target check', () => {
 let projectRoot = '';
 
 async function makeProject(): Promise<string> {
-  return mkdtemp(join(tmpdir(), 'pioneer-write-permission-'));
+  // Resolve the real path: CI's tmpdir goes through a junction or short name,
+  // and main's read-only policy compares resolved paths.
+  const container = await mkdtemp(join(tmpdir(), 'pioneer-write-permission-'));
+  const root = join(container, 'project');
+  await mkdir(root, { recursive: true });
+  return realpath(root);
 }
 
 async function write(
