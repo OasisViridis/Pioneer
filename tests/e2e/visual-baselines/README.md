@@ -26,3 +26,9 @@
 - Codex 逐张检查 1440、900、640 正常图及 640 长文本焦点图；窄窗说明正常换行，焦点、滚动条和保存按钮可见，无重叠或裁切。环境文件与旧基线逐字节相同。逐像素 RGB 比较每张 2503 像素不同，仅落在入口名称和运行说明文字的行内；旧图的故障高亮不是正常界面。
 - 四张 PNG 从原始 artifact 原样复制，未重编码。按上面顺序的 SHA-256 为 `2230a72a40cbbc30a031973454e38a1f01688dedb1555d49af811c0677865ae1`、`a61a956f24231f9d232dd4b95703f2a68432cd5de532b64106a561f4b222924d`、`fe06a0a58e363dd73719b2c6c13245e2e9cc147ecf478e446cc55d755438493c`、`a92d58d4e028b9477aa986027b4551c82015d2507ea837050253a6516f0cc8f3`。
 - 候选截图通过不等于严格回归通过；更新基线后的最终 head 仍需 Windows 质量与视觉检查，包括故意反色失败及恢复。真人 Windows／Provider 验收不在本次范围。
+
+## 2026-11-02 runner image 退出环境门禁
+
+- PR #63 把 `environment.txt` 的 image 更新到 `20261030.294.1` 后，PR 的视觉检查通过；合入 main 的 merge commit `2110444` 又被分到 image `20261021.278.1`，同一个提交因镜像分配不同而失败。
+- GitHub 的 `windows-latest` 池混用两个镜像版本。`environment.txt` 现在只断言渲染相关字段：OS、Electron/Chrome、pixelRatio、字体哈希、locale、time、motion、colorScheme。runner image 仍写入附件 `environment`，供追溯，不再参与断言。
+- 四张 PNG 未改；PR #63 在新镜像上已用同一组图片通过严格比较，说明镜像差异没有改变本次检查的像素。
