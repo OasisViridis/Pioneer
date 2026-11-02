@@ -1,6 +1,7 @@
 import {
   classifyRunEvent,
   type RunEvent,
+  type RunIdentity,
   type RunStatus,
 } from '../../shared/contracts/pioneer-run';
 import type {
@@ -372,26 +373,43 @@ export class RunViewStore {
       }));
       return null;
     }
-    const fresh: RunEvent[] = [];
-    let cursor = 0;
+    const { fresh, ignored, gap } = this.classifyPage(identity, input.page, 0);
+    if (ignored > 0)
+      this.update(input.sessionId, (current) => ({
+        ignoredEvents: current.ignoredEvents + ignored,
+      }));
+    if (gap) {
+      this.update(input.sessionId, { omittedHistory: true });
+    }
+    return fresh;
+  }
+
+  /**
+   * One classify pass shared by the launch page and pushed batches: duplicates
+   * are dropped, foreign/invalid events are counted, and a sequence gap marks
+   * the history as omitted. Returns the events that may be applied.
+   */
+  private classifyPage(
+    identity: RunIdentity,
+    page: RunPage,
+    cursorStart: number,
+  ): { fresh: RunEvent[]; ignored: number; gap: boolean } {
+    let cursor = cursorStart;
     let ignored = 0;
-    for (const event of input.page.events) {
+    let gap = page.gap;
+    const fresh: RunEvent[] = [];
+    for (const event of page.events) {
       const verdict = classifyRunEvent(identity, cursor, event);
       if (verdict === 'duplicate') continue;
       if (verdict === 'foreign' || verdict === 'invalid') {
         ignored += 1;
         continue;
       }
-      if (verdict === 'gap')
-        this.update(input.sessionId, { omittedHistory: true });
+      if (verdict === 'gap') gap = true;
       fresh.push(event);
       cursor = event.seq;
     }
-    if (ignored > 0)
-      this.update(input.sessionId, (current) => ({
-        ignoredEvents: current.ignoredEvents + ignored,
-      }));
-    return fresh;
+    return { fresh, ignored, gap };
   }
 
   private async ingestBatch(batch: RunEventBatch): Promise<void> {
@@ -422,21 +440,12 @@ export class RunViewStore {
       runId: received.runId,
       revision: received.revision,
     };
-    let cursor = this.lastSeqByRun.get(identity.runId) ?? 0;
-    let ignored = 0;
-    const fresh: RunEvent[] = [];
-    for (const event of batch.page.events) {
-      const verdict = classifyRunEvent(identity, cursor, event);
-      if (verdict === 'duplicate') continue;
-      if (verdict === 'foreign' || verdict === 'invalid') {
-        ignored += 1;
-        continue;
-      }
-      if (verdict === 'gap') this.update(sessionId, { omittedHistory: true });
-      fresh.push(event);
-      cursor = event.seq;
-    }
-    if (batch.page.gap) {
+    const { fresh, ignored, gap } = this.classifyPage(
+      identity,
+      batch.page,
+      this.lastSeqByRun.get(identity.runId) ?? 0,
+    );
+    if (gap) {
       this.update(sessionId, { omittedHistory: true });
     }
     if (ignored > 0) {
@@ -447,21 +456,23 @@ export class RunViewStore {
     this.captureRunMeta(identity.runId, fresh);
     this.applyEvents(sessionId, fresh);
     const status = batch.page.status;
-    const terminal =
-      status === 'completed' || status === 'failed' || status === 'stopped';
-    this.update(sessionId, {
-      status,
-      phase: terminal ? 'terminal' : this.get(sessionId).phase,
-    });
-    if (terminal) {
-      this.recordTerminal(sessionId, identity.runId);
-      void this.refreshContext(sessionId).then(() => {
-        // Only a main-verified projection may become the restart summary; a
-        // failed or missing query leaves the previous snapshot untouched.
-        this.captureSnapshot(sessionId);
+    const terminal = isTerminalStatus(status);
+    const currentStatus = this.get(sessionId).status;
+    if (!isTerminalStatus(currentStatus)) {
+      this.update(sessionId, {
+        status,
+        phase: terminal ? 'terminal' : this.get(sessionId).phase,
       });
-    } else if (fresh.some((event) => event.body.type.startsWith('tool.'))) {
-      void this.refreshContext(sessionId);
+      if (terminal) {
+        this.recordTerminal(sessionId, identity.runId);
+        void this.refreshContext(sessionId).then(() => {
+          // Only a main-verified projection may become the restart summary; a
+          // failed or missing query leaves the previous snapshot untouched.
+          this.captureSnapshot(sessionId);
+        });
+      } else if (fresh.some((event) => event.body.type.startsWith('tool.'))) {
+        void this.refreshContext(sessionId);
+      }
     }
     this.advanceCursor(identity.runId, batch.page.nextAfterSeq);
     await this.port.acknowledgeRunPage({
@@ -795,16 +806,16 @@ export class RunViewStore {
           this.captureRunMeta(started.runId, accepted);
           this.applyEvents(input.sessionId, accepted);
           this.advanceCursor(started.runId, page.nextAfterSeq);
-          this.update(input.sessionId, { status: page.status });
-          if (
-            page.status === 'completed' ||
-            page.status === 'failed' ||
-            page.status === 'stopped'
-          ) {
-            // A run that already converged before the first read is terminal
-            // here too; leaving the phase active would keep the stop button.
-            this.update(input.sessionId, { phase: 'terminal' });
-            this.recordTerminal(input.sessionId, started.runId);
+          // A live batch may already have delivered the terminal state while
+          // this first page was in flight; an older page must not regress it.
+          if (!isTerminalStatus(this.get(input.sessionId).status)) {
+            this.update(input.sessionId, { status: page.status });
+            if (isTerminalStatus(page.status)) {
+              // A run that already converged before the first read is terminal
+              // here too; leaving the phase active would keep the stop button.
+              this.update(input.sessionId, { phase: 'terminal' });
+              this.recordTerminal(input.sessionId, started.runId);
+            }
           }
         }
       }
@@ -858,6 +869,10 @@ export class RunViewStore {
       });
     }
   }
+}
+
+function isTerminalStatus(status: RunStatus | null): boolean {
+  return status === 'completed' || status === 'failed' || status === 'stopped';
 }
 
 export function visibleStatus(state: RunViewState): string | null {

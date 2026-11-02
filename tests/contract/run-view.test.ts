@@ -80,6 +80,7 @@ function createFakeRunPort(options: {
   stopReply: RunStopReply;
   getRunContext?: () => Promise<RunContextReply>;
   startReply?: { ok: true; runId: string } | { ok: false; code: string };
+  getRun?: () => Promise<RunPage | null>;
 }): FakeRunPort {
   const ackedPages: number[] = [];
   let batchCallback: ((batch: RunEventBatch) => void) | null = null;
@@ -106,7 +107,10 @@ function createFakeRunPort(options: {
     startRun: () =>
       Promise.resolve(options.startReply ?? { ok: true, runId: RUN_ID }),
     stopRun: () => Promise.resolve(options.stopReply),
-    getRun: () => Promise.resolve(options.getRunPage),
+    getRun: () =>
+      options.getRun === undefined
+        ? Promise.resolve(options.getRunPage)
+        : options.getRun(),
     getRunContext:
       options.getRunContext ??
       (() =>
@@ -311,6 +315,69 @@ describe('run view identity isolation', () => {
     const state = store.get(SESSION_ID);
     expect(state.events.map((event) => event.seq)).toEqual([1, 3]);
     expect(state.omittedHistory).toBe(true);
+  });
+
+  it('does not let the first page regress a terminal live batch', async () => {
+    let resolvePage: (page: RunPage | null) => void = () => undefined;
+    const pending = new Promise<RunPage | null>((resolve) => {
+      resolvePage = resolve;
+    });
+    const port = createFakeRunPort({
+      getRunPage: null,
+      stopReply: { ok: true, status: 'completed' },
+      getRun: () => pending,
+    });
+    const store = new RunViewStore(port);
+    const running = launch(store);
+    await flushBatches();
+
+    port.emit({
+      page: pageOf({
+        status: 'completed',
+        events: sequence(1, 1),
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+    });
+    await flushBatches();
+    expect(store.get(SESSION_ID).status).toBe('completed');
+
+    resolvePage(
+      pageOf({
+        status: 'running',
+        events: sequence(1, 1),
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+    );
+    await running;
+
+    expect(store.get(SESSION_ID).status).toBe('completed');
+    expect(store.get(SESSION_ID).phase).toBe('terminal');
+  });
+
+  it('marks omitted history when the initial page reports a gap', async () => {
+    const page: RunPage = {
+      ...pageOf({
+        status: 'running',
+        events: sequence(1, 1),
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+      gap: true,
+    };
+    const port = createFakeRunPort({
+      getRunPage: page,
+      stopReply: { ok: true, status: 'running' },
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+
+    expect(store.get(SESSION_ID).events).toHaveLength(1);
+    expect(store.get(SESSION_ID).omittedHistory).toBe(true);
   });
 
   it('reports omitted history when the display cap drops the oldest event', async () => {

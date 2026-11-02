@@ -127,7 +127,17 @@ const MATERIAL_REASON_TEXT: Record<RunMaterialReason, string> = {
 
 export const materialReasonText = (
   reason: RunMaterialReason | null,
-): string | null => (reason === null ? null : MATERIAL_REASON_TEXT[reason]);
+  state?: RunMaterialState,
+): string | null => {
+  if (reason === null) return null;
+  if (state === 'read' || state === 'scanned') {
+    if (reason === 'CONTENT_NOT_ALLOWED')
+      return '读取后内容发生变化，后续调用已拒绝';
+    if (reason === 'BINARY_CONTENT')
+      return '读取时发现二进制内容，未按文本分析';
+  }
+  return MATERIAL_REASON_TEXT[reason];
+};
 
 const CALL_STATE_TEXT: Record<RunToolCallState, string> = {
   requested: '请求中',
@@ -186,4 +196,12 @@ export function snapshotOutOfDate(session: {
   const snapshot = session.lastRunView;
   if (snapshot === null) return false;
   return session.runRevision > snapshot.identity.revision;
+}
+
+/** A run was started in this session but left no terminal summary. */
+export function runSummaryMissing(session: {
+  runRevision: number;
+  lastRunView: RunSnapshot | null;
+}): boolean {
+  return session.runRevision > 0 && session.lastRunView === null;
 }

@@ -2005,4 +2005,76 @@ describe('P3-A read fact survives a later failure (#17)', () => {
       'rejected',
     ]);
   });
+
+  it('ignores a material callback that arrives after the run stopped', async () => {
+    const { manager, projectRoot } = await createManager(
+      {
+        steps: [
+          {
+            action: 'tool',
+            request: {
+              tool: 'read_file',
+              arguments: { path: 'notes/readme.txt' },
+            },
+          },
+          { action: 'complete' },
+        ],
+      },
+      {
+        executeTool: async (_root, _request, signal, _materials, observer) => {
+          await new Promise<void>((resolve) => {
+            if (signal.aborted) {
+              resolve();
+              return;
+            }
+            signal.addEventListener('abort', () => {
+              resolve();
+            });
+          });
+          // The executor reports its read after the run has already stopped;
+          // termination must win over this late observation.
+          setTimeout(() => {
+            observer?.onMaterial?.('notes/readme.txt', 'read');
+          }, 50);
+          return { status: 'cancelled', code: 'CANCELLED' };
+        },
+      },
+    );
+    await mkdir(join(projectRoot, 'notes'), { recursive: true });
+    await writeFile(
+      join(projectRoot, 'notes', 'readme.txt'),
+      'fixture-answer',
+      'utf-8',
+    );
+    const { runId } = await launchRun(manager, {
+      materials: ['notes/readme.txt'],
+    });
+    await waitFor(() =>
+      (pageOf(manager, runId)?.events ?? []).some(
+        (event) => event.body.type === 'tool.requested',
+      ),
+    );
+    manager.stop({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      ...binding,
+    });
+    await waitFor(() => pageOf(manager, runId)?.status === 'stopped');
+    await new Promise((resolve) => setTimeout(resolve, 120));
+
+    const context = manager.getContext({
+      sessionId: 'session:test',
+      projectId: 'project:test',
+      runId,
+      revision: 1,
+      ...binding,
+    });
+    expect(context?.materials[0]).toMatchObject({
+      path: 'notes/readme.txt',
+      state: 'approved',
+    });
+    expect(context?.calls[0]).toMatchObject({ state: 'cancelled' });
+  });
 });

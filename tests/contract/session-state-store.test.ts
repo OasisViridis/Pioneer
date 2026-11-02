@@ -14,6 +14,7 @@ import type {
   LegacySessionWorkspaceState,
   SessionWorkspaceState,
 } from '../../apps/desktop/src/shared/contracts/session-workspace';
+import type { RunSnapshot } from '../../apps/desktop/src/shared/contracts/run-context';
 import { createDockLayout } from '../../apps/desktop/src/shared/docking';
 import {
   MAX_SESSION_STATE_BYTES,
@@ -835,5 +836,50 @@ describe('session v6 migration (#17 RunLog panel)', () => {
         state: { ...state, sessions: [{ ...session, dock: legacyDock }] },
       }),
     ).toThrow();
+  });
+});
+
+describe('run snapshot identity guard', () => {
+  const snapshot = (sessionId: string, projectId: string): RunSnapshot => ({
+    identity: {
+      sessionId,
+      projectId,
+      runId: 'run:1',
+      revision: 1,
+    },
+    status: 'completed',
+    tools: ['read_file'],
+    materials: [],
+    calls: [],
+    recordedAt: '2026-10-27T10:00:00.000Z',
+  });
+
+  it('drops a snapshot naming another session', () => {
+    const state = stateWith();
+    const session = state.sessions[0];
+    if (session === undefined) throw new Error('missing session');
+    session.lastRunView = snapshot('session:other', 'alpha');
+    const loaded = loadRecord({ version: SESSION_STATE_VERSION, state });
+    expect(loaded.state.sessions[0]?.lastRunView).toBeNull();
+  });
+
+  it('drops a snapshot naming another project', () => {
+    const state = stateWith();
+    const session = state.sessions[0];
+    if (session === undefined) throw new Error('missing session');
+    session.lastRunView = snapshot('session:alpha', 'beta');
+    const loaded = loadRecord({ version: SESSION_STATE_VERSION, state });
+    expect(loaded.state.sessions[0]?.lastRunView).toBeNull();
+  });
+
+  it('keeps a snapshot that matches its session and project', () => {
+    const state = stateWith();
+    const session = state.sessions[0];
+    if (session === undefined) throw new Error('missing session');
+    session.lastRunView = snapshot('session:alpha', 'alpha');
+    const loaded = loadRecord({ version: SESSION_STATE_VERSION, state });
+    expect(loaded.state.sessions[0]?.lastRunView?.identity.sessionId).toBe(
+      'session:alpha',
+    );
   });
 });

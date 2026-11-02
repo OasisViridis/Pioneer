@@ -128,14 +128,27 @@ const BranchOriginSchema = z
   .strict();
 const SessionSchema = V7SessionSchema.extend({
   branchOrigin: BranchOriginSchema.nullable().optional(),
-}).superRefine((session, context) => {
-  if (session.branchOrigin?.sessionId === session.id)
-    context.addIssue({
-      code: 'custom',
-      path: ['branchOrigin'],
-      message: 'A session cannot branch from itself.',
-    });
-});
+})
+  .superRefine((session, context) => {
+    if (session.branchOrigin?.sessionId === session.id)
+      context.addIssue({
+        code: 'custom',
+        path: ['branchOrigin'],
+        message: 'A session cannot branch from itself.',
+      });
+  })
+  .transform((session) => {
+    const snapshot = session.lastRunView;
+    if (snapshot === null) return session;
+    if (
+      snapshot.identity.sessionId === session.id &&
+      snapshot.identity.projectId === session.project.id
+    )
+      return session;
+    // A persisted snapshot naming another session or project must not seed
+    // these panels; drop it and let the panels report the missing summary.
+    return { ...session, lastRunView: null };
+  });
 export const SessionStateSchema: z.ZodType<SessionWorkspaceState> =
   LegacyStateObjectSchema.extend({
     sessions: z.array(SessionSchema).max(10_000),
