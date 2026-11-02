@@ -113,7 +113,7 @@ function RunIdentity({
       <p className="metadata">
         {run.runId === null
           ? run.summaryMissing
-            ? '上次运行没有留下终态摘要'
+            ? '上次运行没有可用的终态摘要'
             : '本会话尚未启动运行'
           : `运行 ${run.runId} · 修订 ${String(run.revision ?? '—')} · ${run.status ?? '未运行'}`}
       </p>
@@ -161,7 +161,7 @@ export function RunContextPanel({
           </span>
           <h3>
             {run.summaryMissing
-              ? '上次运行没有留下终态摘要'
+              ? '上次运行没有可用的终态摘要'
               : '还没有可查看的上下文'}
           </h3>
           <p>
@@ -262,7 +262,7 @@ export function RunCapabilitiesPanel({
       <RunIdentity session={session} run={run} />
       {run.summaryMissing ? (
         <p className="metadata" role="status">
-          上次运行没有留下终态摘要，无法显示授权工具或调用记录。
+          上次运行没有可用的终态摘要，无法显示授权工具或调用记录。
         </p>
       ) : null}
       <h3 className="run-detail__heading">可用能力</h3>
@@ -272,7 +272,9 @@ export function RunCapabilitiesPanel({
             <dt>{toolLabel(tool)}</dt>
             <dd>
               {run.runId === null
-                ? '尚未授权'
+                ? run.summaryMissing
+                  ? '摘要不可用'
+                  : '尚未授权'
                 : authorized.includes(tool)
                   ? '本次运行已授权 · 只读'
                   : '本次未授权'}
@@ -301,7 +303,9 @@ export function RunCapabilitiesPanel({
       {run.calls.length === 0 ? (
         <p className="metadata">
           {run.runId === null
-            ? '还没有运行，因此没有工具调用。'
+            ? run.summaryMissing
+              ? '上次运行没有可用的终态摘要，无法列出工具调用。'
+              : '还没有运行，因此没有工具调用。'
             : run.omittedHistory
               ? '事件已截断，无法确认本次运行是否请求过工具。'
               : '本次运行尚未请求工具。'}
@@ -325,11 +329,9 @@ export function RunCapabilitiesPanel({
                 <p className="metadata">
                   {call.callId}
                   {call.target === null
-                    ? run.fromSnapshot
-                      ? ' · 目标未持久化'
-                      : call.tool === null
-                        ? ''
-                        : ' · 目标不可显示（敏感或无效路径）'
+                    ? call.tool === null
+                      ? ''
+                      : ' · 目标不可显示（敏感或无效路径）'
                     : ` · ${call.target}`}
                 </p>
                 {call.code === null ? null : (
@@ -451,7 +453,7 @@ export function RunLogPanel({
           <h3>
             {run.runId === null
               ? run.summaryMissing
-                ? '上次运行没有留下日志'
+                ? '上次运行没有可用的日志'
                 : '还没有运行日志'
               : run.fromSnapshot
                 ? '上次运行没有工具调用'

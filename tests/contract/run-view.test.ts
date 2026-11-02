@@ -4,6 +4,7 @@ import type {
   RunEvent,
   RunStatus,
 } from '../../apps/desktop/src/shared/contracts/pioneer-run';
+import type { SessionRunRecord } from '../../apps/desktop/src/shared/contracts/session-run-history';
 import type {
   RunEventBatch,
   RunPage,
@@ -328,15 +329,35 @@ describe('run view identity isolation', () => {
       getRun: () => pending,
     });
     const store = new RunViewStore(port);
-    const running = launch(store);
+    const terminals: SessionRunRecord[] = [];
+    const running = store.launch({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+      task: '读取 fixture 并回答。',
+      materials: [],
+      onTerminal: (record) => terminals.push(record),
+    });
     await flushBatches();
 
+    const completed: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 2,
+      at: '2026-10-25T00:00:02.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: {
+        type: 'run.completed',
+        usage: { inputTokens: null, outputTokens: null },
+      },
+    };
     port.emit({
       page: pageOf({
         status: 'completed',
-        events: sequence(1, 1),
-        lastSeq: 1,
-        nextAfterSeq: 1,
+        events: [...sequence(1, 1), completed],
+        lastSeq: 2,
+        nextAfterSeq: 2,
         hasMore: false,
       }),
     });
@@ -356,6 +377,60 @@ describe('run view identity isolation', () => {
 
     expect(store.get(SESSION_ID).status).toBe('completed');
     expect(store.get(SESSION_ID).phase).toBe('terminal');
+    // The late page duplicates seq 1; the persisted result text must not be
+    // appended twice.
+    expect(terminals).toHaveLength(1);
+    expect(terminals[0]?.resultText).toBe('事件 1');
+  });
+
+  it('records the terminal summary when a confirming batch follows the stop receipt', async () => {
+    const port = createFakeRunPort({
+      getRunPage: null,
+      stopReply: { ok: true, status: 'stopped' },
+    });
+    const store = new RunViewStore(port);
+    const terminals: unknown[] = [];
+    const snapshots: unknown[] = [];
+    await store.launch({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+      task: '读取 fixture 并回答。',
+      materials: [],
+      onTerminal: (record) => terminals.push(record),
+      onSnapshot: (snapshot) => snapshots.push(snapshot),
+    });
+
+    await store.stop({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+    });
+    expect(store.get(SESSION_ID).status).toBe('stopped');
+
+    const stopped: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 1,
+      at: '2026-10-25T00:00:00.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: { type: 'run.stopped' },
+    };
+    port.emit({
+      page: pageOf({
+        status: 'stopped',
+        events: [stopped],
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+    });
+    await flushBatches();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(terminals).toHaveLength(1);
+    expect(snapshots).toHaveLength(1);
   });
 
   it('marks omitted history when the initial page reports a gap', async () => {

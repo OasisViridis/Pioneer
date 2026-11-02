@@ -18,7 +18,7 @@
   ```
 - **质量门禁 (Quality Gates)**：
   - **Repository Normalization**：`pnpm verify:repository`，校验文档中无绝对 file 协议链接，规范化 210 原型必须限定为 Prototype Tests 声明与路径引用。
-  - **Contract Tests**：`pnpm test:contract`，验证共享契约、路径、扫描器、IPC、安全边界、设置存储与 Tabs reducer。
+  - **Contract Tests**：`pnpm test:contract`，验证共享契约、路径、扫描器、IPC、安全边界、设置存储、Tabs reducer 与 renderer 状态投影。
   - **Prototype Tests**：`pnpm test:prototype`，冻结 M1 Prototype Tests 为 210/210；这是模拟器和探针证据，不是 Electron proof。
   - **Real E2E**：`pnpm test:e2e`，由 Playwright 启动真实 Electron，跨越 main → preload → renderer，并校验 fixture 不变性。
   - `pnpm check` 依次执行格式、lint、类型检查、上述三层测试与最终 package smoke；M2 已完成，M3 继续以该门禁作为主线质量基线。
@@ -50,7 +50,7 @@
 
 当前工作副本为 Git-only，使用标准 Git 配合 TheMasterplan 门禁流程。若工作副本具备 `.jj`，请参阅 [Jujutsu 工作流](docs/workflow/jujutsu.md)。
 
-用户于 2026-10-03 验收 v8 展示视频并恢复应用开发；P0 底座、P1 可恢复会话与 P2 真实只读 Harness（PR #16，2026-10-26 合并）均已完成。当前前沿是 P3：面板接真实数据（#17）、移除意图卡（#41）、修正运行提示（#42）；唯一施工队列见[Wayfinder 端到端开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)与 [GitHub Issues #9 主地图](https://github.com/OasisViridis/Pioneer/issues/9)。
+用户于 2026-10-03 验收 v8 展示视频并恢复应用开发；P0 底座、P1 可恢复会话与 P2 真实只读 Harness（PR #16，2026-10-26 合并）均已完成。P3 三票已完成：面板接真实数据（#17，PR #57）、移除意图卡（#41）、修正运行提示（#42）；后续队列见[Wayfinder 端到端开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)与 [GitHub Issues #9 主地图](https://github.com/OasisViridis/Pioneer/issues/9)。
 
 ```powershell
 # 1. 检查当前工作副本状态与变更

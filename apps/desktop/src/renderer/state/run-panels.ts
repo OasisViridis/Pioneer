@@ -130,12 +130,10 @@ export const materialReasonText = (
   state?: RunMaterialState,
 ): string | null => {
   if (reason === null) return null;
-  if (state === 'read' || state === 'scanned') {
-    if (reason === 'CONTENT_NOT_ALLOWED')
-      return '读取后内容发生变化，后续调用已拒绝';
-    if (reason === 'BINARY_CONTENT')
-      return '读取时发现二进制内容，未按文本分析';
-  }
+  if (state === 'read' && reason === 'CONTENT_NOT_ALLOWED')
+    return '读取后内容发生变化，后续调用已拒绝';
+  if (state === 'scanned' && reason === 'CONTENT_NOT_ALLOWED')
+    return '扫描后内容发生变化，后续调用已拒绝';
   return MATERIAL_REASON_TEXT[reason];
 };
 

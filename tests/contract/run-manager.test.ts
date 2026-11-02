@@ -2007,6 +2007,7 @@ describe('P3-A read fact survives a later failure (#17)', () => {
   });
 
   it('ignores a material callback that arrives after the run stopped', async () => {
+    let observed = false;
     const { manager, projectRoot } = await createManager(
       {
         steps: [
@@ -2034,6 +2035,7 @@ describe('P3-A read fact survives a later failure (#17)', () => {
           // The executor reports its read after the run has already stopped;
           // termination must win over this late observation.
           setTimeout(() => {
+            observed = true;
             observer?.onMaterial?.('notes/readme.txt', 'read');
           }, 50);
           return { status: 'cancelled', code: 'CANCELLED' };
@@ -2062,7 +2064,7 @@ describe('P3-A read fact survives a later failure (#17)', () => {
       ...binding,
     });
     await waitFor(() => pageOf(manager, runId)?.status === 'stopped');
-    await new Promise((resolve) => setTimeout(resolve, 120));
+    await waitFor(() => observed);
 
     const context = manager.getContext({
       sessionId: 'session:test',

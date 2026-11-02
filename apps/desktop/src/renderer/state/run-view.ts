@@ -373,7 +373,14 @@ export class RunViewStore {
       }));
       return null;
     }
-    const { fresh, ignored, gap } = this.classifyPage(identity, input.page, 0);
+    const { fresh, ignored, gap } = this.classifyPage(
+      identity,
+      input.page,
+      // A live batch may already have been applied while the first page was in
+      // flight; classify from the current cursor so its text is not re-read
+      // into the persisted result summary.
+      this.lastSeqByRun.get(input.runId) ?? 0,
+    );
     if (ignored > 0)
       this.update(input.sessionId, (current) => ({
         ignoredEvents: current.ignoredEvents + ignored,
@@ -457,22 +464,29 @@ export class RunViewStore {
     this.applyEvents(sessionId, fresh);
     const status = batch.page.status;
     const terminal = isTerminalStatus(status);
-    const currentStatus = this.get(sessionId).status;
-    if (!isTerminalStatus(currentStatus)) {
+    const wasTerminal = isTerminalStatus(this.get(sessionId).status);
+    if (!wasTerminal) {
       this.update(sessionId, {
         status,
         phase: terminal ? 'terminal' : this.get(sessionId).phase,
       });
-      if (terminal) {
-        this.recordTerminal(sessionId, identity.runId);
-        void this.refreshContext(sessionId).then(() => {
-          // Only a main-verified projection may become the restart summary; a
-          // failed or missing query leaves the previous snapshot untouched.
-          this.captureSnapshot(sessionId);
-        });
-      } else if (fresh.some((event) => event.body.type.startsWith('tool.'))) {
-        void this.refreshContext(sessionId);
-      }
+    } else if (terminal) {
+      this.update(sessionId, { phase: 'terminal' });
+    }
+    if (terminal) {
+      // A stop receipt may already have shown a terminal state; the confirming
+      // batch still records the durable summary and the restart snapshot.
+      this.recordTerminal(sessionId, identity.runId);
+      void this.refreshContext(sessionId).then(() => {
+        // Only a main-verified projection may become the restart summary; a
+        // failed or missing query leaves the previous snapshot untouched.
+        this.captureSnapshot(sessionId);
+      });
+    } else if (
+      !wasTerminal &&
+      fresh.some((event) => event.body.type.startsWith('tool.'))
+    ) {
+      void this.refreshContext(sessionId);
     }
     this.advanceCursor(identity.runId, batch.page.nextAfterSeq);
     await this.port.acknowledgeRunPage({
@@ -848,11 +862,7 @@ export class RunViewStore {
     if (reply.ok) {
       // Terminal status arrives via the event stream; stopping is local truth
       // only until main confirms convergence.
-      if (
-        reply.status === 'completed' ||
-        reply.status === 'failed' ||
-        reply.status === 'stopped'
-      ) {
+      if (isTerminalStatus(reply.status)) {
         this.update(input.sessionId, {
           phase: 'terminal',
           status: reply.status,

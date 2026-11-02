@@ -876,10 +876,21 @@ describe('run snapshot identity guard', () => {
     const state = stateWith();
     const session = state.sessions[0];
     if (session === undefined) throw new Error('missing session');
+    session.runRevision = 1;
     session.lastRunView = snapshot('session:alpha', 'alpha');
     const loaded = loadRecord({ version: SESSION_STATE_VERSION, state });
     expect(loaded.state.sessions[0]?.lastRunView?.identity.sessionId).toBe(
       'session:alpha',
     );
+  });
+
+  it('drops a snapshot whose revision the session never reached', () => {
+    const state = stateWith();
+    const session = state.sessions[0];
+    if (session === undefined) throw new Error('missing session');
+    session.runRevision = 0;
+    session.lastRunView = snapshot('session:alpha', 'alpha');
+    const loaded = loadRecord({ version: SESSION_STATE_VERSION, state });
+    expect(loaded.state.sessions[0]?.lastRunView).toBeNull();
   });
 });
