@@ -1195,6 +1195,7 @@ describe('write outcomes', () => {
 
   it('reports verified, unverified, failed and mid-write targets separately', () => {
     const outcomes = summarizeWriteOutcomes(approval, [
+      record('intent', 'src/a.ts'),
       record('applied', 'src/a.ts'),
       record('applied', 'src/b.ts', { verification: 'unverified' }),
       record('intent', 'src/c.ts'),
@@ -1252,6 +1253,17 @@ describe('write outcomes', () => {
     });
   });
 
+  it('rejects an applied record that never declared intent', () => {
+    const outcomes = summarizeWriteOutcomes(approval, [
+      record('applied', 'src/a.ts'),
+    ]);
+    expect(outcomes[0]).toEqual({
+      path: 'src/a.ts',
+      status: 'verification_failed',
+      code: 'VERIFY_FAILED',
+    });
+  });
+
   it('uses the last journal record for a path', () => {
     const outcomes = summarizeWriteOutcomes(approval, [
       record('applied', 'src/a.ts'),
@@ -1266,6 +1278,7 @@ describe('write outcomes', () => {
 
   it('reports a completed recovery as restored, not unchanged', () => {
     const outcomes = summarizeWriteOutcomes(approval, [
+      record('intent', 'src/a.ts'),
       record('applied', 'src/a.ts'),
       record('recovery', 'src/a.ts', {
         action: 'restore',
@@ -1329,6 +1342,32 @@ describe('recovery planning', () => {
     });
   }
 
+  function intentRecord(approval: WriteApproval, path: string) {
+    const target = approval.targets.find((item) => item.path === path);
+    if (target === undefined) {
+      throw new Error(`no approval target for ${path}`);
+    }
+    return WriteChangeJournalRecordSchema.parse({
+      kind: 'intent',
+      approvalId: approval.approvalId,
+      path,
+      beforeSha256: target.before.sha256,
+      at: new Date(AT + 1_000).toISOString(),
+    });
+  }
+
+  /** Declares intent then applies, the only chain that proves a write. */
+  function provenWrite(
+    approval: WriteApproval,
+    path: string,
+    observedIdentity: WriteFileIdentity | null = null,
+  ) {
+    return [
+      intentRecord(approval, path),
+      appliedRecord(approval, path, observedIdentity),
+    ];
+  }
+
   it('restores only a file that still holds this run post-image', async () => {
     const target = await seed('src/index.ts', 'before\n');
     await writeFile(join(projectRoot, 'src/index.ts'), 'after\n');
@@ -1340,7 +1379,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [actual]);
     const plan = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/index.ts')],
+      records: provenWrite(approval, 'src/index.ts'),
       observations,
     });
     expect(plan.actions).toEqual([
@@ -1369,7 +1408,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [actual]);
     const plan = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/index.ts', appliedIdentity)],
+      records: provenWrite(approval, 'src/index.ts', appliedIdentity),
       observations,
     });
     expect(plan.actions[0]).toMatchObject({
@@ -1385,7 +1424,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/index.ts')],
+      records: provenWrite(approval, 'src/index.ts'),
       observations,
     });
     expect(plan.actions[0]).toEqual({
@@ -1398,14 +1437,13 @@ describe('recovery planning', () => {
 
   it('does not replay a target that already has a recovery record', async () => {
     const target = await seed('src/index.ts', 'before\n');
-    await writeFile(join(projectRoot, 'src/index.ts'), 'after\n');
     const actual: WriteTarget = { ...target, after: stateOf('after\n') };
     const approval = approvalOf([actual]);
     const observations = await observeWriteTargets(projectRoot, [actual]);
     const plan = planRecovery({
       approval,
       records: [
-        appliedRecord(approval, 'src/index.ts'),
+        ...provenWrite(approval, 'src/index.ts'),
         WriteChangeJournalRecordSchema.parse({
           kind: 'recovery',
           approvalId: approval.approvalId,
@@ -1420,6 +1458,37 @@ describe('recovery planning', () => {
     expect(plan.actions[0]).toMatchObject({
       path: 'src/index.ts',
       action: 'already_restored',
+      state: 'unchanged',
+    });
+  });
+
+  it('treats a file changed after a restore as a conflict', async () => {
+    const target = await seed('src/index.ts', 'before\n');
+    await writeFile(
+      join(projectRoot, 'src/index.ts'),
+      'edited after restore\n',
+    );
+    const actual: WriteTarget = { ...target, after: stateOf('after\n') };
+    const approval = approvalOf([actual]);
+    const observations = await observeWriteTargets(projectRoot, [actual]);
+    const plan = planRecovery({
+      approval,
+      records: [
+        ...provenWrite(approval, 'src/index.ts'),
+        WriteChangeJournalRecordSchema.parse({
+          kind: 'recovery',
+          approvalId: approval.approvalId,
+          path: 'src/index.ts',
+          action: 'restore',
+          observedSha256: sha256Of('before\n'),
+          at: new Date(AT + 3_000).toISOString(),
+        }),
+      ],
+      observations,
+    });
+    expect(plan.actions[0]).toMatchObject({
+      path: 'src/index.ts',
+      action: 'conflict',
       state: 'changed',
     });
   });
@@ -1561,7 +1630,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [actual]);
     const plan = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/index.ts')],
+      records: provenWrite(approval, 'src/index.ts'),
       observations,
     });
     expect(plan.conflicts).toEqual([
@@ -1582,7 +1651,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/index.ts')],
+      records: provenWrite(approval, 'src/index.ts'),
       observations,
     });
     expect(plan.conflicts).toEqual([
@@ -1603,7 +1672,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/index.ts')],
+      records: provenWrite(approval, 'src/index.ts'),
       observations,
     });
     expect(plan.conflicts[0]).toMatchObject({
@@ -1623,7 +1692,7 @@ describe('recovery planning', () => {
     ]);
     const plan = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/a.ts')],
+      records: provenWrite(approval, 'src/a.ts'),
       observations,
     });
     expect(plan.actions.map((action) => action.path)).toEqual(['src/a.ts']);
@@ -1690,14 +1759,14 @@ describe('recovery planning', () => {
     const approval = approvalOf([actual]);
     const first = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/index.ts')],
+      records: provenWrite(approval, 'src/index.ts'),
       observations: await observeWriteTargets(projectRoot, [actual]),
     });
     expect(first.actions[0]?.action).toBe('restore');
     await writeFile(join(projectRoot, 'src/index.ts'), 'before\n');
     const second = planRecovery({
       approval,
-      records: [appliedRecord(approval, 'src/index.ts')],
+      records: provenWrite(approval, 'src/index.ts'),
       observations: await observeWriteTargets(projectRoot, [actual]),
     });
     expect(second.actions[0]?.action).toBe('already_restored');

@@ -305,20 +305,20 @@ export function rejectedOutcomes(
 
 /**
  * Last journal record for one approved target. `kind` narrows the scan when a
- * caller needs the applied record specifically (recovery) rather than the
- * latest record of any kind (outcome summary).
+ * caller needs one stage of the chain (`intent`, `applied`) rather than the
+ * latest record of any kind.
  */
 function lastRecordFor(
   records: readonly WriteChangeJournalRecord[],
   approvalId: string,
   path: string,
 ): WriteChangeJournalRecord | null;
-function lastRecordFor(
+function lastRecordFor<K extends WriteChangeJournalRecord['kind']>(
   records: readonly WriteChangeJournalRecord[],
   approvalId: string,
   path: string,
-  kind: 'applied',
-): Extract<WriteChangeJournalRecord, { kind: 'applied' }> | null;
+  kind: K,
+): Extract<WriteChangeJournalRecord, { kind: K }> | null;
 function lastRecordFor(
   records: readonly WriteChangeJournalRecord[],
   approvalId: string,
@@ -335,15 +335,21 @@ function lastRecordFor(
 }
 
 /**
- * A journal record proves the reviewed write only when it is verified, its
- * after-image is this approval's after-image and the observation agrees. Both
- * the outcome summary and the recovery plan use this one predicate.
+ * A journal record proves the reviewed write only when the run recorded the
+ * `intent` before it, the record is verified, its after-image is this
+ * approval's after-image and the observation agrees. Both the outcome summary
+ * and the recovery plan use this one predicate.
  */
 function isProvenApplied(
   record: Extract<WriteChangeJournalRecord, { kind: 'applied' }>,
   target: WriteTarget,
+  records: readonly WriteChangeJournalRecord[],
+  approvalId: string,
 ): boolean {
+  const intent = lastRecordFor(records, approvalId, target.path, 'intent');
   return (
+    intent !== null &&
+    intent.at <= record.at &&
     record.verification === 'verified' &&
     record.afterSha256 === target.after.sha256 &&
     record.observedSha256 === record.afterSha256
@@ -359,12 +365,14 @@ function isProvenRecovery(
   record: Extract<WriteChangeJournalRecord, { kind: 'recovery' }>,
   target: WriteTarget,
   applied: Extract<WriteChangeJournalRecord, { kind: 'applied' }> | null,
+  records: readonly WriteChangeJournalRecord[],
+  approvalId: string,
 ): boolean {
   return (
     record.action !== 'preserve' &&
     record.observedSha256 === target.before.sha256 &&
     applied !== null &&
-    isProvenApplied(applied, target)
+    isProvenApplied(applied, target, records, approvalId)
   );
 }
 
@@ -386,7 +394,12 @@ export function summarizeWriteOutcomes(
     }
     switch (record.kind) {
       case 'applied': {
-        const verified = isProvenApplied(record, target);
+        const verified = isProvenApplied(
+          record,
+          target,
+          records,
+          approval.approvalId,
+        );
         return {
           path: target.path,
           status: verified
@@ -414,7 +427,13 @@ export function summarizeWriteOutcomes(
           target.path,
           'applied',
         );
-        const restored = isProvenRecovery(record, target, applied);
+        const restored = isProvenRecovery(
+          record,
+          target,
+          applied,
+          records,
+          approval.approvalId,
+        );
         return restored
           ? { path: target.path, status: 'restored' as const, code: null }
           : {
@@ -484,11 +503,19 @@ export function planRecovery(input: {
         target.path,
         'applied',
       );
+      // A proven restore only settles the target when the disk still agrees;
+      // a file edited after the restore is a new conflict, not "done".
+      const restored =
+        isProvenRecovery(
+          latest,
+          target,
+          applied,
+          input.records,
+          input.approval.approvalId,
+        ) && observation.state === 'unchanged';
       actions.push({
         path: target.path,
-        action: isProvenRecovery(latest, target, applied)
-          ? 'already_restored'
-          : 'conflict',
+        action: restored ? 'already_restored' : 'conflict',
         state: observation.state,
         observed: observation.observed,
       });
@@ -529,7 +556,9 @@ export function planRecovery(input: {
     }
     // Only a verified applied record that matches this approval proves the run
     // actually wrote the reviewed bytes.
-    if (!isProvenApplied(latest, target)) {
+    if (
+      !isProvenApplied(latest, target, input.records, input.approval.approvalId)
+    ) {
       actions.push({
         path: target.path,
         action: 'conflict',
