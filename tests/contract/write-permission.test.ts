@@ -458,6 +458,10 @@ describe('write permission scope', () => {
       ok: false,
       stage: 'permission',
       code: 'PERMISSION_READ_ONLY',
+      targets: [],
+      outcomes: [
+        { path: 'src/a.ts', status: 'rejected', code: 'PERMISSION_DENIED' },
+      ],
     });
     await write(projectRoot, 'src/a.ts', 'user edit');
     const stale = await observeWriteTargets(projectRoot, [target]);

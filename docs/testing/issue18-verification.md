@@ -24,7 +24,7 @@
 | -------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | 仓库规范化     | `pnpm verify:repository`                                                                                                | 6/6 通过                                                                                              |
 | 定向探针       | `pnpm exec vitest run tests/contract/write-permission.test.ts`                                                          | 75 项全部通过；4 处 `skip` 只在平台前提不满足时触发（身份复用、身份不可用、符号链接权限；本机未触发） |
-| 本地无窗口检查 | `pnpm verify:repository`、`format:check`、`lint`、`typecheck`、`test:contract:types`、`test:contract`、`test:prototype` | 全部退出码 0；Contract 467/467                                                                        |
+| 本地无窗口检查 | `pnpm verify:repository`、`format:check`、`lint`、`typecheck`、`test:contract:types`、`test:contract`、`test:prototype` | 全部退出码 0；Contract 469/469                                                                        |
 | 完整门禁       | CI `Windows / pnpm check`                                                                                               | 见下方"门禁结果"                                                                                      |
 | 空白差异       | `git diff --check`                                                                                                      | 无输出                                                                                                |
 
