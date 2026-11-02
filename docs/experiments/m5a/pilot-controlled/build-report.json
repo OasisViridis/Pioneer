@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "m5a-harness-context-comparison",
+  "tasks": {
+    "path": "docs/experiments/m5a/v1/tasks.json",
+    "sha256": "25bde05f9759e1e2debc7bcb65df2845ee80bbf30f52851c3c44f2c9020719da",
+    "bytes": 32227,
+    "taskCount": 12
+  },
+  "captures": [
+    {
+      "captureDir": "controlled-v0",
+      "files": {
+        "capture.json": {
+          "sha256": "6d693f5c3ecddcae2dfa3233ea858ed82e980ca56a842d103091b7df4ff19540",
+          "bytes": 2828
+        },
+        "journal.ndjson": {
+          "sha256": "8d0e09dac2d8e633eab1bfa3a323ff5f6d201b67b0861e6fd2eb88007ad2e8c0",
+          "bytes": 3554
+        },
+        "events.ndjson": {
+          "sha256": "1ca1774a22a254c73668a076fb47fcd261669a59b42dcaf245f2db968288d303",
+          "bytes": 8281
+        }
+      },
+      "attemptCount": 9,
+      "rowCount": 9,
+      "answerCount": 5,
+      "errors": []
+    },
+    {
+      "captureDir": "controlled-v1",
+      "files": {
+        "capture.json": {
+          "sha256": "cff16e567af2dffdccb5934fa9a6197e32bbcf90d19b0b2e1eba5023595a8f72",
+          "bytes": 2820
+        },
+        "journal.ndjson": {
+          "sha256": "cda63f9b12a623a5b7d3c9794af1acf8be1143e98895e99db2b2310c576ad427",
+          "bytes": 3601
+        },
+        "events.ndjson": {
+          "sha256": "1f8f4529aa71f15f01bd781053faeed043e14b442ae3afb435b3140d9f3f49ba",
+          "bytes": 19542
+        }
+      },
+      "attemptCount": 9,
+      "rowCount": 9,
+      "answerCount": 7,
+      "errors": []
+    }
+  ],
+  "totals": {
+    "captures": 2,
+    "accepted": 2,
+    "rejected": 0,
+    "rows": 18,
+    "answers": 12
+  },
+  "errors": []
+}

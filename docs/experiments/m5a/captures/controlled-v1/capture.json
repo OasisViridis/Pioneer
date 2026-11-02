@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "m5a-harness-context-comparison",
+  "protocolVersion": 1,
+  "datasetVersion": 1,
+  "evidenceKind": "controlled",
+  "variantId": "pioneer-readonly-tools",
+  "harnessVersion": "v1",
+  "repetition": 1,
+  "orderIndex": 1,
+  "environment": {
+    "softwareCommit": "13ccfe5f0c9f8cc376aec08eb21cd91162719237",
+    "dirty": false,
+    "platform": "win32-x64",
+    "nodeVersion": "24.17.0",
+    "electronVersion": "44.2.0",
+    "provider": "none",
+    "modelId": "none",
+    "endpointOrigin": "https://none.invalid",
+    "corpusId": "pioneer-demos-m1-frozen",
+    "corpusManifestSha256": "8d301475a46c2af4ef6024e7fc1d2dc1fdb4872b791acb2f343323ed2807613c"
+  },
+  "attempts": [
+    {
+      "attemptId": "a-0010",
+      "taskId": "t01",
+      "variantId": "pioneer-readonly-tools",
+      "repetition": 1,
+      "orderIndex": 1,
+      "runId": "run:a-0010",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0011",
+      "taskId": "t01",
+      "variantId": "pioneer-readonly-tools",
+      "repetition": 2,
+      "orderIndex": 1,
+      "runId": "run:a-0011",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0012",
+      "taskId": "t01",
+      "variantId": "pioneer-readonly-tools",
+      "repetition": 3,
+      "orderIndex": 1,
+      "runId": "run:a-0012",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0013",
+      "taskId": "t02",
+      "variantId": "pioneer-readonly-tools",
+      "repetition": 1,
+      "orderIndex": 3,
+      "runId": "run:a-0013",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0014",
+      "taskId": "t02",
+      "variantId": "pioneer-readonly-tools",
+      "repetition": 2,
+      "orderIndex": 3,
+      "runId": "run:a-0014",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0015",
+      "taskId": "t02",
+      "variantId": "pioneer-readonly-tools",
+      "repetition": 3,
+      "orderIndex": 3,
+      "runId": null,
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0016",
+      "taskId": "t03",
+      "variantId": "pioneer-readonly-tools",
+      "repetition": 1,
+      "orderIndex": 5,
+      "runId": "run:a-0016",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0017",
+      "taskId": "t03",
+      "variantId": "pioneer-readonly-tools",
+      "repetition": 2,
+      "orderIndex": 5,
+      "runId": "run:a-0017",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0018",
+      "taskId": "t03",
+      "variantId": "pioneer-readonly-tools",
+      "repetition": 3,
+      "orderIndex": 5,
+      "runId": "run:a-0018",
+      "status": "registered"
+    }
+  ],
+  "notRun": [
+    {
+      "attemptId": "a-0015",
+      "reason": "PROVIDER_UNAVAILABLE",
+      "note": "先导窗口内 Provider 不可用；受控数据不触发真实调用。"
+    }
+  ]
+}
