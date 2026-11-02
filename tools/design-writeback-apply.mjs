@@ -1,8 +1,14 @@
 import { canonical, hash, fail, repository } from './design-delivery.mjs';
 import { planWriteback } from './design-writeback.mjs';
-import { remoteFailure } from './design-remote.mjs';
+import { remoteFailure, retryableState } from './design-remote.mjs';
 
 const key = (r) => `${r.file_key}/${r.node_id}/${r.url}`;
+// A partial 200 or a still-missing readback is resolved by a read-first rerun;
+// permanent request/credential errors need the operator to change something.
+const canRetry = (failure) =>
+  failure
+    ? failure.state === 'partial-write' || retryableState(failure.state)
+    : true;
 
 // Fresh GitHub evidence is mandatory; never trust an editable saved resource list.
 export async function writeback({
@@ -175,7 +181,7 @@ export async function writeback({
     ? {
         ...receipt,
         state: failure?.state ?? 'writeback-incomplete',
-        retryable: true,
+        retryable: canRetry(failure),
         failure,
         missing: remaining,
       }

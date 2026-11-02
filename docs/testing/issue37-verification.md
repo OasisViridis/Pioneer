@@ -27,7 +27,7 @@ S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook �
 
 ## Windows 视觉基线
 
-- Windows CI 固定 `windows-2025`，依赖由 lockfile 固定，Electron 44.2.0、Playwright 1.62.1。GitHub 的 `windows-latest` 池会混用镜像版本，因此截图旁记录 ImageVersion 作为溯源，但环境断言只比较渲染相关字段：OS build、Electron/Chromium、字体 SHA-256、语言、devicePixelRatio、固定时间、减少动效和配色；这些字段漂移会失败，需要单独审阅。runner image 不参与断言（2026-11-02 调整，见[基线记录](../../tests/e2e/visual-baselines/README.md)）。
+- Windows CI 固定 `windows-2025` 标签，依赖由 lockfile 固定，Electron 44.2.0、Playwright 1.62.1。GitHub 托管的 `windows-2025` 镜像版本会滚动，同一提交可能分到不同镜像，因此截图旁记录 ImageVersion 作为溯源，但环境断言只比较渲染相关字段：OS build、Electron/Chromium、字体 SHA-256、语言、devicePixelRatio、固定时间、减少动效和配色；这些字段漂移会失败，需要单独审阅。runner image 不参与断言（2026-11-02 调整，见[基线记录](../../tests/e2e/visual-baselines/README.md)）。
 - 使用真实保存记录和确定的 Session ID，固定 renderer 时间、1440/900/640 × 1000 内容尺寸、DPR 1、Light、减少动态效果；等待本地字体加载和保存完成，不运行外部模型。截图断言关闭动画和光标闪烁。主进程真实定时器保持正常，避免冻结停止/保存逻辑。
 - `pnpm test:visual` 在独立 Windows job 中比较固定应用截图，`updateSnapshots: none`。缺图/环境记录时失败，不写入基线、不静默跳过。基线已由用户委托 Codex 审阅接受；CI 通过只证明与已审阅图一致，不替代整个产品的设计验收。
 - 首次 PR 没有 `environment.txt` 时，quality 的视觉 job 先抓取候选再执行严格比较；缺少已审阅基线仍失败。这样无需先合并新 workflow 就能取到待审图。候选只上传，不写基线。后续 `visual-candidate.yml` 只能手动调度，调用 `pnpm design:visual:candidate`，输出到被忽略的 `test-output/visual/candidates`。它不会提交、发布或修改 `visual-baselines`。候选工作流成功只表示抓图成功。
@@ -106,9 +106,9 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 
 ## 2026-11-03 本地复核与故障演练
 
-- 在 origin/main `13ccfe5` 的独立 worktree 复跑 `pnpm check`：设计同步 109/109、Contract Tests 505/505（43 文件）、Prototype Tests 210/210、真实 Electron E2E 39/39、package smoke 通过；本地需要清除 `ELECTRON_RUN_AS_NODE=1`，否则 Electron 以 Node 模式启动并拒绝 `--remote-debugging-port`。该变量来自本地宿主环境，不是仓库配置，也没有改动门禁。
+- 在 origin/main `13ccfe5` 的独立 worktree 上、于本分支复跑 `pnpm check`：设计同步 109/109（origin/main 为 102，新增 6 项演练与 1 项错误分类）、Contract Tests 505/505（43 文件）、Prototype Tests 210/210、真实 Electron E2E 39/39、package smoke 通过；本地需要清除 `ELECTRON_RUN_AS_NODE=1`，否则 Electron 以 Node 模式启动并拒绝 `--remote-debugging-port`。该变量来自本地宿主环境，不是仓库配置，也没有改动门禁。
 - 新增 [回填故障恢复演练](issue37-writeback-drill.md)：用 localhost 有状态假服务走生产 `figmaApi` 与 `writeback`，覆盖部分 200、提交后断连、回读失败、429、403、容量不足和三次重放，6/6 通过。`writeback.test.mjs` 同时补了 400/422 永久错误与可重试错误的分类断言。该演练不读取 Figma 凭证，不是真实 Figma 验收。
 - 修正旧记录与当前测试的偏差：runner image 已退出环境断言（2026-11-02），`design-decoration` 不再覆盖已移除的意图 `.form-error`；S1 文档中的 artifact 名改为实际的 `electron-evidence-<sha>` 与 `visual-comparison-<sha>`；token 计数改为 27；`TEST_INFRA.md` 补充 Visual Regression 入口。
-- 计划里“固定 Windows runner 镜像”没有按字面执行：GitHub `windows-latest` 池会为同一提交混用镜像，镜像门禁会让同一 SHA 随机失败。当前固定的是渲染相关环境字段，runner image 只写入附件供溯源。要改成镜像级断言需要自托管 runner，本次未启用。
+- 计划里“固定 Windows runner 镜像”没有按字面执行：GitHub 托管的 `windows-2025` 镜像版本会滚动，同一提交可能分到不同镜像，镜像门禁会让同一 SHA 随机失败。当前固定的是渲染相关环境字段，runner image 只写入附件供溯源。要改成镜像级断言需要自托管 runner，本次未启用。
 - S2 的 `verify` 现在要求质量与视觉两个 job 都成功；没有视觉 job 的旧 S2 PR 返回 `validation-incomplete`。这是有意收紧，不把旧绿色或本地 `pnpm check` 当作当前视觉通过。
 - 真实命名版本事件接收与完整自动链路仍未验收；真实 Figma 部分失败/超时、Code Connect 发布、真人设备与真实 Provider 人工验收也仍未执行。#37、#33 保持 Open，未创建或修改 Figma 版本，未标记 COMPLETED。

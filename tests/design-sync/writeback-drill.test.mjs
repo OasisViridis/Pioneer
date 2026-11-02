@@ -268,8 +268,9 @@ test('drill: rate limits and expired credentials stay visible and do not create 
       state.mode = mode;
       const result = await run(figma);
       assert.equal(result.state, expected);
-      assert.equal(result.retryable, true);
+      assert.equal(result.retryable, expected === 'rate-limited');
       assert.equal(state.links.length, 0);
+      assert.equal(state.posts.length, 1);
       if (mode === 'rate') {
         assert.equal(result.failure.retryAfter, '45');
         assert.equal(

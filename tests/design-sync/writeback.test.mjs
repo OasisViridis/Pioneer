@@ -8,7 +8,12 @@ import {
 } from '../../tools/design-delivery.mjs';
 import { writeback } from '../../tools/design-writeback-apply.mjs';
 import { planWriteback } from '../../tools/design-writeback.mjs';
-import { remoteFailure, retryableState } from '../../tools/design-remote.mjs';
+import {
+  figmaApi,
+  githubApi,
+  remoteFailure,
+  retryableState,
+} from '../../tools/design-remote.mjs';
 
 const policy = JSON.parse(
   await readFile('design/delivery/features.json', 'utf8'),
@@ -326,7 +331,7 @@ test('readback failure reports an unknown write outcome and remains retryable', 
   assert.equal(writes, 1);
 });
 
-test('transport failure classes separate permanent input/scope errors from retryable ones', () => {
+test('transport failure classes separate permanent input/scope errors from retryable ones', async () => {
   assert.equal(remoteFailure({ status: 400 }).state, 'invalid-input');
   assert.equal(remoteFailure({ status: 422 }).state, 'invalid-input');
   assert.equal(remoteFailure({ status: 401 }).state, 'permission-denied');
@@ -347,4 +352,17 @@ test('transport failure classes separate permanent input/scope errors from retry
     assert.equal(retryableState(state), false, state);
   for (const state of ['rate-limited', 'retryable-error'])
     assert.equal(retryableState(state), true, state);
+  const transport = figmaApi('token', async () => ({
+    ok: true,
+    json: async () => ({}),
+  }));
+  for (const endpoint of ['/v1/users/me', '//evil.example/steal'])
+    await assert.rejects(
+      transport('GET', endpoint),
+      (error) => error.state === 'invalid-input',
+    );
+  await assert.rejects(
+    githubApi('GET', '/repos/other/repo/pulls'),
+    (error) => error.state === 'invalid-input',
+  );
 });
