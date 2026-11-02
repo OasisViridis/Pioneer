@@ -10,6 +10,7 @@
 | **Prototype Tests**     | The frozen M1 simulator: the moved 210-case suite plus static and adversarial probes. It verifies historical prototype behavior only, not an Electron product.                                                                                                                                                                                                                                                  | Executable now: `pnpm test:prototype`. |
 | **Real E2E**            | Playwright launches the real Electron process chain, crosses main → preload → renderer, exercises Library/Settings/project Tabs against a committed fixture, and verifies fixture immutability after close.                                                                                                                                                                                                     | `pnpm test:e2e`                        |
 | **Packaged Acceptance** | Packages `apps/desktop`, then launches the shipped `@pioneer-desktop.exe` through the doubly-gated acceptance seam (`PIONEER_ACCEPTANCE=1` in a packaged build only) and drives the real renderer over Chromium CDP. Proves startup, workspace scan, one completed read-only run with a real `read_file` result, one `accept` and one `terminal` journal record sharing a run id, and unchanged fixture hashes. | `pnpm acceptance:packaged`             |
+| **Experiment Tooling Tests** | Deterministic Node tests for the M5-A experiment pipeline under `tools/experiments`: dataset field invariants, missing-usage retention, failure/stop/timeout/tombstone/not-run classification, de-identification rejection, and freeze-manifest drift. It validates tooling only; it is not model behaviour and not experiment evidence. | `pnpm test:experiments` |
 
 ## Aggregate gate
 
@@ -36,6 +37,7 @@ pnpm typecheck        # desktop TypeScript compiler check
 pnpm test:contract    # deterministic M2 contract suites
 pnpm test:prototype   # frozen M1 Prototype Tests and probes
 pnpm test:e2e         # real Electron Playwright flow
+pnpm test:experiments # M5-A experiment record/analysis/freeze tooling (not in pnpm check)
 pnpm acceptance:packaged  # packaged build + one read-only run (not in pnpm check)
 pnpm package:smoke    # final package build smoke
 pnpm check            # full authoritative gate in the order above

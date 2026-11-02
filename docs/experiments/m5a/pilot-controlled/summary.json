@@ -1,0 +1,1070 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-02T18:15:26.477Z",
+  "inputs": {
+    "dataset": {
+      "path": "docs/experiments/m5a/pilot-controlled/dataset.jsonl",
+      "sha256": "0d8cbc1b2beaf387ce9f83de3ab168bf0be998af243311a4c7b37d49128227b3",
+      "bytes": 32102
+    },
+    "buildReport": {
+      "path": "docs/experiments/m5a/pilot-controlled/build-report.json",
+      "sha256": "5101248a7a4a1a97ee37572d060eed278e943defa6d6c16b33d0f09f446a412a",
+      "bytes": 1859
+    },
+    "answers": {
+      "path": "docs/experiments/m5a/pilot-controlled/answers.ndjson",
+      "sha256": "866070362d86a6a9bd1f85aee53b4fb17c5f2dbce189387ce57534e076383842",
+      "bytes": 4021
+    },
+    "protocol": {
+      "path": "docs/experiments/m5a/v1/protocol.json",
+      "sha256": "b7c82d0d75cecf3c5a1ac9bbabe7f8b0e04b780cad89e3950798d93278b0ec58",
+      "bytes": 35219
+    },
+    "plan": {
+      "path": "docs/experiments/m5a/v1/analysis-plan.json",
+      "sha256": "037df891d5d4af05ea4e17267d28d79c52abfd369c9ae05e5712d38e1325fa56",
+      "bytes": 8172
+    },
+    "tasks": {
+      "path": "docs/experiments/m5a/v1/tasks.json",
+      "sha256": "67a261eb1a6ae87520c5371b8d71e01d2a54e24fa2edcaf0f5e8e9d752223b1e",
+      "bytes": 32815
+    }
+  },
+  "protocolId": "m5a-harness-context-comparison",
+  "protocolVersion": 1,
+  "datasetVersion": 1,
+  "evidenceKind": "controlled",
+  "denominator": {
+    "plannedDenominator": 18,
+    "executedCount": 16,
+    "coverage": 0.8889
+  },
+  "plannedDenominator": 18,
+  "executedCount": 16,
+  "completionRate": 0.5556,
+  "successRateAmongExecuted": 0.625,
+  "coverage": 0.8889,
+  "counts": {
+    "status": {
+      "completed": 12,
+      "failed": 2,
+      "stopped": 1,
+      "unknown": 1,
+      "not_run": 2
+    },
+    "countsOnlyMeaningfulForCompleted": true,
+    "verdictCounts": {
+      "pass": 11,
+      "fail": 4,
+      "unscorable": 1,
+      "not_run": 2
+    },
+    "completedVerdictCounts": {
+      "pass": 10,
+      "fail": 2,
+      "unscorable": 0,
+      "not_run": 0
+    },
+    "outcomeClass": {
+      "completed_pass": 10,
+      "completed_fail": 2,
+      "completed_unscorable": 0,
+      "failed": 2,
+      "stopped": 1,
+      "unknown": 1,
+      "not_run": 2
+    },
+    "completedPass": 10,
+    "completedFail": 2,
+    "completedUnscorable": 0,
+    "timedOut": 1,
+    "failureCodes": {
+      "START_FAILED": 0,
+      "MODEL_FAILED": 1,
+      "TOOL_FAILED": 0,
+      "PROTOCOL_ERROR": 0,
+      "OUTPUT_LIMIT": 0,
+      "RUN_DEADLINE": 1,
+      "AUTHORIZATION_REVOKED": 0,
+      "STOP_TIMEOUT": 0,
+      "ADAPTER_DISCONNECTED": 0
+    },
+    "stopReasons": {
+      "user": 1,
+      "window_closed": 0,
+      "deadline": 0,
+      "authorization_revoked": 0,
+      "host_failure": 0
+    },
+    "notRunReasons": {
+      "AUTHORIZATION_MISSING": 1,
+      "PROVIDER_UNAVAILABLE": 1
+    }
+  },
+  "descriptiveAttemptLevel": {
+    "label": "descriptive-only",
+    "caveat": "重复不是独立试验，该区间只描述本次数据；主分析单位为任务。",
+    "plannedDenominator": 18,
+    "executedCount": 16,
+    "completedPass": 10,
+    "completionRate": {
+      "numerator": 10,
+      "denominator": 18,
+      "pointEstimate": 0.5556,
+      "wilson95": {
+        "low": 0.3372,
+        "high": 0.7544
+      }
+    },
+    "successRateAmongExecuted": {
+      "numerator": 10,
+      "denominator": 16,
+      "pointEstimate": 0.625,
+      "wilson95": {
+        "low": 0.3864,
+        "high": 0.8152
+      }
+    }
+  },
+  "usageCoverage": {
+    "plannedDenominator": 18,
+    "executedCount": 16,
+    "reported": 7,
+    "missing": 11,
+    "estimated": 0,
+    "coverageRate": 0.3889,
+    "reportedAmongExecuted": 0.4375,
+    "inputTokens": {
+      "count": 7,
+      "mean": 7305,
+      "median": 4102,
+      "total": 51136
+    },
+    "outputTokens": {
+      "count": 7,
+      "mean": 158,
+      "median": 156,
+      "total": 1107
+    },
+    "note": "Missing usage stays null and never becomes 0; estimated values are not mixed into reported means."
+  },
+  "duration": {
+    "plannedDenominator": 18,
+    "count": 15,
+    "excluded": {
+      "notRun": 2,
+      "unknown": 1,
+      "otherMissing": 0
+    },
+    "medianMs": 19800,
+    "p90Ms": 30760,
+    "completedPass": {
+      "count": 10,
+      "medianMs": 22750
+    }
+  },
+  "toolCalls": {
+    "totals": {
+      "requested": 19,
+      "succeeded": 17,
+      "rejected": 1,
+      "failed": 0,
+      "cancelled": 1
+    },
+    "meanRequested": 1
+  },
+  "answerBytes": {
+    "count": 16,
+    "medianBytes": 152,
+    "p90Bytes": 164
+  },
+  "byVariant": [
+    {
+      "variantId": "fixed-prefix-no-tools",
+      "plannedDenominator": 9,
+      "executedCount": 8,
+      "completionRate": 0.3333,
+      "successRateAmongExecuted": 0.375,
+      "coverage": 0.8889,
+      "counts": {
+        "status": {
+          "completed": 5,
+          "failed": 1,
+          "stopped": 1,
+          "unknown": 1,
+          "not_run": 1
+        },
+        "countsOnlyMeaningfulForCompleted": true,
+        "verdictCounts": {
+          "pass": 4,
+          "fail": 4,
+          "unscorable": 0,
+          "not_run": 1
+        },
+        "completedVerdictCounts": {
+          "pass": 3,
+          "fail": 2,
+          "unscorable": 0,
+          "not_run": 0
+        },
+        "outcomeClass": {
+          "completed_pass": 3,
+          "completed_fail": 2,
+          "completed_unscorable": 0,
+          "failed": 1,
+          "stopped": 1,
+          "unknown": 1,
+          "not_run": 1
+        },
+        "completedPass": 3,
+        "completedFail": 2,
+        "completedUnscorable": 0,
+        "timedOut": 0,
+        "failureCodes": {
+          "START_FAILED": 0,
+          "MODEL_FAILED": 1,
+          "TOOL_FAILED": 0,
+          "PROTOCOL_ERROR": 0,
+          "OUTPUT_LIMIT": 0,
+          "RUN_DEADLINE": 0,
+          "AUTHORIZATION_REVOKED": 0,
+          "STOP_TIMEOUT": 0,
+          "ADAPTER_DISCONNECTED": 0
+        },
+        "stopReasons": {
+          "user": 1,
+          "window_closed": 0,
+          "deadline": 0,
+          "authorization_revoked": 0,
+          "host_failure": 0
+        },
+        "notRunReasons": {
+          "AUTHORIZATION_MISSING": 1
+        }
+      },
+      "descriptiveAttemptLevel": {
+        "label": "descriptive-only",
+        "caveat": "重复不是独立试验，该区间只描述本次数据；主分析单位为任务。",
+        "plannedDenominator": 9,
+        "executedCount": 8,
+        "completedPass": 3,
+        "completionRate": {
+          "numerator": 3,
+          "denominator": 9,
+          "pointEstimate": 0.3333,
+          "wilson95": {
+            "low": 0.1206,
+            "high": 0.6458
+          }
+        },
+        "successRateAmongExecuted": {
+          "numerator": 3,
+          "denominator": 8,
+          "pointEstimate": 0.375,
+          "wilson95": {
+            "low": 0.1368,
+            "high": 0.6943
+          }
+        }
+      },
+      "usageCoverage": {
+        "plannedDenominator": 9,
+        "executedCount": 8,
+        "reported": 2,
+        "missing": 7,
+        "estimated": 0,
+        "coverageRate": 0.2222,
+        "reportedAmongExecuted": 0.25,
+        "inputTokens": {
+          "count": 2,
+          "mean": 15926,
+          "median": 15926,
+          "total": 31852
+        },
+        "outputTokens": {
+          "count": 2,
+          "mean": 155,
+          "median": 155,
+          "total": 310
+        },
+        "note": "Missing usage stays null and never becomes 0; estimated values are not mixed into reported means."
+      },
+      "duration": {
+        "plannedDenominator": 9,
+        "count": 7,
+        "excluded": {
+          "notRun": 1,
+          "unknown": 1,
+          "otherMissing": 0
+        },
+        "medianMs": 12400,
+        "p90Ms": 16520,
+        "completedPass": {
+          "count": 3,
+          "medianMs": 15800
+        }
+      },
+      "toolCalls": {
+        "totals": {
+          "requested": 0,
+          "succeeded": 0,
+          "rejected": 0,
+          "failed": 0,
+          "cancelled": 0
+        },
+        "meanRequested": 0
+      },
+      "answerBytes": {
+        "count": 8,
+        "medianBytes": 98,
+        "p90Bytes": 156
+      }
+    },
+    {
+      "variantId": "pioneer-readonly-tools",
+      "plannedDenominator": 9,
+      "executedCount": 8,
+      "completionRate": 0.7778,
+      "successRateAmongExecuted": 0.875,
+      "coverage": 0.8889,
+      "counts": {
+        "status": {
+          "completed": 7,
+          "failed": 1,
+          "stopped": 0,
+          "unknown": 0,
+          "not_run": 1
+        },
+        "countsOnlyMeaningfulForCompleted": true,
+        "verdictCounts": {
+          "pass": 7,
+          "fail": 0,
+          "unscorable": 1,
+          "not_run": 1
+        },
+        "completedVerdictCounts": {
+          "pass": 7,
+          "fail": 0,
+          "unscorable": 0,
+          "not_run": 0
+        },
+        "outcomeClass": {
+          "completed_pass": 7,
+          "completed_fail": 0,
+          "completed_unscorable": 0,
+          "failed": 1,
+          "stopped": 0,
+          "unknown": 0,
+          "not_run": 1
+        },
+        "completedPass": 7,
+        "completedFail": 0,
+        "completedUnscorable": 0,
+        "timedOut": 1,
+        "failureCodes": {
+          "START_FAILED": 0,
+          "MODEL_FAILED": 0,
+          "TOOL_FAILED": 0,
+          "PROTOCOL_ERROR": 0,
+          "OUTPUT_LIMIT": 0,
+          "RUN_DEADLINE": 1,
+          "AUTHORIZATION_REVOKED": 0,
+          "STOP_TIMEOUT": 0,
+          "ADAPTER_DISCONNECTED": 0
+        },
+        "stopReasons": {
+          "user": 0,
+          "window_closed": 0,
+          "deadline": 0,
+          "authorization_revoked": 0,
+          "host_failure": 0
+        },
+        "notRunReasons": {
+          "PROVIDER_UNAVAILABLE": 1
+        }
+      },
+      "descriptiveAttemptLevel": {
+        "label": "descriptive-only",
+        "caveat": "重复不是独立试验，该区间只描述本次数据；主分析单位为任务。",
+        "plannedDenominator": 9,
+        "executedCount": 8,
+        "completedPass": 7,
+        "completionRate": {
+          "numerator": 7,
+          "denominator": 9,
+          "pointEstimate": 0.7778,
+          "wilson95": {
+            "low": 0.4526,
+            "high": 0.9368
+          }
+        },
+        "successRateAmongExecuted": {
+          "numerator": 7,
+          "denominator": 8,
+          "pointEstimate": 0.875,
+          "wilson95": {
+            "low": 0.5291,
+            "high": 0.9776
+          }
+        }
+      },
+      "usageCoverage": {
+        "plannedDenominator": 9,
+        "executedCount": 8,
+        "reported": 5,
+        "missing": 4,
+        "estimated": 0,
+        "coverageRate": 0.5556,
+        "reportedAmongExecuted": 0.625,
+        "inputTokens": {
+          "count": 5,
+          "mean": 3857,
+          "median": 3980,
+          "total": 19284
+        },
+        "outputTokens": {
+          "count": 5,
+          "mean": 159,
+          "median": 156,
+          "total": 797
+        },
+        "note": "Missing usage stays null and never becomes 0; estimated values are not mixed into reported means."
+      },
+      "duration": {
+        "plannedDenominator": 9,
+        "count": 8,
+        "excluded": {
+          "notRun": 1,
+          "unknown": 0,
+          "otherMissing": 0
+        },
+        "medianMs": 27700,
+        "p90Ms": 57840,
+        "completedPass": {
+          "count": 7,
+          "medianMs": 26500
+        }
+      },
+      "toolCalls": {
+        "totals": {
+          "requested": 19,
+          "succeeded": 17,
+          "rejected": 1,
+          "failed": 0,
+          "cancelled": 1
+        },
+        "meanRequested": 2
+      },
+      "answerBytes": {
+        "count": 8,
+        "medianBytes": 156,
+        "p90Bytes": 164
+      }
+    }
+  ],
+  "byVariantCategory": [
+    {
+      "variantId": "fixed-prefix-no-tools",
+      "category": "locate-exact-fact",
+      "plannedDenominator": 9,
+      "executedCount": 8,
+      "completionRate": 0.3333,
+      "successRateAmongExecuted": 0.375,
+      "coverage": 0.8889,
+      "counts": {
+        "status": {
+          "completed": 5,
+          "failed": 1,
+          "stopped": 1,
+          "unknown": 1,
+          "not_run": 1
+        },
+        "countsOnlyMeaningfulForCompleted": true,
+        "verdictCounts": {
+          "pass": 4,
+          "fail": 4,
+          "unscorable": 0,
+          "not_run": 1
+        },
+        "completedVerdictCounts": {
+          "pass": 3,
+          "fail": 2,
+          "unscorable": 0,
+          "not_run": 0
+        },
+        "outcomeClass": {
+          "completed_pass": 3,
+          "completed_fail": 2,
+          "completed_unscorable": 0,
+          "failed": 1,
+          "stopped": 1,
+          "unknown": 1,
+          "not_run": 1
+        },
+        "completedPass": 3,
+        "completedFail": 2,
+        "completedUnscorable": 0,
+        "timedOut": 0,
+        "failureCodes": {
+          "START_FAILED": 0,
+          "MODEL_FAILED": 1,
+          "TOOL_FAILED": 0,
+          "PROTOCOL_ERROR": 0,
+          "OUTPUT_LIMIT": 0,
+          "RUN_DEADLINE": 0,
+          "AUTHORIZATION_REVOKED": 0,
+          "STOP_TIMEOUT": 0,
+          "ADAPTER_DISCONNECTED": 0
+        },
+        "stopReasons": {
+          "user": 1,
+          "window_closed": 0,
+          "deadline": 0,
+          "authorization_revoked": 0,
+          "host_failure": 0
+        },
+        "notRunReasons": {
+          "AUTHORIZATION_MISSING": 1
+        }
+      },
+      "descriptiveAttemptLevel": {
+        "label": "descriptive-only",
+        "caveat": "重复不是独立试验，该区间只描述本次数据；主分析单位为任务。",
+        "plannedDenominator": 9,
+        "executedCount": 8,
+        "completedPass": 3,
+        "completionRate": {
+          "numerator": 3,
+          "denominator": 9,
+          "pointEstimate": 0.3333,
+          "wilson95": {
+            "low": 0.1206,
+            "high": 0.6458
+          }
+        },
+        "successRateAmongExecuted": {
+          "numerator": 3,
+          "denominator": 8,
+          "pointEstimate": 0.375,
+          "wilson95": {
+            "low": 0.1368,
+            "high": 0.6943
+          }
+        }
+      },
+      "usageCoverage": {
+        "plannedDenominator": 9,
+        "executedCount": 8,
+        "reported": 2,
+        "missing": 7,
+        "estimated": 0,
+        "coverageRate": 0.2222,
+        "reportedAmongExecuted": 0.25,
+        "inputTokens": {
+          "count": 2,
+          "mean": 15926,
+          "median": 15926,
+          "total": 31852
+        },
+        "outputTokens": {
+          "count": 2,
+          "mean": 155,
+          "median": 155,
+          "total": 310
+        },
+        "note": "Missing usage stays null and never becomes 0; estimated values are not mixed into reported means."
+      },
+      "duration": {
+        "plannedDenominator": 9,
+        "count": 7,
+        "excluded": {
+          "notRun": 1,
+          "unknown": 1,
+          "otherMissing": 0
+        },
+        "medianMs": 12400,
+        "p90Ms": 16520,
+        "completedPass": {
+          "count": 3,
+          "medianMs": 15800
+        }
+      },
+      "toolCalls": {
+        "totals": {
+          "requested": 0,
+          "succeeded": 0,
+          "rejected": 0,
+          "failed": 0,
+          "cancelled": 0
+        },
+        "meanRequested": 0
+      },
+      "answerBytes": {
+        "count": 8,
+        "medianBytes": 98,
+        "p90Bytes": 156
+      }
+    },
+    {
+      "variantId": "pioneer-readonly-tools",
+      "category": "locate-exact-fact",
+      "plannedDenominator": 9,
+      "executedCount": 8,
+      "completionRate": 0.7778,
+      "successRateAmongExecuted": 0.875,
+      "coverage": 0.8889,
+      "counts": {
+        "status": {
+          "completed": 7,
+          "failed": 1,
+          "stopped": 0,
+          "unknown": 0,
+          "not_run": 1
+        },
+        "countsOnlyMeaningfulForCompleted": true,
+        "verdictCounts": {
+          "pass": 7,
+          "fail": 0,
+          "unscorable": 1,
+          "not_run": 1
+        },
+        "completedVerdictCounts": {
+          "pass": 7,
+          "fail": 0,
+          "unscorable": 0,
+          "not_run": 0
+        },
+        "outcomeClass": {
+          "completed_pass": 7,
+          "completed_fail": 0,
+          "completed_unscorable": 0,
+          "failed": 1,
+          "stopped": 0,
+          "unknown": 0,
+          "not_run": 1
+        },
+        "completedPass": 7,
+        "completedFail": 0,
+        "completedUnscorable": 0,
+        "timedOut": 1,
+        "failureCodes": {
+          "START_FAILED": 0,
+          "MODEL_FAILED": 0,
+          "TOOL_FAILED": 0,
+          "PROTOCOL_ERROR": 0,
+          "OUTPUT_LIMIT": 0,
+          "RUN_DEADLINE": 1,
+          "AUTHORIZATION_REVOKED": 0,
+          "STOP_TIMEOUT": 0,
+          "ADAPTER_DISCONNECTED": 0
+        },
+        "stopReasons": {
+          "user": 0,
+          "window_closed": 0,
+          "deadline": 0,
+          "authorization_revoked": 0,
+          "host_failure": 0
+        },
+        "notRunReasons": {
+          "PROVIDER_UNAVAILABLE": 1
+        }
+      },
+      "descriptiveAttemptLevel": {
+        "label": "descriptive-only",
+        "caveat": "重复不是独立试验，该区间只描述本次数据；主分析单位为任务。",
+        "plannedDenominator": 9,
+        "executedCount": 8,
+        "completedPass": 7,
+        "completionRate": {
+          "numerator": 7,
+          "denominator": 9,
+          "pointEstimate": 0.7778,
+          "wilson95": {
+            "low": 0.4526,
+            "high": 0.9368
+          }
+        },
+        "successRateAmongExecuted": {
+          "numerator": 7,
+          "denominator": 8,
+          "pointEstimate": 0.875,
+          "wilson95": {
+            "low": 0.5291,
+            "high": 0.9776
+          }
+        }
+      },
+      "usageCoverage": {
+        "plannedDenominator": 9,
+        "executedCount": 8,
+        "reported": 5,
+        "missing": 4,
+        "estimated": 0,
+        "coverageRate": 0.5556,
+        "reportedAmongExecuted": 0.625,
+        "inputTokens": {
+          "count": 5,
+          "mean": 3857,
+          "median": 3980,
+          "total": 19284
+        },
+        "outputTokens": {
+          "count": 5,
+          "mean": 159,
+          "median": 156,
+          "total": 797
+        },
+        "note": "Missing usage stays null and never becomes 0; estimated values are not mixed into reported means."
+      },
+      "duration": {
+        "plannedDenominator": 9,
+        "count": 8,
+        "excluded": {
+          "notRun": 1,
+          "unknown": 0,
+          "otherMissing": 0
+        },
+        "medianMs": 27700,
+        "p90Ms": 57840,
+        "completedPass": {
+          "count": 7,
+          "medianMs": 26500
+        }
+      },
+      "toolCalls": {
+        "totals": {
+          "requested": 19,
+          "succeeded": 17,
+          "rejected": 1,
+          "failed": 0,
+          "cancelled": 1
+        },
+        "meanRequested": 2
+      },
+      "answerBytes": {
+        "count": 8,
+        "medianBytes": 156,
+        "p90Bytes": 164
+      }
+    }
+  ],
+  "cells": [
+    {
+      "variantId": "fixed-prefix-no-tools",
+      "taskId": "t01",
+      "category": "locate-exact-fact",
+      "plannedAttempts": 3,
+      "executedAttempts": 3,
+      "completedPass": 0,
+      "completedFail": 2,
+      "completedUnscorable": 0,
+      "failed": 1,
+      "stopped": 0,
+      "unknown": 0,
+      "notRun": 0,
+      "statusCounts": {
+        "completed": 2,
+        "failed": 1,
+        "stopped": 0,
+        "unknown": 0,
+        "not_run": 0
+      },
+      "successRate": 0,
+      "successRateAmongExecuted": 0,
+      "majorityPass": false
+    },
+    {
+      "variantId": "fixed-prefix-no-tools",
+      "taskId": "t02",
+      "category": "locate-exact-fact",
+      "plannedAttempts": 3,
+      "executedAttempts": 2,
+      "completedPass": 1,
+      "completedFail": 0,
+      "completedUnscorable": 0,
+      "failed": 0,
+      "stopped": 1,
+      "unknown": 0,
+      "notRun": 1,
+      "statusCounts": {
+        "completed": 1,
+        "failed": 0,
+        "stopped": 1,
+        "unknown": 0,
+        "not_run": 1
+      },
+      "successRate": 0.3333,
+      "successRateAmongExecuted": 0.5,
+      "majorityPass": false
+    },
+    {
+      "variantId": "fixed-prefix-no-tools",
+      "taskId": "t03",
+      "category": "locate-exact-fact",
+      "plannedAttempts": 3,
+      "executedAttempts": 3,
+      "completedPass": 2,
+      "completedFail": 0,
+      "completedUnscorable": 0,
+      "failed": 0,
+      "stopped": 0,
+      "unknown": 1,
+      "notRun": 0,
+      "statusCounts": {
+        "completed": 2,
+        "failed": 0,
+        "stopped": 0,
+        "unknown": 1,
+        "not_run": 0
+      },
+      "successRate": 0.6667,
+      "successRateAmongExecuted": 0.6667,
+      "majorityPass": true
+    },
+    {
+      "variantId": "pioneer-readonly-tools",
+      "taskId": "t01",
+      "category": "locate-exact-fact",
+      "plannedAttempts": 3,
+      "executedAttempts": 3,
+      "completedPass": 3,
+      "completedFail": 0,
+      "completedUnscorable": 0,
+      "failed": 0,
+      "stopped": 0,
+      "unknown": 0,
+      "notRun": 0,
+      "statusCounts": {
+        "completed": 3,
+        "failed": 0,
+        "stopped": 0,
+        "unknown": 0,
+        "not_run": 0
+      },
+      "successRate": 1,
+      "successRateAmongExecuted": 1,
+      "majorityPass": true
+    },
+    {
+      "variantId": "pioneer-readonly-tools",
+      "taskId": "t02",
+      "category": "locate-exact-fact",
+      "plannedAttempts": 3,
+      "executedAttempts": 2,
+      "completedPass": 1,
+      "completedFail": 0,
+      "completedUnscorable": 0,
+      "failed": 1,
+      "stopped": 0,
+      "unknown": 0,
+      "notRun": 1,
+      "statusCounts": {
+        "completed": 1,
+        "failed": 1,
+        "stopped": 0,
+        "unknown": 0,
+        "not_run": 1
+      },
+      "successRate": 0.3333,
+      "successRateAmongExecuted": 0.5,
+      "majorityPass": false
+    },
+    {
+      "variantId": "pioneer-readonly-tools",
+      "taskId": "t03",
+      "category": "locate-exact-fact",
+      "plannedAttempts": 3,
+      "executedAttempts": 3,
+      "completedPass": 3,
+      "completedFail": 0,
+      "completedUnscorable": 0,
+      "failed": 0,
+      "stopped": 0,
+      "unknown": 0,
+      "notRun": 0,
+      "statusCounts": {
+        "completed": 3,
+        "failed": 0,
+        "stopped": 0,
+        "unknown": 0,
+        "not_run": 0
+      },
+      "successRate": 1,
+      "successRateAmongExecuted": 1,
+      "majorityPass": true
+    }
+  ],
+  "taskLevel": {
+    "unit": "task",
+    "pairing": "taskId",
+    "taskCount": 3,
+    "differenceDefinition": "successRate(pioneer-readonly-tools) - successRate(fixed-prefix-no-tools) per taskId",
+    "tasks": [
+      {
+        "taskId": "t01",
+        "category": "locate-exact-fact",
+        "variants": {
+          "pioneer-readonly-tools": {
+            "plannedAttempts": 3,
+            "executedAttempts": 3,
+            "passCount": 3,
+            "failCount": 0,
+            "unscorableCount": 0,
+            "notRunCount": 0,
+            "failedCount": 0,
+            "stoppedCount": 0,
+            "unknownCount": 0,
+            "successRate": 1,
+            "successRateAmongExecuted": 1
+          },
+          "fixed-prefix-no-tools": {
+            "plannedAttempts": 3,
+            "executedAttempts": 3,
+            "passCount": 0,
+            "failCount": 2,
+            "unscorableCount": 0,
+            "notRunCount": 0,
+            "failedCount": 1,
+            "stoppedCount": 0,
+            "unknownCount": 0,
+            "successRate": 0,
+            "successRateAmongExecuted": 0
+          }
+        },
+        "difference": 1
+      },
+      {
+        "taskId": "t02",
+        "category": "locate-exact-fact",
+        "variants": {
+          "pioneer-readonly-tools": {
+            "plannedAttempts": 3,
+            "executedAttempts": 2,
+            "passCount": 1,
+            "failCount": 0,
+            "unscorableCount": 0,
+            "notRunCount": 1,
+            "failedCount": 1,
+            "stoppedCount": 0,
+            "unknownCount": 0,
+            "successRate": 0.3333,
+            "successRateAmongExecuted": 0.5
+          },
+          "fixed-prefix-no-tools": {
+            "plannedAttempts": 3,
+            "executedAttempts": 2,
+            "passCount": 1,
+            "failCount": 0,
+            "unscorableCount": 0,
+            "notRunCount": 1,
+            "failedCount": 0,
+            "stoppedCount": 1,
+            "unknownCount": 0,
+            "successRate": 0.3333,
+            "successRateAmongExecuted": 0.5
+          }
+        },
+        "difference": 0
+      },
+      {
+        "taskId": "t03",
+        "category": "locate-exact-fact",
+        "variants": {
+          "pioneer-readonly-tools": {
+            "plannedAttempts": 3,
+            "executedAttempts": 3,
+            "passCount": 3,
+            "failCount": 0,
+            "unscorableCount": 0,
+            "notRunCount": 0,
+            "failedCount": 0,
+            "stoppedCount": 0,
+            "unknownCount": 0,
+            "successRate": 1,
+            "successRateAmongExecuted": 1
+          },
+          "fixed-prefix-no-tools": {
+            "plannedAttempts": 3,
+            "executedAttempts": 3,
+            "passCount": 2,
+            "failCount": 0,
+            "unscorableCount": 0,
+            "notRunCount": 0,
+            "failedCount": 0,
+            "stoppedCount": 0,
+            "unknownCount": 1,
+            "successRate": 0.6667,
+            "successRateAmongExecuted": 0.6667
+          }
+        },
+        "difference": 0.3333
+      }
+    ],
+    "summary": {
+      "taskCount": 3,
+      "tasksWithDifference": 3,
+      "meanDifference": 0.4444,
+      "minDifference": 0,
+      "medianDifference": 0.3333,
+      "maxDifference": 1,
+      "differences": [
+        {
+          "taskId": "t01",
+          "difference": 1
+        },
+        {
+          "taskId": "t02",
+          "difference": 0
+        },
+        {
+          "taskId": "t03",
+          "difference": 0.3333
+        }
+      ],
+      "passCountDistribution": {
+        "0": 1,
+        "1": 2,
+        "2": 1,
+        "3": 2
+      }
+    },
+    "signTest": {
+      "method": "exact-binomial-sign-test",
+      "sides": 2,
+      "label": "exploratory-only",
+      "ignoreZeroDifferences": true,
+      "unit": "task",
+      "n": 2,
+      "positive": 2,
+      "negative": 0,
+      "zero": 1,
+      "pValue": 0.5
+    }
+  },
+  "exploratorySignTest": {
+    "method": "exact-binomial-sign-test",
+    "sides": 2,
+    "label": "exploratory-only",
+    "ignoreZeroDifferences": true,
+    "unit": "task",
+    "n": 2,
+    "positive": 2,
+    "negative": 0,
+    "zero": 1,
+    "pValue": 0.5
+  },
+  "answersVerification": {
+    "present": true,
+    "path": "docs/experiments/m5a/pilot-controlled/answers.ndjson",
+    "checked": 12,
+    "matched": 12,
+    "mismatched": 0,
+    "skipped": 0,
+    "mismatchedAttemptIds": [],
+    "skippedAttemptIds": [],
+    "details": []
+  }
+}

@@ -1,0 +1,565 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "m5a-harness-context-comparison",
+  "protocolVersion": 1,
+  "corpus": {
+    "corpusId": "pioneer-demos-m1-frozen",
+    "root": "demos",
+    "files": [
+      {
+        "path": "demos/00-pioneer-workbench.html",
+        "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+        "bytes": 127662
+      },
+      {
+        "path": "demos/01-bookshelf-workspace.html",
+        "sha256": "727e2486d4309200cc2e65bdddde865f5ae23fe7b29b309cb450cd7248199dd2",
+        "bytes": 41161
+      },
+      {
+        "path": "demos/02-session-intent-card.html",
+        "sha256": "d34a8ef63dcc043fc61fdca70699da6fddfb30704221f25d110a111e3157d7bc",
+        "bytes": 58858
+      },
+      {
+        "path": "demos/03-wrapup-and-gallery.html",
+        "sha256": "abb129a07b3b7743bc2e09b6cdd7de105e1a0d572f8d9f88ef83fff8195fa515",
+        "bytes": 50181
+      },
+      {
+        "path": "demos/04-ppt-presentation-demo.html",
+        "sha256": "79cee4b3a6173d1c46bd9e2044cf2040b2bf7c0c2ff4218e187c10d74f6d0575",
+        "bytes": 116981
+      },
+      {
+        "path": "demos/README.md",
+        "sha256": "625d3303147427ed04eef20807e0a2f052c9e089c27bcc1167c3e62c7cf95038",
+        "bytes": 1657
+      }
+    ],
+    "totalBytes": 396500
+  },
+  "tasks": [
+    {
+      "taskId": "t01",
+      "category": "locate-exact-fact",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。请在 00-pioneer-workbench.html 的系统设置页（#viewSettings）里找到「大模型端点 (LLM Inference Endpoints)」卡片，然后回答：该卡片为「备用引擎: DeepSeek-V3 (远程云端备份)」给出的端点地址是什么？请按材料原文逐字给出完整 URL（含协议与路径），不要补全、缩写或改写。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r01",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["https://api.deepseek.com/v1"],
+        "forbidden": []
+      },
+      "groundTruth": {
+        "answerSummary": "00-pioneer-workbench.html 系统设置页的备用引擎 (DeepSeek-V3) 端点是 https://api.deepseek.com/v1；主执行引擎的端点是 http://localhost:11434/v1，两者不能混用。",
+        "evidence": [
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -SimpleMatch -Pattern 'api.deepseek.com' -> 第 2478 行『端点: https://api.deepseek.com/v1』"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t02",
+      "category": "locate-exact-fact",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。请在 03-wrapup-and-gallery.html 的底部状态栏（footer.global-statusbar）里找到左侧的两个事实：运行时名称后面跟的版本号，以及 PID。请原样抄写（版本号保留 v 前缀）。请在末行 ANSWER 后写两个值，用空格分隔：先写版本号，再写 PID。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r02",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["v1.2.0", "8291"],
+        "forbidden": []
+      },
+      "groundTruth": {
+        "answerSummary": "03-wrapup-and-gallery.html 底部状态栏写着『Pioneer Agent Runtime · v1.2.0』与『PID: 8291 (Archived)』，因此版本号 v1.2.0、PID 8291。",
+        "evidence": [
+          {
+            "path": "demos/03-wrapup-and-gallery.html",
+            "sha256": "abb129a07b3b7743bc2e09b6cdd7de105e1a0d572f8d9f88ef83fff8195fa515",
+            "hint": "Select-String -LiteralPath demos/03-wrapup-and-gallery.html -SimpleMatch -Pattern 'v1.2.0' -> 第 973 行；同文件 -Pattern 'PID: 8291' -> 第 974 行"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t03",
+      "category": "locate-exact-fact",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。00-pioneer-workbench.html 的会话分支树面板（#sessionTreePanel）头部有一个「+ 分叉」按钮，点击后调用 forkNewBranch()。请回答：该函数内部把分支名写死成哪个字符串常量（保留 branch- 前缀）。02-session-intent-card.html 里也有一个同名的「+ 分叉」按钮，但那里的分支名不同，本题只回答 00 里的值。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r03",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["branch-deepseek-alt"],
+        "forbidden": []
+      },
+      "groundTruth": {
+        "answerSummary": "00-pioneer-workbench.html 的 forkNewBranch() 里写死 branchName = \"branch-deepseek-alt\"；02-session-intent-card.html 的同类按钮提示的是 branch-intent-alt，是干扰项。",
+        "evidence": [
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -SimpleMatch -Pattern 'branch-deepseek-alt' -> 第 3276 行 const branchName = \"branch-deepseek-alt\";"
+          },
+          {
+            "path": "demos/02-session-intent-card.html",
+            "sha256": "d34a8ef63dcc043fc61fdca70699da6fddfb30704221f25d110a111e3157d7bc",
+            "hint": "Select-String -LiteralPath demos/02-session-intent-card.html -SimpleMatch -Pattern 'branch-intent-alt' -> 第 1227 行（干扰项，不是本题答案）"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t04",
+      "category": "aggregate-count",
+      "prompt": "冻结材料根目录是 demos/，其中 5 个 HTML 原型（00 到 04）都在文档末尾引入了同一个快速切换 HUD（#pioneerNavHUD），并且都支持 Alt 键位切换。请跨这 5 个文件统计：只有其中一个文件把 HUD 的键盘逻辑单独写进带 id 的 <script> 块，其余文件把同样的键位处理写在内联主脚本里。请给出这个独立 script 块的 id，以及它所在的文件名。请在末行 ANSWER 后写两个值，用空格分隔：先写 script 块的 id，再写所在文件名。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r04",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["pioneer-nav-hud-script", "03-wrapup-and-gallery.html"],
+        "forbidden": []
+      },
+      "groundTruth": {
+        "answerSummary": "5 个 HTML 里只有 03-wrapup-and-gallery.html 额外带一个 <script id=\"pioneer-nav-hud-script\"> 块（第 1173 行），其余文件把 Alt+0..4 处理写在内联主脚本里，所以文件数是 1、脚本 id 是 pioneer-nav-hud-script。",
+        "evidence": [
+          {
+            "path": "demos/03-wrapup-and-gallery.html",
+            "sha256": "abb129a07b3b7743bc2e09b6cdd7de105e1a0d572f8d9f88ef83fff8195fa515",
+            "hint": "Select-String -LiteralPath demos/03-wrapup-and-gallery.html -SimpleMatch -Pattern 'pioneer-nav-hud-script' -> 唯一命中，第 1173 行；同文件 -Pattern '<script' 计数为 2，其余 HTML 为 1"
+          },
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -SimpleMatch -Pattern 'e.altKey' -> 第 3489 行，键位逻辑在内联主脚本里而不是独立 script id 块"
+          },
+          {
+            "path": "demos/04-ppt-presentation-demo.html",
+            "sha256": "79cee4b3a6173d1c46bd9e2044cf2040b2bf7c0c2ff4218e187c10d74f6d0575",
+            "hint": "Select-String -LiteralPath demos/04-ppt-presentation-demo.html -SimpleMatch -Pattern 'e.altKey' -> 第 2380 行，同样是内联主脚本"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t05",
+      "category": "aggregate-count",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。00-pioneer-workbench.html 的海报墙（#posterGrid）有 6 张 poster-card，每张卡片底部的 episode-counter 上写着「第 N 集」。请把这 6 个 N 相加得到总和，并指出 N 最大的项目 id。请在末行 ANSWER 后只写这个总和（半角阿拉伯数字）；正文里写出集数最大的项目 id。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r05",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["36", "pioneer-agent-core"],
+        "forbidden": []
+      },
+      "groundTruth": {
+        "answerSummary": "6 张海报卡片的集数依次是 4、14、3、5、2、8，总和 36；最大的是 pioneer-agent-core（第 14 集）。脚本里的 AppState.projectEpisodes 映射给出同一组数值。",
+        "evidence": [
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -SimpleMatch -Pattern '第 14 集' -> 第 1891 行；六张卡片集数分散在第 1860/1891/1924/1956/1986/2016 行，脚本映射在 2935-2940 行（4+14+3+5+2+8=36）"
+          },
+          {
+            "path": "demos/01-bookshelf-workspace.html",
+            "sha256": "727e2486d4309200cc2e65bdddde865f5ae23fe7b29b309cb450cd7248199dd2",
+            "hint": "Select-String -LiteralPath demos/01-bookshelf-workspace.html -SimpleMatch -Pattern '第 14 集' -> 第 844 行；同文件 813-969 行重复同一组六个集数，可交叉核对"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t06",
+      "category": "aggregate-count",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。这些文件里出现了若干快照编号，形态为 CHK-xxxx 或 SNAP-xxx（原文通常带前导 #）。请列出全部互不相同的编号：去掉前导 # 后按字符串去重，只统计材料原文里真实出现过的编号，不要补造。请在末行 ANSWER 后只写这些编号的个数（半角阿拉伯数字）；正文里逐个写出编号。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r06",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": [
+          "CHK-0903",
+          "CHK-0904",
+          "SNAP-20260903-01",
+          "SNAP-CHK0903"
+        ],
+        "forbidden": []
+      },
+      "groundTruth": {
+        "answerSummary": "全语料共 4 个互不相同的快照编号：CHK-0903（00/02/03）、CHK-0904（00/02 的 snapshot_create）、SNAP-20260903-01（00/01 的整理提案快照）、SNAP-CHK0903（04 的整理抽屉快照）。",
+        "evidence": [
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -SimpleMatch -Pattern 'CHK-0903' -> 第 2084/2160/2572/3310 行；-Pattern 'CHK-0904' -> 第 3168 行；-Pattern 'SNAP-20260903-01' -> 第 3304/3305 行"
+          },
+          {
+            "path": "demos/01-bookshelf-workspace.html",
+            "sha256": "727e2486d4309200cc2e65bdddde865f5ae23fe7b29b309cb450cd7248199dd2",
+            "hint": "Select-String -LiteralPath demos/01-bookshelf-workspace.html -SimpleMatch -Pattern 'SNAP-20260903-01' -> 第 982/1196/1197 行（与 00 同名，去重后不新增）"
+          },
+          {
+            "path": "demos/02-session-intent-card.html",
+            "sha256": "d34a8ef63dcc043fc61fdca70699da6fddfb30704221f25d110a111e3157d7bc",
+            "hint": "Select-String -LiteralPath demos/02-session-intent-card.html -SimpleMatch -Pattern 'CHK-0904' -> 第 1648 行（同样是已计数的编号）"
+          },
+          {
+            "path": "demos/04-ppt-presentation-demo.html",
+            "sha256": "79cee4b3a6173d1c46bd9e2044cf2040b2bf7c0c2ff4218e187c10d74f6d0575",
+            "hint": "Select-String -LiteralPath demos/04-ppt-presentation-demo.html -SimpleMatch -Pattern 'SNAP-CHK0903' -> 第 1903/2256 行（这是第四个编号，与 SNAP-20260903-01 不同）"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t07",
+      "category": "cross-file-synthesis",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。请回答两个关于页数的问题：第一，04-ppt-presentation-demo.html 的 deck 模式一共包含多少页幻灯片，请写出最后一页 slide 元素的 id 作为依据；第二，00-pioneer-workbench.html 的成果画廊在描述 04-ppt-presentation-demo.html 这张交付物卡片时写的是多少页。请在末行 ANSWER 后写两个值，用空格分隔：先写最后一页 slide 的 id，再写 00 声称的页数（半角阿拉伯数字）。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r07",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["slide-10", "8"],
+        "forbidden": []
+      },
+      "groundTruth": {
+        "answerSummary": "04-ppt-presentation-demo.html 实际有 10 页（#slide-1 至 #slide-10，脚本里 totalSlides = 10，页脚 10/10），但 00-pioneer-workbench.html 的成果画廊把同一份文件描述成「8 页交互演示切片」，两处页数不一致。",
+        "evidence": [
+          {
+            "path": "demos/04-ppt-presentation-demo.html",
+            "sha256": "79cee4b3a6173d1c46bd9e2044cf2040b2bf7c0c2ff4218e187c10d74f6d0575",
+            "hint": "Select-String -LiteralPath demos/04-ppt-presentation-demo.html -SimpleMatch -Pattern 'id=\"slide-10\"' -> 第 1663 行；-Pattern 'totalSlides = 10' -> 第 2175 行；10 个 slide section 位于第 1239-1683 行"
+          },
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -SimpleMatch -Pattern '8 页交互演示切片' -> 第 2366 行（04-ppt-presentation-demo.html 交付物卡片描述）；03 第 877 行同一句话，可交叉核对"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t08",
+      "category": "cross-file-synthesis",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。同一份交付物 04-ppt-presentation-demo.html 在不同原型里被标注了不同的体积：00-pioneer-workbench.html 与 03-wrapup-and-gallery.html 的成果画廊标注一个值，02-session-intent-card.html 的 artifacts-grid-mini 标注另一个值。请分别给出这两个 KB 数值，都保留一位小数。请在末行 ANSWER 后写两个数值，用空格分隔：先写画廊里的值，再写 02 缩略网格里的值。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r08",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["31.2", "45.0"],
+        "forbidden": []
+      },
+      "groundTruth": {
+        "answerSummary": "04-ppt-presentation-demo.html 在 00 与 03 的成果画廊里标 31.2 KB，在 02 的 artifacts-grid-mini 里标 45.0 KB；同一交付物两处标注不一致。",
+        "evidence": [
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -SimpleMatch -Pattern '31.2 KB' -> 第 2363 行（04-ppt-presentation-demo.html 卡片）"
+          },
+          {
+            "path": "demos/03-wrapup-and-gallery.html",
+            "sha256": "abb129a07b3b7743bc2e09b6cdd7de105e1a0d572f8d9f88ef83fff8195fa515",
+            "hint": "Select-String -LiteralPath demos/03-wrapup-and-gallery.html -SimpleMatch -Pattern '31.2 KB' -> 第 873 行（同一张卡片的同一数值）"
+          },
+          {
+            "path": "demos/02-session-intent-card.html",
+            "sha256": "d34a8ef63dcc043fc61fdca70699da6fddfb30704221f25d110a111e3157d7bc",
+            "hint": "Select-String -LiteralPath demos/02-session-intent-card.html -SimpleMatch -Pattern '45.0 KB' -> 第 1341 行『45.0 KB · 答辩幻灯片舞台』"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t09",
+      "category": "cross-file-synthesis",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。00-pioneer-workbench.html 与 03-wrapup-and-gallery.html 的脚本各自定义了一个 AppState.projectEpisodes 映射（键是 project id，值是集数）。请对比这两个映射并回答：哪个 project id 在两边都存在且集数相同？哪些 project id 只出现在 03 的映射里？请在末行 ANSWER 后只写那个两边共有的 project id；正文里写出只出现在 03 映射里的全部 project id。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r09",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": [
+          "demo-thesis-2027",
+          "agent-runtime-pi",
+          "model-adapter-engine"
+        ],
+        "forbidden": []
+      },
+      "groundTruth": {
+        "answerSummary": "00 的映射有 6 个键（demo-thesis-2027: 4、pioneer-agent-core: 14、local-rag-indexer: 3、prompt-eval-bench: 5、wonderwall-media-engine: 2、design-system-tokens: 8）；03 的映射只有 3 个键（demo-thesis-2027: 4、agent-runtime-pi: 12、model-adapter-engine: 8）。两边共有且同值的是 demo-thesis-2027=4，03 独有的是 agent-runtime-pi 与 model-adapter-engine。",
+        "evidence": [
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -SimpleMatch -Pattern 'projectEpisodes' -> 第 2934 行；映射体在第 2935-2940 行，共 6 个键"
+          },
+          {
+            "path": "demos/03-wrapup-and-gallery.html",
+            "sha256": "abb129a07b3b7743bc2e09b6cdd7de105e1a0d572f8d9f88ef83fff8195fa515",
+            "hint": "Select-String -LiteralPath demos/03-wrapup-and-gallery.html -SimpleMatch -Pattern 'agent-runtime-pi' -> 第 1225 行；-Pattern 'model-adapter-engine' -> 第 1226 行；映射体在第 1223-1227 行，共 3 个键"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t10",
+      "category": "negative-scope",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件，其中 5 个是 HTML 单文件原型。请检查这 5 个 HTML 是否通过 <script src=...>、<link ...>、@import 或 CSS url(...) 加载外部文件或远程资源。为便于复核，请以 03-wrapup-and-gallery.html 里那个带 id 的独立 script 块为入口：先写出该 script 块的 id，再说明它和其余 4 个文件的内联 style/script 是否带 src 或外部 href，最后给出结论。末行 ANSWER 按约定写结论：若存在外部引用，写出你找到的那个引用；若确认不存在，写 none。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r10",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["none", "pioneer-nav-hud-script"],
+        "forbidden": ["cdn.jsdelivr.net", "unpkg.com", "fonts.googleapis.com"]
+      },
+      "groundTruth": {
+        "answerSummary": "5 个 HTML 都没有外部资源引用：src= 属性 0 个、<link> 0 个、@import 0 个、CSS url(...) 0 个，样式与脚本全部内联。全语料里唯一的 http(s) 字符串是 00 的两个模型端点，以及 README 里指向 Figma 的文档链接，都不是页面加载的资源。回答须先给出 03 那个独立 script 块的 id `pioneer-nav-hud-script` 作为复核入口。",
+        "evidence": [
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -Pattern '<link' -> 无命中；-LiteralPath 同文件 -SimpleMatch -Pattern 'url(' -> 无命中；src 属性计数为 0"
+          },
+          {
+            "path": "demos/01-bookshelf-workspace.html",
+            "sha256": "727e2486d4309200cc2e65bdddde865f5ae23fe7b29b309cb450cd7248199dd2",
+            "hint": "Select-String -LiteralPath demos/01-bookshelf-workspace.html -Pattern '<link|@import|url\\(' -> 无命中；src 属性计数为 0"
+          },
+          {
+            "path": "demos/02-session-intent-card.html",
+            "sha256": "d34a8ef63dcc043fc61fdca70699da6fddfb30704221f25d110a111e3157d7bc",
+            "hint": "Select-String -LiteralPath demos/02-session-intent-card.html -Pattern '<link|@import|url\\(' -> 无命中；src 属性计数为 0"
+          },
+          {
+            "path": "demos/03-wrapup-and-gallery.html",
+            "sha256": "abb129a07b3b7743bc2e09b6cdd7de105e1a0d572f8d9f88ef83fff8195fa515",
+            "hint": "Select-String -LiteralPath demos/03-wrapup-and-gallery.html -Pattern '<link|@import|url\\(' -> 无命中；该文件有两个内联 <script> 块，均无 src"
+          },
+          {
+            "path": "demos/04-ppt-presentation-demo.html",
+            "sha256": "79cee4b3a6173d1c46bd9e2044cf2040b2bf7c0c2ff4218e187c10d74f6d0575",
+            "hint": "Select-String -LiteralPath demos/04-ppt-presentation-demo.html -Pattern '<link|@import|url\\(' -> 无命中；src 属性计数为 0"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t11",
+      "category": "negative-scope",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件。00-pioneer-workbench.html 的系统设置视图里有一个「保存设置」按钮，点击后弹出的 toast 声称所有系统配置已持久化至本地存储。请先写出该设置视图那个 section 元素的 id（作为你实际检查的入口），再核对该文件脚本里是否真的调用了 localStorage、sessionStorage 或 indexedDB，最后给出结论。末行 ANSWER 按约定写结论：若找到这类调用，写出你找到的调用；若确认不存在，写 none。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r11",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["none", "viewSettings"],
+        "forbidden": ["setItem", "indexedDB.open", "sessionStorage.setItem"]
+      },
+      "groundTruth": {
+        "answerSummary": "没有持久化调用：00 全文件内 localStorage、sessionStorage、indexedDB、setItem 都是 0 命中；「已持久化至本地存储」只是「保存设置」按钮的 showToast 文案（第 2550 行），改完状态并不写盘。回答须先给出设置视图的 section id `viewSettings` 作为复核入口。",
+        "evidence": [
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -Pattern 'localStorage|sessionStorage|indexedDB|setItem' -> 无命中；原 toast 文案见第 2550 行 onclick=\"showToast('所有系统配置已持久化至本地存储')\""
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    },
+    {
+      "taskId": "t12",
+      "category": "negative-scope",
+      "prompt": "冻结材料根目录是 demos/，共 6 个文件（含 README.md）。请检查这些文件里有没有开源许可证声明（license、MIT、Apache 等字样）。为便于复核，请先照抄 README.md 里规定「禁止的改动」那一节的英文小节标题，再给出许可证检查结论。末行 ANSWER 按约定写结论：若找到许可证名称，写出该名称；若确认不存在，写 none。\n最后一行只写：ANSWER: <值>。<值> 必须是 ASCII 标识符、阿拉伯数字或文件路径片段，不要用中文数字写数量（写 3，不要写三个）。",
+      "materialScope": {
+        "root": "demos",
+        "allowedFiles": [
+          "demos/00-pioneer-workbench.html",
+          "demos/01-bookshelf-workspace.html",
+          "demos/02-session-intent-card.html",
+          "demos/03-wrapup-and-gallery.html",
+          "demos/04-ppt-presentation-demo.html",
+          "demos/README.md"
+        ]
+      },
+      "rubricId": "r12",
+      "rubric": {
+        "kind": "contains_all",
+        "match": "substring",
+        "literals": ["none", "Disallowed changes"],
+        "forbidden": [
+          "Apache License",
+          "MIT License",
+          "SPDX-License-Identifier"
+        ]
+      },
+      "groundTruth": {
+        "answerSummary": "6 个文件都没有许可证声明：license、Apache、SPDX、版权、许可证 全部 0 命中（小写的 mit 只出现在 Uncommitted / emit / Limit 这类词里，不是许可证名）。README.md 只写了允许与禁止的改动范围，没有授权条款。回答须先照抄 README 的 `Disallowed changes` 小节标题作为复核入口。",
+        "evidence": [
+          {
+            "path": "demos/README.md",
+            "sha256": "625d3303147427ed04eef20807e0a2f052c9e089c27bcc1167c3e62c7cf95038",
+            "hint": "Select-String -LiteralPath demos/README.md -Pattern 'license|apache|spdx' -> 无命中；文件只有 Purpose / Allowed changes / Disallowed changes / Formal product 四节"
+          },
+          {
+            "path": "demos/00-pioneer-workbench.html",
+            "sha256": "cbfbcba375cde3680c1e91969434340c1d3a5f758350fcfa32f30bcb2c8d839c",
+            "hint": "Select-String -LiteralPath demos/00-pioneer-workbench.html -Pattern 'license|apache|spdx' -> 无命中"
+          },
+          {
+            "path": "demos/01-bookshelf-workspace.html",
+            "sha256": "727e2486d4309200cc2e65bdddde865f5ae23fe7b29b309cb450cd7248199dd2",
+            "hint": "Select-String -LiteralPath demos/01-bookshelf-workspace.html -Pattern 'license|apache|spdx' -> 无命中"
+          },
+          {
+            "path": "demos/02-session-intent-card.html",
+            "sha256": "d34a8ef63dcc043fc61fdca70699da6fddfb30704221f25d110a111e3157d7bc",
+            "hint": "Select-String -LiteralPath demos/02-session-intent-card.html -Pattern 'license|apache|spdx' -> 无命中"
+          },
+          {
+            "path": "demos/03-wrapup-and-gallery.html",
+            "sha256": "abb129a07b3b7743bc2e09b6cdd7de105e1a0d572f8d9f88ef83fff8195fa515",
+            "hint": "Select-String -LiteralPath demos/03-wrapup-and-gallery.html -Pattern 'license|apache|spdx' -> 无命中"
+          },
+          {
+            "path": "demos/04-ppt-presentation-demo.html",
+            "sha256": "79cee4b3a6173d1c46bd9e2044cf2040b2bf7c0c2ff4218e187c10d74f6d0575",
+            "hint": "Select-String -LiteralPath demos/04-ppt-presentation-demo.html -Pattern 'license|apache|spdx' -> 无命中"
+          }
+        ]
+      },
+      "maxDurationMs": 120000
+    }
+  ]
+}

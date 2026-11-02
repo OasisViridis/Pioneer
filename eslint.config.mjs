@@ -85,7 +85,9 @@ export default [
     files: [
       '*.config.{js,mjs,cjs}',
       'tools/design-*.mjs',
+      'tools/experiments/**/*.mjs',
       'tests/design-sync/*.mjs',
+      'tests/experiments/*.mjs',
     ],
     languageOptions: {
       ecmaVersion: 'latest',

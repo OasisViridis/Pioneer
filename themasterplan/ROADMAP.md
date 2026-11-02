@@ -1,4 +1,4 @@
-# ROADMAP · Pioneer Agent
+﻿# ROADMAP · Pioneer Agent
 
 > **工程研发里程碑、功能优先级矩阵与 jj 工作流指南 (2026.09 — 2027.06)**
 > 课题：基于TypeScript的模块化智能体交互系统设计与实现（2026-10-08 按导师意见确认）
@@ -52,6 +52,18 @@
 | M1.5 | **COMPLETE** | 仓库规范化、三层测试真相与 `pnpm check:m15` 门禁已完成。 |
 | M2 | **COMPLETE** | Electron + React + TypeScript 只读桌面基础切片已完成；Contract Tests、Real Electron E2E、Windows Native Picker 人工验收、Package Smoke 与最终 Windows Quality Gate 均已通过。M2 不包含文件写入、工作区重组或快照；其只读安全边界继续作为 M3 基线。 |
 | M3 | **IN PROGRESS** | 纵向切片 `Input → Intent Review → READY → Runtime Session INITIALIZED → START REQUESTED` 与确定性 append-only 本地生命周期事件流已合并 `main`；P1 会话 Tabs 已接入，同项目可有多会话，草稿／消息／意图／单布局保存与重启恢复通过。P2 只读 Harness 已并入 `main`（PR #16，2026-10-26）：模型接入与 `read_file`／`list_directory`／`search_in_files` 三只只读工具在显式授权下可用，A09 真实 Provider 已留证；文件写入、命令执行、通用文件系统 IPC 与 Runtime 子进程仍关闭。P3 三票（#17 面板、#41 移除意图卡、#42 运行提示）均已关闭；#17 由 PR #57 合并（2026-10-29）。P1 完成不等于整个 M3 完成。 |
+
+---
+
+### 2026-11-03 M5-A 方案冻结与受控先导（M5 仍未完成）
+
+Issue #29 的对比方案冻结为 v1：两个变体（`pioneer-readonly-tools` / `fixed-prefix-no-tools`）、12 条任务分 4 类、三层分母、任务级统计，以及 `tools/experiments` 的记录与分析工具。冻结清单 `docs/experiments/m5a/v1/freeze-manifest.json` 覆盖 4 份 v1 JSON 与 9 个工具源码。
+
+受控先导（`evidenceKind=controlled`）跑通 build → analyze → freeze 全链路：18 条登记尝试、16 条执行、2 条 `not_run`；缺 usage 保持 null，`MODEL_FAILED`、`RUN_DEADLINE`、用户停止与 `host_restarted` 墓碑各按枚举分类；`answers.ndjson` 复算 12/12 一致。这组数据只证明记录与分析流程正确，不是模型结果，不进入论文结果章节。
+
+真实 Provider 先导为 **NOT_RUN**：没有点名 Provider、模型与外发材料授权，且产品侧还缺「把 journal 与事件流导出成采集包」的入口。因此「先导结果」与「样本量、成本已由真实先导验证」两项保持待办，M5 不因本票据关闭而完成。
+
+`pnpm check` 退出码 0（含 Real Electron E2E 39/39 与 package smoke）；`pnpm test:experiments` 37/37。协议、披露与限制见[冻结方案](../docs/experiments/2026-11-03-m5a-comparison-protocol.md)。
 
 ---
 

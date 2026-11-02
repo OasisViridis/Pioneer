@@ -65,6 +65,9 @@ jobs:
       - name: Prototype tests
         run: pnpm test:prototype
 
+      - name: Experiment tooling tests
+        run: pnpm test:experiments
+
       - name: Electron E2E
         run: pnpm test:e2e
 

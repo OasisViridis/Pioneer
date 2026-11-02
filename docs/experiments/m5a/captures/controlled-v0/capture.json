@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "m5a-harness-context-comparison",
+  "protocolVersion": 1,
+  "datasetVersion": 1,
+  "evidenceKind": "controlled",
+  "variantId": "fixed-prefix-no-tools",
+  "harnessVersion": "v1",
+  "repetition": 1,
+  "orderIndex": 1,
+  "environment": {
+    "softwareCommit": "13ccfe5f0c9f8cc376aec08eb21cd91162719237",
+    "dirty": false,
+    "platform": "win32-x64",
+    "nodeVersion": "24.17.0",
+    "electronVersion": "44.2.0",
+    "provider": "none",
+    "modelId": "none",
+    "endpointOrigin": "https://none.invalid",
+    "corpusId": "pioneer-demos-m1-frozen",
+    "corpusManifestSha256": "1557594df4dbdd7324dd4ffa4dcbf6c71607c6e99dfd5ee967f023f52bdc7f42"
+  },
+  "attempts": [
+    {
+      "attemptId": "a-0001",
+      "taskId": "t01",
+      "variantId": "fixed-prefix-no-tools",
+      "repetition": 1,
+      "orderIndex": 12,
+      "runId": "run:a-0001",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0002",
+      "taskId": "t01",
+      "variantId": "fixed-prefix-no-tools",
+      "repetition": 2,
+      "orderIndex": 12,
+      "runId": "run:a-0002",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0003",
+      "taskId": "t01",
+      "variantId": "fixed-prefix-no-tools",
+      "repetition": 3,
+      "orderIndex": 12,
+      "runId": "run:a-0003",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0004",
+      "taskId": "t02",
+      "variantId": "fixed-prefix-no-tools",
+      "repetition": 1,
+      "orderIndex": 1,
+      "runId": "run:a-0004",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0005",
+      "taskId": "t02",
+      "variantId": "fixed-prefix-no-tools",
+      "repetition": 2,
+      "orderIndex": 1,
+      "runId": null,
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0006",
+      "taskId": "t02",
+      "variantId": "fixed-prefix-no-tools",
+      "repetition": 3,
+      "orderIndex": 1,
+      "runId": "run:a-0006",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0007",
+      "taskId": "t03",
+      "variantId": "fixed-prefix-no-tools",
+      "repetition": 1,
+      "orderIndex": 3,
+      "runId": "run:a-0007",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0008",
+      "taskId": "t03",
+      "variantId": "fixed-prefix-no-tools",
+      "repetition": 2,
+      "orderIndex": 3,
+      "runId": "run:a-0008",
+      "status": "registered"
+    },
+    {
+      "attemptId": "a-0009",
+      "taskId": "t03",
+      "variantId": "fixed-prefix-no-tools",
+      "repetition": 3,
+      "orderIndex": 3,
+      "runId": "run:a-0009",
+      "status": "registered"
+    }
+  ],
+  "notRun": [
+    {
+      "attemptId": "a-0005",
+      "reason": "AUTHORIZATION_MISSING",
+      "note": "本轮没有 Provider / 模型 / 外发材料授权，受控先导不发起真实调用。"
+    }
+  ]
+}
