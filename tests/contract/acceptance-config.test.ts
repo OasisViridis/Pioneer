@@ -1,4 +1,11 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import {
+  mkdir,
+  mkdtemp,
+  rm,
+  symlink,
+  unlink,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -59,6 +66,21 @@ function validEnvironment(
   };
 }
 
+const supportsSymlinks = async (): Promise<boolean> => {
+  const directory = await mkdtemp(join(tmpdir(), 'pioneer-symlink-probe-'));
+  temporaryDirectories.push(directory);
+  const target = join(directory, 'target.txt');
+  const link = join(directory, 'link.txt');
+  await writeFile(target, 'probe', 'utf-8');
+  try {
+    await symlink(target, link, 'file');
+    await unlink(link);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 afterEach(async () => {
   await Promise.all(
     temporaryDirectories
@@ -78,12 +100,17 @@ describe('packaged acceptance launch seam', () => {
 
   it.each([undefined, '', 'true', '01', '0', 'yes'])(
     'ignores a packaged launch without the exact switch %#',
-    (PIONEER_ACCEPTANCE) => {
+    async (PIONEER_ACCEPTANCE) => {
+      const fixture = await createAcceptanceFixture();
       const setPath = vi.fn();
 
       expect(
         applyPackagedAcceptanceConfig(
-          { isPackaged: true, setPath },
+          {
+            isPackaged: true,
+            getPath: () => join(fixture.container, 'profile'),
+            setPath,
+          },
           {
             PIONEER_ACCEPTANCE,
             PIONEER_ACCEPTANCE_WORKSPACE: 'not-an-absolute-workspace',
@@ -193,9 +220,11 @@ describe('packaged acceptance launch seam', () => {
   it('accepts a packaged launch and applies the isolated profile once', async () => {
     const fixture = await createAcceptanceFixture();
     const setPath = vi.fn();
+    const applicationProfile = join(fixture.container, 'application-profile');
+    await mkdir(applicationProfile, { recursive: true });
 
     const config = applyPackagedAcceptanceConfig(
-      { isPackaged: true, setPath },
+      { isPackaged: true, getPath: () => applicationProfile, setPath },
       {
         ...validEnvironment(fixture),
         PIONEER_ACCEPTANCE_WORKSPACE: join(fixture.workspacePath, '.'),
@@ -211,6 +240,81 @@ describe('packaged acceptance launch seam', () => {
     });
     expect(setPath).toHaveBeenCalledOnce();
     expect(setPath).toHaveBeenCalledWith('userData', fixture.userDataPath);
+  });
+
+  it('refuses a profile that is, contains or sits inside the application profile', async () => {
+    const fixture = await createAcceptanceFixture();
+    const applicationProfile = join(fixture.container, 'app-profile', 'inner');
+    await mkdir(applicationProfile, { recursive: true });
+    const setPath = vi.fn();
+    const app = {
+      isPackaged: true,
+      getPath: () => applicationProfile,
+      setPath,
+    };
+
+    expect(() =>
+      applyPackagedAcceptanceConfig(app, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_USER_DATA: applicationProfile,
+      }),
+    ).toThrow('must not overlap the application profile directory');
+    await mkdir(join(applicationProfile, 'nested'), { recursive: true });
+    expect(() =>
+      applyPackagedAcceptanceConfig(app, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_USER_DATA: join(applicationProfile, 'nested'),
+      }),
+    ).toThrow('must not overlap the application profile directory');
+    expect(() =>
+      applyPackagedAcceptanceConfig(app, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_USER_DATA: join(fixture.container, 'app-profile'),
+      }),
+    ).toThrow('must not overlap the application profile directory');
+    expect(setPath).not.toHaveBeenCalled();
+  });
+
+  it('resolves an output leaf through an existing symbolic link before accepting it', async () => {
+    if (!(await supportsSymlinks())) return;
+    const fixture = await createAcceptanceFixture();
+    const workspaceFile = join(fixture.workspacePath, 'inside.txt');
+    await writeFile(workspaceFile, 'inside the workspace', 'utf-8');
+    const reportLink = join(fixture.reportsPath, 'startup.json');
+    await symlink(workspaceFile, reportLink, 'file');
+
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_REPORT: reportLink,
+      }),
+    ).toThrow('PIONEER_ACCEPTANCE_REPORT must be outside');
+
+    const scriptLink = join(fixture.reportsPath, 'run-link.json');
+    await symlink(workspaceFile, scriptLink, 'file');
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_REPORT: join(
+          fixture.reportsPath,
+          'script-case.json',
+        ),
+        PIONEER_ACCEPTANCE_RUN_SCRIPT: scriptLink,
+      }),
+    ).toThrow('PIONEER_ACCEPTANCE_RUN_SCRIPT must be outside');
+  });
+
+  it('rejects an existing output leaf that is a directory', async () => {
+    const fixture = await createAcceptanceFixture();
+    const directoryLeaf = join(fixture.reportsPath, 'startup.json');
+    await mkdir(directoryLeaf, { recursive: true });
+
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_REPORT: directoryLeaf,
+      }),
+    ).toThrow('PIONEER_ACCEPTANCE_REPORT');
   });
 
   it('rejects a run script inside the workspace', async () => {

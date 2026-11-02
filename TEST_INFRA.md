@@ -13,7 +13,7 @@
 
 ## Aggregate gate
 
-The primary gate is `pnpm check`. It runs, in order: format check; strict lint; desktop typecheck; Contract Tests; frozen Prototype Tests; Real E2E (including its package build); and a final package smoke. The duplicate final build is intentional. M2 is **COMPLETE**; `pnpm check` continues as the primary quality gate for M3.
+The primary gate is `pnpm check`. It runs, in order: design check; format check; strict lint; desktop typecheck; Contract Tests; frozen Prototype Tests; Real E2E (including its package build); and a final package smoke. The duplicate final build is intentional. M2 is **COMPLETE**; `pnpm check` continues as the primary quality gate for M3.
 
 Packaged Acceptance is deliberately outside `pnpm check` because it repackages the desktop app and starts the shipped executable; run it per milestone and on any change to the launch seam, packaging configuration, or run-layer main code.
 
@@ -23,7 +23,8 @@ Packaged Acceptance is deliberately outside `pnpm check` because it repackages t
 - The native directory picker is outside the deterministic E2E fixture seam; M2 manual acceptance evidence was completed in [`docs/testing/m2-native-picker-smoke.md`](docs/testing/m2-native-picker-smoke.md), and subsequent fixture seams must not pretend to substitute for manual verification.
 - No renderer mock can support a Real E2E claim: that claim requires the Electron main → preload → renderer flow against filesystem fixtures.
 - Packaged Acceptance is a packaged-artifact proof, not a provider proof: it uses the deterministic controlled adapter, so it does not show a real model provider working inside the shipped build. See [`docs/testing/issue53-packaged-acceptance.md`](docs/testing/issue53-packaged-acceptance.md) and [`docs/testing/issue13-real-provider.md`](docs/testing/issue13-real-provider.md).
-- Playwright's `_electron.launch` cannot attach to the shipped build because the `EnableNodeCliInspectArguments` fuse is off; the packaged acceptance spec therefore drives the renderer over CDP and reads run facts from main-process artifacts (startup report and run journal), never from renderer claims.
+- Playwright's `_electron.launch` cannot attach to the shipped build because the `EnableNodeCliInspectArguments` fuse is off; the packaged acceptance spec therefore drives the renderer over CDP. Terminal state comes from the main-process startup report and the run journal, while the renderer is only asked what a person would see: the run status, the run-log panel and the tool result text.
+- The report's `channels` field lists every IPC channel name this build wires, and the spec compares the whole list with the shared contract maps; it is a wiring inventory, not a claim that a channel was exercised.
 - See [`TEST_READY.md`](TEST_READY.md) for the historical M1 readiness record, not a current product-runtime certification.
 
 ## Current commands

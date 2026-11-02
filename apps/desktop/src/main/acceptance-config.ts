@@ -2,6 +2,7 @@ import {
   containsPath,
   requireAbsoluteOutputFile,
   requireExistingAbsoluteDirectory,
+  type LaunchProfileApp,
 } from './launch-paths';
 
 /**
@@ -18,10 +19,10 @@ export interface PackagedAcceptanceConfig {
   runScriptPath: string;
 }
 
-export interface PackagedAcceptanceApp {
-  readonly isPackaged: boolean;
-  setPath(name: 'userData', path: string): void;
-}
+export type PackagedAcceptanceApp = Pick<
+  LaunchProfileApp,
+  'isPackaged' | 'getPath' | 'setPath'
+>;
 
 export type PackagedAcceptanceEnvironment = Readonly<
   Partial<
@@ -58,9 +59,11 @@ function requireScriptPath(
 }
 
 /**
- * Resolves the packaged acceptance seam. Anything less than the exact switch
- * plus a fully valid configuration returns null rather than throwing, so an
- * unrelated environment variable cannot stop a real launch.
+ * Resolves the packaged acceptance seam. A launch without the exact switch
+ * returns null, so an unrelated or leftover environment variable cannot change
+ * a real launch. Once the switch is actually set the configuration is a
+ * contract: a missing, relative, overlapping or otherwise unsafe path throws
+ * instead of silently falling back to the real profile.
  */
 export function resolvePackagedAcceptanceConfig(
   isPackaged: boolean,
@@ -106,12 +109,29 @@ export function resolvePackagedAcceptanceConfig(
   };
 }
 
-/** Applies the isolated profile only after the whole acceptance config is valid. */
+/**
+ * Applies the isolated profile only after the whole acceptance config is valid.
+ * A configured profile that is, contains or sits inside the application's own
+ * profile directory is refused: the acceptance run must never reuse real user
+ * data, even when the caller points it there on purpose.
+ */
 export function applyPackagedAcceptanceConfig(
   app: PackagedAcceptanceApp,
   environment: PackagedAcceptanceEnvironment = process.env,
 ): PackagedAcceptanceConfig | null {
   const config = resolvePackagedAcceptanceConfig(app.isPackaged, environment);
-  if (config !== null) app.setPath('userData', config.userDataPath);
+  if (config === null) return null;
+
+  const applicationProfile = app.getPath('userData');
+  if (
+    containsPath(applicationProfile, config.userDataPath) ||
+    containsPath(config.userDataPath, applicationProfile)
+  ) {
+    throw new Error(
+      'PIONEER_ACCEPTANCE_USER_DATA must not overlap the application profile directory',
+    );
+  }
+
+  app.setPath('userData', config.userDataPath);
   return config;
 }

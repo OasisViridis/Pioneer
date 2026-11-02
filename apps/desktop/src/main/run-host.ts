@@ -128,13 +128,12 @@ export async function assembleRunHost(dependencies: {
 
   const selection = selectRunHostAdapter(environment, dependencies.launchGate);
 
+  const adapterKind = selection.kind;
   let adapterFactory: HarnessAdapterFactory;
-  let adapterKind: 'controlled' | 'pi';
   let adapterAvailable: boolean;
   let modelName: string | null = null;
 
   if (selection.kind === 'controlled') {
-    adapterKind = 'controlled';
     adapterAvailable = true;
     adapterFactory =
       selection.scriptPath !== null
@@ -143,7 +142,6 @@ export async function assembleRunHost(dependencies: {
           )
         : createControlledAdapterFactory();
   } else {
-    adapterKind = 'pi';
     const config = resolvePiRuntimeConfig(environment);
     adapterAvailable =
       config !== null && piCredentialPresent(config, process.env);

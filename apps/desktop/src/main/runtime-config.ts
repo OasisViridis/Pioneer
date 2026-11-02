@@ -1,14 +1,15 @@
-import { containsPath, requireExistingAbsoluteDirectory } from './launch-paths';
+import {
+  containsPath,
+  requireExistingAbsoluteDirectory,
+  type LaunchProfileApp,
+} from './launch-paths';
 
 export interface LaunchRuntimeConfig {
   rootPath: string;
   userDataPath: string;
 }
 
-export interface LaunchRuntimeApp {
-  readonly isPackaged: boolean;
-  setPath(name: 'userData', path: string): void;
-}
+export type LaunchRuntimeApp = Pick<LaunchProfileApp, 'isPackaged' | 'setPath'>;
 
 export type LaunchRuntimeEnvironment = Readonly<
   Partial<

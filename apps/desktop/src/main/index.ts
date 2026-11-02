@@ -6,7 +6,10 @@ import { registerCatalogIpc } from './ipc';
 import { IPC_CHANNELS } from '../shared/contracts/ipc';
 import { applyLaunchRuntimeConfig } from './runtime-config';
 import { applyPackagedAcceptanceConfig } from './acceptance-config';
-import { writePackagedAcceptanceReport } from './acceptance-report';
+import {
+  buildPackagedAcceptanceReport,
+  writePackagedAcceptanceReport,
+} from './acceptance-report';
 import { createSettingsStore } from './settings-store';
 import { createMainWindow } from './window';
 import {
@@ -424,37 +427,26 @@ void app.whenReady().then(async () => {
   appLifecycle.markReady();
 
   if (acceptanceConfig !== null) {
-    const catalog = catalogService.getCurrentCatalog();
-    await writePackagedAcceptanceReport(acceptanceConfig.reportPath, {
-      kind: 'pioneer-packaged-acceptance-startup',
-      schemaVersion: 1,
+    const report = buildPackagedAcceptanceReport({
       isPackaged: app.isPackaged,
       electronVersion: process.versions.electron,
       nodeVersion: process.versions.node,
       platform: process.platform,
       processId: process.pid,
       startedAt: launchStartedAt,
-      reportedAt: new Date().toISOString(),
       userDataRoot: app.getPath('userData'),
-      workspaceRoot: catalog.rootPath,
-      projects: catalog.projects.map((project) => ({
-        id: project.id,
-        name: project.name,
-        absolutePath: project.absolutePath,
-      })),
-      warnings: catalog.warnings.map((warning) => ({
-        code: warning.code,
-        path: warning.path,
-      })),
-      adapterKind: assembledRunHost.adapterKind,
-      adapterAvailable: assembledRunHost.adapterAvailable,
-      modelName: assembledRunHost.modelName,
+      executablePath: app.getPath('exe'),
+      catalog: catalogService.getCurrentCatalog(),
+      runHost: assembledRunHost,
       channels: [
         ...Object.values(IPC_CHANNELS),
         ...Object.values(SESSION_IPC_CHANNELS),
+        SESSION_CLOSE_REQUESTED_CHANNEL,
         ...Object.values(RUN_IPC_CHANNELS),
       ],
+      now: () => new Date(),
     });
+    await writePackagedAcceptanceReport(acceptanceConfig.reportPath, report);
   }
 
   app.on('activate', () => {
