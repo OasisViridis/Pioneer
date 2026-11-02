@@ -433,6 +433,58 @@ describe('run view identity isolation', () => {
     expect(snapshots).toHaveLength(1);
   });
 
+  it('records the terminal summary when the first page arrives after the stop receipt', async () => {
+    let resolvePage: (page: RunPage | null) => void = () => undefined;
+    const pending = new Promise<RunPage | null>((resolve) => {
+      resolvePage = resolve;
+    });
+    const port = createFakeRunPort({
+      getRunPage: null,
+      stopReply: { ok: true, status: 'stopped' },
+      getRun: () => pending,
+    });
+    const store = new RunViewStore(port);
+    const terminals: SessionRunRecord[] = [];
+    const running = store.launch({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+      task: '读取 fixture 并回答。',
+      materials: [],
+      onTerminal: (record) => terminals.push(record),
+    });
+    await flushBatches();
+    await store.stop({
+      sessionId: SESSION_ID,
+      projectId: PROJECT_ID,
+      revision: REVISION,
+    });
+    expect(store.get(SESSION_ID).status).toBe('stopped');
+
+    const stopped: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 1,
+      at: '2026-10-25T00:00:00.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: { type: 'run.stopped' },
+    };
+    resolvePage(
+      pageOf({
+        status: 'stopped',
+        events: [stopped],
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+    );
+    await running;
+
+    expect(terminals).toHaveLength(1);
+    expect(store.get(SESSION_ID).phase).toBe('terminal');
+  });
+
   it('marks omitted history when the initial page reports a gap', async () => {
     const page: RunPage = {
       ...pageOf({

@@ -124,7 +124,7 @@ PR #57 合并后，仓库级 `code-review` 两轴与 ChatGPT 复查又发现并�
 | 问题                                                       | 修复                                                                                                     |
 | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | 旧首屏 `getRun` 迟到时可能把已终态的状态覆盖回运行中       | 终态优先；首屏与推送批次共用 `classifyPage`，逐事件推进游标，`page.gap` 也记入省略历史。                  |
-| 停止回执先到、确认批次后到时，运行记录与摘要可能都不写     | 终态批次仍调用 `recordTerminal` 与 `captureSnapshot`；终态状态不回退。                                    |
+| 停止回执先到、确认批次或首屏后到时，运行记录与摘要可能都不写 | 终态批次与首屏仍调用 `recordTerminal` 与 `captureSnapshot`；终态状态不回退。                              |
 | 工具在 Run 终态后仍能通过 `onMaterial` 改材料记录          | 观察回调检查 `isTerminal`，终态后的观察被忽略。                                                          |
 | v8 载入不校验 `lastRunView` 与 Session/project 身份         | 身份不匹配的摘要直接丢弃，不跨会话显示；新增载入用例。                                                    |
 | 首次 Run 中断且无可用摘要时，重启后显示“尚未启动运行”      | `runRevision > 0` 且无摘要时，三块面板显示“上次运行没有可用的终态摘要”，不补造材料。                      |
@@ -134,4 +134,4 @@ PR #57 合并后，仓库级 `code-review` 两轴与 ChatGPT 复查又发现并�
 
 Narrator 人工证据绑定 `698090d`；本补修改动了面板文案，没有重跑人工验收，不把旧证据冒称为新版本证据。
 
-验证：`pnpm check` exit 0，Contract 401/401（39 文件）、Prototype 210/210、Real Electron 39/39、package smoke；工作树 `review/issue17-postmerge`，分支 `review/issue17-postmerge`，提交见 PR 页面。
+验证：`pnpm check` exit 0，Contract 404/404（39 文件）、Prototype 210/210、Real Electron 39/39、package smoke；工作树 `review/issue17-postmerge`，分支 `review/issue17-postmerge`，提交见 PR 页面。

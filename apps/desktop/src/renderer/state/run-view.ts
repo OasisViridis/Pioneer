@@ -820,16 +820,17 @@ export class RunViewStore {
           this.captureRunMeta(started.runId, accepted);
           this.applyEvents(input.sessionId, accepted);
           this.advanceCursor(started.runId, page.nextAfterSeq);
+          const pageTerminal = isTerminalStatus(page.status);
           // A live batch may already have delivered the terminal state while
           // this first page was in flight; an older page must not regress it.
           if (!isTerminalStatus(this.get(input.sessionId).status)) {
             this.update(input.sessionId, { status: page.status });
-            if (isTerminalStatus(page.status)) {
-              // A run that already converged before the first read is terminal
-              // here too; leaving the phase active would keep the stop button.
-              this.update(input.sessionId, { phase: 'terminal' });
-              this.recordTerminal(input.sessionId, started.runId);
-            }
+          }
+          if (pageTerminal) {
+            // A stop receipt may already have shown a terminal state; the
+            // first page still records the durable terminal summary.
+            this.update(input.sessionId, { phase: 'terminal' });
+            this.recordTerminal(input.sessionId, started.runId);
           }
         }
       }
