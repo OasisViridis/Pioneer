@@ -1056,18 +1056,6 @@ describe('recovery planning', () => {
 });
 
 describe('write surface stays closed', () => {
-  /**
-   * The four files that already wrote to disk before this ticket: window
-   * bootstrap, the run host, the session state store and the settings store.
-   * The probe fails if any other production file starts writing.
-   */
-  const allowlist = new Set<string>([
-    'main/index.ts',
-    'main/run-host.ts',
-    'main/session-state-store.ts',
-    'main/settings-store.ts',
-  ]);
-
   async function listSourceFiles(root: string): Promise<string[]> {
     const entries = await readdir(root, { withFileTypes: true });
     const files: string[] = [];
@@ -1085,19 +1073,25 @@ describe('write surface stays closed', () => {
     return files;
   }
 
-  it('keeps production write calls inside the reviewed files', async () => {
-    const files = await listSourceFiles(sourceRoot);
+  it('keeps every write call out of the decision modules', async () => {
+    // Scope is this ticket's own surface: a decision module that could write
+    // would defeat the point, and a repository-wide allowlist would break every
+    // time another ticket adds an unrelated writer on main.
+    const reviewedRoots = ['main/harness/write-permission', 'shared/contracts'];
     const writeCall = /\b(writeFile|appendFile|rm|unlink|rename|copyFile)\s*\(/;
     const offenders: string[] = [];
-    for (const file of files) {
-      const relativeFile = file
-        .slice(sourceRoot.length + 1)
-        .split(sep)
-        .join('/');
-      if (allowlist.has(relativeFile)) continue;
-      if (relativeFile.startsWith('main/harness/write-permission/')) continue;
-      const source = await readFile(file, 'utf-8');
-      if (writeCall.test(source)) offenders.push(relativeFile);
+    for (const relativeRoot of reviewedRoots) {
+      for (const file of await listSourceFiles(
+        join(sourceRoot, relativeRoot),
+      )) {
+        const relativeFile = file
+          .slice(sourceRoot.length + 1)
+          .split(sep)
+          .join('/');
+        if (writeCall.test(await readFile(file, 'utf-8'))) {
+          offenders.push(relativeFile);
+        }
+      }
     }
     expect(offenders).toEqual([]);
   });

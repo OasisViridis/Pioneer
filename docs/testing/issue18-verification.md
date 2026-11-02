@@ -31,7 +31,7 @@
 
 ### 门禁结果
 
-最终 `pnpm check`（日志 `tmp/issue18/full-check-21.log`，2026-11-02）退出码 0：
+最终 `pnpm check`（日志 `tmp/issue18/full-check-22.log`，2026-11-02）退出码 0：
 
 - Contract Tests：458/458 通过（40 个测试文件，含本票 64 项）；
 - Prototype Tests：210/210 通过；
