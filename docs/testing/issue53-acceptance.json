@@ -18,15 +18,15 @@
     "outcome": "passed",
     "exitCode": 0,
     "worktreeDirty": false,
-    "testDurationMs": 3300,
+    "testDurationMs": 3200,
     "executable": {
       "path": "apps/desktop/out/@pioneer-desktop-win32-x64/@pioneer-desktop.exe",
-      "sha256": "de17e0141191adf38d2ec1d7c36cf622c094b16607d55d15ddebbf2e9a80de61",
+      "sha256": "341ca094b89b31dbb4484d6da14a86f0c0c4ee5db6e75a197d9aa5fc674fa550",
       "newerThanRunMarker": true
     },
     "packagedApp": {
       "path": "apps/desktop/out/@pioneer-desktop-win32-x64/resources/app.asar",
-      "sha256": "62eeb783f66ba00526303067492f055f0430024c7378d08f3f0b5392693efccd"
+      "sha256": "e3fb05915b51b221f886cd987afbca5b6f19fc4556b48d7cc0e3b672801e8549"
     },
     "startupReport": {
       "isPackaged": true,
@@ -34,7 +34,8 @@
       "adapterAvailable": true,
       "projectNames": ["alpha-app", "beta-notes", "broken-metadata"],
       "ipcChannelCount": 18,
-      "executablePathMatchesSpawnedExe": true
+      "executablePathMatchesSpawnedExe": true,
+      "expectsEvidenceScopedOutputs": true
     },
     "journal": {
       "acceptRecords": 1,
@@ -56,14 +57,31 @@
       "afterHash": "1bceca9874f89bcc8986cc808144623257f6bedb114adb11c1f63767089246c5",
       "unchanged": true
     },
-    "cleanupErrors": []
+    "cleanupErrors": [],
+    "evidenceDirectory": "tmp/issue53-acceptance/latest/evidence"
   },
   "gates": {
-    "repository": { "passed": 6, "failed": 0 },
-    "designCheckNodeTests": { "passed": 102, "failed": 0 },
-    "contract": { "files": 42, "passed": 417, "failed": 0 },
-    "prototype": { "passed": 210, "failed": 0 },
-    "realElectronBaseline": { "passed": 39, "failed": 0 },
+    "repository": {
+      "passed": 6,
+      "failed": 0
+    },
+    "designCheckNodeTests": {
+      "passed": 102,
+      "failed": 0
+    },
+    "contract": {
+      "files": 42,
+      "passed": 417,
+      "failed": 0
+    },
+    "prototype": {
+      "passed": 210,
+      "failed": 0
+    },
+    "realElectronBaseline": {
+      "passed": 39,
+      "failed": 0
+    },
     "fullCheckExitCode": 0
   },
   "notRun": [

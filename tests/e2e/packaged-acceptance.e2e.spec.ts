@@ -205,6 +205,7 @@ const createAcceptanceEnvironment = (
   environment.PIONEER_ACCEPTANCE = '1';
   environment.PIONEER_ACCEPTANCE_WORKSPACE = paths.workspacePath;
   environment.PIONEER_ACCEPTANCE_USER_DATA = paths.userDataPath;
+  environment.PIONEER_ACCEPTANCE_EVIDENCE = paths.evidencePath;
   environment.PIONEER_ACCEPTANCE_REPORT = paths.reportPath;
   environment.PIONEER_ACCEPTANCE_RUN_SCRIPT = paths.runScriptPath;
   return environment;
@@ -568,26 +569,24 @@ test('the packaged build completes one read-only run through the acceptance seam
 
   await rm(evidenceDirectory, { force: true, recursive: true });
   const userDataPath = path.join(evidenceDirectory, 'user-data');
-  const reportsPath = path.join(evidenceDirectory, 'reports');
-  const evidenceFilesPath = path.join(evidenceDirectory, 'evidence');
+  const evidencePath = path.join(evidenceDirectory, 'evidence');
   await Promise.all([
     mkdir(userDataPath, { recursive: true }),
-    mkdir(reportsPath, { recursive: true }),
-    mkdir(evidenceFilesPath, { recursive: true }),
+    mkdir(evidencePath, { recursive: true }),
   ]);
 
-  const reportPath = path.join(reportsPath, 'startup-report.json');
-  const runScriptPath = path.join(reportsPath, 'run-script.json');
+  const reportPath = path.join(evidencePath, 'startup-report.json');
+  const runScriptPath = path.join(evidencePath, 'run-script.json');
   const journalPath = path.join(userDataPath, 'runs', 'journal.jsonl');
   const statusScreenshotPath = path.join(
-    evidenceFilesPath,
+    evidencePath,
     'packaged-run-status.png',
   );
   const eventsScreenshotPath = path.join(
-    evidenceFilesPath,
+    evidencePath,
     'packaged-run-events.png',
   );
-  const logPath = path.join(evidenceFilesPath, 'packaged-app.log');
+  const logPath = path.join(evidencePath, 'packaged-app.log');
   const summaryPath = path.join(evidenceDirectory, 'summary.json');
   await writeFile(
     runScriptPath,
@@ -598,6 +597,7 @@ test('the packaged build completes one read-only run through the acceptance seam
   const environment = createAcceptanceEnvironment({
     workspacePath: fixtureRoot,
     userDataPath,
+    evidencePath,
     reportPath,
     runScriptPath,
   });
@@ -704,8 +704,9 @@ test('the packaged build completes one read-only run through the acceptance seam
 
     // Two distinct frames: the window with the run controls and terminal
     // status in view, then the run-log panel with the tool exchange.
-    const runControls = window.locator('details.run-log');
-    await runControls.scrollIntoViewIfNeeded();
+    const runStatus = window.locator('.run-status');
+    await runStatus.scrollIntoViewIfNeeded();
+    await expect(runStatus).toBeInViewport();
     await window.screenshot({ path: statusScreenshotPath });
     await runLogPanel.screenshot({ path: eventsScreenshotPath });
     await testInfo.attach('packaged-run-status.png', {
@@ -720,11 +721,7 @@ test('the packaged build completes one read-only run through the acceptance seam
     journal = await waitForJournal(journalPath);
     assertJournalRecords(journal, alphaProject.id, transcript);
 
-    await copyFile(journalPath, path.join(evidenceFilesPath, 'journal.jsonl'));
-    await copyFile(
-      reportPath,
-      path.join(evidenceFilesPath, 'startup-report.json'),
-    );
+    await copyFile(journalPath, path.join(evidencePath, 'journal.jsonl'));
   } catch (error) {
     failure = error;
   } finally {

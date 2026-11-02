@@ -17,6 +17,7 @@ import {
 export interface PackagedAcceptanceConfig {
   workspacePath: string;
   userDataPath: string;
+  evidencePath: string;
   reportPath: string;
   runScriptPath: string;
 }
@@ -32,6 +33,7 @@ export type PackagedAcceptanceEnvironment = Readonly<
       | 'PIONEER_ACCEPTANCE'
       | 'PIONEER_ACCEPTANCE_WORKSPACE'
       | 'PIONEER_ACCEPTANCE_USER_DATA'
+      | 'PIONEER_ACCEPTANCE_EVIDENCE'
       | 'PIONEER_ACCEPTANCE_REPORT'
       | 'PIONEER_ACCEPTANCE_RUN_SCRIPT',
       string
@@ -42,22 +44,22 @@ export type PackagedAcceptanceEnvironment = Readonly<
 /**
  * The packaged acceptance run must name its script explicitly: the controlled
  * adapter's default script never reads a file, so a default would let a run
- * "complete" without exercising a read-only tool at all.
+ * "complete" without exercising a read-only tool at all. The script and the
+ * report must both live inside the run's own evidence directory, so an
+ * accepted launch can never overwrite a file somewhere else on the machine.
  */
-function requireScriptPath(
-  workspacePath: string,
+function requireEvidenceFile(
+  variableName: 'PIONEER_ACCEPTANCE_REPORT' | 'PIONEER_ACCEPTANCE_RUN_SCRIPT',
+  evidencePath: string,
   value: string | undefined,
 ): string {
-  const scriptPath = requireAbsoluteOutputFile(
-    'PIONEER_ACCEPTANCE_RUN_SCRIPT',
-    value,
-  );
-  if (isPathInsideOrEqual(workspacePath, scriptPath)) {
+  const filePath = requireAbsoluteOutputFile(variableName, value);
+  if (!isPathInsideOrEqual(evidencePath, filePath)) {
     throw new Error(
-      'PIONEER_ACCEPTANCE_RUN_SCRIPT must be outside PIONEER_ACCEPTANCE_WORKSPACE',
+      `${variableName} must be inside PIONEER_ACCEPTANCE_EVIDENCE`,
     );
   }
-  return scriptPath;
+  return filePath;
 }
 
 /**
@@ -81,9 +83,9 @@ export function resolvePackagedAcceptanceConfig(
     'PIONEER_ACCEPTANCE_USER_DATA',
     environment.PIONEER_ACCEPTANCE_USER_DATA,
   );
-  const reportPath = requireAbsoluteOutputFile(
-    'PIONEER_ACCEPTANCE_REPORT',
-    environment.PIONEER_ACCEPTANCE_REPORT,
+  const evidencePath = requireExistingAbsoluteDirectory(
+    'PIONEER_ACCEPTANCE_EVIDENCE',
+    environment.PIONEER_ACCEPTANCE_EVIDENCE,
   );
 
   if (pathsOverlap(workspacePath, userDataPath)) {
@@ -91,23 +93,38 @@ export function resolvePackagedAcceptanceConfig(
       'PIONEER_ACCEPTANCE_WORKSPACE and PIONEER_ACCEPTANCE_USER_DATA must be disjoint',
     );
   }
-  if (isPathInsideOrEqual(workspacePath, reportPath)) {
+  if (pathsOverlap(workspacePath, evidencePath)) {
     throw new Error(
-      'PIONEER_ACCEPTANCE_REPORT must be outside PIONEER_ACCEPTANCE_WORKSPACE',
+      'PIONEER_ACCEPTANCE_EVIDENCE must be disjoint from PIONEER_ACCEPTANCE_WORKSPACE',
     );
   }
 
-  const runScriptPath = requireScriptPath(
-    workspacePath,
+  const reportPath = requireEvidenceFile(
+    'PIONEER_ACCEPTANCE_REPORT',
+    evidencePath,
+    environment.PIONEER_ACCEPTANCE_REPORT,
+  );
+  const runScriptPath = requireEvidenceFile(
+    'PIONEER_ACCEPTANCE_RUN_SCRIPT',
+    evidencePath,
     environment.PIONEER_ACCEPTANCE_RUN_SCRIPT,
   );
-  if (runScriptPath === reportPath) {
+  if (
+    isPathInsideOrEqual(reportPath, runScriptPath) &&
+    isPathInsideOrEqual(runScriptPath, reportPath)
+  ) {
     throw new Error(
       'PIONEER_ACCEPTANCE_REPORT and PIONEER_ACCEPTANCE_RUN_SCRIPT must differ',
     );
   }
 
-  return { workspacePath, userDataPath, reportPath, runScriptPath };
+  return {
+    workspacePath,
+    userDataPath,
+    evidencePath,
+    reportPath,
+    runScriptPath,
+  };
 }
 
 /**

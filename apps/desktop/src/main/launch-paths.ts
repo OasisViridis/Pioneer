@@ -9,12 +9,17 @@ import {
   sep,
 } from 'node:path';
 
+/** Windows resolves names case-insensitively; compare the same way there. */
+const foldPathCase = (value: string): string =>
+  process.platform === 'win32' ? value.toLowerCase() : value;
+
 /** Launch variables whose values must be validated before the app reads them. */
 export type LaunchPathVariable =
   | 'PIONEER_E2E_ROOT'
   | 'PIONEER_E2E_USER_DATA'
   | 'PIONEER_ACCEPTANCE_WORKSPACE'
   | 'PIONEER_ACCEPTANCE_USER_DATA'
+  | 'PIONEER_ACCEPTANCE_EVIDENCE'
   | 'PIONEER_ACCEPTANCE_REPORT'
   | 'PIONEER_ACCEPTANCE_RUN_SCRIPT';
 
@@ -139,7 +144,10 @@ export function isPathInsideOrEqual(
   parentPath: string,
   candidatePath: string,
 ): boolean {
-  const relativePath = relative(parentPath, candidatePath);
+  const relativePath = relative(
+    foldPathCase(parentPath),
+    foldPathCase(candidatePath),
+  );
   return (
     relativePath === '' ||
     (!relativePath.startsWith(`..${sep}`) &&

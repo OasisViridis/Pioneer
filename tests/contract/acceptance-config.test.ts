@@ -22,7 +22,7 @@ interface AcceptanceFixture {
   container: string;
   workspacePath: string;
   userDataPath: string;
-  reportsPath: string;
+  evidencePath: string;
   reportPath: string;
   scriptPath: string;
 }
@@ -32,13 +32,13 @@ async function createAcceptanceFixture(): Promise<AcceptanceFixture> {
   temporaryDirectories.push(container);
   const workspacePath = join(container, 'workspace');
   const userDataPath = join(container, 'user-data');
-  const reportsPath = join(container, 'reports');
+  const evidencePath = join(container, 'evidence');
   await Promise.all([
     mkdir(join(workspacePath, 'alpha-app'), { recursive: true }),
     mkdir(userDataPath, { recursive: true }),
-    mkdir(reportsPath, { recursive: true }),
+    mkdir(evidencePath, { recursive: true }),
   ]);
-  const scriptPath = join(reportsPath, 'run-script.json');
+  const scriptPath = join(evidencePath, 'run-script.json');
   await writeFile(
     scriptPath,
     JSON.stringify({ steps: [{ action: 'complete' }] }),
@@ -48,8 +48,8 @@ async function createAcceptanceFixture(): Promise<AcceptanceFixture> {
     container,
     workspacePath,
     userDataPath,
-    reportsPath,
-    reportPath: join(reportsPath, 'startup.json'),
+    evidencePath,
+    reportPath: join(evidencePath, 'startup.json'),
     scriptPath,
   };
 }
@@ -61,6 +61,7 @@ function validEnvironment(
     PIONEER_ACCEPTANCE: '1',
     PIONEER_ACCEPTANCE_WORKSPACE: fixture.workspacePath,
     PIONEER_ACCEPTANCE_USER_DATA: fixture.userDataPath,
+    PIONEER_ACCEPTANCE_EVIDENCE: fixture.evidencePath,
     PIONEER_ACCEPTANCE_REPORT: fixture.reportPath,
     PIONEER_ACCEPTANCE_RUN_SCRIPT: fixture.scriptPath,
   };
@@ -150,18 +151,27 @@ describe('packaged acceptance launch seam', () => {
         PIONEER_ACCEPTANCE_WORKSPACE: fixture.workspacePath,
         PIONEER_ACCEPTANCE_USER_DATA: fixture.userDataPath,
       }),
+    ).toThrow('PIONEER_ACCEPTANCE_EVIDENCE');
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        PIONEER_ACCEPTANCE: '1',
+        PIONEER_ACCEPTANCE_WORKSPACE: fixture.workspacePath,
+        PIONEER_ACCEPTANCE_USER_DATA: fixture.userDataPath,
+        PIONEER_ACCEPTANCE_EVIDENCE: fixture.evidencePath,
+      }),
     ).toThrow('PIONEER_ACCEPTANCE_REPORT');
     expect(() =>
       resolvePackagedAcceptanceConfig(true, {
         PIONEER_ACCEPTANCE: '1',
         PIONEER_ACCEPTANCE_WORKSPACE: fixture.workspacePath,
         PIONEER_ACCEPTANCE_USER_DATA: fixture.userDataPath,
+        PIONEER_ACCEPTANCE_EVIDENCE: fixture.evidencePath,
         PIONEER_ACCEPTANCE_REPORT: fixture.reportPath,
       }),
     ).toThrow('PIONEER_ACCEPTANCE_RUN_SCRIPT');
   });
 
-  it('rejects relative or missing directories and a report outside an existing directory', async () => {
+  it('rejects relative or missing directories and an output with no existing parent', async () => {
     const fixture = await createAcceptanceFixture();
 
     expect(() =>
@@ -179,8 +189,14 @@ describe('packaged acceptance launch seam', () => {
     expect(() =>
       resolvePackagedAcceptanceConfig(true, {
         ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_EVIDENCE: join(fixture.container, 'missing'),
+      }),
+    ).toThrow('PIONEER_ACCEPTANCE_EVIDENCE');
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
         PIONEER_ACCEPTANCE_REPORT: join(
-          fixture.reportsPath,
+          fixture.evidencePath,
           'missing',
           'x.json',
         ),
@@ -188,7 +204,7 @@ describe('packaged acceptance launch seam', () => {
     ).toThrow('PIONEER_ACCEPTANCE_REPORT');
   });
 
-  it('keeps the workspace disjoint from the profile and the evidence files', async () => {
+  it('keeps the workspace, the profile and the evidence directory disjoint', async () => {
     const fixture = await createAcceptanceFixture();
 
     expect(() =>
@@ -208,13 +224,22 @@ describe('packaged acceptance launch seam', () => {
     expect(() =>
       resolvePackagedAcceptanceConfig(true, {
         ...validEnvironment(fixture),
-        PIONEER_ACCEPTANCE_REPORT: join(fixture.workspacePath, 'startup.json'),
-        PIONEER_ACCEPTANCE_RUN_SCRIPT: join(
-          fixture.workspacePath,
-          'run-script.json',
-        ),
+        PIONEER_ACCEPTANCE_EVIDENCE: join(fixture.container, 'elsewhere'),
       }),
-    ).toThrow('must be outside');
+    ).toThrow('PIONEER_ACCEPTANCE_EVIDENCE');
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_WORKSPACE: fixture.container,
+        PIONEER_ACCEPTANCE_EVIDENCE: fixture.evidencePath,
+      }),
+    ).toThrow('must be disjoint');
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_EVIDENCE: fixture.container,
+      }),
+    ).toThrow('must be disjoint');
   });
 
   it('accepts a packaged launch and applies the isolated profile once', async () => {
@@ -235,6 +260,7 @@ describe('packaged acceptance launch seam', () => {
     expect(config).toEqual({
       workspacePath: fixture.workspacePath,
       userDataPath: fixture.userDataPath,
+      evidencePath: fixture.evidencePath,
       reportPath: fixture.reportPath,
       runScriptPath: fixture.scriptPath,
     });
@@ -287,7 +313,7 @@ describe('packaged acceptance launch seam', () => {
     // resolving either one would let the report overwrite that file.
     for (const target of [workspaceFile, outsideFile]) {
       const reportLink = join(
-        fixture.reportsPath,
+        fixture.evidencePath,
         `startup-${String(target.length)}.json`,
       );
       await symlink(target, reportLink, 'file');
@@ -301,13 +327,13 @@ describe('packaged acceptance launch seam', () => {
       );
     }
 
-    const scriptLink = join(fixture.reportsPath, 'run-link.json');
+    const scriptLink = join(fixture.evidencePath, 'run-link.json');
     await symlink(outsideFile, scriptLink, 'file');
     expect(() =>
       resolvePackagedAcceptanceConfig(true, {
         ...validEnvironment(fixture),
         PIONEER_ACCEPTANCE_REPORT: join(
-          fixture.reportsPath,
+          fixture.evidencePath,
           'script-case.json',
         ),
         PIONEER_ACCEPTANCE_RUN_SCRIPT: scriptLink,
@@ -319,7 +345,7 @@ describe('packaged acceptance launch seam', () => {
 
   it('rejects an existing output leaf that is a directory', async () => {
     const fixture = await createAcceptanceFixture();
-    const directoryLeaf = join(fixture.reportsPath, 'startup.json');
+    const directoryLeaf = join(fixture.evidencePath, 'startup.json');
     await mkdir(directoryLeaf, { recursive: true });
 
     expect(() =>
@@ -330,7 +356,7 @@ describe('packaged acceptance launch seam', () => {
     ).toThrow('PIONEER_ACCEPTANCE_REPORT');
   });
 
-  it('rejects a run script inside the workspace', async () => {
+  it('rejects a run script outside the evidence directory', async () => {
     const fixture = await createAcceptanceFixture();
 
     expect(() =>
@@ -341,7 +367,13 @@ describe('packaged acceptance launch seam', () => {
           'run-script.json',
         ),
       }),
-    ).toThrow('must be outside');
+    ).toThrow('must be inside PIONEER_ACCEPTANCE_EVIDENCE');
+    expect(() =>
+      resolvePackagedAcceptanceConfig(true, {
+        ...validEnvironment(fixture),
+        PIONEER_ACCEPTANCE_REPORT: join(fixture.container, 'outside.json'),
+      }),
+    ).toThrow('must be inside PIONEER_ACCEPTANCE_EVIDENCE');
   });
 
   it('rejects a report path that is also the run script', async () => {
