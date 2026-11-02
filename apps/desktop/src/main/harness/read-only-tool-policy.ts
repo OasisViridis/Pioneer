@@ -8,6 +8,7 @@ import {
   type ReadOnlyToolRequest,
 } from '../../shared/contracts/read-only-tools';
 import { isPathInsideRoot, normalizeRootPath } from '../catalog/path-policy';
+import { isSafePathSegment } from '../../shared/path-safety';
 
 export type ReadOnlyToolDecision =
   | ReadOnlyToolRejection
@@ -46,20 +47,7 @@ function reject(
 function isSafeRelativePath(path: string): boolean {
   if (path === '.') return true;
   const parts = path.split(/[\\/]/);
-  return (
-    parts.length <= 32 &&
-    parts.every(
-      (part) =>
-        part !== '' &&
-        part !== '.' &&
-        part !== '..' &&
-        !/[\x00-\x1f\x7f:<>"|?*]/.test(part) &&
-        !/[. ]$/.test(part) &&
-        !/^(?:con|prn|aux|nul|com[1-9¹²³]|lpt[1-9¹²³]|conin\$|conout\$)(?:\.|$)/i.test(
-          part,
-        ),
-    )
-  );
+  return parts.length <= 32 && parts.every(isSafePathSegment);
 }
 
 /** Reusable per-entry filter for traversals: skipped entries never get enumerated outward. */
