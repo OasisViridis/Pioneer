@@ -265,6 +265,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 边界说明：
 
 - "同名重建"有一条真实删除后重建的探针，平台复用同一身份时会显式 `skip`；另有一条用构造身份覆盖 `replaced` 判定。
+- 链接相关探针（目标符号链接、保护路径父目录链接）在无创建链接权限时会显式 `skip`；本机与 CI 未触发。
 - "读取期间被改动"依赖 `readStableFile` 的 `afterRead` 测试钩子；这是本票对 Issue "不另建测试替换点" 的一次偏离，理由是没有它测不到 `unstable` 分支。钩子只在构造选项时传入，生产调用不传，验证记录里单列。
 - `identity_unavailable` 由构造观察对象覆盖判定分支，真实平台上无法稳定制造。
 - 探针不证明将来的写入执行器一定正确：#19 的实现要用同一套校验。
@@ -342,7 +343,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 2026-11-03 在 `docs/issue18-confirm-decisions`（自 `origin/main` `13ccfe5` 起）定稿 §9 并复跑无窗口检查：
 
-- 定向探针：`pnpm exec vitest run tests/contract/write-permission.test.ts` → 79 项全部通过（新增目标上限、保护路径上限、父目录链接、按目标区分拒绝码 4 项）。
+- 定向探针：`pnpm exec vitest run tests/contract/write-permission.test.ts` → 79 项全部通过（新增目标上限、保护路径上限、父目录链接、逐目标拒绝码 4 项）；5 处 `skip` 只在平台前提不满足时触发（身份复用、身份不可用、符号链接或联接权限、父目录链接权限），本机未触发。
 - 无窗口检查：`pnpm verify:repository`（6/6）、`pnpm format:check`、`pnpm lint`、`pnpm typecheck`、`pnpm test:contract:types`、`pnpm test:contract`（509/509，43 个文件）、`pnpm test:prototype`（210/210）全部退出码 0。
 - 完整门禁：CI `Windows / pnpm check` 的结果见验证记录。
 - 外部第二意见：见验证记录「外部第二意见」一节。
