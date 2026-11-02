@@ -112,5 +112,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: visual-comparison-${{ github.sha }}
-          path: tests/e2e/test-output/visual/
+          # Collect report, results and failure images only. The Playwright
+          # output also contains the throwaway Chromium user-data profile,
+          # which must not be uploaded as evidence.
+          path: |
+            tests/e2e/test-output/visual/report/
+            tests/e2e/test-output/visual/results.json
+            tests/e2e/test-output/visual/candidates/
+            tests/e2e/test-output/visual/artifacts/**/*.png
+            tests/e2e/test-output/visual/artifacts/**/trace.zip
+            tests/e2e/test-output/visual/artifacts/**/error-context.md
           if-no-files-found: warn

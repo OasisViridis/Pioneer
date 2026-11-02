@@ -111,4 +111,5 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 - 修正旧记录与当前测试的偏差：runner image 已退出环境断言（2026-11-02），`design-decoration` 不再覆盖已移除的意图 `.form-error`；S1 文档中的 artifact 名改为实际的 `electron-evidence-<sha>` 与 `visual-comparison-<sha>`；token 计数改为 27；`TEST_INFRA.md` 补充 Visual Regression 入口。
 - 计划里“固定 Windows runner 镜像”没有按字面执行：GitHub 托管的 `windows-2025` 镜像版本会滚动，同一提交可能分到不同镜像，镜像门禁会让同一 SHA 随机失败。当前固定的是渲染相关环境字段，runner image 只写入附件供溯源。要改成镜像级断言需要自托管 runner，本次未启用。
 - S2 的 `verify` 现在要求质量与视觉两个 job 都成功；没有视觉 job 的旧 S2 PR 返回 `validation-incomplete`。这是有意收紧，不把旧绿色或本地 `pnpm check` 当作当前视觉通过。
+- 下载提交 `2283fd9` 的 CI artifact 复核：`electron-evidence-2283fd9...` 的 `results.json` 为 12 suites / 39 specs 全部通过；`visual-comparison-2283fd9...` 含 HTML/JSON 报告和故意反色故障的 expected/actual/diff 三张 PNG。artifact 里原有的 Chromium 临时 user-data 目录不再上传：`quality.yml` 与 `visual-candidate.yml` 改为按报告、结果 JSON、候选/截图/trace 精确收集。
 - 真实命名版本事件接收与完整自动链路仍未验收；真实 Figma 部分失败/超时、Code Connect 发布、真人设备与真实 Provider 人工验收也仍未执行。#37、#33 保持 Open，未创建或修改 Figma 版本，未标记 COMPLETED。
