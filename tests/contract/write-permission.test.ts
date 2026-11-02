@@ -394,14 +394,6 @@ describe('write permission scope', () => {
     ).toMatchObject({ ok: true });
   });
 
-  it('marks auto review as permission to write without a confirmation', () => {
-    const decision = checkWritePermission(
-      [targetOf('src/a.ts', 'a', 'b')],
-      permissionOf({ mode: 'auto_review', riskAcknowledged: true }),
-    );
-    expect(decision).toMatchObject({ ok: true, confirmation: 'none' });
-  });
-
   it('marks auto review as the only mode without a per-apply confirmation', () => {
     const targets = [targetOf('src/a.ts', 'a', 'b')];
     expect(
@@ -568,7 +560,9 @@ describe('full access and protected paths', () => {
     });
     expect(plan.denied).toBe('PERMISSION_READ_ONLY');
     expect(plan.actions).toEqual([]);
-    expect(plan.outOfScope).toEqual(['src/index.ts']);
+    // A permission denial is not "nothing to do": outOfScope stays empty so a
+    // caller cannot read the plan as already settled.
+    expect(plan.outOfScope).toEqual([]);
   });
 
   it('keeps protected paths out of recovery in the workspace modes', async () => {
@@ -1021,6 +1015,34 @@ describe('write outcomes', () => {
     });
   });
 
+  it('refuses an applied record whose intent came from another revision', () => {
+    const target = targetOf('src/a.ts', 'a', 'a2');
+    const records = [
+      WriteChangeJournalRecordSchema.parse({
+        kind: 'intent',
+        runId: RUN_ID,
+        revision: 1,
+        path: 'src/a.ts',
+        beforeSha256: target.before.sha256,
+        at: '2026-10-27T12:00:01.000Z',
+      }),
+      WriteChangeJournalRecordSchema.parse({
+        kind: 'applied',
+        runId: RUN_ID,
+        revision: 2,
+        path: 'src/a.ts',
+        afterSha256: target.after.sha256,
+        observedSha256: target.after.sha256,
+        observedIdentity: null,
+        verification: 'verified',
+        at: '2026-10-27T12:00:02.000Z',
+      }),
+    ];
+    expect(
+      summarizeWriteOutcomes(RUN_ID, 2, [target], records)[0],
+    ).toMatchObject({ status: 'verification_failed' });
+  });
+
   it('reports a proven restore as restored and an unproven one as failed', () => {
     const target = at(targets, 0);
     const proven = [
@@ -1213,6 +1235,33 @@ describe('recovery planning', () => {
       action: 'already_restored',
       state: 'unchanged',
     });
+  });
+
+  it('preserves a file whose object changed after the written bytes', async () => {
+    const target = await seed(projectRoot, 'src/index.ts', 'before\n');
+    await write(projectRoot, 'src/index.ts', 'before\n\nchanged');
+    const actual: WriteTarget = {
+      ...target,
+      after: stateOf('before\n\nchanged'),
+    };
+    const observations = await observeWriteTargets(projectRoot, [actual]);
+    const plan = planRecovery({
+      runId: RUN_ID,
+      permission: permissionOf(),
+      targets: [actual],
+      records: [
+        intentRecord(
+          actual.path,
+          actual.before.sha256,
+          '2026-10-27T12:00:01.000Z',
+        ),
+        appliedRecord(actual, {
+          observedIdentity: { fileId: 'other-object', birthtimeMs: 1 },
+        }),
+      ],
+      observations,
+    });
+    expect(plan.actions[0]).toMatchObject({ action: 'conflict' });
   });
 
   it('treats a file changed after a restore as a conflict', async () => {

@@ -1,5 +1,7 @@
 import { lstat, realpath } from 'node:fs/promises';
-import { join, sep } from 'node:path';
+import { join } from 'node:path';
+
+import { isPathInsideRoot } from '../../catalog/path-policy';
 
 import {
   WRITE_LIMITS,
@@ -56,15 +58,16 @@ function isAllowedProtectedPath(
 }
 
 /**
- * Re-checks a protected-path target before reading it: a link at the literal
- * path is refused, and the resolved path must stay inside the resolved project
- * root. Returns the observation state to report, or null when the read may go
- * ahead. `full_access` widens which names are readable, never where a path may
- * point.
+ * Re-checks a protected-path target before reading it: no component of the
+ * path may be a link, and the resolved path must stay inside the resolved
+ * project root. Returns the observation state to report, or null when the read
+ * may go ahead. `full_access` widens which names are readable, never where a
+ * path may point.
  */
 async function resolveProtectedTarget(
   projectRoot: string,
   candidate: string,
+  components: readonly string[],
 ): Promise<WriteTargetState | null> {
   let stats;
   try {
@@ -75,14 +78,19 @@ async function resolveProtectedTarget(
   if (stats.isSymbolicLink()) return 'link_not_allowed';
   if (!stats.isFile()) return 'not_regular_file';
   try {
+    // Reject a link or junction at any intermediate component, the same rule
+    // the read-only policy applies; resolving the leaf alone would follow it.
+    let current = projectRoot;
+    for (const component of components.slice(0, -1)) {
+      current = join(current, component);
+      const entry = await lstat(current);
+      if (entry.isSymbolicLink()) return 'link_not_allowed';
+    }
     const [resolvedRoot, resolved] = await Promise.all([
       realpath(projectRoot),
       realpath(candidate),
     ]);
-    const prefix = resolvedRoot.endsWith(sep)
-      ? resolvedRoot
-      : `${resolvedRoot}${sep}`;
-    if (!resolved.startsWith(prefix)) return 'link_not_allowed';
+    if (!isPathInsideRoot(resolvedRoot, resolved)) return 'link_not_allowed';
   } catch {
     return 'unreadable';
   }
@@ -155,7 +163,11 @@ export async function observeWriteTarget(
     // is re-checked here: no link at the literal path, and the resolved path
     // must stay inside the resolved project root.
     const candidate = join(projectRoot, ...target.path.split('/'));
-    const escape = await resolveProtectedTarget(projectRoot, candidate);
+    const escape = await resolveProtectedTarget(
+      projectRoot,
+      candidate,
+      target.path.split('/'),
+    );
     if (escape !== null) {
       return {
         path: target.path,
@@ -228,7 +240,7 @@ export async function observeWriteTarget(
 
 /**
  * Protected paths observation may read through the sensitive-name filter.
- * Only ull_access opens them: the other modes must see .git as
+ * Only `full_access` opens them: the other modes must see `.git` as
  * unreadable, which is what makes their refusal honest instead of a
  * permission check against a target nobody was allowed to inspect.
  */
@@ -241,7 +253,7 @@ export function observationAllowance(
 
 /**
  * Observes a batch under a granted permission. Callers use this instead of
- * passing llowProtectedPaths by hand, so the workspace modes cannot
+ * passing `allowProtectedPaths` by hand, so the workspace modes cannot
  * accidentally observe a protected path.
  */
 export function observeTargetsForPermission(

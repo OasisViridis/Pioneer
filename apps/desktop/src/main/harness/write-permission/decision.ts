@@ -22,14 +22,14 @@ import type { TargetObservation } from './observe-targets';
  * write, delete, rename or restore a file.
  */
 
-export interface WritePermissionDecision {
-  ok: boolean;
-  code: WritePermissionDenialCode | null;
-  /** Whether the UI must confirm each apply; `auto_review` is the only `none`. */
-  confirmation: 'per_apply' | 'none';
-  /** First target that triggered a denial; null when the batch is allowed. */
-  path: string | null;
-}
+export type WritePermissionDecision =
+  | { ok: true; confirmation: 'per_apply' | 'none' }
+  | {
+      ok: false;
+      code: WritePermissionDenialCode;
+      /** First target that triggered the denial, for diagnostics. */
+      path: string | null;
+    };
 
 /**
  * Protected paths match by whole path segment, at any depth and in any case:
@@ -65,7 +65,6 @@ export function checkWritePermission(
     return {
       ok: false,
       code: 'PERMISSION_READ_ONLY',
-      confirmation: 'per_apply',
       path: targets[0]?.path ?? null,
     };
   }
@@ -78,7 +77,6 @@ export function checkWritePermission(
       return {
         ok: false,
         code: 'PERMISSION_OUT_OF_SCOPE',
-        confirmation: 'per_apply',
         path: outside.path,
       };
     }
@@ -97,16 +95,13 @@ export function checkWritePermission(
       return {
         ok: false,
         code: 'PERMISSION_PROTECTED_PATH',
-        confirmation: 'per_apply',
         path: guarded.path,
       };
     }
   }
   return {
     ok: true,
-    code: null,
     confirmation: permission.mode === 'auto_review' ? 'none' : 'per_apply',
-    path: null,
   };
 }
 
@@ -129,6 +124,7 @@ export type WriteAuthorization =
       code: WritePermissionDenialCode;
       path: string | null;
       targets: readonly WriteStaleTarget[];
+      outcomes: readonly WriteTargetOutcome[];
     }
   | {
       ok: false;
@@ -149,15 +145,13 @@ export function authorizeWrite(
 ): WriteAuthorization {
   const gate = checkWritePermission(targets, permission);
   if (!gate.ok) {
-    if (gate.code === null) {
-      throw new Error('internal: permission refusal without a code');
-    }
     return {
       ok: false,
       stage: 'permission',
       code: gate.code,
       path: gate.path,
       targets: [],
+      outcomes: permissionDeniedOutcomes(targets),
     };
   }
   const verdict = evaluateWriteTargets(targets, observations);
@@ -295,9 +289,10 @@ export function rejectedOutcomes(
   targets: readonly WriteTarget[],
   verdict: WriteVerdict,
 ): WriteTargetOutcome[] {
-  const code: WriteRejectionCode = verdict.ok
-    ? 'TARGET_CHANGED'
-    : verdict.error.code;
+  if (verdict.ok) {
+    throw new Error('internal: rejectedOutcomes needs a refused verdict');
+  }
+  const code: WriteRejectionCode = verdict.error.code;
   return targets.map((target) => ({
     path: target.path,
     status: 'rejected' as const,
@@ -402,7 +397,7 @@ export function summarizeWriteOutcomes(
     }
     switch (record.kind) {
       case 'applied': {
-        const verified = isProvenApplied(record, target, records, runId);
+        const verified = isProvenApplied(record, target, current, runId);
         return {
           path: target.path,
           status: verified
@@ -424,12 +419,12 @@ export function summarizeWriteOutcomes(
           code: 'UNKNOWN' as const,
         };
       case 'recovery': {
-        const applied = lastRecordFor(records, runId, target.path, 'applied');
+        const applied = lastRecordFor(current, runId, target.path, 'applied');
         const restored = isProvenRecovery(
           record,
           target,
           applied,
-          records,
+          current,
           runId,
         );
         return restored
@@ -480,13 +475,13 @@ export function planRecovery(input: {
   records: readonly WriteChangeJournalRecord[];
   observations: readonly TargetObservation[];
 }): RecoveryPlan {
-  const permission = checkWritePermission(input.targets, input.permission);
-  if (!permission.ok) {
+  const gate = checkWritePermission(input.targets, input.permission);
+  if (!gate.ok) {
     return {
       actions: [],
       conflicts: [],
-      outOfScope: input.targets.map((target) => target.path),
-      denied: permission.code,
+      outOfScope: [],
+      denied: gate.code,
     };
   }
   const byPath = new Map(
