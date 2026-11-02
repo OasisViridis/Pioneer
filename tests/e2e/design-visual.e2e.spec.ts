@@ -36,12 +36,16 @@ test('reviewed Windows application pixels: normal, narrow, long text, focus and 
       motion: 'reduce',
       colorScheme: 'light',
     };
+    const { image, ...renderEnvironment } = environment;
     await info.attach('environment', {
       body: JSON.stringify(environment, null, 2),
       contentType: 'application/json',
     });
-    // A runner/font/Electron change must be reviewed separately, before pixels.
-    expect(JSON.stringify(environment, null, 2)).toMatchSnapshot(
+    // GitHub's windows-latest pool mixes runner image versions, so the image
+    // name is provenance, not a rendering input. Keep the render-relevant
+    // environment under the snapshot gate and attach the image with the rest.
+    expect(image).toBeTruthy();
+    expect(JSON.stringify(renderEnvironment, null, 2)).toMatchSnapshot(
       'environment.txt',
     );
     for (const width of [1440, 900, 640]) {
