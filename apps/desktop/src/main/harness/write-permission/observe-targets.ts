@@ -1,9 +1,12 @@
-import { join } from 'node:path';
+import { lstat, realpath } from 'node:fs/promises';
+import { join, sep } from 'node:path';
 
 import {
   WRITE_LIMITS,
+  WRITE_PROTECTED_PATHS,
   type WriteFileIdentity,
   type WriteFileState,
+  type WritePermission,
   type WriteTarget,
   type WriteTargetState,
 } from '../../../shared/contracts/write-permission';
@@ -50,6 +53,40 @@ function isAllowedProtectedPath(
   return allowProtectedPaths.some((protectedPath) =>
     wrapped.includes(`/${protectedPath.toLowerCase()}/`),
   );
+}
+
+/**
+ * Re-checks a protected-path target before reading it: a link at the literal
+ * path is refused, and the resolved path must stay inside the resolved project
+ * root. Returns the observation state to report, or null when the read may go
+ * ahead. `full_access` widens which names are readable, never where a path may
+ * point.
+ */
+async function resolveProtectedTarget(
+  projectRoot: string,
+  candidate: string,
+): Promise<WriteTargetState | null> {
+  let stats;
+  try {
+    stats = await lstat(candidate);
+  } catch {
+    return 'missing';
+  }
+  if (stats.isSymbolicLink()) return 'link_not_allowed';
+  if (!stats.isFile()) return 'not_regular_file';
+  try {
+    const [resolvedRoot, resolved] = await Promise.all([
+      realpath(projectRoot),
+      realpath(candidate),
+    ]);
+    const prefix = resolvedRoot.endsWith(sep)
+      ? resolvedRoot
+      : `${resolvedRoot}${sep}`;
+    if (!resolved.startsWith(prefix)) return 'link_not_allowed';
+  } catch {
+    return 'unreadable';
+  }
+  return null;
 }
 
 function stateForRejection(
@@ -113,10 +150,21 @@ export async function observeWriteTarget(
     preflight.error.code === 'SENSITIVE_PATH' &&
     isAllowedProtectedPath(target.path, allowProtectedPaths)
   ) {
-    // `full_access` may write protected paths, so observation has to be able to
-    // read them too; the path schema already forbids `..`, absolute paths and
-    // backslashes, so joining keeps the read inside the project root.
-    absolutePath = join(projectRoot, ...target.path.split('/'));
+    // `full_access` may write protected paths, so observation has to read them
+    // too. The bypass is limited to the caller's protected list, and the target
+    // is re-checked here: no link at the literal path, and the resolved path
+    // must stay inside the resolved project root.
+    const candidate = join(projectRoot, ...target.path.split('/'));
+    const escape = await resolveProtectedTarget(projectRoot, candidate);
+    if (escape !== null) {
+      return {
+        path: target.path,
+        state: escape,
+        observed: null,
+        identity: null,
+      };
+    }
+    absolutePath = candidate;
   } else {
     return {
       path: target.path,
@@ -176,6 +224,36 @@ export async function observeWriteTarget(
     }
   }
   return { path: target.path, state: 'unchanged', observed, identity };
+}
+
+/**
+ * Protected paths observation may read through the sensitive-name filter.
+ * Only ull_access opens them: the other modes must see .git as
+ * unreadable, which is what makes their refusal honest instead of a
+ * permission check against a target nobody was allowed to inspect.
+ */
+export function observationAllowance(
+  permission: WritePermission,
+): readonly string[] {
+  if (permission.mode !== 'full_access') return [];
+  return [...WRITE_PROTECTED_PATHS, ...permission.protectedPaths];
+}
+
+/**
+ * Observes a batch under a granted permission. Callers use this instead of
+ * passing llowProtectedPaths by hand, so the workspace modes cannot
+ * accidentally observe a protected path.
+ */
+export function observeTargetsForPermission(
+  projectRoot: string,
+  targets: readonly WriteTarget[],
+  permission: WritePermission,
+  options: Omit<ObserveTargetOptions, 'allowProtectedPaths'> = {},
+): Promise<TargetObservation[]> {
+  return observeWriteTargets(projectRoot, targets, {
+    ...options,
+    allowProtectedPaths: observationAllowance(permission),
+  });
 }
 
 /** Observes the whole target batch in batch order. */

@@ -30,9 +30,10 @@ import {
   type WriteTarget,
 } from '../../apps/desktop/src/shared/contracts/write-permission';
 import {
+  authorizeWrite,
+  checkPermissionBinding,
   checkWritePermission,
   evaluateWriteTargets,
-  observationAllowance,
   permissionDeniedOutcomes,
   planRecovery,
   rejectedOutcomes,
@@ -40,6 +41,8 @@ import {
   summarizeWriteOutcomes,
 } from '../../apps/desktop/src/main/harness/write-permission/decision';
 import {
+  observationAllowance,
+  observeTargetsForPermission,
   observeWriteTarget,
   observeWriteTargets,
 } from '../../apps/desktop/src/main/harness/write-permission/observe-targets';
@@ -313,7 +316,7 @@ describe('write permission scope', () => {
     const targets = [targetOf('src/a.ts', 'a', 'b')];
     expect(checkWritePermission(targets, permissionOf())).toMatchObject({
       ok: true,
-      autoReview: false,
+      confirmation: 'per_apply',
     });
   });
 
@@ -396,7 +399,81 @@ describe('write permission scope', () => {
       [targetOf('src/a.ts', 'a', 'b')],
       permissionOf({ mode: 'auto_review', riskAcknowledged: true }),
     );
-    expect(decision).toMatchObject({ ok: true, autoReview: true });
+    expect(decision).toMatchObject({ ok: true, confirmation: 'none' });
+  });
+
+  it('marks auto review as the only mode without a per-apply confirmation', () => {
+    const targets = [targetOf('src/a.ts', 'a', 'b')];
+    expect(
+      checkWritePermission(
+        targets,
+        permissionOf({ mode: 'auto_review', riskAcknowledged: true }),
+      ),
+    ).toMatchObject({ ok: true, confirmation: 'none' });
+    expect(checkWritePermission(targets, permissionOf())).toMatchObject({
+      ok: true,
+      confirmation: 'per_apply',
+    });
+    expect(
+      checkWritePermission(
+        targets,
+        permissionOf({ mode: 'full_access', riskAcknowledged: true }),
+      ),
+    ).toMatchObject({ ok: true, confirmation: 'per_apply' });
+  });
+
+  it('binds a grant to the window and project that issued it', () => {
+    const permission = permissionOf();
+    expect(
+      checkPermissionBinding(permission, {
+        sessionId: permission.sessionId,
+        projectId: permission.projectId,
+        webContentsId: permission.webContentsId,
+        windowEpoch: permission.windowEpoch,
+      }),
+    ).toBe(true);
+    for (const expected of [
+      { ...permission, webContentsId: 99 },
+      { ...permission, windowEpoch: 99 },
+      { ...permission, sessionId: 'session-other' },
+      { ...permission, projectId: 'project-other' },
+    ]) {
+      expect(
+        checkPermissionBinding(permission, {
+          sessionId: expected.sessionId,
+          projectId: expected.projectId,
+          webContentsId: expected.webContentsId,
+          windowEpoch: expected.windowEpoch,
+        }),
+      ).toBe(false);
+    }
+  });
+
+  it('composes permission and target checks into one decision', async () => {
+    const target = await seed(projectRoot, 'src/a.ts', 'a');
+    const observations = await observeWriteTargets(projectRoot, [target]);
+    expect(authorizeWrite([target], permissionOf(), observations)).toEqual({
+      ok: true,
+      confirmation: 'per_apply',
+    });
+    expect(
+      authorizeWrite(
+        [target],
+        permissionOf({ mode: 'read_only' }),
+        observations,
+      ),
+    ).toMatchObject({
+      ok: false,
+      stage: 'permission',
+      code: 'PERMISSION_READ_ONLY',
+    });
+    await write(projectRoot, 'src/a.ts', 'user edit');
+    const stale = await observeWriteTargets(projectRoot, [target]);
+    expect(authorizeWrite([target], permissionOf(), stale)).toMatchObject({
+      ok: false,
+      stage: 'targets',
+      code: 'TARGET_CHANGED',
+    });
   });
 
   it('maps a permission denial to untouched targets', () => {
@@ -439,6 +516,75 @@ describe('full access and protected paths', () => {
     if (verdict.ok) return;
     expect(verdict.error.code).toBe('TARGET_UNREADABLE');
   });
+
+  it('reports a missing protected file as missing, not unreadable', async () => {
+    const permission = permissionOf({
+      mode: 'full_access',
+      riskAcknowledged: true,
+    });
+    const target = targetOf('.git/config', 'core', 'core\nedited');
+    const observations = await observeTargetsForPermission(
+      projectRoot,
+      [target],
+      permission,
+    );
+    expect(observations[0]).toMatchObject({ state: 'missing' });
+  });
+
+  it('refuses a linked protected path instead of following it', async (context) => {
+    const permission = permissionOf({
+      mode: 'full_access',
+      riskAcknowledged: true,
+    });
+    const outside = await makeProject();
+    await write(outside, 'config', 'outside');
+    const { symlink } = await import('node:fs/promises');
+    try {
+      await symlink(outside, join(projectRoot, '.git'), 'junction');
+    } catch {
+      context.skip();
+      return;
+    }
+    const target = targetOf('.git/config', 'outside', 'outside\nedited');
+    const [observation] = await observeTargetsForPermission(
+      projectRoot,
+      [target],
+      permission,
+    );
+    expect(observation).toBeDefined();
+    expect(observation?.state).not.toBe('unchanged');
+    expect(['link_not_allowed', 'unreadable']).toContain(observation?.state);
+  });
+
+  it('refuses recovery under the view-only mode', async () => {
+    const target = await seed(projectRoot, 'src/index.ts', 'before\n');
+    const observations = await observeWriteTargets(projectRoot, [target]);
+    const plan = planRecovery({
+      runId: RUN_ID,
+      permission: permissionOf({ mode: 'read_only' }),
+      targets: [target],
+      records: provenWrite(target),
+      observations,
+    });
+    expect(plan.denied).toBe('PERMISSION_READ_ONLY');
+    expect(plan.actions).toEqual([]);
+    expect(plan.outOfScope).toEqual(['src/index.ts']);
+  });
+
+  it('keeps protected paths out of recovery in the workspace modes', async () => {
+    await write(projectRoot, '.git/config', 'core');
+    const target = targetOf('.git/config', 'core', 'core\nedited');
+    const observations = await observeWriteTargets(projectRoot, [target]);
+    const plan = planRecovery({
+      runId: RUN_ID,
+      permission: permissionOf(),
+      targets: [target],
+      records: provenWrite(target),
+      observations,
+    });
+    expect(plan.denied).toBe('PERMISSION_PROTECTED_PATH');
+    expect(plan.actions).toEqual([]);
+  });
 });
 
 describe('write-time target check', () => {
@@ -475,7 +621,7 @@ describe('write-time target check', () => {
     expect(verdict.error.code).toBe('TARGET_MISSING');
   });
 
-  it('refuses a target whose file object was replaced', async () => {
+  it('refuses a target whose recorded identity differs', async () => {
     const projectRoot = await makeProject();
     const target = await seed(projectRoot, 'src/a.ts', 'a');
     const observations = await observeWriteTargets(projectRoot, [target]);
@@ -506,12 +652,15 @@ describe('write-time target check', () => {
     expect(verdict.error.code).toBe('TARGET_IDENTITY_UNAVAILABLE');
   });
 
-  it('compares the whole identity, not just the file index', async () => {
+  it('compares the whole identity, not just the file index', async (context) => {
     const projectRoot = await makeProject();
     const target = await seed(projectRoot, 'src/a.ts', 'a');
     const observations = await observeWriteTargets(projectRoot, [target]);
     const current = observations[0]?.identity;
-    if (current === null || current === undefined) return;
+    if (current === null || current === undefined) {
+      context.skip();
+      return;
+    }
     const sameIdOtherBirth: WriteTarget = {
       ...target,
       identity: {
@@ -757,7 +906,7 @@ describe('write outcomes', () => {
   ];
 
   it('reports targets without records as unchanged', () => {
-    expect(summarizeWriteOutcomes(RUN_ID, targets, [])).toEqual([
+    expect(summarizeWriteOutcomes(RUN_ID, 1, targets, [])).toEqual([
       { path: 'src/a.ts', status: 'unchanged', code: null },
       { path: 'src/b.ts', status: 'unchanged', code: null },
       { path: 'src/c.ts', status: 'unchanged', code: null },
@@ -767,11 +916,25 @@ describe('write outcomes', () => {
 
   it('reports a proven write as applied', () => {
     const records = provenWrite(at(targets, 0));
-    expect(summarizeWriteOutcomes(RUN_ID, targets, records)[0]).toEqual({
+    expect(summarizeWriteOutcomes(RUN_ID, 1, targets, records)[0]).toEqual({
       path: 'src/a.ts',
       status: 'applied',
       code: null,
     });
+  });
+
+  it('ignores records from an older session revision', () => {
+    const target = at(targets, 0);
+    const staleRevision = provenWrite(target).map((record) => ({
+      ...record,
+      revision: 1,
+    }));
+    expect(summarizeWriteOutcomes(RUN_ID, 2, targets, staleRevision)).toEqual([
+      { path: 'src/a.ts', status: 'unchanged', code: null },
+      { path: 'src/b.ts', status: 'unchanged', code: null },
+      { path: 'src/c.ts', status: 'unchanged', code: null },
+      { path: 'src/d.ts', status: 'unchanged', code: null },
+    ]);
   });
 
   it('reports an unverified write as verification failed', () => {
@@ -780,7 +943,7 @@ describe('write outcomes', () => {
       intentRecord(target.path, target.before.sha256),
       appliedRecord(target, { verification: 'unverified' }),
     ];
-    expect(summarizeWriteOutcomes(RUN_ID, targets, records)[0]).toEqual({
+    expect(summarizeWriteOutcomes(RUN_ID, 1, targets, records)[0]).toEqual({
       path: 'src/a.ts',
       status: 'verification_failed',
       code: 'VERIFY_FAILED',
@@ -790,10 +953,10 @@ describe('write outcomes', () => {
   it('refuses an applied record without a matching intent', () => {
     const target = at(targets, 0);
     expect(
-      summarizeWriteOutcomes(RUN_ID, targets, [appliedRecord(target)])[0],
+      summarizeWriteOutcomes(RUN_ID, 1, targets, [appliedRecord(target)])[0],
     ).toMatchObject({ status: 'verification_failed' });
     expect(
-      summarizeWriteOutcomes(RUN_ID, targets, [
+      summarizeWriteOutcomes(RUN_ID, 1, targets, [
         intentRecord(target.path, sha256Of('stale')),
         appliedRecord(target),
       ])[0],
@@ -809,7 +972,9 @@ describe('write outcomes', () => {
         observedSha256: sha256Of('other'),
       }),
     ];
-    expect(summarizeWriteOutcomes(RUN_ID, targets, records)[0]).toMatchObject({
+    expect(
+      summarizeWriteOutcomes(RUN_ID, 1, targets, records)[0],
+    ).toMatchObject({
       status: 'verification_failed',
     });
   });
@@ -829,7 +994,7 @@ describe('write outcomes', () => {
       intentRecord('src/c.ts', at(targets, 2).before.sha256),
     ];
     expect(
-      summarizeWriteOutcomes(RUN_ID, targets, records).slice(1, 3),
+      summarizeWriteOutcomes(RUN_ID, 1, targets, records).slice(1, 3),
     ).toEqual([
       { path: 'src/b.ts', status: 'failed', code: 'CANCELLED' },
       { path: 'src/c.ts', status: 'unknown', code: 'UNKNOWN' },
@@ -849,7 +1014,9 @@ describe('write outcomes', () => {
       }),
       appliedRecord(target),
     ];
-    expect(summarizeWriteOutcomes(RUN_ID, [target], records)[0]).toMatchObject({
+    expect(
+      summarizeWriteOutcomes(RUN_ID, 1, [target], records)[0],
+    ).toMatchObject({
       status: 'verification_failed',
     });
   });
@@ -860,13 +1027,13 @@ describe('write outcomes', () => {
       ...provenWrite(target),
       recoveryRecord(target.path, target.before.sha256),
     ];
-    expect(summarizeWriteOutcomes(RUN_ID, targets, proven)[0]).toEqual({
+    expect(summarizeWriteOutcomes(RUN_ID, 1, targets, proven)[0]).toEqual({
       path: 'src/a.ts',
       status: 'restored',
       code: null,
     });
     expect(
-      summarizeWriteOutcomes(RUN_ID, targets, [
+      summarizeWriteOutcomes(RUN_ID, 1, targets, [
         recoveryRecord(target.path, target.before.sha256),
       ])[0],
     ).toEqual({
@@ -884,6 +1051,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: provenWrite(target),
       observations,
@@ -900,6 +1068,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: provenWrite(target),
       observations,
@@ -917,6 +1086,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: provenWrite(target),
       observations,
@@ -931,6 +1101,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: [],
       observations,
@@ -952,6 +1123,7 @@ describe('recovery planning', () => {
     });
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: [failed],
       observations,
@@ -965,6 +1137,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: [recoveryRecord(target.path, target.before.sha256)],
       observations,
@@ -985,6 +1158,7 @@ describe('recovery planning', () => {
     });
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: [...provenWrite(target), failed],
       observations,
@@ -998,6 +1172,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: [intentRecord(target.path, target.before.sha256)],
       observations,
@@ -1010,6 +1185,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: [
         intentRecord(target.path, target.before.sha256),
@@ -1025,6 +1201,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: [
         ...provenWrite(target),
@@ -1044,6 +1221,7 @@ describe('recovery planning', () => {
     const observations = await observeWriteTargets(projectRoot, [target]);
     const plan = planRecovery({
       runId: RUN_ID,
+      permission: permissionOf(),
       targets: [target],
       records: [
         ...provenWrite(target),

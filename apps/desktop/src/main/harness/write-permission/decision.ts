@@ -25,8 +25,8 @@ import type { TargetObservation } from './observe-targets';
 export interface WritePermissionDecision {
   ok: boolean;
   code: WritePermissionDenialCode | null;
-  /** True for `auto_review`: main may write without a per-change confirmation. */
-  autoReview: boolean;
+  /** Whether the UI must confirm each apply; `auto_review` is the only `none`. */
+  confirmation: 'per_apply' | 'none';
   /** First target that triggered a denial; null when the batch is allowed. */
   path: string | null;
 }
@@ -51,6 +51,11 @@ function isProtectedPath(
  * `workspace_write` and `auto_review` keep protected paths read-only;
  * `full_access` is the explicit opt-out. A narrowed scope must cover every
  * target, because the batch is applied all-or-nothing.
+ *
+ * `auto_review` differs from `workspace_write` in exactly one place: the
+ * returned `confirmation` is `none`, so a caller that does ask the user before
+ * each apply (workspace modes) must skip that prompt. The write-time checks are
+ * identical; the mode never weakens them.
  */
 export function checkWritePermission(
   targets: readonly WriteTarget[],
@@ -60,7 +65,7 @@ export function checkWritePermission(
     return {
       ok: false,
       code: 'PERMISSION_READ_ONLY',
-      autoReview: false,
+      confirmation: 'per_apply',
       path: targets[0]?.path ?? null,
     };
   }
@@ -73,7 +78,7 @@ export function checkWritePermission(
       return {
         ok: false,
         code: 'PERMISSION_OUT_OF_SCOPE',
-        autoReview: false,
+        confirmation: 'per_apply',
         path: outside.path,
       };
     }
@@ -92,7 +97,7 @@ export function checkWritePermission(
       return {
         ok: false,
         code: 'PERMISSION_PROTECTED_PATH',
-        autoReview: false,
+        confirmation: 'per_apply',
         path: guarded.path,
       };
     }
@@ -100,7 +105,7 @@ export function checkWritePermission(
   return {
     ok: true,
     code: null,
-    autoReview: permission.mode === 'auto_review',
+    confirmation: permission.mode === 'auto_review' ? 'none' : 'per_apply',
     path: null,
   };
 }
@@ -116,17 +121,77 @@ export function permissionDeniedOutcomes(
   }));
 }
 
+export type WriteAuthorization =
+  | { ok: true; confirmation: 'per_apply' | 'none' }
+  | {
+      ok: false;
+      stage: 'permission';
+      code: WritePermissionDenialCode;
+      path: string | null;
+      targets: readonly WriteStaleTarget[];
+    }
+  | {
+      ok: false;
+      stage: 'targets';
+      code: WriteRejectionCode;
+      targets: readonly WriteStaleTarget[];
+    };
+
 /**
- * Protected paths observation may read through the sensitive-name filter.
- * Only `full_access` opens them: the other modes must see `.git` as
- * `unreadable`, which is what makes their refusal honest instead of a
- * permission check against a target nobody was allowed to inspect.
+ * The composed entry point every executor should call: permission first,
+ * write-time target check second. `#19` gets one decision instead of being
+ * trusted to run both checks in the right order.
  */
-export function observationAllowance(
+export function authorizeWrite(
+  targets: readonly WriteTarget[],
   permission: WritePermission,
-): readonly string[] {
-  if (permission.mode !== 'full_access') return [];
-  return [...WRITE_PROTECTED_PATHS, ...permission.protectedPaths];
+  observations: readonly TargetObservation[],
+): WriteAuthorization {
+  const gate = checkWritePermission(targets, permission);
+  if (!gate.ok) {
+    if (gate.code === null) {
+      throw new Error('internal: permission refusal without a code');
+    }
+    return {
+      ok: false,
+      stage: 'permission',
+      code: gate.code,
+      path: gate.path,
+      targets: [],
+    };
+  }
+  const verdict = evaluateWriteTargets(targets, observations);
+  if (!verdict.ok) {
+    return {
+      ok: false,
+      stage: 'targets',
+      code: verdict.error.code,
+      targets: verdict.error.targets,
+    };
+  }
+  return { ok: true, confirmation: gate.confirmation };
+}
+
+/**
+ * Whether a grant still belongs to the window and project that issued it.
+ * `#19` calls this before trusting a stored permission; the decision layer
+ * itself only sees the grant, so the expected binding is passed in.
+ */
+export function checkPermissionBinding(
+  permission: WritePermission,
+  expected: {
+    sessionId: string;
+    projectId: string;
+    webContentsId: number;
+    windowEpoch: number;
+  },
+): boolean {
+  return (
+    permission.sessionId === expected.sessionId &&
+    permission.projectId === expected.projectId &&
+    permission.webContentsId === expected.webContentsId &&
+    permission.windowEpoch === expected.windowEpoch
+  );
 }
 
 /** Map an observed target state to the rejection code it produces. */
@@ -156,7 +221,7 @@ export function rejectionCodeFor(state: WriteTargetState): WriteRejectionCode {
   }
 }
 
-const messages2 = {
+const rejectionMessages = {
   TARGET_CHANGED: 'The file changed since this run read it.',
   TARGET_MISSING: 'The file no longer exists.',
   TARGET_REPLACED: 'The file was deleted and re-created.',
@@ -216,7 +281,7 @@ export function evaluateWriteTargets(
       ok: false,
       error: {
         code,
-        message: messages2[code],
+        message: rejectionMessages[code],
         retryable: false,
         targets: stale,
       },
@@ -323,11 +388,15 @@ function isProvenRecovery(
  */
 export function summarizeWriteOutcomes(
   runId: string,
+  revision: number,
   targets: readonly WriteTarget[],
   records: readonly WriteChangeJournalRecord[],
 ): WriteTargetOutcome[] {
+  // Only records of this exact revision describe the current outcome: a bump
+  // means the session moved on, and an older record would prove a stale write.
+  const current = records.filter((record) => record.revision === revision);
   return targets.map((target) => {
-    const record = lastRecordFor(records, runId, target.path);
+    const record = lastRecordFor(current, runId, target.path);
     if (record === null) {
       return { path: target.path, status: 'unchanged' as const, code: null };
     }
@@ -387,22 +456,39 @@ export interface RecoveryPlan {
   conflicts: RecoveryAction[];
   /** Targets this run never applied; recovery must not touch them. */
   outOfScope: string[];
+  /** Set when the permission refuses recovery for the whole batch. */
+  denied: WritePermissionDenialCode | null;
 }
 
 /**
- * Plans a recovery that only touches what this run applied. `restore` requires
- * the current bytes to still equal the post-image this run wrote and, when both
- * sides recorded a file identity, the same file object; anything else (a user
- * edit, a deletion, a re-created file, a different type) is preserved as a
- * conflict. Repeating the plan after a successful restore reports
- * `already_restored`, so recovery never re-applies or re-undoes anything.
+ * Plans a recovery under the granted permission. Recovery writes too, so the
+ * permission check runs first and a refusal ends the plan: `read_only` denies
+ * everything, the workspace modes deny protected paths, and `full_access`
+ * allows what the write path allows.
+ *
+ * When the permission allows it, `restore` requires the current bytes to still
+ * equal the post-image this run wrote and, when both sides recorded a file
+ * identity, the same file object; anything else (a user edit, a deletion, a
+ * re-created file, a different type) is preserved as a conflict. Repeating the
+ * plan after a successful restore reports `already_restored`, so recovery never
+ * re-applies or re-undoes anything.
  */
 export function planRecovery(input: {
   runId: string;
+  permission: WritePermission;
   targets: readonly WriteTarget[];
   records: readonly WriteChangeJournalRecord[];
   observations: readonly TargetObservation[];
 }): RecoveryPlan {
+  const permission = checkWritePermission(input.targets, input.permission);
+  if (!permission.ok) {
+    return {
+      actions: [],
+      conflicts: [],
+      outOfScope: input.targets.map((target) => target.path),
+      denied: permission.code,
+    };
+  }
   const byPath = new Map(
     input.observations.map((observation) => [observation.path, observation]),
   );
@@ -528,5 +614,6 @@ export function planRecovery(input: {
     actions,
     conflicts: actions.filter((action) => action.action === 'conflict'),
     outOfScope,
+    denied: null,
   };
 }

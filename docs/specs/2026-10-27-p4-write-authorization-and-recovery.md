@@ -58,6 +58,8 @@
 | `grantedAt`                     | main                           | 授予时间                                                                           |
 | `riskAcknowledged`              | 用户                           | `full_access` 与 `auto_review` 必须为真，否则记录不合法                            |
 
+窗口与项目归属由 `checkPermissionBinding(permission, expected)` 判定：`sessionId`、`projectId`、`webContentsId`、`windowEpoch` 四项必须与当前窗口一致；`#19` 在信任任何已存权限前先调用它，不一致就当作没有权限。
+
 上限（`WRITE_LIMITS`）：单批 16 个目标、单文件前后各 1 MiB、整批写入侧合计 4 MiB、路径 1,024 字符与 32 个组件。超限直接拒绝，不做静默截断。
 
 ### 2.2 生命周期：会话级、显式降级
@@ -79,9 +81,9 @@
 
 ### 2.5 自动审查（EXP）的不变量
 
-一次写入必须同时满足才允许落盘：权限有效、目标在 `scope` 内、不在保护路径、目标内容仍等于 `before`、文件身份可确认（记录过就必须一致）。
+一次写入必须同时满足才允许落盘：权限有效、目标在 `scope` 内、不在保护路径、目标内容仍等于 `before`、文件身份可确认（记录过就必须一致）。`auto_review` 与 `workspace_write` 的写前检查完全相同，唯一差别是 `checkWritePermission` 返回 `confirmation: 'none'`，调用方因此不再逐次询问；它不减弱任何检查，也不是"先写后审"。
 
-写后必须回读并核对 `after` 的哈希；不一致记 `verification_failed`，停止后续写入，保留现场，不自动覆盖或回滚。首版只支持普通文本的创建与修改，不开放删除、改名与命令执行。
+写后必须回读并核对 `after` 的哈希；不一致记 `verification_failed`，停止后续写入，保留现场，不自动覆盖或回滚。首版只支持替换已有普通文件的文本内容，不开放创建、删除、改名与命令执行。
 
 ## 3. 落盘前目标核验（陈旧目标拦截）
 
@@ -103,7 +105,8 @@
 1. **权限**：`checkWritePermission` 先看档位、作用域与保护路径。`read_only` 拒绝整批（`PERMISSION_READ_ONLY`）；目标不在 `scope` 内拒绝（`PERMISSION_OUT_OF_SCOPE`）；工作区两档下命中保护路径拒绝（`PERMISSION_PROTECTED_PATH`）。被拒绝时所有目标记 `rejected` + `PERMISSION_DENIED`，一个目标都不碰。
 2. **观察（只读，无副作用）**：main 以自己在目录册里的项目根为起点，对每个目标执行只读路径策略（拒绝绝对路径、`..`、隐藏与凭证类名称、链接、项目外解析、非普通文件与多链接），再用共享的有界稳定读取（上限 `targetBytes`）读取一次，读取前后核对 `size`/`mtimeMs`/`ino` 一致，不一致记 `unstable`；随后按 §3.1 得出每个目标的状态、内容哈希与文件身份。
 3. **写前校验**：`evaluateWriteTargets` 要求每个目标仍是 `unchanged`、内容等于 `before`、记录过身份时必须同一文件对象。任何一条不满足，整批拒绝，`targets` 只列出真正异常的目标。
-4. **写入与回读**：全部通过才允许写入；每个目标写后回读核对 `after` 哈希，结果记进变更日志（§4）。
+4. **组合入口**：`authorizeWrite` 把上面三步合成一个决定，返回 `stage: 'permission'` 或 `stage: 'targets'` 加对应码，成功时给出 `confirmation`；`#19` 只需处理一个结果，不必自己记住调用顺序。`planRecovery` 同样先跑 `checkWritePermission`，被拒时 `denied` 非空、`actions` 为空。
+5. **写入与回读**：全部通过才允许写入；每个目标写后回读核对 `after` 哈希，结果记进变更日志（§4）。
 
 观察必须发生在校验之前，因为校验需要观察结果；观察本身不改任何东西，所以先观察不构成授权。两段之间没有"检查过就不用再查"的缓存：每次写入都必须重新观察。
 
@@ -144,7 +147,7 @@
 - `full_access`：项目内普通文件，含保护路径。仍不越过项目根，也不等于命令执行；开启需要风险确认。
 - `auto_review`：在 `workspace_write` 的边界内免去逐次确认，前提是写前校验与写后回读都通过；它不增强任何能力。
 
-读取策略与写入档位的关系：观察阶段默认沿用只读策略，隐藏文件与凭证类名称被拒绝。`full_access` 下只有**保护路径**（`WRITE_PROTECTED_PATHS` 加授权里自带的 `protectedPaths`）通过允许清单进入观察，其余隐藏名称照样拒绝；`workspace_write` 与 `auto_review` 连保护路径都不进入观察，因此 `.git` 在这两档下观察结果就是 `unreadable`。允许清单由 `observationAllowance(permission)` 给出，只有 `full_access` 返回非空。
+读取策略与写入档位的关系：观察阶段默认沿用只读策略，隐藏文件与凭证类名称被拒绝。`full_access` 下只有**保护路径**（`WRITE_PROTECTED_PATHS` 加授权里自带的 `protectedPaths`）通过允许清单进入观察，其余隐藏名称照样拒绝；进入允许清单的目标在读之前还要复检一次：字面路径是链接就拒绝，解析后的路径必须仍在解析后的项目根内，所以"把 `.git` 做成指向项目外的链接"不会被跟随；`workspace_write` 与 `auto_review` 连保护路径都不进入观察，因此 `.git` 在这两档下观察结果就是 `unreadable`。允许清单由 `observationAllowance(permission)` 给出，只有 `full_access` 返回非空。
 
 真正的内核级隔离（Windows 受限 Token + job object、低权限账户或 MXC）属于 #19/#20，本票只定义判定。
 
@@ -224,7 +227,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 ### 5.5 恢复的权限
 
-恢复同样受权限模式约束：`read_only` 下不能恢复，`workspace_write` 与 `auto_review` 只能恢复项目内普通文件，保护路径不恢复。恢复不再需要"重新确认"，因为它作用于本 Run 已证明写入的目标，并且要重新观察当前磁盘。
+恢复同样受权限模式约束，而且这条由代码执行：`planRecovery` 先调用 `checkWritePermission`，`read_only` 返回 `denied: PERMISSION_READ_ONLY`，工作区两档命中保护路径返回 `denied: PERMISSION_PROTECTED_PATH`，被拒时 `actions` 为空、全部目标进 `outOfScope`。恢复不需要"重新确认"，因为它作用于本 Run 已证明写入的目标，并且要重新观察当前磁盘。
 
 ## 6. 拒绝码与状态词汇
 
@@ -242,7 +245,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 ## 7. 负向探针矩阵（本票已执行）
 
-[探针测试](../../tests/contract/write-permission.test.ts)共 64 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
+[探针测试](../../tests/contract/write-permission.test.ts)共 72 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
 
 | 组         | 覆盖                                                                                                                          | 期望                                                 | describe                     |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------- |
@@ -312,7 +315,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 
 2026-11-02 在 `docs/issue18-write-authorization`（自 `origin/main` `28e6882` 起）执行：
 
-- 定向探针：`pnpm exec vitest run tests/contract/write-permission.test.ts` → 59/59 通过；其中 1 条在平台复用文件身份时会显式 `skip`，本机未触发。
+- 定向探针：`pnpm exec vitest run tests/contract/write-permission.test.ts` → 72/72 通过；其中 3 条在平台前提不满足时会显式 `skip`（身份复用、符号链接权限），本机未触发。
 - 完整门禁：`pnpm check`，结果与日志见 [`docs/testing/issue18-verification.md`](../testing/issue18-verification.md)。
 
 探针只证明决策函数与目标观察的行为，不证明写入执行器、界面或内核隔离。
