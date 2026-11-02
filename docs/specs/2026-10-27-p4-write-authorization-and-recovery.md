@@ -231,12 +231,15 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 ### 5.2 恢复前提与判定
 
-恢复只处理该 Run 的变更，逐个目标判定：
+恢复只处理该 Run 的变更，逐个目标判定。判定以**该路径的最后一条日志记录**为准，而不是"历史上出现过 applied"：
 
-1. 该目标必须有本批准的 `applied` 记录；没有记录的目标一律进 `outOfScope`，不恢复。
-2. 当前观察结果等于 `before`（`unchanged`）→ `already_restored`，不做任何事。
-3. 当前观察结果等于 `after`（字节与哈希都相同），并且当前文件身份等于 `applied` 记录里的 `observedIdentity` → `restore`，可以写回 `before`。这里比较的是**写入后**的身份，不是批准时的写入前身份：`applied` 记录保存的是这次写入实际落到的文件对象，因此"临时文件 + rename"这种替换对象的写法不会让恢复永远落进冲突。若 `applied` 记录里没有身份（平台不报告），则内容哈希是唯一证据，按内容判定；若 `applied` 记录有身份而本次观察拿不到，视为身份无法证明，落 `conflict`。
-4. 其余情况（内容不同、文件缺失、同名重建、类型改变、链接、无法读取、读取不稳定）→ `conflict`，保留现场并要求人工处理。
+1. 没有记录 → `outOfScope`。最后一条是 `failed` 且此前没有 `applied` → 同样 `outOfScope`（确实没写成，没有可撤销的写入）。
+2. 最后一条是 `applied`：必须是 `verified`、`afterSha256` 等于本批准的 `after`、`observedSha256` 等于 `afterSha256`，否则 `conflict`（写入是否成立无法证明）。
+3. 最后一条是 `recovery`：只有 `observedSha256` 等于 `before`、且此前存在**已证明的** `applied` 时才是 `already_restored`；孤立的恢复记录或哈希不符一律 `conflict`，不重放、不改写。
+4. 最后一条是 `intent`，或 `applied` 之后又出现 `failed`：真实状态未知（可能已写、可能没写），一律 `conflict`，留给人工。
+5. 当前观察结果等于 `before`（`unchanged`）→ `already_restored`，不做任何事。
+6. 当前观察结果等于 `after`（字节与哈希都相同），并且当前文件身份等于 `applied` 记录里的 `observedIdentity` → `restore`，可以写回 `before`。这里比较的是**写入后**的身份，不是批准时的写入前身份：`applied` 记录保存的是这次写入实际落到的文件对象，因此"临时文件 + rename"这种替换对象的写法不会让恢复永远落进冲突。若 `applied` 记录里没有身份（平台不报告），则内容哈希是唯一证据，按内容判定；若 `applied` 记录有身份而本次观察拿不到，视为身份无法证明，落 `conflict`。
+7. 其余情况（内容不同、文件缺失、同名重建、类型改变、链接、无法读取、读取不稳定）→ `conflict`，保留现场并要求人工处理。
 
 判定依赖内容哈希与文件身份而不是时间戳：用户"只是保存、内容没变、文件对象也没变"（例如只更新时间戳）不会造成假冲突；内容变了或文件被同名重建才会。恢复前同样要重新观察目标，不能复用批准时的观察结果。
 
@@ -273,7 +276,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 ## 7. 负向探针矩阵（本票已执行）
 
-[探针测试](../../tests/contract/write-approval.test.ts)共 110 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
+[探针测试](../../tests/contract/write-approval.test.ts)共 113 项，全部在 `pnpm test:contract` 的 Contract 层，临时目录由测试自建并在结束后删除，仓库 committed fixture 未参与、未改变。
 
 | 组 | 输入 | 期望 | 位置 |
 | --- | --- | --- | --- |
@@ -353,7 +356,7 @@ main 为每份写后结果保留追加式变更日志，记录四类：
 
 2026-10-27 在 `docs/issue18-write-authorization`（自 `origin/main` `28e6882`）执行：
 
-- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 103/103 通过；其中 2 条只在平台复用文件身份或无符号链接权限时显式 `skip`，本机未触发。
+- 定向探针：`pnpm exec vitest run tests/contract/write-approval.test.ts` → 113/113 通过；其中 2 条只在平台复用文件身份或无符号链接权限时显式 `skip`，本机未触发。
 - 受影响既有测试：`egress-materials`、`read-only-tools-exec`、`read-only-tool-policy`、`run-manager` 共 123 项通过（共享读取重构未改变行为）。
 - `pnpm typecheck`、`pnpm test:contract:types` 通过；新文件 ESLint 0 问题；Prettier 检查通过。
 - 完整 `pnpm check` 与 `pnpm verify:repository` 记录见[验证记录](../testing/issue18-verification.md)；本文件的证据范围仅到 Contract Tests，不代表写入功能已实现。

@@ -228,29 +228,18 @@ export type WriteScopeDecision =
   { ok: true } | { ok: false; code: WriteScopeDenialCode };
 
 /**
- * Protected paths match by path segment, at any depth and in any case: `.git`,
- * `.git/config`, `vendor/x/.git/config` and `.GIT/config` are all refused,
- * while a lookalike such as `.github/workflows` is not protected.
+ * Protected paths match by whole path segment, at any depth and in any case:
+ * `.git`, `.git/config`, `vendor/x/.git/config` and `.GIT/config` are all
+ * refused, while a lookalike such as `.github/workflows` is not protected.
  */
-function containsSegmentRun(
-  path: readonly string[],
-  protectedSegments: readonly string[],
+function isProtectedPath(
+  path: string,
+  protectedPaths: readonly string[],
 ): boolean {
-  for (
-    let start = 0;
-    start + protectedSegments.length <= path.length;
-    start += 1
-  ) {
-    let matches = true;
-    for (let offset = 0; offset < protectedSegments.length; offset += 1) {
-      if (path[start + offset] !== protectedSegments[offset]) {
-        matches = false;
-        break;
-      }
-    }
-    if (matches) return true;
-  }
-  return false;
+  const wrapped = `/${path.toLowerCase()}/`;
+  return protectedPaths.some((protectedPath) =>
+    wrapped.includes(`/${protectedPath.toLowerCase()}/`),
+  );
 }
 
 /**
@@ -270,15 +259,9 @@ export function checkWriteScope(
     return { ok: false, code: 'SCOPE_READ_ONLY' };
   if (policy.mode === 'full_access') return { ok: true };
   // `.git` is an invariant of workspace-write, not a default a policy may drop.
-  const protectedSegments = [...WRITE_PROTECTED_PATHS, ...policy.protectedPaths]
-    .map((protectedPath) => protectedPath.toLowerCase().split('/'))
-    .filter(
-      (run, index, all) =>
-        all.findIndex((other) => other.join('/') === run.join('/')) === index,
-    );
+  const protectedPaths = [...WRITE_PROTECTED_PATHS, ...policy.protectedPaths];
   for (const target of targets) {
-    const segments = target.path.toLowerCase().split('/');
-    if (protectedSegments.some((run) => containsSegmentRun(segments, run))) {
+    if (isProtectedPath(target.path, protectedPaths)) {
       return { ok: false, code: 'SCOPE_PROTECTED_PATH' };
     }
   }
@@ -352,11 +335,45 @@ function lastRecordFor(
 }
 
 /**
+ * A journal record proves the reviewed write only when it is verified, its
+ * after-image is this approval's after-image and the observation agrees. Both
+ * the outcome summary and the recovery plan use this one predicate.
+ */
+function isProvenApplied(
+  record: Extract<WriteChangeJournalRecord, { kind: 'applied' }>,
+  target: WriteTarget,
+): boolean {
+  return (
+    record.verification === 'verified' &&
+    record.afterSha256 === target.after.sha256 &&
+    record.observedSha256 === record.afterSha256
+  );
+}
+
+/**
+ * A recovery record proves the target is back at its before-image only when
+ * the run's own write was proven first and the recorded observation is that
+ * before-image; anything else needs a human.
+ */
+function isProvenRecovery(
+  record: Extract<WriteChangeJournalRecord, { kind: 'recovery' }>,
+  target: WriteTarget,
+  applied: Extract<WriteChangeJournalRecord, { kind: 'applied' }> | null,
+): boolean {
+  return (
+    record.action !== 'preserve' &&
+    record.observedSha256 === target.before.sha256 &&
+    applied !== null &&
+    isProvenApplied(applied, target)
+  );
+}
+
+/**
  * Per-path actual file state after an attempt. A target with no journal record
  * was never written, so it reports `unchanged`; an `intent` without `applied`
  * or `failed` means the process stopped mid-write, so it reports `unknown`
  * rather than a guess. A recovery record replaces the earlier outcome: a
- * completed restore reports `restored`, a preserved conflict stays `failed`.
+ * proven restore reports `restored`, anything else stays `failed`.
  */
 export function summarizeWriteOutcomes(
   approval: WriteApproval,
@@ -369,13 +386,7 @@ export function summarizeWriteOutcomes(
     }
     switch (record.kind) {
       case 'applied': {
-        // Defense in depth: the contract forbids a "verified" record whose
-        // observed hash differs from the after hash, but a record loaded from
-        // an older store must still match this approval's reviewed bytes.
-        const verified =
-          record.verification === 'verified' &&
-          record.observedSha256 === record.afterSha256 &&
-          record.afterSha256 === target.after.sha256;
+        const verified = isProvenApplied(record, target);
         return {
           path: target.path,
           status: verified
@@ -397,12 +408,13 @@ export function summarizeWriteOutcomes(
           code: 'UNKNOWN' as const,
         };
       case 'recovery': {
-        // "Restored" is only true when the recorded observation is the
-        // approval's before-image; a preserved or unproven restore stays a
-        // conflict a human must resolve.
-        const restored =
-          record.action !== 'preserve' &&
-          record.observedSha256 === target.before.sha256;
+        const applied = lastRecordFor(
+          records,
+          approval.approvalId,
+          target.path,
+          'applied',
+        );
+        const restored = isProvenRecovery(record, target, applied);
         return restored
           ? { path: target.path, status: 'restored' as const, code: null }
           : {
@@ -463,21 +475,45 @@ export function planRecovery(input: {
       outOfScope.push(target.path);
       continue;
     }
-    // A later recovery record ends this run's claim on the target: a completed
-    // restore or a preserved conflict must not be replayed, and the user may
-    // legitimately edit the file back to a matching byte stream afterwards.
+    // A later recovery record ends this run's claim on the target, but only a
+    // proven restore counts as done; an orphan or unproven one needs a human.
     if (latest.kind === 'recovery') {
+      const applied = lastRecordFor(
+        input.records,
+        input.approval.approvalId,
+        target.path,
+        'applied',
+      );
       actions.push({
         path: target.path,
-        action: latest.action === 'preserve' ? 'conflict' : 'already_restored',
+        action: isProvenRecovery(latest, target, applied)
+          ? 'already_restored'
+          : 'conflict',
         state: observation.state,
         observed: observation.observed,
       });
       continue;
     }
     if (latest.kind === 'failed') {
-      // Nothing was written, so there is nothing this run may undo.
-      outOfScope.push(target.path);
+      // A failure after a real write leaves the file in an unknown state, so it
+      // is a conflict; only a path with no applied record is safely out of scope.
+      if (
+        lastRecordFor(
+          input.records,
+          input.approval.approvalId,
+          target.path,
+          'applied',
+        ) === null
+      ) {
+        outOfScope.push(target.path);
+      } else {
+        actions.push({
+          path: target.path,
+          action: 'conflict',
+          state: observation.state,
+          observed: observation.observed,
+        });
+      }
       continue;
     }
     if (latest.kind === 'intent') {
@@ -493,10 +529,7 @@ export function planRecovery(input: {
     }
     // Only a verified applied record that matches this approval proves the run
     // actually wrote the reviewed bytes.
-    if (
-      latest.verification !== 'verified' ||
-      latest.afterSha256 !== target.after.sha256
-    ) {
+    if (!isProvenApplied(latest, target)) {
       actions.push({
         path: target.path,
         action: 'conflict',
