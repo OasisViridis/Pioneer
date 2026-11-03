@@ -25,5 +25,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: visual-candidates-${{ github.sha }}
-          path: tests/e2e/test-output/visual/
+          # Candidates plus the report; never the throwaway Chromium profile.
+          path: |
+            tests/e2e/test-output/visual/candidates/
+            tests/e2e/test-output/visual/report/
+            tests/e2e/test-output/visual/results.json
           if-no-files-found: error

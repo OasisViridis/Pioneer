@@ -27,4 +27,4 @@ Code Connect 官方发布/回读、Tokens Studio Git Sync、Figma 回灌、原�
 
 本地：frozen lockfile 安装、28 项设计测试、6 项仓库检查、示例类型检查通过。完整结果需以最新 PR 提交的 Windows CI 为准；Linux 环境缺少图形运行依赖；本次 package smoke 的 webpack 构建通过，但 Electron 解包被仓库既有 win32 bsdtar 补丁拒绝，退出 1。本文件不将计划运行或静态注册当作 Electron / 打包通过，Windows CI 是本次完整门禁的验证环境。
 
-CI 的最终门禁改为 `pnpm design:acceptance`，内部执行完整 `pnpm check` 后检查三组件无未完成项。`s1-visual-evidence` artifact 保存实际截图；像素完全一致、官方 Code Connect 发布和人工无障碍验收不在本次通过声明中。
+CI 的最终门禁改为 `pnpm design:acceptance`，内部执行完整 `pnpm check` 后检查三组件无未完成项。`electron-evidence-<sha>` artifact 保存行为与设计证据，`visual-comparison-<sha>` 保存视觉比较报告；像素完全一致、官方 Code Connect 发布和人工无障碍验收不在本次通过声明中。

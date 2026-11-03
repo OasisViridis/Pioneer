@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { format } from 'prettier';
+import { retryableState } from './design-remote.mjs';
 
 const require = createRequire(
   new URL('../apps/desktop/package.json', import.meta.url),
@@ -456,11 +457,12 @@ export async function publish({ root, pkg, output, api, actor }) {
     featureId: pkg.request.featureId,
     issue: pkg.request.issue,
     packageHash: pkg.packageHash,
-    retryable: true,
+    retryable: false,
   };
   try {
     const reasons = await gate(pkg, api, actor);
-    if (reasons.length) return { ...receipt, state: 'materials-only', reasons };
+    if (reasons.length)
+      return { ...receipt, state: 'materials-only', retryable: false, reasons };
     const result = validateOutput(root, pkg, output);
     const outputHash = hash(canonical(result.files));
     const branch = `codex/design-${pkg.request.featureId}`;
@@ -630,15 +632,18 @@ export async function publish({ root, pkg, output, api, actor }) {
     return {
       ...receipt,
       state: 'validation-pending',
+      retryable: true,
       pr: pr.html_url,
       prNumber: pr.number,
       headSha,
       elapsedMs: Date.now() - started,
     };
   } catch (error) {
+    const state = classify(error);
     return {
       ...receipt,
-      state: classify(error),
+      state,
+      retryable: retryableState(state),
       detail: error.message,
       elapsedMs: Date.now() - started,
     };

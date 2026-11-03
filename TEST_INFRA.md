@@ -9,11 +9,14 @@
 | **Contract Tests**      | Deterministic TypeScript units for shared schemas, normalized paths, scanner behavior, IPC/sender validation, settings write scope, runtime configuration, tab invariants, and renderer state projections.                                                                                                                                                                                                      | `pnpm test:contract`                   |
 | **Prototype Tests**     | The frozen M1 simulator: the moved 210-case suite plus static and adversarial probes. It verifies historical prototype behavior only, not an Electron product.                                                                                                                                                                                                                                                  | Executable now: `pnpm test:prototype`. |
 | **Real E2E**            | Playwright launches the real Electron process chain, crosses main → preload → renderer, exercises Library/Settings/project Tabs against a committed fixture, and verifies fixture immutability after close.                                                                                                                                                                                                     | `pnpm test:e2e`                        |
+| **Visual Regression**   | Playwright renders the real Electron app at 1440/900/640 and compares reviewed Windows PNG baselines with `updateSnapshots: none`. The environment snapshot records OS build, Electron/Chromium, font hashes, DPR, locale, fixed time, reduced motion and color scheme; the runner image is provenance only because GitHub-hosted `windows-2025` image versions roll forward. It runs in a separate Windows CI job and uploads expected/actual/diff plus a failure trace; it does not replace behavior, authorization, stop or isolation checks. | `pnpm test:visual`                     |
 | **Packaged Acceptance** | Packages `apps/desktop`, then launches the shipped `@pioneer-desktop.exe` through the doubly-gated acceptance seam (`PIONEER_ACCEPTANCE=1` in a packaged build only) and drives the real renderer over Chromium CDP. Proves startup, workspace scan, one completed read-only run with a real `read_file` result, one `accept` and one `terminal` journal record sharing a run id, and unchanged fixture hashes. | `pnpm acceptance:packaged`             |
 
 ## Aggregate gate
 
 The primary gate is `pnpm check`. It runs, in order: design check; format check; strict lint; desktop typecheck; Contract Tests; frozen Prototype Tests; Real E2E (including its package build); and a final package smoke. The duplicate final build is intentional. M2 is **COMPLETE**; `pnpm check` continues as the primary quality gate for M3.
+
+Visual Regression is deliberately outside `pnpm check` and runs as a second required job in `quality.yml`; the separate job keeps the pixel comparison on one Windows runner and uploads its diff artifacts. A green `pnpm check` alone does not claim the visual baseline passed.
 
 Packaged Acceptance is deliberately outside `pnpm check` because it repackages the desktop app and starts the shipped executable; run it per milestone and on any change to the launch seam, packaging configuration, or run-layer main code.
 
@@ -36,6 +39,8 @@ pnpm typecheck        # desktop TypeScript compiler check
 pnpm test:contract    # deterministic M2 contract suites
 pnpm test:prototype   # frozen M1 Prototype Tests and probes
 pnpm test:e2e         # real Electron Playwright flow
+pnpm test:visual      # reviewed Windows pixel baseline comparison (separate CI job)
+pnpm design:visual:candidate  # capture candidate screenshots; never accepts a baseline
 pnpm acceptance:packaged  # packaged build + one read-only run (not in pnpm check)
 pnpm package:smoke    # final package build smoke
 pnpm check            # full authoritative gate in the order above

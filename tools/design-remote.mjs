@@ -1,5 +1,12 @@
 import { execFileSync } from 'node:child_process';
 
+// A plain rerun can resolve these; permanent input, scope or credential errors
+// need a human to change something first.
+const transientStates = new Set(['rate-limited', 'retryable-error']);
+export const retryableState = (state) => transientStates.has(state);
+const invalidInput = (message) =>
+  Object.assign(new Error(message), { state: 'invalid-input' });
+
 // Credentials stay in the transport; errors never echo server bodies or tokens.
 export function remoteFailure(error) {
   const status = Number(error.status) || null;
@@ -13,7 +20,9 @@ export function remoteFailure(error) {
             ? 'invalid-input'
             : error.code === 'ENOENT' || status === 404
               ? 'missing-input'
-              : 'retryable-error')),
+              : [400, 422].includes(status)
+                ? 'invalid-input'
+                : 'retryable-error')),
     status,
     retryAfter: error.retryAfter ?? null,
   };
@@ -28,7 +37,7 @@ export function figmaApi(token, fetcher = fetch) {
       !endpoint.startsWith('/v1/') ||
       (method === 'POST' && endpoint !== '/v1/dev_resources')
     )
-      throw new Error('Unsupported Figma operation');
+      throw invalidInput('Unsupported Figma operation');
     const url = new URL(endpoint, 'https://api.figma.com');
     if (
       url.origin !== 'https://api.figma.com' ||
@@ -36,14 +45,14 @@ export function figmaApi(token, fetcher = fetch) {
       url.password ||
       url.hash
     )
-      throw new Error('Untrusted Figma URL');
+      throw invalidInput('Untrusted Figma URL');
     if (
       method === 'GET' &&
       !/^\/v1\/files\/[A-Za-z0-9]+\/(versions|nodes|dev_resources)$/.test(
         url.pathname,
       )
     )
-      throw new Error('Unsupported Figma operation');
+      throw invalidInput('Unsupported Figma operation');
     // Never retry POST automatically: the caller must reconcile by reading first.
     const response = await fetcher(url, {
       method,
@@ -63,7 +72,7 @@ export function figmaApi(token, fetcher = fetch) {
 
 export async function githubApi(method, endpoint, body) {
   if (method !== 'GET' || !endpoint.startsWith('/repos/OasisViridis/Pioneer/'))
-    throw new Error('Wrong repository');
+    throw invalidInput('Wrong repository');
   try {
     const output = execFileSync(
       'gh',

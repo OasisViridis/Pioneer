@@ -14,7 +14,7 @@ S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook �
 
 | 旧文件 / 用例                                                    | 当前适用性与处置                                                                                                                           | 实际替代入口                                                                                                            |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `hazel-design` 的多主题/重启                                     | 旧版 v3 record、专注/审阅/交付标签已被单布局替换，当前记录为 v5，原文件不运行                                                              | 已选入的 `design-decoration` 验证 11 个实际素材、hash、重启、窄窗、隐藏边界和错误态                                     |
+| `hazel-design` 的多主题/重启                                     | 旧版 v3 record、专注/审阅/交付标签已被单布局替换，当前记录为 v5，原文件不运行                                                              | 已选入的 `design-decoration` 验证 11 个实际素材、hash、重启、窄窗、隐藏边界和消息状态；意图卡移除后不再有 `.form-error` 断言，目录错误/重试由 `catalog-state` 覆盖 |
 | `hazel-design` 的 onboarding                                     | 当前 ProjectLibrary 没有 Hazel 插画；`PIONEER_E2E_SKIP_INITIAL_ROOT` 也未被主进程读取，不能恢复一个不存在的功能                            | `catalog-state` 验证选择目录/错误/重试，`design/sync/asset-policy.json` 明确 organizing 素材 dormant                    |
 | `hazel-design` 的三宽度与本机草稿                                | 旧选择器和布局标签不再存在，迁移仍适用的交互断言                                                                                           | 新选入 `design-states`：1440/900/640、长文本、键盘可见焦点、减少动态效果、本机保存、消息出现后移除插画                  |
 | `window-chrome` 的自定义红黄绿、托盘、全屏、最大化、退出菜单     | `App.tsx` 未挂载 WindowChrome；main 未注册 window-ipc；原测试依赖的 tray/initialize seam 不存在。保留旧文件作历史规格，不计为当前 E2E 覆盖 | `window-controls` / `window-preload` 等 Contract Tests 仅证明独立模块；原生拖动、系统菜单、托盘、自定义 chrome 仍未验收 |
@@ -27,7 +27,7 @@ S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook �
 
 ## Windows 视觉基线
 
-- Windows CI 固定 `windows-2025`，依赖由 lockfile 固定，Electron 44.2.0、Playwright 1.62.1。托管镜像仍会更新，因此截图旁记录并比较 ImageVersion、OS build、Electron/Chromium、字体 SHA-256、语言和 devicePixelRatio；漂移会失败，需要单独审阅。
+- Windows CI 固定 `windows-2025` 标签，依赖由 lockfile 固定，Electron 44.2.0、Playwright 1.62.1。GitHub 托管的 `windows-2025` 镜像版本会滚动，同一提交可能分到不同镜像，因此截图旁记录 ImageVersion 作为溯源，但环境断言只比较渲染相关字段：OS build、Electron/Chromium、字体 SHA-256、语言、devicePixelRatio、固定时间、减少动效和配色；这些字段漂移会失败，需要单独审阅。runner image 不参与断言（2026-11-02 调整，见[基线记录](../../tests/e2e/visual-baselines/README.md)）。
 - 使用真实保存记录和确定的 Session ID，固定 renderer 时间、1440/900/640 × 1000 内容尺寸、DPR 1、Light、减少动态效果；等待本地字体加载和保存完成，不运行外部模型。截图断言关闭动画和光标闪烁。主进程真实定时器保持正常，避免冻结停止/保存逻辑。
 - `pnpm test:visual` 在独立 Windows job 中比较固定应用截图，`updateSnapshots: none`。缺图/环境记录时失败，不写入基线、不静默跳过。基线已由用户委托 Codex 审阅接受；CI 通过只证明与已审阅图一致，不替代整个产品的设计验收。
 - 首次 PR 没有 `environment.txt` 时，quality 的视觉 job 先抓取候选再执行严格比较；缺少已审阅基线仍失败。这样无需先合并新 workflow 就能取到待审图。候选只上传，不写基线。后续 `visual-candidate.yml` 只能手动调度，调用 `pnpm design:visual:candidate`，输出到被忽略的 `test-output/visual/candidates`。它不会提交、发布或修改 `visual-baselines`。候选工作流成功只表示抓图成功。
@@ -101,5 +101,15 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 
 - 固定草案版本 `2415735911323890660` 的结构快照与视觉参考分别在独立[快照提交](https://github.com/OasisViridis/Pioneer/blob/4b67a17b7b121644bbab37760526fe2bbbb4bedd/docs/testing/snapshots/session-branch-tabs-2415735911323890660.json)和[审阅记录](https://github.com/OasisViridis/Pioneer/blob/305109beacab966e176f471f688288f62d9818b0/docs/testing/snapshots/session-branch-tabs-review.md)。快照使用真实版本节点读取及模拟事件投影；不是实际 Webhook 投递。
 - [PR #59](https://github.com/OasisViridis/Pioneer/pull/59) 固定受审快照与允许范围；[PR #60](https://github.com/OasisViridis/Pioneer/pull/60) 实现标签分支来源提示，最终 head `fa3c56ffb8c7fbaf1d2e28700cb14d235f34eb8b` 的质量与视觉检查通过。普通标签视觉差异在合并前修复，未更新既有视觉基线。[合并提交](https://github.com/OasisViridis/Pioneer/commit/e407b6660366fa1221e9464b92a21f6be7924dc3)的 [main 检查](https://github.com/OasisViridis/Pioneer/actions/runs/40979414675)两项均通过。
-- 获用户外部发布授权后，对 Figma 文件节点 `1093:1259` 先预览，再通过 `design:external writeback` 写入并读回六条 Dev Resources：#25、PR #60、合并提交、同提交 CI、固定设计包和[验证记录](https://github.com/OasisViridis/Pioneer/blob/e407b6660366fa1221e9464b92a21f6be7924dc3/docs/testing/issue25-s2-tab-acceptance.md)。回执为 `links-verified`，`confirmed: 6`、`attempted: 6`；随后顺序重放三次均为 `links-verified`、`created: 0`。这验证正常成功与幂等重放，不是实际超时或部分失败演练。
+- 获用户外部发布授权后，对 Figma 文件节点 `1093:1259` 先预览，再通过 `design:external writeback` 写入并读回六条 Dev Resources：#25、PR #60、合并提交、同提交 CI、固定设计包和[验证记录](https://github.com/OasisViridis/Pioneer/blob/e407b6660366fa1221e9464b92a21f6be7924dc3/docs/testing/issue25-s2-tab-acceptance.md)。回执为 `links-verified`，`confirmed: 6`、`attempted: 6`；随后顺序重放三次均为 `links-verified`、`created: 0`。这验证正常成功与幂等重放；本地部分失败/超时/回读失败演练另见 [回填故障恢复演练](issue37-writeback-drill.md)，它不是真实 Figma 超时记录。
 - 验证记录说明真实 Electron 自动测试和 Codex 受托视觉检查；真人设备验收、真实 Provider 与官方 Code Connect 发布仍未验证。当前没有可确认的获准 HTTPS/n8n 接收器或无人值守消费者，真实 Figma 命名版本事件到 S2 的链路仍未验收。#37 和 #33 不因此关闭。
+
+## 2026-11-03 本地复核与故障演练
+
+- 在 origin/main `13ccfe5` 的独立 worktree 上、于本分支复跑 `pnpm check`：设计同步 110/110（origin/main 为 102，新增 7 项演练与 1 项错误分类）、Contract Tests 505/505（43 文件）、Prototype Tests 210/210、真实 Electron E2E 39/39、package smoke 通过；本地需要清除 `ELECTRON_RUN_AS_NODE=1`，否则 Electron 以 Node 模式启动并拒绝 `--remote-debugging-port`。该变量来自本地宿主环境，不是仓库配置，也没有改动门禁。
+- 新增 [回填故障恢复演练](issue37-writeback-drill.md)：用 localhost 有状态假服务走生产 `figmaApi` 与 `writeback`，覆盖部分 200、提交后断连、回读失败、429、403、预检 GET 403、容量不足和三次重放，7/7 通过。`writeback.test.mjs` 同时补了 400/422 永久错误与可重试错误的分类断言。该演练不读取 Figma 凭证，不是真实 Figma 验收。
+- 修正旧记录与当前测试的偏差：runner image 已退出环境断言（2026-11-02），`design-decoration` 不再覆盖已移除的意图 `.form-error`；S1 文档中的 artifact 名改为实际的 `electron-evidence-<sha>` 与 `visual-comparison-<sha>`；token 计数改为 27；`TEST_INFRA.md` 补充 Visual Regression 入口。
+- 计划里“固定 Windows runner 镜像”没有按字面执行：GitHub 托管的 `windows-2025` 镜像版本会滚动，同一提交可能分到不同镜像，镜像门禁会让同一 SHA 随机失败。当前固定的是渲染相关环境字段，runner image 只写入附件供溯源。要改成镜像级断言需要自托管 runner，本次未启用。
+- S2 的 `verify` 现在要求质量与视觉两个 job 都成功；没有视觉 job 的旧 S2 PR 返回 `validation-incomplete`。这是有意收紧，不把旧绿色或本地 `pnpm check` 当作当前视觉通过。
+- 下载提交 `6292c51` 的 CI artifact 复核：`electron-evidence-6292c51...` 的 `results.json` 为 12 suites / 39 specs 全部通过；`visual-comparison-6292c51...` 含 HTML/JSON 报告和故意反色故障的 expected/actual/diff 三张 PNG，user-data 文件为 0。此前 `2283fd9` 的 artifact 仍带 Chromium 临时 user-data 目录，因此本 PR 的 `quality.yml` 与 `visual-candidate.yml` 改为按报告、结果 JSON、候选/截图/trace 精确收集。
+- 真实命名版本事件接收与完整自动链路仍未验收；真实 Figma 部分失败/超时、Code Connect 发布、真人设备与真实 Provider 人工验收也仍未执行。#37、#33 保持 Open，未创建或修改 Figma 版本，未标记 COMPLETED。

@@ -171,10 +171,16 @@ test('missing nodes, version, empty input, wrong hash and foreign feature/Issue 
 
 test('one explicit delivery produces a Draft PR; three identical submissions create one commit and no comments', async () => {
   const { deliver, state } = boundary();
-  assert.equal((await deliver()).state, 'validation-pending');
+  const first = await deliver();
+  assert.equal(first.state, 'validation-pending');
+  assert.equal(first.retryable, true);
   assert.equal(state.pr.draft, true);
   const firstWrites = state.writes.length;
-  for (let i = 0; i < 3; i++) assert.equal((await deliver()).state, 'no-op');
+  for (let i = 0; i < 3; i++) {
+    const replay = await deliver();
+    assert.equal(replay.state, 'no-op');
+    assert.equal(replay.retryable, false);
+  }
   assert.equal(state.writes.length, firstWrites);
   assert.equal(
     state.writes.filter((w) => w.url.endsWith('/git/commits')).length,
@@ -210,7 +216,9 @@ test('original dependencies, existing owner and Unknown/Run conflicts yield mate
   ]) {
     const { deliver, state } = boundary();
     change(state);
-    assert.equal((await deliver(null)).state, 'materials-only');
+    const receipt = await deliver(null);
+    assert.equal(receipt.state, 'materials-only');
+    assert.equal(receipt.retryable, false);
     assert.equal(state.writes.length, 0);
   }
   const { deliver, state } = boundary();
@@ -219,7 +227,9 @@ test('original dependencies, existing owner and Unknown/Run conflicts yield mate
     { ...request, behaviorChanges: ['unknown-run-state', 'stop'] },
     policy,
   );
-  assert.equal((await deliver(null, conflict)).state, 'materials-only');
+  const blocked = await deliver(null, conflict);
+  assert.equal(blocked.state, 'materials-only');
+  assert.equal(blocked.retryable, false);
   assert.equal(state.writes.length, 0);
 });
 
@@ -320,7 +330,7 @@ test('permission loss and rate limiting have distinct retryable states and no su
       },
     });
     assert.equal(receipt.state, expected);
-    assert.equal(receipt.retryable, true);
+    assert.equal(receipt.retryable, expected === 'rate-limited');
   }
 });
 
