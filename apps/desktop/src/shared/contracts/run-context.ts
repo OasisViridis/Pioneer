@@ -2,7 +2,11 @@ import { z } from 'zod';
 
 import { EGRESS_MATERIAL_LIMIT } from './egress';
 import { RunIdentitySchema, RunStatusSchema } from './pioneer-run';
-import { ReadOnlyToolNameSchema } from './read-only-tools';
+import {
+  HARNESS_TOOL_NAMES,
+  HarnessToolNameSchema,
+  ReadOnlyToolNameSchema,
+} from './read-only-tools';
 
 /**
  * Bounded, main-generated projection of a run's context (Issue #17): which
@@ -92,15 +96,8 @@ export const RunContextReplySchema = z.discriminatedUnion('ok', [
  * outcomes only, and the panels say so instead of replaying invented events.
  */
 export const RunSnapshotToolsSchema = z
-  .array(
-    z.enum([
-      'read_file',
-      'list_directory',
-      'search_in_files',
-      'propose_file_write',
-    ]),
-  )
-  .max(4);
+  .array(HarnessToolNameSchema)
+  .max(HARNESS_TOOL_NAMES.length);
 
 export const RunSnapshotSchema = z
   .object({

@@ -108,7 +108,7 @@ const appLifecycle = createAppWindowCoordinator({
   },
   reportTrayUnavailable: () => undefined,
   reportOperationFailure: (reason) => {
-    dialog.showErrorBox('Pioneer 鏃犳硶瀹屾垚绐楀彛鎿嶄綔', reason);
+    dialog.showErrorBox('Pioneer 无法完成窗口操作', reason);
   },
   settleAcceptedSaves: () => acceptedSaves.settle(),
 });
@@ -196,7 +196,7 @@ const openMainWindow = (service: CatalogService): void => {
       if (isMainFrame && !isInPlace) {
         closeCoordinator.disconnect();
         closeBarrier.invalidate();
-        // Contract 搂1: a navigation rebuilds the window binding. Runs from the
+        // Contract §1: a navigation rebuilds the window binding. Runs from the
         // previous document lose their window and are stopped instead of keep
         // running behind a dead renderer.
         runHost?.manager.abandonWindow(boundWebContentsId);

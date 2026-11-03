@@ -104,7 +104,7 @@ export function WritePermissionPicker({
       });
       if (reply.ok) {
         setMode(reply.mode);
-        setRiskAcknowledged(next === 'full_access' || next === 'auto_review');
+        setRiskAcknowledged(acknowledged);
         setPendingMode(null);
         setNotice('写入权限已保存到这个会话');
         return true;
@@ -125,6 +125,9 @@ export function WritePermissionPicker({
     setError(null);
     setNotice(null);
     if (definition.risky) {
+      // Every risky selection needs its own fresh acknowledgement; a previous
+      // risky mode's check must not silently authorize this one.
+      setRiskAcknowledged(false);
       setPendingMode(next);
       return;
     }
@@ -139,7 +142,8 @@ export function WritePermissionPicker({
   };
 
   const selected = pendingMode ?? mode;
-  const active = MODES.find((item) => item.mode === selected);
+  /** The mode main currently holds; a pending risky choice is not saved yet. */
+  const saved = MODES.find((item) => item.mode === mode);
   const busy = disabled || saving || loading;
 
   return (
@@ -190,9 +194,10 @@ export function WritePermissionPicker({
       ) : null}
       <p className="metadata">
         当前：
-        {active === undefined
+        {saved === undefined
           ? '未选择（写入请求会被拒绝）'
-          : `${active.label} · 作用域：本次预览列出的全部目标`}
+          : `${saved.label} · 作用域：本次预览列出的全部目标`}
+        {pendingMode !== null ? '（上方选择尚未保存）' : ''}
       </p>
       {error !== null ? (
         <p role="alert" className="form-error">

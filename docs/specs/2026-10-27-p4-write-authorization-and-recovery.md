@@ -260,7 +260,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 | 逐路径结果         | 无记录、完整证明、未验证、缺 `intent`、`intent` 前置哈希不符、`intent` 晚于 `applied`、跨修订号的 `intent`、`after` 不符、失败、只有 `intent`、恢复完成、孤立恢复、按目标区分拒绝码、未异常目标保持 `unchanged` | 对应 `status` 与 `code`                                                      | `write outcomes`                  |
 | 恢复               | 仍持有后像、未动、用户改动、删除后保留现场、无记录、写入失败且无后像、孤立恢复、写入后失败、中途中断、未验证、已恢复不重放、恢复后又被改、写入后对象被换 | `restore`/`already_restored`/`conflict`/`outOfScope`                         | `recovery planning`               |
 | 完全权限与保护路径 | 完全权限下 `.git/config` 端到端可观察可写、缺失报 `missing`、链接不跟随、工作区两档下 `unreadable`、恢复在只读与保护路径下被拒                                    | 通过 / `TARGET_UNREADABLE` / `missing` / `link_not_allowed` / `PERMISSION_*` | `full access and protected paths` |
-| 写面               | 决策模块与共享契约不含写调用、IPC 与 Run 契约不含写入权限                                                                                                         | 无新增                                                                       | `write surface stays closed`      |
+| 写面               | 决策模块与共享契约不含写调用；#19 的写调用只允许出现在执行器与变更日志，IPC 与 Run 契约不含写入权限                                                                 | 无新增                                                                       | `P4-D1 decision surface`          |
 
 边界说明：
 

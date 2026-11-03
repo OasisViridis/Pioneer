@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import {
   WRITE_LIMITS,
   WriteTargetsSchema,
+  type WriteChangeFailureCode,
   type WriteChangeJournalRecord,
   type WriteFileIdentity,
   type WriteFileState,
@@ -47,7 +48,9 @@ export interface ApplyBatchReport {
   partial: boolean;
   failure: {
     path: string;
-    code: 'WRITE_FAILED' | 'VERIFY_FAILED' | 'CANCELLED' | 'UNKNOWN';
+    /** Shared #18 change-failure vocabulary; only WRITE_FAILED/VERIFY_FAILED
+     * are produced by this single-target slice. */
+    code: WriteChangeFailureCode;
   } | null;
 }
 

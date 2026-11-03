@@ -11,7 +11,10 @@ import {
   type RunStatus,
 } from '../../shared/contracts/pioneer-run';
 import type { RunEventBatch, RunPage } from '../../shared/contracts/run-ipc';
-import type { ReadOnlyToolRequest } from '../../shared/contracts/read-only-tools';
+import type {
+  HarnessToolName,
+  ReadOnlyToolRequest,
+} from '../../shared/contracts/read-only-tools';
 import type { EgressMaterial } from '../../shared/contracts/egress';
 import type {
   RunContext,
@@ -69,9 +72,7 @@ export interface RunAuthorization {
   grantId: string;
   taskDigest: string;
   projectName: string;
-  tools: readonly (
-    'read_file' | 'list_directory' | 'search_in_files' | 'propose_file_write'
-  )[];
+  tools: readonly HarnessToolName[];
   adapter: 'controlled' | 'pi';
   model: string | null;
   expiresAt: string;

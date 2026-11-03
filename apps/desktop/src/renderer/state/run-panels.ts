@@ -8,7 +8,10 @@ import type {
   RunToolCallState,
 } from '../../shared/contracts/run-context';
 import type { RunAuthorizationSummary } from '../../shared/contracts/run-ipc';
-import type { ReadOnlyToolName } from '../../shared/contracts/read-only-tools';
+import type {
+  HarnessToolName,
+  ReadOnlyToolName,
+} from '../../shared/contracts/read-only-tools';
 import type { RunViewState } from './run-view';
 
 /**
@@ -169,15 +172,15 @@ const CALL_CODE_TEXT: Record<string, string> = {
 export const callCodeText = (code: string): string =>
   CALL_CODE_TEXT[code] ?? code;
 
-export const TOOL_LABELS: Record<string, string> = {
+export const TOOL_LABELS: Record<HarnessToolName, string> = {
   read_file: '读取文件',
   list_directory: '列目录',
   search_in_files: '搜索文本',
   propose_file_write: '提交文件修改',
 };
 
-export const toolLabel = (tool: string | null): string =>
-  tool === null ? '未知工具' : (TOOL_LABELS[tool] ?? tool);
+export const toolLabel = (tool: HarnessToolName | null): string =>
+  tool === null ? '未知工具' : TOOL_LABELS[tool];
 
 /** `2026-10-27T10:00:00.000Z` -> `10:00:00`. */
 export const formatUtcTime = (iso: string): string =>

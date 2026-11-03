@@ -39,7 +39,7 @@ pnpm exec vitest run tests/contract/write-diff.test.ts tests/contract/write-prev
 
 ## 完成条件对应证据
 
-1. **预览与批准**：`write-controller.test.ts` 断言预览内容与 Diff；E2E 用例 1 在真实 Electron 中打开「改动」面板、看到 `README.md` 路径、`-beta`/`+Reviewed change.`、前后哈希，再执行拒绝/批准。
+1. **预览与批准**：`write-controller.test.ts` 断言预览内容与 Diff；E2E 用例 1 在真实 Electron 中打开「改动」面板、看到 `README.md` 路径、`An alpha application fixture.` 上下文行、`+Reviewed change.` 与前后 SHA-256，再执行拒绝/批准。
 2. **拒绝无副作用**：`write-controller.test.ts` 比较拒绝前后字节与 SHA-256；E2E 用例 1 拒绝后读取副本文件等于原文。
 3. **批准范围**：`write-controller.test.ts` “writes only the previewed path” 断言另一个文件逐字节不变；apply 请求只带 proposal/Run/`previewRevision`，不带路径或内容。
 4. **过期与目标变化**：`write-preview.test.ts` 刷新后 `previewRevision` 递增、旧批准 `PREVIEW_EXPIRED`；`write-controller.test.ts` 新 Run 修订使旧预览过期；E2E 用例 2 在预览后外部改写目标，批准得到 `TARGET_CHANGED`，重新读取后新 Diff 再批准成功。
@@ -63,7 +63,9 @@ pnpm exec vitest run tests/contract/write-diff.test.ts tests/contract/write-prev
 
 - 真实 Provider 运行：未运行，不能由受控 adapter 结果替代。
 - Windows 人工验收（批准入口、目标文件实际结果、读屏/高 DPI）：未运行，需按 #24 的人工门另记。
+- `pnpm test:visual`：未运行。本次新增「改动」面板与权限选择器样式，但 `pnpm check` 不包含 Visual Regression；按 TEST_INFRA，「Aggregate gate 通过不等于视觉基线通过」，新的视觉基线需在独立 Windows job 重跑并审阅。
 - 恢复执行器、部分完成后的撤销、内核级隔离（受限 Token/job object）：属于 #20，未实现。
+- 执行器保留 `beforeReplace` / `writeTempFile` 两个 main 私有测试钩子，仅用于探测替换前竞态与写入失败；它们不改变生产路径的校验顺序，也不暴露给 renderer。本记录按 #18 §7 的偏差留痕要求单列。
 - 本地 E2E 运行环境曾带 `ELECTRON_RUN_AS_NODE=1`，Playwright 的 `_electron.launch` 会被 Electron 当作 Node 参数拒绝；本次在运行前移除该变量，与常规 CI 环境一致。测试代码没有依赖该处理。
 
 ## 原始日志

@@ -1,12 +1,30 @@
 import { z } from 'zod';
 
-export const ReadOnlyToolNameSchema = z.enum([
+/** The three read-only tools; the tuple feeds the wider harness vocabulary. */
+export const READ_ONLY_TOOL_NAMES = [
   'read_file',
   'list_directory',
   'search_in_files',
-]);
+] as const;
+
+export const ReadOnlyToolNameSchema = z.enum(READ_ONLY_TOOL_NAMES);
 
 export type ReadOnlyToolName = z.infer<typeof ReadOnlyToolNameSchema>;
+
+/**
+ * Every tool a Run may expose: the three reads plus the review-only write
+ * proposal. The proposal cannot write; main turns it into a preview that a
+ * person approves. Keeping one tuple keeps authorization, snapshots and the
+ * capabilities panel from drifting on the tool list.
+ */
+export const HARNESS_TOOL_NAMES = [
+  ...READ_ONLY_TOOL_NAMES,
+  'propose_file_write',
+] as const;
+
+export const HarnessToolNameSchema = z.enum(HARNESS_TOOL_NAMES);
+
+export type HarnessToolName = z.infer<typeof HarnessToolNameSchema>;
 
 const path = z.string().min(1).max(1024);
 

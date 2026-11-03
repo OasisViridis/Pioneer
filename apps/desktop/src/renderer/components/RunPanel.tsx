@@ -95,7 +95,8 @@ export function RunPanel({
           {status ?? '未运行'}
         </span>
         <span className="metadata">
-          读取 + 待审阅修改 · read_file / propose_file_write
+          读取 + 待审阅修改 · read_file / list_directory / search_in_files /
+          propose_file_write
         </span>
       </header>
       {state.rejectionCode !== null ? (

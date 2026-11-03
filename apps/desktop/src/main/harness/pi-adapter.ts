@@ -166,11 +166,12 @@ type TrackTool = <T>(execute: () => Promise<T>) => Promise<T>;
 
 /**
  * Bridges the read-only tools plus the review-only write proposal to Pi's
- * AgentTool shape. Execution goes through the harness executor port (main's
- * wrapped executor), so every call is rechecked by the #11 preflight, budgeted
- * by §5, and published as wire tool.requested/tool.result events with
- * main-assigned callIds. `propose_file_write` cannot write: main turns the
- * argument into a preview that a person must approve first.
+ * AgentTool shape. The three read tools go through the harness executor port
+ * (main's wrapped executor), so every read is rechecked by the #11 preflight,
+ * budgeted by §5, and published as wire tool.requested/tool.result events with
+ * main-assigned callIds. `propose_file_write` uses the separate write port: main
+ * turns its argument into a preview that a person approves, and the adapter
+ * never receives a file handle.
  */
 function buildHarnessTools(
   type: TypeBoxLike,

@@ -6,6 +6,7 @@ import type {
   RunContextMaterial,
 } from '../../shared/contracts/run-context';
 import type { SessionRunStatus } from '../../shared/contracts/session-run-history';
+import { HARNESS_TOOL_NAMES } from '../../shared/contracts/read-only-tools';
 import { runViews } from '../state/run-view-instance';
 import { describe, visibleStatus, type RunViewState } from '../state/run-view';
 import {
@@ -247,12 +248,7 @@ export function RunContextPanel({
   );
 }
 
-const TOOL_ROWS = [
-  'read_file',
-  'list_directory',
-  'search_in_files',
-  'propose_file_write',
-] as const;
+const TOOL_ROWS = HARNESS_TOOL_NAMES;
 
 export function RunCapabilitiesPanel({
   session,

@@ -16,6 +16,7 @@ import {
   type RunStopRequest,
   type RunCursorRequest,
 } from './pioneer-run';
+import { HarnessToolNameSchema } from './read-only-tools';
 
 /** Fixed run protocol surface (P2 run contract §2). No arbitrary channels. */
 export const RUN_IPC_CHANNELS = {
@@ -68,14 +69,7 @@ export const RunAuthorizationSummarySchema = z
     grantId: RunIdentitySchema.shape.runId,
     taskDigest: z.string().min(1).max(512),
     projectName: z.string().min(1).max(512),
-    tools: z.array(
-      z.enum([
-        'read_file',
-        'list_directory',
-        'search_in_files',
-        'propose_file_write',
-      ]),
-    ),
+    tools: z.array(HarnessToolNameSchema),
     adapter: z.enum(['controlled', 'pi']),
     model: z.string().min(1).max(256).nullable(),
     expiresAt: z.iso.datetime(),

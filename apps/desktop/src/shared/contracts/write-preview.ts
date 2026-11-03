@@ -6,6 +6,7 @@ import {
   WRITE_LIMITS,
   WRITE_PERMISSION_DENIAL_CODES,
   WRITE_REJECTION_CODES,
+  WriteChangeFailureCodeSchema,
   WriteFileIdentitySchema,
   WriteFileStateSchema,
   WritePermissionModeSchema,
@@ -33,9 +34,9 @@ export const WRITE_PREVIEW_LIMITS = Object.freeze({
   /** Proposals retained in main memory across one window. */
   retainedProposals: 32,
   /** Total pre-image, post-image and diff bytes kept for retained proposals. */
-  retainedBytes: 8_388_608,
+  retainedBytes: 8 * WRITE_LIMITS.targetBytes,
   /** Rendered diff bytes per preview; over budget means refuse, never truncate. */
-  previewBytes: 4_194_304,
+  previewBytes: 4 * WRITE_LIMITS.targetBytes,
 });
 
 const identifierSchema = RunIdentitySchema.shape.runId;
@@ -149,14 +150,8 @@ export const WriteApplyReportSchema = z
     failure: z
       .object({
         path: WriteTargetPathSchema,
-        code: z.enum([
-          'WRITE_FAILED',
-          'VERIFY_FAILED',
-          'CANCELLED',
-          'RECOVERY_CONFLICT',
-          'PERMISSION_DENIED',
-          'UNKNOWN',
-        ]),
+        /** One vocabulary with the #18 journal failure codes. */
+        code: WriteChangeFailureCodeSchema,
       })
       .strict()
       .nullable(),

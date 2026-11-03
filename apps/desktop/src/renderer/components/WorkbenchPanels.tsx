@@ -71,7 +71,7 @@ export function WorkbenchPanel({
         <p>
           {session.outputTab === 'verification'
             ? '没有测试结果，不预先标记通过。'
-            : '只读运行不产生文件或预览；这里不填入演示数据。'}
+            : '本切片的写入只替换已有文件，不生成新产物；这里不填入演示数据。'}
         </p>
       </div>
     </div>
