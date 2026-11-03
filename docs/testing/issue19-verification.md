@@ -9,7 +9,7 @@
 - 受控 adapter 新增 `propose_write` 步骤；Pi adapter 新增 `propose_file_write` 工具（只提交提案，不写入）。
 - 「运行控制」加入权限选择器；「改动」面板从空态变为真实预览/批准/拒绝/重新读取/结果面板。
 - Run 事件新增 `write.proposed` 标记；授权摘要与持久化快照的工具清单包含 `propose_file_write`。
-- 新增 Contract 探针 5 个文件，Real Electron E2E 3 个用例。
+- 新增 Contract 探针 5 个文件，Real Electron E2E 4 个用例。
 
 ## 命令与结果
 
@@ -23,7 +23,7 @@
 | `pnpm lint`                       | 通过                                                                                           |
 | `pnpm typecheck`                  | 通过                                                                                           |
 | `pnpm test:contract:types`        | 通过（含 `tests/e2e`）                                                                          |
-| `pnpm test:contract`              | 49 个文件、567 项通过                                                                          |
+| `pnpm test:contract`              | 修复后 50 个文件、578 项通过（首轮 49 文件 / 567 项）                                             |
 | `pnpm test:prototype`             | 210/210 通过                                                                                   |
 | `pnpm test:e2e`                   | 修复前一轮 42 项通过；本轮新增 `auto_review` 用例，完整套件由 PR CI 的 Windows runner 执行（本地不启动可见窗口） |
 | `pnpm package:smoke`              | 包装成功                                                                                       |
@@ -71,10 +71,12 @@ pnpm exec vitest run tests/contract/write-diff.test.ts tests/contract/write-prev
 6. 面板在运行中每 2 秒刷新列表，运行中到达的提案不再等运行结束。
 7. 权限选择器不再承诺本切片未开放的保护路径；高风险档每次重新确认，当前行只显示 main 已保存的档位。
 8. `chmod` 使用完整 `mode & 0o7777` 并在失败时中止；失败按 `WRITE_FAILED` 返回，目标保持原样。
+9. 父目录规范路径在临时文件存在后、最终读取与 `rename` 前再检查一次；新增“父目录被 junction 替换”的探针，在临时文件创建后移动项目目录并建 junction，写入被拒绝且目标保持原样。
+10. `refresh` 超预算时不再先提交新预览；只有通过字节预算才更新 `preview` 与 `retainedBytes`，否则置为 `expired` 并返回 `PREVIEW_EXPIRED`。新增“超预算刷新不提交”的探针，断言 `previewRevision` 仍为 1 且前像哈希未变。
 
-新增/更新的探针：`write-apply.test.ts` 3 项（就地改动、不可回读的 applied、日志与恢复冲突）、`write-preview.test.ts` 1 项（淘汰）、`write-controller.test.ts` 1 项（`auto_review` 报告），E2E 新增 `auto_review` 用例。
+新增/更新的探针：`write-apply.test.ts` 5 项（就地改动、不可回读的 applied、父目录 junction、日志与恢复冲突）、`write-preview.test.ts` 2 项（淘汰、超预算刷新）、`write-controller.test.ts` 1 项（`auto_review` 报告），E2E 新增 `auto_review` 用例。
 
-本地已通过：`format`、`lint`、`typecheck`、`test:contract`（50 文件 / 576 项）、`design:check`、`verify:repository`。完整 `pnpm check` 由 PR CI 的 Windows runner 执行；本地未再启动可见 Electron 窗口。
+本地已通过：`format`、`lint`、`typecheck`、`test:contract`（50 文件 / 578 项）、`design:check`、`verify:repository`。完整 `pnpm check` 由 PR CI 的 Windows runner 执行；本地未再启动可见 Electron 窗口。
 
 ## 未运行 / 未包含
 

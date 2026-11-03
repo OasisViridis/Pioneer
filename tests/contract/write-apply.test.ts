@@ -5,7 +5,9 @@ import {
   readdir,
   readFile,
   realpath,
+  rename,
   rm,
+  symlink,
   writeFile,
 } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -340,6 +342,48 @@ describe('write execution', () => {
     expect((await readdir(root)).some((name) => name.endsWith('.tmp'))).toBe(
       false,
     );
+  });
+
+  it('refuses a parent directory swapped for a junction after the temp file exists', async () => {
+    const probe = await journalProbe();
+    const moved = `${root}-moved`;
+    const state = { swapped: false };
+    try {
+      const result = await applyWriteBatch({
+        projectRoot: root,
+        runId: RUN_ID,
+        revision: 1,
+        targets: [targetOf('README.md', 'alpha\nbeta\n', 'alpha\nBETA\n')],
+        contents,
+        permission: permissionOf(),
+        journal: probe.journal,
+        now: () => AT,
+        hooks: {
+          beforeReplace: async () => {
+            await rename(root, moved);
+            try {
+              await symlink(moved, root, 'junction');
+              state.swapped = true;
+            } catch (error) {
+              await rename(moved, root);
+              throw error;
+            }
+          },
+        },
+      });
+      if (!state.swapped) return;
+      expect(result).toMatchObject({ status: 'failed', code: 'WRITE_FAILED' });
+      if (result.status !== 'failed') return;
+      expect(result.report.outcomes).toEqual([
+        { path: 'README.md', status: 'failed', code: 'TARGET_UNREADABLE' },
+      ]);
+      expect(await readFile(join(moved, 'README.md'), 'utf-8')).toBe(
+        'alpha\nbeta\n',
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true }).catch(() => undefined);
+      await rm(moved, { recursive: true, force: true }).catch(() => undefined);
+    }
   });
 
   it('records an unverified applied state when the post-image cannot be read back', async () => {

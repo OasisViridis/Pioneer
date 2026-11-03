@@ -488,7 +488,7 @@ export class WriteProposalRegistry {
         diff: diff.text,
       });
     }
-    stored.preview = WritePreviewSchema.parse({
+    const nextPreview = WritePreviewSchema.parse({
       ...stored.preview,
       previewRevision: stored.preview.previewRevision + 1,
       targets,
@@ -506,9 +506,12 @@ export class WriteProposalRegistry {
     const totalBytes =
       this.retainedBytes() - stored.retainedBytes + refreshedBytes;
     if (totalBytes > this.maxBytes) {
+      // Do not commit the new preview: committing it while keeping the old
+      // byte count would let later proposals exceed the retained budget.
       stored.state = 'expired';
       return { ok: false, code: 'PREVIEW_EXPIRED' };
     }
+    stored.preview = nextPreview;
     stored.retainedBytes = refreshedBytes;
     stored.report = null;
     return { ok: true, preview: structuredClone(stored.preview) };

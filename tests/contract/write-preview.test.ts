@@ -371,4 +371,36 @@ describe('write proposal registry', () => {
       ).toEqual({ ok: false, code: 'PROPOSAL_NOT_FOUND' });
     }
   });
+
+  it('does not commit a refresh that exceeds the byte budget', async () => {
+    const small = new WriteProposalRegistry({ now: () => AT, maxBytes: 700 });
+    await writeFile(join(root, 'README.md'), 'alpha\n', 'utf-8');
+    const proposed = await small.propose({
+      binding: BINDING,
+      runId: 'run-0000000000001',
+      revision: 1,
+      projectRoot: root,
+      path: 'README.md',
+      content: 'beta\n',
+    });
+    expect(proposed.ok).toBe(true);
+    if (!proposed.ok) return;
+    const identity = {
+      ...BINDING,
+      proposalId: proposed.proposalId,
+      runId: 'run-0000000000001',
+      revision: 1,
+      previewRevision: 1,
+    };
+    await writeFile(join(root, 'README.md'), `${'x'.repeat(400)}\n`, 'utf-8');
+    expect(await small.refresh(identity)).toEqual({
+      ok: false,
+      code: 'PREVIEW_EXPIRED',
+    });
+    const after = small.get(identity);
+    expect(after).toMatchObject({ ok: true, state: 'expired' });
+    if (!after.ok) return;
+    expect(after.preview.previewRevision).toBe(1);
+    expect(after.preview.targets[0]?.before.sha256).toBe(sha256Of('alpha\n'));
+  });
 });

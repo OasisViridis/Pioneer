@@ -159,6 +159,16 @@ async function replaceFileAtomically(
 
     await hooks.beforeReplace?.(absolutePath);
 
+    // The directory itself can be swapped for a junction after the temp file
+    // exists; check it again immediately before the final read and rename.
+    const canonicalAfterTemp = await realpath(directory).catch(() => null);
+    if (
+      canonicalAfterTemp === null ||
+      !sameCanonicalPath(canonicalAfterTemp, directory)
+    ) {
+      return { ok: false, code: 'TARGET_UNREADABLE' };
+    }
+
     // The user may have edited the file in place while the temp file was being
     // written. Identity alone would miss that, so compare the reviewed bytes.
     let currentRead;

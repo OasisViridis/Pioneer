@@ -2,7 +2,7 @@
 
 日期：2026-10-27（2026-11-02 改为权限模式模型）。来源：[Issue #18](https://github.com/OasisViridis/Pioneer/issues/18)，属于[主地图 #9](https://github.com/OasisViridis/Pioneer/issues/9) 的 P4 决策票。
 
-本规格只定义决策，不实现写入。写入能力保持关闭，直到 #19/#20 实现并通过验收：没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段。
+本规格只定义决策，不实现写入。写入能力保持关闭，直到 #19/#20 实现并通过验收：本规格本身没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段（#19 的实现见文末接入说明与 [P4-A 规格](2026-11-03-p4a-write-preview.md)）。
 
 ## 本次决策与交付范围
 
@@ -83,7 +83,7 @@
 
 ### 2.5 自动审查（EXP）的不变量
 
-一次写入必须同时满足才允许落盘：权限有效、目标在 `scope` 内、不在保护路径、目标内容仍等于 `before`、文件身份可确认（记录过就必须一致）。`auto_review` 与 `workspace_write` 的写前检查完全相同，唯一差别是 `checkWritePermission` 返回 `confirmation: 'none'`，调用方因此不再逐次询问；它不减弱任何检查，也不是"先写后审"。
+一次写入必须同时满足才允许落盘：权限有效、目标在 `scope` 内、不在保护路径、目标内容仍等于 `before`、文件身份可确认（记录过就必须一致）。`auto_review` 与 `workspace_write` 的写前检查完全相同，唯一差别是 `checkWritePermission` 返回 `confirmation: 'none'`，调用方因此不再逐次询问；它不减弱任何检查，也不是"先写后审"。#19 的提案入口在目标尚未形成完整批次时直接读取同一份 `permission.mode`；`auto_review` 是唯一会返回 `confirmation: 'none'` 的档位，两者等价。
 
 写后必须回读并核对 `after` 的哈希；不一致记 `verification_failed`，停止后续写入，保留现场，不自动覆盖或回滚。首版只支持替换已有普通文件的文本内容，不开放创建、删除、改名与命令执行。
 
