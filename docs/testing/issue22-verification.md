@@ -34,7 +34,8 @@
 | 类型检查        | `pnpm typecheck`                                                                                                        | 退出码 0                                                             |
 | Contract Tests  | `pnpm test:contract`                                                                                                    | 44 个文件、521 项全部通过                                            |
 | Prototype Tests | `pnpm test:prototype`                                                                                                   | Prototype Tests: 210/210 通过；冻结口径不变                          |
-| 完整门禁        | CI run [41619340221](https://github.com/OasisViridis/Pioneer/actions/runs/41619340221)（`d82d8c7`，PR #70）              | `Windows / pnpm check` 9m45s 通过；`Windows / reviewed visual baseline` 1m38s 通过；最终提交的 CI 见 PR 检查页 |
+| 完整门禁        | CI run [41619340221](https://github.com/OasisViridis/Pioneer/actions/runs/41619340221)（`d82d8c7`，PR #70）              | `Windows / pnpm check` 9m45s 通过；`Windows / reviewed visual baseline` 1m38s 通过 |
+| 完整门禁（复盘） | CI run [41667074761](https://github.com/OasisViridis/Pioneer/actions/runs/41667074761)（`3e8b2f2`，PR #70）              | `Windows / pnpm check` 与 visual baseline 均通过；确认文字提交是之后的文档改动，见 PR 检查页 |
 
 本地不执行完整 `pnpm check`：它包含 Real Electron E2E，会在使用者桌面弹出窗口。按 #18 的既有做法，完整门禁由推送后的 CI `Windows / pnpm check` 执行，结果以该次 CI run 为准；本记录的本地部分只覆盖无窗口检查。
 
@@ -132,11 +133,11 @@
 | 3. 逐项说明程序、参数、环境、目录、文件与网络如何授权或待决 | 规格 §5.2–§5.6 已写；文件与网络明确标为应用层无法限制                |
 | 4. 定义停止、超时、子进程、崩溃及部分副作用如何核对与呈现   | 规格 §7 已写；区分受控树不确定与作业外不确定                         |
 | 5. 列出拒绝路径和不可验证条件，不依赖黑名单沙箱说法         | 规格 §8 已写；§3.4、§5.6、§7.1 明确不称隔离；§9 列出 #23 两处需要改写的验收措辞 |
-| 6. 产物通过安全审阅并获得人类确认；确认前命令能力关闭       | 双轴审阅与三轮外部复核已完成，发现已处理；人类确认待业主回复；命令能力保持关闭 |
+| 6. 产物通过安全审阅并获得人类确认；确认前命令能力关闭       | 双轴审阅与三轮外部复核完成，发现已处理；业主 2026-11-03 确认全部 16 项；命令能力保持关闭 |
 
 ## 人类确认状态
 
-待业主确认。规格 §11 的 16 项决定（3a、3b 分列）目前是建议值，确认前命令能力保持关闭。
+2026-11-03 业主在会话中确认全部 16 项决定，原话“确认，关吧”：13 项按建议值，3b、13、15 按第三轮复核后的收窄/细化版本；1 与 14 成组确认。确认后 Issue #22 关闭；命令能力仍关闭，直到 #23 实现并验收。
 
 ## NOT_RUN
 
