@@ -88,6 +88,9 @@ function createFakeRunPort(options: {
   getRunContext?: () => Promise<RunContextReply>;
   startReply?: { ok: true; runId: string } | { ok: false; code: string };
   getRun?: () => Promise<RunPage | null>;
+  acknowledge?: (
+    request: Parameters<RunPort['acknowledgeRunPage']>[0],
+  ) => Promise<void>;
 }): FakeRunPort {
   const ackedPages: number[] = [];
   const unsubscribedRuns: FakeRunPort['unsubscribedRuns'] = [];
@@ -134,6 +137,8 @@ function createFakeRunPort(options: {
         })),
     subscribeRun: () => Promise.resolve(true),
     acknowledgeRunPage: (request) => {
+      if (options.acknowledge !== undefined)
+        return options.acknowledge(request);
       ackedPages.push(request.afterSeq);
       return Promise.resolve();
     },
@@ -243,6 +248,50 @@ describe('run view delivery cursor', () => {
         revision: REVISION,
       },
     ]);
+  });
+
+  it('does not revoke the subscription before the terminal ACK resolves', async () => {
+    let releaseAck: () => void = () => undefined;
+    const ackGate = new Promise<void>((resolve) => {
+      releaseAck = resolve;
+    });
+    const port = createFakeRunPort({
+      getRunPage: null,
+      stopReply: { ok: true, status: 'completed' },
+      acknowledge: () => ackGate,
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+    const completed: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 1,
+      at: '2026-10-25T00:00:02.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: {
+        type: 'run.completed',
+        usage: { inputTokens: null, outputTokens: null },
+      },
+    };
+    port.emit({
+      page: pageOf({
+        status: 'completed',
+        events: [completed],
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+    });
+    await flushBatches();
+    // The terminal event is applied and the summary recorded, but the ACK is
+    // still in flight; the main subscription must stay alive until it resolves.
+    expect(store.get(SESSION_ID).events.map((event) => event.seq)).toEqual([1]);
+    expect(port.unsubscribedRuns).toEqual([]);
+
+    releaseAck();
+    await flushBatches();
+    expect(port.unsubscribedRuns).toHaveLength(1);
   });
 
   it('keeps the subscription while a terminal page still has more events', async () => {
