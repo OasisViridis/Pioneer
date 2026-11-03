@@ -1,9 +1,11 @@
 import { app, dialog, ipcMain } from 'electron';
+import { join } from 'node:path';
 
 import { CatalogService } from './catalog/catalog-service';
 import { scanWorkspace } from './catalog/scanner';
-import { registerCatalogIpc } from './ipc';
-import { IPC_CHANNELS } from '../shared/contracts/ipc';
+import { registerCatalogIpc, registerWriteExecutionIpc } from './ipc';
+import { IPC_CHANNELS, WRITE_IPC_CHANNELS } from '../shared/contracts/ipc';
+import { WriteExecutionService } from './write-execution';
 import { applyLaunchRuntimeConfig } from './runtime-config';
 import {
   applyPackagedAcceptanceConfig,
@@ -159,6 +161,22 @@ const openMainWindow = (service: CatalogService): void => {
     webContentsId: boundWebContentsId,
     epoch: windowEpochCounter,
   };
+  const expectedRendererUrl =
+    new URL(MAIN_WINDOW_WEBPACK_ENTRY).protocol === 'file:'
+      ? MAIN_WINDOW_WEBPACK_ENTRY
+      : new URL(MAIN_WINDOW_WEBPACK_ENTRY).origin;
+  const writeExecution = new WriteExecutionService({
+    resolveProjectRoot: async (projectId) => {
+      const catalog = await service.getCatalog();
+      return (
+        catalog.projects.find((candidate) => candidate.id === projectId)
+          ?.absolutePath ?? null
+      );
+    },
+    // The change journal lives with the app's own data, never inside a project:
+    // the executor refuses a journal path under the project it describes.
+    journalPath: join(app.getPath('userData'), 'write-journal.jsonl'),
+  });
   if (store === null)
     throw new Error(
       'Session store must be initialized before opening the workspace.',
@@ -194,6 +212,7 @@ const openMainWindow = (service: CatalogService): void => {
       if (isMainFrame && !isInPlace) {
         closeCoordinator.disconnect();
         closeBarrier.invalidate();
+        writeExecution.invalidate();
         // Contract §1: a navigation rebuilds the window binding. Runs from the
         // previous document lose their window and are stopped instead of keep
         // running behind a dead renderer.
@@ -209,6 +228,7 @@ const openMainWindow = (service: CatalogService): void => {
   trustedWindow.webContents.on('render-process-gone', () => {
     closeCoordinator.disconnect();
     closeBarrier.invalidate();
+    writeExecution.invalidate();
     runHost?.manager.abandonWindow(boundWebContentsId);
     windowEpochCounter += 1;
     activeWindowBinding = {
@@ -219,6 +239,7 @@ const openMainWindow = (service: CatalogService): void => {
   trustedWindow.once('closed', () => {
     closeCoordinator.disconnect();
     closeBarrier.invalidate();
+    writeExecution.invalidate();
     runHost?.manager.abandonWindow(boundWebContentsId);
     if (activeWindowBinding?.webContentsId === boundWebContentsId) {
       activeWindowBinding = null;
@@ -228,16 +249,14 @@ const openMainWindow = (service: CatalogService): void => {
   });
   for (const channel of [
     ...Object.values(IPC_CHANNELS),
+    ...Object.values(WRITE_IPC_CHANNELS),
     ...Object.values(SESSION_IPC_CHANNELS),
     ...Object.values(RUN_IPC_CHANNELS),
   ]) {
     ipcMain.removeHandler(channel);
   }
   registerCatalogIpc({
-    expectedRendererUrl:
-      new URL(MAIN_WINDOW_WEBPACK_ENTRY).protocol === 'file:'
-        ? MAIN_WINDOW_WEBPACK_ENTRY
-        : new URL(MAIN_WINDOW_WEBPACK_ENTRY).origin,
+    expectedRendererUrl,
     ipcMain: {
       handle: (channel, handler) => {
         ipcMain.handle(channel, (event, ...args: unknown[]) =>
@@ -269,11 +288,22 @@ const openMainWindow = (service: CatalogService): void => {
     },
     service,
   });
+  registerWriteExecutionIpc({
+    expectedRendererUrl,
+    ipcMain: {
+      handle: (channel, handler) => {
+        ipcMain.handle(channel, (event, ...args: unknown[]) =>
+          handler(event, ...args),
+        );
+      },
+    },
+    mainWindow: { webContents: trustedWindow.webContents },
+    windowEpoch: () => activeWindowBinding?.epoch ?? windowEpochCounter,
+    prepare: (input, binding) => writeExecution.prepare(input, binding),
+    execute: (request, binding) => writeExecution.execute(request, binding),
+  });
   registerSessionStateIpc({
-    expectedRendererUrl:
-      new URL(MAIN_WINDOW_WEBPACK_ENTRY).protocol === 'file:'
-        ? MAIN_WINDOW_WEBPACK_ENTRY
-        : new URL(MAIN_WINDOW_WEBPACK_ENTRY).origin,
+    expectedRendererUrl,
     ipcMain: {
       handle: (channel, handler) => {
         ipcMain.handle(channel, (event, ...args: unknown[]) =>
@@ -307,10 +337,7 @@ const openMainWindow = (service: CatalogService): void => {
         },
       },
       mainWindow: { webContents: trustedWindow.webContents },
-      expectedRendererUrl:
-        new URL(MAIN_WINDOW_WEBPACK_ENTRY).protocol === 'file:'
-          ? MAIN_WINDOW_WEBPACK_ENTRY
-          : new URL(MAIN_WINDOW_WEBPACK_ENTRY).origin,
+      expectedRendererUrl,
       manager: runHost.manager,
       listMaterials: async (projectId) => {
         const service = catalogService;
