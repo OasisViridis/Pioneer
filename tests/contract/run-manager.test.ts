@@ -1101,6 +1101,85 @@ describe('P2 run manager review hardening', () => {
     manager.unsubscribe(identityOf(runId));
   });
 
+  it('delivers and acknowledges two sessions in the same window independently', async () => {
+    const { manager, sender } = await createManager({
+      steps: [
+        { action: 'wait', ms: 150 },
+        { action: 'text', text: '各自的事件' },
+        { action: 'complete' },
+      ],
+    });
+    const first = await launchRun(manager, {
+      sessionId: 'session:alpha',
+      requestId: 'request:alpha',
+    });
+    const second = await launchRun(manager, {
+      sessionId: 'session:beta',
+      requestId: 'request:beta',
+    });
+    const alpha = identityOf(first.runId, { sessionId: 'session:alpha' });
+    const beta = identityOf(second.runId, { sessionId: 'session:beta' });
+    expect(manager.subscribe({ ...alpha, afterSeq: 0 })).toBe(true);
+    expect(manager.subscribe({ ...beta, afterSeq: 0 })).toBe(true);
+    await waitFor(
+      () =>
+        new Set(sender.batches.map((batch) => batch.page.identity.sessionId))
+          .size === 2,
+    );
+    for (const batch of sender.batches) {
+      const identity = batch.page.identity;
+      manager.acknowledge({
+        ...identityOf(identity.runId, {
+          sessionId: identity.sessionId,
+          projectId: identity.projectId,
+          revision: identity.revision,
+        }),
+        afterSeq: batch.page.nextAfterSeq,
+      });
+    }
+    await waitFor(
+      () =>
+        manager.getRun({ ...alpha, afterSeq: 0 })?.status === 'completed' &&
+        manager.getRun({ ...beta, afterSeq: 0 })?.status === 'completed',
+    );
+    manager.unsubscribe(alpha);
+    manager.unsubscribe(beta);
+  });
+
+  it('drops a subscriber whose window epoch changed', async () => {
+    let epoch = windowEpoch;
+    const { manager, sender } = await createManager(
+      {
+        steps: [
+          { action: 'wait', ms: 200 },
+          { action: 'text', text: '后续事件' },
+          { action: 'complete' },
+        ],
+      },
+      {
+        windowBindings: {
+          epochFor: (id) => (id === webContentsId ? epoch : null),
+        },
+      },
+    );
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'running');
+    expect(manager.subscribe({ ...identityOf(runId), afterSeq: 0 })).toBe(true);
+    await waitFor(() => sender.batches.length === 1);
+    const before = sender.batches.length;
+    epoch = windowEpoch + 1;
+    manager.acknowledge({
+      ...identityOf(runId),
+      afterSeq: sender.batches[0]?.page.nextAfterSeq ?? 0,
+    });
+    await new Promise((resolve) => {
+      setTimeout(resolve, 80);
+    });
+    // The run keeps the old epoch; the rebuilt window's id must not receive
+    // the pre-rebuild run's next batch.
+    expect(sender.batches).toHaveLength(before);
+  });
+
   it('revokes the window subscription when its window is abandoned', async () => {
     const { manager, sender } = await createManager({
       steps: [{ action: 'wait', ms: 200 }, { action: 'complete' }],

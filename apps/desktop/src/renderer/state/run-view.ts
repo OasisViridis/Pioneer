@@ -143,12 +143,7 @@ export interface RunPort {
     revision: number;
     afterSeq: number;
   }): Promise<void>;
-  unsubscribeRun(request: {
-    sessionId: string;
-    projectId: string;
-    runId: string;
-    revision: number;
-  }): Promise<void>;
+  unsubscribeRun(request: RunIdentity): Promise<void>;
   onRunEventBatch(callback: (batch: RunEventBatch) => void): () => void;
 }
 
@@ -330,9 +325,9 @@ export class RunViewStore {
     this.states.get(sessionId) ?? IDLE_STATE;
 
   /** Revokes the main-side subscription once its run can produce no more events. */
-  private releaseSubscription(sessionId: string): void {
+  private releaseSubscription(sessionId: string, runId: string): void {
     const subscription = this.subscriptions.get(sessionId);
-    if (subscription === undefined) return;
+    if (subscription?.runId !== runId) return;
     this.subscriptions.delete(sessionId);
     void this.port
       .unsubscribeRun({ sessionId, ...subscription })
@@ -519,7 +514,10 @@ export class RunViewStore {
         afterSeq: batch.page.nextAfterSeq,
       });
     } finally {
-      if (terminal) this.releaseSubscription(sessionId);
+      // A terminal page can still have older events queued (hasMore); keep the
+      // subscription until the tail has been acknowledged.
+      if (terminal && !batch.page.hasMore)
+        this.releaseSubscription(sessionId, identity.runId);
     }
   }
 
@@ -863,7 +861,8 @@ export class RunViewStore {
             // first page still records the durable terminal summary.
             this.update(input.sessionId, { phase: 'terminal' });
             this.recordTerminal(input.sessionId, started.runId);
-            this.releaseSubscription(input.sessionId);
+            if (!page.hasMore)
+              this.releaseSubscription(input.sessionId, started.runId);
           }
         }
       }

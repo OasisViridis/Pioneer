@@ -244,6 +244,40 @@ describe('run view delivery cursor', () => {
       },
     ]);
   });
+
+  it('keeps the subscription while a terminal page still has more events', async () => {
+    const port = createFakeRunPort({
+      getRunPage: null,
+      stopReply: { ok: true, status: 'completed' },
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+
+    port.emit({
+      page: pageOf({
+        status: 'completed',
+        events: sequence(1, 1),
+        lastSeq: 40,
+        nextAfterSeq: 1,
+        hasMore: true,
+      }),
+    });
+    await flushBatches();
+    expect(store.get(SESSION_ID).phase).toBe('terminal');
+    expect(port.unsubscribedRuns).toEqual([]);
+
+    port.emit({
+      page: pageOf({
+        status: 'completed',
+        events: sequence(2, 2),
+        lastSeq: 40,
+        nextAfterSeq: 2,
+        hasMore: false,
+      }),
+    });
+    await flushBatches();
+    expect(port.unsubscribedRuns).toHaveLength(1);
+  });
 });
 
 describe('run view stop rejection', () => {

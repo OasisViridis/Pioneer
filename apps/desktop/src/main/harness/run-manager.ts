@@ -80,6 +80,12 @@ export interface ProjectBinding {
 /** RUN_LIMITS with widened numeric fields so tests can override timers. */
 export type RunLimits = { readonly [K in keyof typeof RUN_LIMITS]: number };
 
+/** Run identity plus the window binding that owns the run. */
+type RunOwner = RunIdentity & {
+  webContentsId: number;
+  windowEpoch: number;
+};
+
 export interface WindowBindingPort {
   epochFor(webContentsId: number): number | null;
 }
@@ -1046,13 +1052,7 @@ export class RunManager {
       windowEpoch: number;
       identity: RunIdentity;
     },
-    input: {
-      sessionId: string;
-      projectId: string;
-      revision: number;
-      webContentsId: number;
-      windowEpoch: number;
-    },
+    input: RunOwner,
   ): boolean {
     return (
       run.webContentsId === input.webContentsId &&
@@ -1220,7 +1220,13 @@ export class RunManager {
     if (run.publishHeld) return;
     const now = this.now();
     for (const subscriber of [...run.subscribers.values()]) {
-      if (subscriber.windowEpoch !== run.windowEpoch) {
+      // The run keeps the epoch it started with. A rebuilt/navigated window
+      // gets a new epoch for the same webContentsId; drop the old subscriber
+      // instead of delivering the pre-rebuild run's batches to it.
+      const currentEpoch = this.dependencies.windowBindings.epochFor(
+        subscriber.webContentsId,
+      );
+      if (currentEpoch === null || currentEpoch !== subscriber.windowEpoch) {
         run.subscribers.delete(subscriber.webContentsId);
         continue;
       }
