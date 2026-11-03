@@ -963,3 +963,126 @@
 .permission-card[data-state='Approved'] .permission-card__message {
   color: var(--hazel-success-ink);
 }
+
+.change-review {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  overflow: auto;
+}
+
+.change-review__header {
+  display: grid;
+  gap: 4px;
+}
+
+.change-review__header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.change-review__diff,
+.change-review__result {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--pioneer-border);
+  border-radius: var(--pioneer-radius);
+  background: var(--pioneer-surface);
+}
+
+.change-review__diff-header h4,
+.change-review__result h4 {
+  margin: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.change-review__lines {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  border-radius: 8px;
+  background: var(--pioneer-surface-muted);
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  max-height: 260px;
+  overflow: auto;
+}
+
+.change-review__line {
+  padding: 0 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.change-review__line--context {
+  color: var(--hazel-secondary);
+}
+
+.change-review__line--added {
+  background: var(--hazel-jade);
+  color: var(--hazel-success-ink);
+}
+
+.change-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.change-review__status {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--pioneer-notice);
+  color: var(--pioneer-foreground);
+  font-size: 13px;
+}
+
+.change-review__status--success {
+  background: var(--hazel-jade);
+  color: var(--hazel-success-ink);
+}
+
+.change-review__targets {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.change-review__targets > li {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--pioneer-surface-muted);
+}
+
+.change-review__target-path {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.change-review__target-status {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.change-review__target-status--applied,
+.change-review__target-status--restored {
+  color: var(--hazel-success-ink);
+}
+
+.change-review__target-status--rejected,
+.change-review__target-status--verification_failed,
+.change-review__target-status--failed,
+.change-review__target-status--unknown {
+  color: var(--hazel-danger-ink);
+}

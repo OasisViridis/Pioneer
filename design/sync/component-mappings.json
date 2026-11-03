@@ -452,7 +452,7 @@
     "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "2d39cd9aeeeb35137a6813016a4cf1e8dce9fcf1",
     "apps/desktop/src/renderer/components/Conversation.tsx": "cf72736a084a10821e93d876ebde2506fc3e13f3",
     "apps/desktop/src/renderer/styles/app.css": "cfce7cf1c923f3e0b4febc85b49a3d1e96b15658",
-    "apps/desktop/src/renderer/styles/session-workbench.css": "339ef7d4904caf7c385636a53ee8ff554fc814cd",
+    "apps/desktop/src/renderer/styles/session-workbench.css": "892f80ac4a958d22b929e645341c8f3a577a810c",
     "tests/e2e/design-mappings.e2e.spec.ts": "fd338c7b3c41db408791b259373bdd1108ae72fd",
     "tests/e2e/p2-run.e2e.spec.ts": "08363406bd9129bc9891b472a6a95fd3ea952393",
     "tests/e2e/design-decoration.e2e.spec.ts": "ee00c34bc7c5699d7c52bbbd1553b73e3b03da58"

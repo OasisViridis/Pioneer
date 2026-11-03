@@ -1,0 +1,1298 @@
+{
+  "schemaVersion": 1,
+  "request": {
+    "schemaVersion": 1,
+    "featureId": "change-approval-preview",
+    "issue": 19,
+    "changeType": "ui",
+    "baseSha": "c6eac9bf5bdfd4fe29da5fcddaa7844f1f2911df",
+    "design": {
+      "commit": "499efe4172e6539a676a8539c49dd566ed36dc86",
+      "path": "design/delivery/events/965418ec263c4dbb4a1f77ac44ee62ab9bcb252784361a784a751cb209328500.json",
+      "sha256": "0cfc2f66480ee6e1d7462dad9374b228c1fa6ea69e00ddc4fbaf764ac3ecc79a",
+      "kind": "version",
+      "version": "2417598685933588034",
+      "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+      "nodes": [
+        "830:1593"
+      ]
+    },
+    "behaviorChanges": []
+  },
+  "nodes": [
+    {
+      "id": "830:1593",
+      "type": "COMPONENT_SET",
+      "name": "Pioneer v3 / Permission Card",
+      "absoluteBoundingBox": {
+        "x": 100,
+        "y": 3800,
+        "width": 1080,
+        "height": 792
+      },
+      "properties": {
+        "Operation#725:23": {
+          "type": "TEXT",
+          "defaultValue": "对象：毕业项目的设计文档"
+        },
+        "Scope#725:28": {
+          "type": "TEXT",
+          "defaultValue": "路径：D:/Project/Pioneer/docs\n权限：只读；不写入、不执行命令"
+        },
+        "Recipient#725:33": {
+          "type": "TEXT",
+          "defaultValue": "接收方：本地示例运行器；不外发"
+        },
+        "Expiry#725:38": {
+          "type": "TEXT",
+          "defaultValue": "时效：仅此一次；目标变更或超时即失效"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Awaiting",
+          "variantOptions": [
+            "Awaiting",
+            "Denied",
+            "Expired",
+            "Approved"
+          ]
+        }
+      },
+      "children": [
+        {
+          "id": "830:1594",
+          "type": "COMPONENT",
+          "name": "State=Awaiting",
+          "absoluteBoundingBox": {
+            "x": 124,
+            "y": 3824,
+            "width": 504,
+            "height": 360
+          },
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 12,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+          "paddingBottom": 16,
+          "children": [
+            {
+              "id": "830:1595",
+              "type": "FRAME",
+              "name": "Future boundary",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 3841,
+                "width": 470,
+                "height": 38
+              },
+              "layoutMode": "VERTICAL",
+              "paddingLeft": 8,
+              "paddingRight": 8,
+              "paddingTop": 8,
+              "paddingBottom": 8,
+              "children": [
+                {
+                  "id": "830:1596",
+                  "type": "TEXT",
+                  "name": "Message",
+                  "characters": "设计示例 · 尚未接入 · 不具授权效力",
+                  "absoluteBoundingBox": {
+                    "x": 149,
+                    "y": 3849,
+                    "width": 454,
+                    "height": 22
+                  }
+                }
+              ]
+            },
+            {
+              "id": "830:1597",
+              "type": "TEXT",
+              "name": "State title",
+              "characters": "是否批准本次读取？",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 3891,
+                "width": 470,
+                "height": 28
+              }
+            },
+            {
+              "id": "830:1598",
+              "type": "TEXT",
+              "name": "Operation",
+              "characters": "对象：毕业项目的设计文档",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 3931,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1599",
+              "type": "TEXT",
+              "name": "Scope",
+              "characters": "路径：D:/Project/Pioneer/docs\n权限：只读；不写入、不执行命令",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 3965,
+                "width": 470,
+                "height": 44
+              }
+            },
+            {
+              "id": "830:1600",
+              "type": "TEXT",
+              "name": "Recipient",
+              "characters": "接收方：本地示例运行器；不外发",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4021,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1601",
+              "type": "TEXT",
+              "name": "Expiry",
+              "characters": "时效：仅此一次；目标变更或超时即失效",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4055,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1602",
+              "type": "TEXT",
+              "name": "State message",
+              "characters": "尚未读取；拒绝不丢失当前讨论",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4089,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1603",
+              "type": "FRAME",
+              "name": "Actions",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4123,
+                "width": 470,
+                "height": 44
+              },
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 8,
+              "children": [
+                {
+                  "id": "830:1604",
+                  "type": "INSTANCE",
+                  "name": "Action · 批准本次读取",
+                  "absoluteBoundingBox": {
+                    "x": 141,
+                    "y": 4123,
+                    "width": 148,
+                    "height": 44
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                  "paddingBottom": 4,
+                  "children": [
+                    {
+                      "id": "I830:1604;830:1278",
+                      "type": "FRAME",
+                      "name": "Button surface",
+                      "absoluteBoundingBox": {
+                        "x": 145,
+                        "y": 4127,
+                        "width": 140,
+                        "height": 36
+                      },
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 4,
+                      "paddingLeft": 8,
+                      "paddingRight": 8,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "id": "I830:1604;830:1279",
+                          "type": "TEXT",
+                          "name": "Label",
+                          "characters": "批准本次读取",
+                          "absoluteBoundingBox": {
+                            "x": 173,
+                            "y": 4135,
+                            "width": 84,
+                            "height": 20
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "830:1605",
+                  "type": "INSTANCE",
+                  "name": "Action · 拒绝并保留讨论",
+                  "absoluteBoundingBox": {
+                    "x": 297,
+                    "y": 4123,
+                    "width": 168,
+                    "height": 44
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                  "paddingBottom": 4,
+                  "children": [
+                    {
+                      "id": "I830:1605;830:1297",
+                      "type": "FRAME",
+                      "name": "Button surface",
+                      "absoluteBoundingBox": {
+                        "x": 301,
+                        "y": 4127,
+                        "width": 160,
+                        "height": 36
+                      },
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 4,
+                      "paddingLeft": 8,
+                      "paddingRight": 8,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "id": "I830:1605;830:1298",
+                          "type": "TEXT",
+                          "name": "Label",
+                          "characters": "拒绝并保留讨论",
+                          "absoluteBoundingBox": {
+                            "x": 332,
+                            "y": 4135,
+                            "width": 98,
+                            "height": 20
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "830:1606",
+          "type": "COMPONENT",
+          "name": "State=Denied",
+          "absoluteBoundingBox": {
+            "x": 652,
+            "y": 3824,
+            "width": 504,
+            "height": 360
+          },
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 12,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+          "paddingBottom": 16,
+          "children": [
+            {
+              "id": "830:1607",
+              "type": "FRAME",
+              "name": "Future boundary",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 3841,
+                "width": 470,
+                "height": 38
+              },
+              "layoutMode": "VERTICAL",
+              "paddingLeft": 8,
+              "paddingRight": 8,
+              "paddingTop": 8,
+              "paddingBottom": 8,
+              "children": [
+                {
+                  "id": "830:1608",
+                  "type": "TEXT",
+                  "name": "Message",
+                  "characters": "设计示例 · 尚未接入 · 不具授权效力",
+                  "absoluteBoundingBox": {
+                    "x": 677,
+                    "y": 3849,
+                    "width": 454,
+                    "height": 22
+                  }
+                }
+              ]
+            },
+            {
+              "id": "830:1609",
+              "type": "TEXT",
+              "name": "State title",
+              "characters": "你已拒绝本次读取",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 3891,
+                "width": 470,
+                "height": 28
+              }
+            },
+            {
+              "id": "830:1610",
+              "type": "TEXT",
+              "name": "Operation",
+              "characters": "对象：毕业项目的设计文档",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 3931,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1611",
+              "type": "TEXT",
+              "name": "Scope",
+              "characters": "路径：D:/Project/Pioneer/docs\n权限：只读；不写入、不执行命令",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 3965,
+                "width": 470,
+                "height": 44
+              }
+            },
+            {
+              "id": "830:1612",
+              "type": "TEXT",
+              "name": "Recipient",
+              "characters": "接收方：本地示例运行器；不外发",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4021,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1613",
+              "type": "TEXT",
+              "name": "Expiry",
+              "characters": "时效：仅此一次；目标变更或超时即失效",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4055,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1614",
+              "type": "TEXT",
+              "name": "State message",
+              "characters": "未执行，可修改需求后重新核对",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4089,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1615",
+              "type": "FRAME",
+              "name": "Actions",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4123,
+                "width": 470,
+                "height": 44
+              },
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 8,
+              "children": [
+                {
+                  "id": "830:1616",
+                  "type": "INSTANCE",
+                  "name": "Action · 重新核对范围",
+                  "absoluteBoundingBox": {
+                    "x": 669,
+                    "y": 4123,
+                    "width": 148,
+                    "height": 44
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                  "paddingBottom": 4,
+                  "children": [
+                    {
+                      "id": "I830:1616;830:1297",
+                      "type": "FRAME",
+                      "name": "Button surface",
+                      "absoluteBoundingBox": {
+                        "x": 673,
+                        "y": 4127,
+                        "width": 140,
+                        "height": 36
+                      },
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 4,
+                      "paddingLeft": 8,
+                      "paddingRight": 8,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "id": "I830:1616;830:1298",
+                          "type": "TEXT",
+                          "name": "Label",
+                          "characters": "重新核对范围",
+                          "absoluteBoundingBox": {
+                            "x": 701,
+                            "y": 4135,
+                            "width": 84,
+                            "height": 20
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "830:1617",
+                  "type": "INSTANCE",
+                  "name": "Action · 返回讨论",
+                  "absoluteBoundingBox": {
+                    "x": 825,
+                    "y": 4123,
+                    "width": 148,
+                    "height": 44
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                  "paddingBottom": 4,
+                  "children": [
+                    {
+                      "id": "I830:1617;830:1316",
+                      "type": "FRAME",
+                      "name": "Button surface",
+                      "absoluteBoundingBox": {
+                        "x": 829,
+                        "y": 4127,
+                        "width": 140,
+                        "height": 36
+                      },
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 4,
+                      "paddingLeft": 8,
+                      "paddingRight": 8,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "id": "I830:1617;830:1317",
+                          "type": "TEXT",
+                          "name": "Label",
+                          "characters": "返回讨论",
+                          "absoluteBoundingBox": {
+                            "x": 871,
+                            "y": 4135,
+                            "width": 56,
+                            "height": 20
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "830:1618",
+          "type": "COMPONENT",
+          "name": "State=Expired",
+          "absoluteBoundingBox": {
+            "x": 124,
+            "y": 4208,
+            "width": 504,
+            "height": 360
+          },
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 12,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+          "paddingBottom": 16,
+          "children": [
+            {
+              "id": "830:1619",
+              "type": "FRAME",
+              "name": "Future boundary",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4225,
+                "width": 470,
+                "height": 38
+              },
+              "layoutMode": "VERTICAL",
+              "paddingLeft": 8,
+              "paddingRight": 8,
+              "paddingTop": 8,
+              "paddingBottom": 8,
+              "children": [
+                {
+                  "id": "830:1620",
+                  "type": "TEXT",
+                  "name": "Message",
+                  "characters": "设计示例 · 尚未接入 · 不具授权效力",
+                  "absoluteBoundingBox": {
+                    "x": 149,
+                    "y": 4233,
+                    "width": 454,
+                    "height": 22
+                  }
+                }
+              ]
+            },
+            {
+              "id": "830:1621",
+              "type": "TEXT",
+              "name": "State title",
+              "characters": "本次批准已失效",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4275,
+                "width": 470,
+                "height": 28
+              }
+            },
+            {
+              "id": "830:1622",
+              "type": "TEXT",
+              "name": "Operation",
+              "characters": "对象：毕业项目的设计文档",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4315,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1623",
+              "type": "TEXT",
+              "name": "Scope",
+              "characters": "路径：D:/Project/Pioneer/docs\n权限：只读；不写入、不执行命令",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4349,
+                "width": 470,
+                "height": 44
+              }
+            },
+            {
+              "id": "830:1624",
+              "type": "TEXT",
+              "name": "Recipient",
+              "characters": "接收方：本地示例运行器；不外发",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4405,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1625",
+              "type": "TEXT",
+              "name": "Expiry",
+              "characters": "时效：仅此一次；目标变更或超时即失效",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4439,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1626",
+              "type": "TEXT",
+              "name": "State message",
+              "characters": "不得复用旧授权；先核对对象和范围",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4473,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1627",
+              "type": "FRAME",
+              "name": "Actions",
+              "absoluteBoundingBox": {
+                "x": 141,
+                "y": 4507,
+                "width": 470,
+                "height": 44
+              },
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 8,
+              "children": [
+                {
+                  "id": "830:1628",
+                  "type": "INSTANCE",
+                  "name": "Action · 重新核对范围",
+                  "absoluteBoundingBox": {
+                    "x": 141,
+                    "y": 4507,
+                    "width": 148,
+                    "height": 44
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                  "paddingBottom": 4,
+                  "children": [
+                    {
+                      "id": "I830:1628;830:1297",
+                      "type": "FRAME",
+                      "name": "Button surface",
+                      "absoluteBoundingBox": {
+                        "x": 145,
+                        "y": 4511,
+                        "width": 140,
+                        "height": 36
+                      },
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 4,
+                      "paddingLeft": 8,
+                      "paddingRight": 8,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "id": "I830:1628;830:1298",
+                          "type": "TEXT",
+                          "name": "Label",
+                          "characters": "重新核对范围",
+                          "absoluteBoundingBox": {
+                            "x": 173,
+                            "y": 4519,
+                            "width": 84,
+                            "height": 20
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "830:1629",
+                  "type": "INSTANCE",
+                  "name": "Action · 返回讨论",
+                  "absoluteBoundingBox": {
+                    "x": 297,
+                    "y": 4507,
+                    "width": 148,
+                    "height": 44
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                  "paddingBottom": 4,
+                  "children": [
+                    {
+                      "id": "I830:1629;830:1316",
+                      "type": "FRAME",
+                      "name": "Button surface",
+                      "absoluteBoundingBox": {
+                        "x": 301,
+                        "y": 4511,
+                        "width": 140,
+                        "height": 36
+                      },
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 4,
+                      "paddingLeft": 8,
+                      "paddingRight": 8,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "id": "I830:1629;830:1317",
+                          "type": "TEXT",
+                          "name": "Label",
+                          "characters": "返回讨论",
+                          "absoluteBoundingBox": {
+                            "x": 343,
+                            "y": 4519,
+                            "width": 56,
+                            "height": 20
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "830:1630",
+          "type": "COMPONENT",
+          "name": "State=Approved",
+          "absoluteBoundingBox": {
+            "x": 652,
+            "y": 4208,
+            "width": 504,
+            "height": 360
+          },
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 12,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+          "paddingBottom": 16,
+          "children": [
+            {
+              "id": "830:1631",
+              "type": "FRAME",
+              "name": "Future boundary",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4225,
+                "width": 470,
+                "height": 38
+              },
+              "layoutMode": "VERTICAL",
+              "paddingLeft": 8,
+              "paddingRight": 8,
+              "paddingTop": 8,
+              "paddingBottom": 8,
+              "children": [
+                {
+                  "id": "830:1632",
+                  "type": "TEXT",
+                  "name": "Message",
+                  "characters": "设计示例 · 尚未接入 · 不具授权效力",
+                  "absoluteBoundingBox": {
+                    "x": 677,
+                    "y": 4233,
+                    "width": 454,
+                    "height": 22
+                  }
+                }
+              ]
+            },
+            {
+              "id": "830:1633",
+              "type": "TEXT",
+              "name": "State title",
+              "characters": "本次读取已批准",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4275,
+                "width": 470,
+                "height": 28
+              }
+            },
+            {
+              "id": "830:1634",
+              "type": "TEXT",
+              "name": "Operation",
+              "characters": "对象：毕业项目的设计文档",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4315,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1635",
+              "type": "TEXT",
+              "name": "Scope",
+              "characters": "路径：D:/Project/Pioneer/docs\n权限：只读；不写入、不执行命令",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4349,
+                "width": 470,
+                "height": 44
+              }
+            },
+            {
+              "id": "830:1636",
+              "type": "TEXT",
+              "name": "Recipient",
+              "characters": "接收方：本地示例运行器；不外发",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4405,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1637",
+              "type": "TEXT",
+              "name": "Expiry",
+              "characters": "时效：仅此一次；目标变更或超时即失效",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4439,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1638",
+              "type": "TEXT",
+              "name": "State message",
+              "characters": "批准不等于已执行，等待真实执行事件",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4473,
+                "width": 470,
+                "height": 22
+              }
+            },
+            {
+              "id": "830:1639",
+              "type": "FRAME",
+              "name": "Actions",
+              "absoluteBoundingBox": {
+                "x": 669,
+                "y": 4507,
+                "width": 470,
+                "height": 44
+              },
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 8,
+              "children": [
+                {
+                  "id": "830:1640",
+                  "type": "INSTANCE",
+                  "name": "Action · 撤回本次授权",
+                  "absoluteBoundingBox": {
+                    "x": 669,
+                    "y": 4507,
+                    "width": 148,
+                    "height": 44
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                  "paddingBottom": 4,
+                  "children": [
+                    {
+                      "id": "I830:1640;830:1297",
+                      "type": "FRAME",
+                      "name": "Button surface",
+                      "absoluteBoundingBox": {
+                        "x": 673,
+                        "y": 4511,
+                        "width": 140,
+                        "height": 36
+                      },
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 4,
+                      "paddingLeft": 8,
+                      "paddingRight": 8,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "id": "I830:1640;830:1298",
+                          "type": "TEXT",
+                          "name": "Label",
+                          "characters": "撤回本次授权",
+                          "absoluteBoundingBox": {
+                            "x": 701,
+                            "y": 4519,
+                            "width": 84,
+                            "height": 20
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "830:1641",
+                  "type": "INSTANCE",
+                  "name": "Action · 查看批准范围",
+                  "absoluteBoundingBox": {
+                    "x": 825,
+                    "y": 4507,
+                    "width": 148,
+                    "height": 44
+                  },
+                  "layoutMode": "HORIZONTAL",
+                  "paddingLeft": 4,
+                  "paddingRight": 4,
+                  "paddingTop": 4,
+                  "paddingBottom": 4,
+                  "children": [
+                    {
+                      "id": "I830:1641;830:1316",
+                      "type": "FRAME",
+                      "name": "Button surface",
+                      "absoluteBoundingBox": {
+                        "x": 829,
+                        "y": 4511,
+                        "width": 140,
+                        "height": 36
+                      },
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 4,
+                      "paddingLeft": 8,
+                      "paddingRight": 8,
+                      "paddingTop": 8,
+                      "paddingBottom": 8,
+                      "children": [
+                        {
+                          "id": "I830:1641;830:1317",
+                          "type": "TEXT",
+                          "name": "Label",
+                          "characters": "查看批准范围",
+                          "absoluteBoundingBox": {
+                            "x": 857,
+                            "y": 4519,
+                            "width": 84,
+                            "height": 20
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "designNode": "830:1593",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=830-1593",
+      "designProperties": {
+        "Operation#725:23": {
+          "type": "TEXT",
+          "defaultValue": "对象：毕业项目的设计文档"
+        },
+        "Scope#725:28": {
+          "type": "TEXT",
+          "defaultValue": "路径：D:/Project/Pioneer/docs\n权限：只读；不写入、不执行命令"
+        },
+        "Recipient#725:33": {
+          "type": "TEXT",
+          "defaultValue": "接收方：本地示例运行器；不外发"
+        },
+        "Expiry#725:38": {
+          "type": "TEXT",
+          "defaultValue": "时效：仅此一次；目标变更或超时即失效"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Awaiting",
+          "variantOptions": [
+            "Awaiting",
+            "Denied",
+            "Expired",
+            "Approved"
+          ]
+        }
+      },
+      "designVersion": "Issue 37 real named version 2417598685933588034; node 830:1593; no Code Connect publication",
+      "status": "mapped",
+      "code": {
+        "exportName": "PermissionCard",
+        "path": "apps/desktop/src/renderer/components/PermissionCard.tsx",
+        "commit": null,
+        "blob": "aac39b4a76b656272ac9ea42571e990d7f722cff",
+        "inAcceptedMain": false,
+        "mainBlob": "0000000000000000000000000000000000000000",
+        "props": {
+          "operation": "string",
+          "scope": "string",
+          "recipient": "string",
+          "expiry": "string",
+          "state": "PermissionCardState",
+          "onAction": "((action: PermissionCardAction) => void) | undefined",
+          "note": "string | undefined",
+          "disabled": "boolean | undefined"
+        },
+        "proposedInThisPR": true,
+        "baseCommit": "7d27d455907822219af530fd310a8dd748fec5be"
+      },
+      "usedProps": [
+        "operation",
+        "scope",
+        "recipient",
+        "expiry",
+        "state",
+        "onAction",
+        "note",
+        "disabled"
+      ],
+      "example": "<PermissionCard operation={operation} scope={scope} recipient={recipient} expiry={expiry} state={state} onAction={onAction} note={note} disabled={disabled} />",
+      "variants": [
+        {
+          "nodeId": "830:1594",
+          "name": "State=Awaiting",
+          "status": "preserved-difference",
+          "reason": "The runtime card keeps the reviewed title, message, four fields and action labels. The design-only 'not connected / no authorization effect' note is rendered only by the preview via note; the component reports an action and never grants.",
+          "exercise": "Open Settings, verify the Awaiting card shows 是否批准本次读取 and both disabled actions; confirm the design note is visible and no permission is recorded.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S2 permission card renders four reviewed states without enabling actions"
+            }
+          ]
+        },
+        {
+          "nodeId": "830:1606",
+          "name": "State=Denied",
+          "status": "preserved-difference",
+          "reason": "The runtime card keeps the Denied title, message and actions. The preview disables the controls until #19 wires a real approval flow; no denial is recorded by the component.",
+          "exercise": "Verify the Denied card shows 你已拒绝本次读取, 重新核对范围 and 返回讨论, both disabled, with no state mutation.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S2 permission card renders four reviewed states without enabling actions"
+            }
+          ]
+        },
+        {
+          "nodeId": "830:1618",
+          "name": "State=Expired",
+          "status": "preserved-difference",
+          "reason": "The runtime card keeps the Expired title, message and actions. It does not reuse or infer an old authorization; the preview is read-only.",
+          "exercise": "Verify the Expired card shows 本次批准已失效 with the two reviewed actions disabled.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S2 permission card renders four reviewed states without enabling actions"
+            }
+          ]
+        },
+        {
+          "nodeId": "830:1630",
+          "name": "State=Approved",
+          "status": "preserved-difference",
+          "reason": "The runtime card keeps the Approved title, message and actions. Approving is not execution; the component never records a grant.",
+          "exercise": "Verify the Approved card shows 本次读取已批准 and both actions disabled; confirm no execution or permission event is produced.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S2 permission card renders four reviewed states without enabling actions"
+            }
+          ]
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Operation#725:23",
+          "code": "operation",
+          "status": "mapped",
+          "reason": "Supplied by the caller; the Figma sample text is not application data."
+        },
+        {
+          "figma": "Scope#725:28",
+          "code": "scope",
+          "status": "mapped",
+          "reason": "Supplied by the caller; the reviewed line break is preserved with white-space: pre-line."
+        },
+        {
+          "figma": "Recipient#725:33",
+          "code": "recipient",
+          "status": "mapped",
+          "reason": "Supplied by the caller; no provider is inferred."
+        },
+        {
+          "figma": "Expiry#725:38",
+          "code": "expiry",
+          "status": "mapped",
+          "reason": "Supplied by the caller; no lifetime is inferred."
+        },
+        {
+          "figma": "State",
+          "code": "state",
+          "status": "mapped",
+          "reason": "The four reviewed states select title, message and action labels; transitions belong to the caller."
+        },
+        {
+          "figma": "Actions",
+          "code": "onAction / disabled",
+          "status": "preserved-difference",
+          "reason": "The component reports an action id and has no authorization side effect. The Settings preview disables the same labels until #19 wires the real flow."
+        }
+      ],
+      "examplesExport": "PermissionCardExamples",
+      "acceptedAt": "c6eac9bf5bdfd4fe29da5fcddaa7844f1f2911df",
+      "actualSourceSha256": "544ce3420c0f8d22711f335d2c4013cdab4b1dac243a951112ca2e3803a99234"
+    }
+  ],
+  "designDifferences": [],
+  "basis": [
+    {
+      "path": "design/sync/component-mappings.json",
+      "commit": "c6eac9bf5bdfd4fe29da5fcddaa7844f1f2911df",
+      "sha256": "9f6257174c06819589266aa0471c95689efad749146090f65caffbf60259c4ad"
+    },
+    {
+      "path": "design/sync/mapping-acceptance.md",
+      "commit": "c6eac9bf5bdfd4fe29da5fcddaa7844f1f2911df",
+      "sha256": "3fc1f6ec64d855b673bc367af9642450154c1ae2b3e871c820ebf351b55ba30c"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/RunDetailPanels.tsx",
+      "commit": "c6eac9bf5bdfd4fe29da5fcddaa7844f1f2911df",
+      "sha256": "c3661eea853a3465f35086897a7536530529a570731da1df0d1ef731e0050a8b"
+    },
+    {
+      "path": "tests/e2e/design-mappings.e2e.spec.ts",
+      "commit": "c6eac9bf5bdfd4fe29da5fcddaa7844f1f2911df",
+      "sha256": "4816e1445fc703c80b4800ab86acae548721b1965124b7826d15fc92e4be96ff"
+    },
+    {
+      "path": "tests/e2e/p2-run.e2e.spec.ts",
+      "commit": "c6eac9bf5bdfd4fe29da5fcddaa7844f1f2911df",
+      "sha256": "1b4357d63cff9a9ff02aea4ff42298c3647df6b892d8e32c28ad1a9a59ebc7ef"
+    }
+  ],
+  "policy": {
+    "issue": 19,
+    "fileKey": "EQis9ep9ZQsEenrUVXwlFU",
+    "nodes": [
+      "830:1593"
+    ],
+    "changeTypes": [
+      "ui"
+    ],
+    "allowedPaths": [
+      "apps/desktop/src/renderer/components/",
+      "apps/desktop/src/renderer/styles/",
+      "tests/e2e/",
+      "tests/contract/",
+      "docs/testing/",
+      "design/sync/component-mappings.json"
+    ],
+    "backendPaths": [
+      "apps/desktop/src/shared/contracts/write-permission.ts",
+      "apps/desktop/src/shared/contracts/write-execution.ts",
+      "apps/desktop/src/shared/contracts/ipc.ts",
+      "apps/desktop/src/main/write-execution.ts",
+      "apps/desktop/src/main/ipc.ts",
+      "apps/desktop/src/main/index.ts",
+      "apps/desktop/src/main/atomic-file.ts",
+      "apps/desktop/src/preload/write-api.ts",
+      "apps/desktop/src/preload/index.ts",
+      "tests/contract/write-execution.test.ts",
+      "tests/e2e/change-approval.e2e.spec.ts"
+    ],
+    "basis": [
+      "design/sync/component-mappings.json",
+      "design/sync/mapping-acceptance.md",
+      "apps/desktop/src/renderer/components/RunDetailPanels.tsx",
+      "tests/e2e/design-mappings.e2e.spec.ts",
+      "tests/e2e/p2-run.e2e.spec.ts"
+    ]
+  },
+  "constraints": [
+    "Design is visual evidence, not behavioral authority.",
+    "Preserve retained S1 differences; no inferred Grant, stop or Unknown state.",
+    "No automatic merge, issue edits, Figma writeback or real Provider execution."
+  ],
+  "packageHash": "106785880df43b8e741d56960ea60b0c03052d31b1ad5f6df62a3e3e6bad0633",
+  "outputHash": "7dc2f2db220c36e3d00badf1eb898c6ecb2c1032f45a9c1e02c96e81355dea00",
+  "files": [
+    {
+      "path": "apps/desktop/src/main/index.ts",
+      "sha256": "6f905a5c083839104f6323ad7ded3c5bcebd5b8f2f994f9018aa91165fee5cfe"
+    },
+    {
+      "path": "apps/desktop/src/main/ipc.ts",
+      "sha256": "730dbc7e050b3d9e3d7233c63223771be4d2dad32c600f9090601f4c6e2d72f5"
+    },
+    {
+      "path": "apps/desktop/src/main/write-execution.ts",
+      "sha256": "c409e0e87813fc3165f9ab7295bd241f30c47ef89150fdda054720aeee723052"
+    },
+    {
+      "path": "apps/desktop/src/preload/index.ts",
+      "sha256": "9a636f44c4fb730241781c02355022016c72473addb9f60d9078a20858536d45"
+    },
+    {
+      "path": "apps/desktop/src/preload/write-api.ts",
+      "sha256": "114dee993fe7cb8d55a1c20ee8044007617cc80662596a89734281441edfaaa6"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ChangeApprovalReview.tsx",
+      "sha256": "9103ccbb0f2ef2b4bcaf43612fdd3bf9a3ab6d13f92831c0cee04c0ac106e766"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/WorkbenchPanels.tsx",
+      "sha256": "c23c937a8226d6f701d8c0a7a225c2b3d667f3aca51e76ea926990a1c01baf74"
+    },
+    {
+      "path": "apps/desktop/src/renderer/styles/session-workbench.css",
+      "sha256": "56b33436610376778d1c994e10f518feb6e8c6267831d1271348887a39905ed4"
+    },
+    {
+      "path": "apps/desktop/src/shared/contracts/ipc.ts",
+      "sha256": "97c1a5405323f7cfe8772081319302b28553b5c587846a75f6968d9d500f6a71"
+    },
+    {
+      "path": "apps/desktop/src/shared/contracts/write-execution.ts",
+      "sha256": "6914b534c413e81435925780927fbdedb9ef481510bf01276e07925467ff43fc"
+    },
+    {
+      "path": "design/sync/component-mappings.json",
+      "sha256": "5eadd1f8aa78bb72649793332ed6e865e802ab62f51c217a069f427f95390a07"
+    },
+    {
+      "path": "docs/testing/issue19-change-approval.md",
+      "sha256": "dc9aff81eb8fcf33994666613bd465aae4de10cb179755c594b76f2e0d254984"
+    },
+    {
+      "path": "tests/contract/write-execution.test.ts",
+      "sha256": "23033997ee6b57611deac518fbd60642fe2fffd36858ae1634e7db731ee3761e"
+    },
+    {
+      "path": "tests/e2e/change-approval.e2e.spec.ts",
+      "sha256": "32c72b05e01c6c84427a8bbc6a9524d47b43f6cd83ca196a3b32a8f2ada0b6d8"
+    },
+    {
+      "path": "tests/e2e/playwright.config.ts",
+      "sha256": "976406a23f27e40184b650322a708bdcf7abd0c88ab316b39f0f77c22644328f"
+    }
+  ]
+}
