@@ -1,0 +1,54 @@
+name: Design release intake (prepared, not real-event verified)
+
+# Phase A only: a trusted receiver has already verified the Figma passcode and
+# forwards a restricted payload. This workflow never creates a PR, calls a
+# model, or accepts routing from the dispatch body. It prepares fixed materials
+# for a local S2 agent and fails closed when the Figma token is absent.
+on:
+  repository_dispatch:
+    types: [figma-design-release]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: design-intake-${{ github.event.client_payload.deliveryId }}
+  cancel-in-progress: false
+
+jobs:
+  intake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate dispatch and prepare fixed materials
+        env:
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: node tools/design-event-consumer.mjs
+
+      - name: Upload intake material and receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-intake-${{ github.run_id }}
+          path: tmp/design-external/
+          if-no-files-found: warn
+          retention-days: 7
