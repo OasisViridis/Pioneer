@@ -80,6 +80,12 @@ export interface ProjectBinding {
 /** RUN_LIMITS with widened numeric fields so tests can override timers. */
 export type RunLimits = { readonly [K in keyof typeof RUN_LIMITS]: number };
 
+/** Run identity plus the window binding that owns the run. */
+type RunOwner = RunIdentity & {
+  webContentsId: number;
+  windowEpoch: number;
+};
+
 export interface WindowBindingPort {
   epochFor(webContentsId: number): number | null;
 }
@@ -969,14 +975,7 @@ export class RunManager {
   }): RunContext | null {
     const run = this.runs.get(input.runId);
     if (run === undefined) return null;
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      run.identity.sessionId !== input.sessionId ||
-      run.identity.projectId !== input.projectId ||
-      run.identity.revision !== input.revision
-    )
-      return null;
+    if (!this.ownsRun(run, input)) return null;
     return {
       identity: run.identity,
       status: run.status,
@@ -1036,6 +1035,32 @@ export class RunManager {
     this.requestStop(run, 'host_failure');
   }
 
+  private matchesIdentity(
+    identity: RunIdentity,
+    input: { sessionId: string; projectId: string; revision: number },
+  ): boolean {
+    return (
+      identity.sessionId === input.sessionId &&
+      identity.projectId === input.projectId &&
+      identity.revision === input.revision
+    );
+  }
+
+  private ownsRun(
+    run: {
+      webContentsId: number;
+      windowEpoch: number;
+      identity: RunIdentity;
+    },
+    input: RunOwner,
+  ): boolean {
+    return (
+      run.webContentsId === input.webContentsId &&
+      run.windowEpoch === input.windowEpoch &&
+      this.matchesIdentity(run.identity, input)
+    );
+  }
+
   stop(input: {
     sessionId: string;
     projectId: string;
@@ -1050,21 +1075,11 @@ export class RunManager {
     if (run === undefined) {
       const tomb = this.tombstones.get(input.runId);
       if (tomb === undefined) return { ok: false, code: 'RUN_NOT_FOUND' };
-      if (
-        tomb.identity.sessionId !== input.sessionId ||
-        tomb.identity.projectId !== input.projectId ||
-        tomb.identity.revision !== input.revision
-      )
+      if (!this.matchesIdentity(tomb.identity, input))
         return { ok: false, code: 'BINDING_MISMATCH' };
       return { ok: true, status: 'unknown' };
     }
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      run.identity.sessionId !== input.sessionId ||
-      run.identity.projectId !== input.projectId ||
-      run.identity.revision !== input.revision
-    )
+    if (!this.ownsRun(run, input))
       return { ok: false, code: 'BINDING_MISMATCH' };
     if (this.isTerminal(run)) return { ok: true, status: run.status };
     this.requestStop(run, 'user');
@@ -1084,12 +1099,7 @@ export class RunManager {
     if (run === undefined) {
       const tomb = this.tombstones.get(input.runId);
       if (tomb === undefined) return null;
-      if (
-        tomb.identity.sessionId !== input.sessionId ||
-        tomb.identity.projectId !== input.projectId ||
-        tomb.identity.revision !== input.revision
-      )
-        return null;
+      if (!this.matchesIdentity(tomb.identity, input)) return null;
       return {
         identity: tomb.identity,
         status: 'unknown',
@@ -1101,14 +1111,7 @@ export class RunManager {
         hasMore: false,
       };
     }
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      run.identity.sessionId !== input.sessionId ||
-      run.identity.projectId !== input.projectId ||
-      run.identity.revision !== input.revision
-    )
-      return null;
+    if (!this.ownsRun(run, input)) return null;
     return this.buildPage(run, input.afterSeq);
   }
 
@@ -1142,14 +1145,7 @@ export class RunManager {
   }): boolean {
     const run = this.runs.get(input.runId);
     if (run === undefined) return false;
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      run.identity.sessionId !== input.sessionId ||
-      run.identity.projectId !== input.projectId ||
-      run.identity.revision !== input.revision
-    )
-      return false;
+    if (!this.ownsRun(run, input)) return false;
     // A stale cursor past the newest seq must still receive future events
     // instead of waiting for a page that can never exist.
     const startSeq = Math.min(input.afterSeq, run.events.at(-1)?.seq ?? 0);
@@ -1167,12 +1163,17 @@ export class RunManager {
   }
 
   acknowledge(input: {
+    sessionId: string;
+    projectId: string;
     runId: string;
+    revision: number;
     webContentsId: number;
+    windowEpoch: number;
     afterSeq: number;
   }): void {
     const run = this.runs.get(input.runId);
     if (run === undefined) return;
+    if (!this.ownsRun(run, input)) return;
     const subscriber = run.subscribers.get(input.webContentsId);
     if (subscriber === undefined) return;
     subscriber.lastActivityAt = this.now();
@@ -1191,8 +1192,18 @@ export class RunManager {
     this.flushSubscribers(run);
   }
 
-  unsubscribe(input: { runId: string; webContentsId: number }): void {
-    this.runs.get(input.runId)?.subscribers.delete(input.webContentsId);
+  unsubscribe(input: {
+    sessionId: string;
+    projectId: string;
+    runId: string;
+    revision: number;
+    webContentsId: number;
+    windowEpoch: number;
+  }): void {
+    const run = this.runs.get(input.runId);
+    if (run === undefined) return;
+    if (!this.ownsRun(run, input)) return;
+    run.subscribers.delete(input.webContentsId);
   }
 
   private flushSubscribers(run: ActiveRun): void {
@@ -1209,6 +1220,16 @@ export class RunManager {
     if (run.publishHeld) return;
     const now = this.now();
     for (const subscriber of [...run.subscribers.values()]) {
+      // The run keeps the epoch it started with. A rebuilt/navigated window
+      // gets a new epoch for the same webContentsId; drop the old subscriber
+      // instead of delivering the pre-rebuild run's batches to it.
+      const currentEpoch = this.dependencies.windowBindings.epochFor(
+        subscriber.webContentsId,
+      );
+      if (currentEpoch !== subscriber.windowEpoch) {
+        run.subscribers.delete(subscriber.webContentsId);
+        continue;
+      }
       if (now - subscriber.lastActivityAt > this.limits.subscriberAckMs) {
         if (subscriber.awaitingBatch) {
           run.subscribers.delete(subscriber.webContentsId);
@@ -1426,7 +1447,11 @@ export class RunManager {
       ...(this.runsByWindow.get(String(webContentsId)) ?? []),
     ]) {
       const run = this.runs.get(runId);
-      if (run === undefined || this.isTerminal(run)) continue;
+      if (run === undefined) continue;
+      // The window that owned this subscription is gone. Revoke it now; the
+      // 2s ACK sweep is a fallback, not the revocation path.
+      run.subscribers.delete(webContentsId);
+      if (this.isTerminal(run)) continue;
       this.requestStop(run, 'window_closed');
     }
   }

@@ -14,6 +14,7 @@ const port: RunPort = {
   getRunContext: (request) => desktop().getRunContext(request),
   subscribeRun: (request) => desktop().subscribeRun(request),
   acknowledgeRunPage: (request) => desktop().acknowledgeRunPage(request),
+  unsubscribeRun: (request) => desktop().unsubscribeRun(request),
   onRunEventBatch: (callback) => desktop().onRunEventBatch(callback),
 };
 

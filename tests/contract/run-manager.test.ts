@@ -161,14 +161,28 @@ async function launchRun(
   return { request, runId: started.runId };
 }
 
+const identityOf = (
+  runId: string,
+  overrides: Partial<{
+    sessionId: string;
+    projectId: string;
+    revision: number;
+    webContentsId: number;
+    windowEpoch: number;
+  }> = {},
+) => ({
+  sessionId: 'session:test',
+  projectId: 'project:test',
+  runId,
+  revision: 1,
+  ...binding,
+  ...overrides,
+});
+
 const pageOf = (manager: RunManager, runId: string, afterSeq = 0) =>
   manager.getRun({
-    sessionId: 'session:test',
-    projectId: 'project:test',
-    runId,
-    revision: 1,
+    ...identityOf(runId),
     afterSeq,
-    ...binding,
   });
 
 describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => {
@@ -779,15 +793,14 @@ describe('P2 run event paging and acknowledged subscriptions (contract §5)', ()
     expect(firstBatch?.events.length).toBe(RUN_LIMITS.subscriberBatch);
     expect(firstBatch?.hasMore).toBe(true);
     manager.acknowledge({
-      runId,
-      webContentsId,
+      ...identityOf(runId),
       afterSeq: firstBatch?.nextAfterSeq ?? 0,
     });
     await waitFor(() => sender.batches.length > 1);
     expect(sender.batches[1]?.page.events[0]?.seq).toBe(
       (firstBatch?.nextAfterSeq ?? 0) + 1,
     );
-    manager.unsubscribe({ runId, webContentsId });
+    manager.unsubscribe(identityOf(runId));
   });
 
   it('reports a gap instead of fabricating evicted history', async () => {
@@ -1044,6 +1057,156 @@ describe('P2 run manager review hardening', () => {
     });
   });
 
+  it('ignores ACK and unsubscribe from a foreign identity (contract §5)', async () => {
+    const { manager, sender } = await createManager({
+      steps: Array.from({ length: 40 }, (_, index) => ({
+        action: 'text',
+        text: `chunk-${String(index)}`,
+      })) as never,
+    });
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+    expect(manager.subscribe({ ...identityOf(runId), afterSeq: 0 })).toBe(true);
+    await waitFor(() => sender.batches.length === 1);
+    const first = sender.batches[0]?.page.nextAfterSeq ?? 0;
+    manager.acknowledge({
+      ...identityOf(runId, { sessionId: 'session:other' }),
+      afterSeq: first,
+    });
+    manager.unsubscribe(identityOf(runId, { sessionId: 'session:other' }));
+    manager.acknowledge({
+      ...identityOf(runId, { windowEpoch: windowEpoch + 1 }),
+      afterSeq: first,
+    });
+    manager.unsubscribe(identityOf(runId, { projectId: 'project:other' }));
+    manager.acknowledge({
+      ...identityOf(runId, { revision: 2 }),
+      afterSeq: first,
+    });
+    manager.acknowledge({
+      ...identityOf(runId, { webContentsId: webContentsId + 1 }),
+      afterSeq: first,
+    });
+    manager.unsubscribe(
+      identityOf(runId, { webContentsId: webContentsId + 1 }),
+    );
+    await new Promise((resolve) => {
+      setTimeout(resolve, 60);
+    });
+    // None of the foreign ACK/unsubscribe calls may release or remove the
+    // subscriber that belongs to session:test.
+    expect(sender.batches).toHaveLength(1);
+    manager.acknowledge({ ...identityOf(runId), afterSeq: first });
+    await waitFor(() => sender.batches.length > 1);
+    manager.unsubscribe(identityOf(runId));
+  });
+
+  it('delivers and acknowledges two sessions in the same window independently', async () => {
+    const { manager, sender } = await createManager({
+      steps: [
+        { action: 'wait', ms: 150 },
+        { action: 'text', text: '各自的事件' },
+        { action: 'complete' },
+      ],
+    });
+    const first = await launchRun(manager, {
+      sessionId: 'session:alpha',
+      requestId: 'request:alpha',
+    });
+    const second = await launchRun(manager, {
+      sessionId: 'session:beta',
+      requestId: 'request:beta',
+    });
+    const alpha = identityOf(first.runId, { sessionId: 'session:alpha' });
+    const beta = identityOf(second.runId, { sessionId: 'session:beta' });
+    expect(manager.subscribe({ ...alpha, afterSeq: 0 })).toBe(true);
+    expect(manager.subscribe({ ...beta, afterSeq: 0 })).toBe(true);
+    await waitFor(
+      () =>
+        new Set(sender.batches.map((batch) => batch.page.identity.sessionId))
+          .size === 2,
+    );
+    for (const batch of sender.batches) {
+      const identity = batch.page.identity;
+      manager.acknowledge({
+        ...identityOf(identity.runId, {
+          sessionId: identity.sessionId,
+          projectId: identity.projectId,
+          revision: identity.revision,
+        }),
+        afterSeq: batch.page.nextAfterSeq,
+      });
+    }
+    await waitFor(
+      () =>
+        manager.getRun({ ...alpha, afterSeq: 0 })?.status === 'completed' &&
+        manager.getRun({ ...beta, afterSeq: 0 })?.status === 'completed',
+    );
+    manager.unsubscribe(alpha);
+    manager.unsubscribe(beta);
+  });
+
+  it('drops a subscriber whose window epoch changed', async () => {
+    let epoch = windowEpoch;
+    const { manager, sender } = await createManager(
+      {
+        steps: [
+          { action: 'wait', ms: 200 },
+          { action: 'text', text: '后续事件' },
+          { action: 'complete' },
+        ],
+      },
+      {
+        windowBindings: {
+          epochFor: (id) => (id === webContentsId ? epoch : null),
+        },
+      },
+    );
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'running');
+    expect(manager.subscribe({ ...identityOf(runId), afterSeq: 0 })).toBe(true);
+    await waitFor(() => sender.batches.length === 1);
+    const before = sender.batches.length;
+    epoch = windowEpoch + 1;
+    manager.acknowledge({
+      ...identityOf(runId),
+      afterSeq: sender.batches[0]?.page.nextAfterSeq ?? 0,
+    });
+    // Wait past the scripted 200ms text event so the delivery attempt happens
+    // after the epoch flip; a shorter wait asserts before the guard can run.
+    await new Promise((resolve) => {
+      setTimeout(resolve, 350);
+    });
+    // The run keeps the old epoch; the rebuilt window's id must not receive
+    // the pre-rebuild run's next batch.
+    expect(sender.batches).toHaveLength(before);
+  });
+
+  it('revokes the window subscription when its window is abandoned', async () => {
+    const { manager, sender } = await createManager({
+      steps: [{ action: 'wait', ms: 200 }, { action: 'complete' }],
+    });
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'running');
+    expect(manager.subscribe({ ...identityOf(runId), afterSeq: 0 })).toBe(true);
+    await waitFor(() => sender.batches.length === 1);
+    const before = sender.batches.length;
+    manager.abandonWindow(webContentsId);
+    await new Promise((resolve) => {
+      setTimeout(resolve, 60);
+    });
+    manager.acknowledge({
+      ...identityOf(runId),
+      afterSeq: sender.batches[0]?.page.nextAfterSeq ?? 0,
+    });
+    await new Promise((resolve) => {
+      setTimeout(resolve, 60);
+    });
+    // The abandoned subscription is gone; the stop_requested event must not
+    // be delivered to a window that no longer owns it.
+    expect(sender.batches).toHaveLength(before);
+  });
+
   it('clamps an over-claiming ACK to what was actually delivered', async () => {
     const script = {
       steps: Array.from({ length: 40 }, (_, index) => ({
@@ -1068,13 +1231,13 @@ describe('P2 run manager review hardening', () => {
     expect(delivered).toBe(RUN_LIMITS.subscriberBatch);
     // A renderer that claims everything must still receive the unseen tail;
     // clamping to the run's newest seq (the previous behaviour) would starve it.
-    manager.acknowledge({ runId, webContentsId, afterSeq: 9_999 });
+    manager.acknowledge({ ...identityOf(runId), afterSeq: 9_999 });
     await waitFor(() =>
       sender.batches.some((batch) =>
         batch.page.events.some((event) => event.seq > delivered),
       ),
     );
-    manager.unsubscribe({ runId, webContentsId });
+    manager.unsubscribe(identityOf(runId));
   });
 
   it('keeps the host_restarted tombstone reachable after a second boot', async () => {
@@ -1377,7 +1540,7 @@ describe('P2 run manager edge hardening', () => {
         batch.page.events.some((event) => event.body.type === 'text.delta'),
       ),
     );
-    manager.unsubscribe({ runId, webContentsId });
+    manager.unsubscribe(identityOf(runId));
   });
 
   it('does not let a stale ACK release the next batch', async () => {
@@ -1402,17 +1565,17 @@ describe('P2 run manager edge hardening', () => {
     ).toBe(true);
     await waitFor(() => sender.batches.length === 1);
     const first = sender.batches[0]?.page.nextAfterSeq ?? 0;
-    manager.acknowledge({ runId, webContentsId, afterSeq: first });
+    manager.acknowledge({ ...identityOf(runId), afterSeq: first });
     await waitFor(() => sender.batches.length === 2);
     const second = sender.batches[1]?.page.nextAfterSeq ?? 0;
     // Stale ACK for the first page must not put two batches in flight.
-    manager.acknowledge({ runId, webContentsId, afterSeq: first });
+    manager.acknowledge({ ...identityOf(runId), afterSeq: first });
     await new Promise((resolve) => {
       setTimeout(resolve, 40);
     });
     expect(sender.batches).toHaveLength(2);
-    manager.acknowledge({ runId, webContentsId, afterSeq: second });
-    manager.unsubscribe({ runId, webContentsId });
+    manager.acknowledge({ ...identityOf(runId), afterSeq: second });
+    manager.unsubscribe(identityOf(runId));
   });
 
   it('still replays an accepted request after the journal turns unhealthy', async () => {
