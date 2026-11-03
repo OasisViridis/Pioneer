@@ -171,6 +171,14 @@ const pageOf = (manager: RunManager, runId: string, afterSeq = 0) =>
     ...binding,
   });
 
+const identityOf = (runId: string) => ({
+  sessionId: 'session:test',
+  projectId: 'project:test',
+  runId,
+  revision: 1,
+  ...binding,
+});
+
 describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => {
   it('runs an authorized read-only task to completion with a full event sequence', async () => {
     const { manager, journalStore } = await createManager({
@@ -779,15 +787,14 @@ describe('P2 run event paging and acknowledged subscriptions (contract §5)', ()
     expect(firstBatch?.events.length).toBe(RUN_LIMITS.subscriberBatch);
     expect(firstBatch?.hasMore).toBe(true);
     manager.acknowledge({
-      runId,
-      webContentsId,
+      ...identityOf(runId),
       afterSeq: firstBatch?.nextAfterSeq ?? 0,
     });
     await waitFor(() => sender.batches.length > 1);
     expect(sender.batches[1]?.page.events[0]?.seq).toBe(
       (firstBatch?.nextAfterSeq ?? 0) + 1,
     );
-    manager.unsubscribe({ runId, webContentsId });
+    manager.unsubscribe(identityOf(runId));
   });
 
   it('reports a gap instead of fabricating evicted history', async () => {
@@ -1044,6 +1051,52 @@ describe('P2 run manager review hardening', () => {
     });
   });
 
+  it('ignores ACK and unsubscribe from a foreign identity (contract §5)', async () => {
+    const { manager, sender } = await createManager({
+      steps: Array.from({ length: 40 }, (_, index) => ({
+        action: 'text',
+        text: `chunk-${String(index)}`,
+      })) as never,
+    });
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+    expect(manager.subscribe({ ...identityOf(runId), afterSeq: 0 })).toBe(true);
+    await waitFor(() => sender.batches.length === 1);
+    const first = sender.batches[0]?.page.nextAfterSeq ?? 0;
+    manager.acknowledge({
+      ...identityOf(runId),
+      sessionId: 'session:other',
+      afterSeq: first,
+    });
+    manager.unsubscribe({
+      ...identityOf(runId),
+      sessionId: 'session:other',
+    });
+    manager.acknowledge({
+      ...identityOf(runId),
+      windowEpoch: windowEpoch + 1,
+      afterSeq: first,
+    });
+    manager.unsubscribe({
+      ...identityOf(runId),
+      projectId: 'project:other',
+    });
+    manager.acknowledge({
+      ...identityOf(runId),
+      revision: 2,
+      afterSeq: first,
+    });
+    await new Promise((resolve) => {
+      setTimeout(resolve, 60);
+    });
+    // None of the foreign ACK/unsubscribe calls may release or remove the
+    // subscriber that belongs to session:test.
+    expect(sender.batches).toHaveLength(1);
+    manager.acknowledge({ ...identityOf(runId), afterSeq: first });
+    await waitFor(() => sender.batches.length > 1);
+    manager.unsubscribe(identityOf(runId));
+  });
+
   it('clamps an over-claiming ACK to what was actually delivered', async () => {
     const script = {
       steps: Array.from({ length: 40 }, (_, index) => ({
@@ -1068,13 +1121,13 @@ describe('P2 run manager review hardening', () => {
     expect(delivered).toBe(RUN_LIMITS.subscriberBatch);
     // A renderer that claims everything must still receive the unseen tail;
     // clamping to the run's newest seq (the previous behaviour) would starve it.
-    manager.acknowledge({ runId, webContentsId, afterSeq: 9_999 });
+    manager.acknowledge({ ...identityOf(runId), afterSeq: 9_999 });
     await waitFor(() =>
       sender.batches.some((batch) =>
         batch.page.events.some((event) => event.seq > delivered),
       ),
     );
-    manager.unsubscribe({ runId, webContentsId });
+    manager.unsubscribe(identityOf(runId));
   });
 
   it('keeps the host_restarted tombstone reachable after a second boot', async () => {
@@ -1377,7 +1430,7 @@ describe('P2 run manager edge hardening', () => {
         batch.page.events.some((event) => event.body.type === 'text.delta'),
       ),
     );
-    manager.unsubscribe({ runId, webContentsId });
+    manager.unsubscribe(identityOf(runId));
   });
 
   it('does not let a stale ACK release the next batch', async () => {
@@ -1402,17 +1455,17 @@ describe('P2 run manager edge hardening', () => {
     ).toBe(true);
     await waitFor(() => sender.batches.length === 1);
     const first = sender.batches[0]?.page.nextAfterSeq ?? 0;
-    manager.acknowledge({ runId, webContentsId, afterSeq: first });
+    manager.acknowledge({ ...identityOf(runId), afterSeq: first });
     await waitFor(() => sender.batches.length === 2);
     const second = sender.batches[1]?.page.nextAfterSeq ?? 0;
     // Stale ACK for the first page must not put two batches in flight.
-    manager.acknowledge({ runId, webContentsId, afterSeq: first });
+    manager.acknowledge({ ...identityOf(runId), afterSeq: first });
     await new Promise((resolve) => {
       setTimeout(resolve, 40);
     });
     expect(sender.batches).toHaveLength(2);
-    manager.acknowledge({ runId, webContentsId, afterSeq: second });
-    manager.unsubscribe({ runId, webContentsId });
+    manager.acknowledge({ ...identityOf(runId), afterSeq: second });
+    manager.unsubscribe(identityOf(runId));
   });
 
   it('still replays an accepted request after the journal turns unhealthy', async () => {

@@ -228,9 +228,8 @@ export function registerRunIpc(dependencies: RunIpcDependencies): void {
     const parsed = RunCursorRequestSchema.safeParse(args[0]);
     if (trusted.ok && parsed.success) {
       dependencies.manager.acknowledge({
-        runId: parsed.data.runId,
-        webContentsId: event.sender.id,
-        afterSeq: parsed.data.afterSeq,
+        ...parsed.data,
+        ...binding(event),
       });
     }
     return Promise.resolve();
@@ -243,8 +242,8 @@ export function registerRunIpc(dependencies: RunIpcDependencies): void {
       const parsed = RunUnsubscribeRequestSchema.safeParse(args[0]);
       if (trusted.ok && parsed.success) {
         dependencies.manager.unsubscribe({
-          runId: parsed.data.runId,
-          webContentsId: event.sender.id,
+          ...parsed.data,
+          ...binding(event),
         });
       }
       return Promise.resolve();

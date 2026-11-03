@@ -972,9 +972,7 @@ export class RunManager {
     if (
       run.webContentsId !== input.webContentsId ||
       run.windowEpoch !== input.windowEpoch ||
-      run.identity.sessionId !== input.sessionId ||
-      run.identity.projectId !== input.projectId ||
-      run.identity.revision !== input.revision
+      !this.matchesIdentity(run.identity, input)
     )
       return null;
     return {
@@ -1036,6 +1034,17 @@ export class RunManager {
     this.requestStop(run, 'host_failure');
   }
 
+  private matchesIdentity(
+    identity: RunIdentity,
+    input: { sessionId: string; projectId: string; revision: number },
+  ): boolean {
+    return (
+      identity.sessionId === input.sessionId &&
+      identity.projectId === input.projectId &&
+      identity.revision === input.revision
+    );
+  }
+
   stop(input: {
     sessionId: string;
     projectId: string;
@@ -1050,20 +1059,14 @@ export class RunManager {
     if (run === undefined) {
       const tomb = this.tombstones.get(input.runId);
       if (tomb === undefined) return { ok: false, code: 'RUN_NOT_FOUND' };
-      if (
-        tomb.identity.sessionId !== input.sessionId ||
-        tomb.identity.projectId !== input.projectId ||
-        tomb.identity.revision !== input.revision
-      )
+      if (!this.matchesIdentity(tomb.identity, input))
         return { ok: false, code: 'BINDING_MISMATCH' };
       return { ok: true, status: 'unknown' };
     }
     if (
       run.webContentsId !== input.webContentsId ||
       run.windowEpoch !== input.windowEpoch ||
-      run.identity.sessionId !== input.sessionId ||
-      run.identity.projectId !== input.projectId ||
-      run.identity.revision !== input.revision
+      !this.matchesIdentity(run.identity, input)
     )
       return { ok: false, code: 'BINDING_MISMATCH' };
     if (this.isTerminal(run)) return { ok: true, status: run.status };
@@ -1084,12 +1087,7 @@ export class RunManager {
     if (run === undefined) {
       const tomb = this.tombstones.get(input.runId);
       if (tomb === undefined) return null;
-      if (
-        tomb.identity.sessionId !== input.sessionId ||
-        tomb.identity.projectId !== input.projectId ||
-        tomb.identity.revision !== input.revision
-      )
-        return null;
+      if (!this.matchesIdentity(tomb.identity, input)) return null;
       return {
         identity: tomb.identity,
         status: 'unknown',
@@ -1104,9 +1102,7 @@ export class RunManager {
     if (
       run.webContentsId !== input.webContentsId ||
       run.windowEpoch !== input.windowEpoch ||
-      run.identity.sessionId !== input.sessionId ||
-      run.identity.projectId !== input.projectId ||
-      run.identity.revision !== input.revision
+      !this.matchesIdentity(run.identity, input)
     )
       return null;
     return this.buildPage(run, input.afterSeq);
@@ -1145,9 +1141,7 @@ export class RunManager {
     if (
       run.webContentsId !== input.webContentsId ||
       run.windowEpoch !== input.windowEpoch ||
-      run.identity.sessionId !== input.sessionId ||
-      run.identity.projectId !== input.projectId ||
-      run.identity.revision !== input.revision
+      !this.matchesIdentity(run.identity, input)
     )
       return false;
     // A stale cursor past the newest seq must still receive future events
@@ -1167,12 +1161,22 @@ export class RunManager {
   }
 
   acknowledge(input: {
+    sessionId: string;
+    projectId: string;
     runId: string;
+    revision: number;
     webContentsId: number;
+    windowEpoch: number;
     afterSeq: number;
   }): void {
     const run = this.runs.get(input.runId);
     if (run === undefined) return;
+    if (
+      run.webContentsId !== input.webContentsId ||
+      run.windowEpoch !== input.windowEpoch ||
+      !this.matchesIdentity(run.identity, input)
+    )
+      return;
     const subscriber = run.subscribers.get(input.webContentsId);
     if (subscriber === undefined) return;
     subscriber.lastActivityAt = this.now();
@@ -1191,8 +1195,23 @@ export class RunManager {
     this.flushSubscribers(run);
   }
 
-  unsubscribe(input: { runId: string; webContentsId: number }): void {
-    this.runs.get(input.runId)?.subscribers.delete(input.webContentsId);
+  unsubscribe(input: {
+    sessionId: string;
+    projectId: string;
+    runId: string;
+    revision: number;
+    webContentsId: number;
+    windowEpoch: number;
+  }): void {
+    const run = this.runs.get(input.runId);
+    if (run === undefined) return;
+    if (
+      run.webContentsId !== input.webContentsId ||
+      run.windowEpoch !== input.windowEpoch ||
+      !this.matchesIdentity(run.identity, input)
+    )
+      return;
+    run.subscribers.delete(input.webContentsId);
   }
 
   private flushSubscribers(run: ActiveRun): void {
