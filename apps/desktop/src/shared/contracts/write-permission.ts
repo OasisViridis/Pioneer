@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { RunIdentitySchema } from './pioneer-run';
-import { isSafePathSegment } from '../path-safety';
+import { MAX_PATH_COMPONENTS, isSafePathSegment } from '../path-safety';
 
 /**
  * P4-D1 (#18) write permission contract: a decision-only surface.
@@ -13,9 +13,8 @@ import { isSafePathSegment } from '../path-safety';
  * the declared target scope, the protected paths and the current bytes.
  *
  * Nothing in this module writes, deletes, renames or restores project files.
- * The human confirmation of the P4-D1 decision is a precondition for any
- * executor that consumes these records; until then no capability flag, IPC
- * channel or executor reaches them.
+ * The P4-D1 decision is recorded (Issue #18); the executor that consumes these
+ * records is #19, and no capability flag, IPC channel or executor exists yet.
  */
 
 export const WRITE_LIMITS = Object.freeze({
@@ -26,14 +25,18 @@ export const WRITE_LIMITS = Object.freeze({
   /** Post-image bytes across one batch. */
   batchBytes: 4_194_304,
   pathChars: 1_024,
-  pathComponents: 32,
+  pathComponents: MAX_PATH_COMPONENTS,
 });
 
 /** Shared with the run protocol so an id/revision cannot drift between them. */
-const id = RunIdentitySchema.shape.runId;
-const revision = RunIdentitySchema.shape.revision;
-const sha256 = z.string().regex(/^[0-9a-f]{64}$/);
-const bytes = z.number().int().nonnegative().max(WRITE_LIMITS.targetBytes);
+const identifierSchema = RunIdentitySchema.shape.runId;
+const revisionSchema = RunIdentitySchema.shape.revision;
+const sha256Schema = z.string().regex(/^[0-9a-f]{64}$/);
+const byteCountSchema = z
+  .number()
+  .int()
+  .nonnegative()
+  .max(WRITE_LIMITS.targetBytes);
 
 /**
  * Shape-only check: plain project-relative components with no traversal,
@@ -59,8 +62,8 @@ export const WriteTargetPathSchema = z
 export const WriteFileStateSchema = z
   .object({
     kind: z.literal('file'),
-    bytes,
-    sha256,
+    bytes: byteCountSchema,
+    sha256: sha256Schema,
   })
   .strict();
 
@@ -135,7 +138,9 @@ export const WritePermissionModeSchema = z.enum(WRITE_PERMISSION_MODES);
 /**
  * What the selector's scope covers: every target of the batch ("全部 N 个
  * 文件"), or an explicit subset. A subset can only narrow the batch, never add
- * a path the batch does not carry.
+ * a path the batch does not carry. Subset paths match exactly, never case-folded:
+ * on a case-sensitive volume `src/A.ts` and `src/a.ts` are different files, so
+ * the caller passes the batch's own path strings.
  */
 export const WritePermissionScopeSchema = z.union([
   z.literal('all_targets'),
@@ -146,16 +151,18 @@ export const WritePermissionScopeSchema = z.union([
 export const WRITE_PROTECTED_PATHS = ['.git'] as const;
 
 /**
- * One permission grant. It is bound to the session, project and window epoch,
- * not to a single Diff: switching project or task, closing the window or
- * restarting main invalidates it. `full_access` and `auto_review` require an
- * explicit risk acknowledgement, recorded here so the UI can prove it happened.
+ * One permission record. It is bound to the session, project and window epoch,
+ * not to a single Diff: switching project, closing the window or restarting
+ * main invalidates it. A task switch inside one session does not, because the
+ * permission is session-scoped and the task text is egress material.
+ * `full_access` and `auto_review` require an explicit risk acknowledgement,
+ * recorded here so the UI can prove it happened.
  */
 export const WritePermissionSchema = z
   .object({
     version: z.literal(1),
-    sessionId: id,
-    projectId: id,
+    sessionId: identifierSchema,
+    projectId: identifierSchema,
     mode: WritePermissionModeSchema,
     scope: WritePermissionScopeSchema,
     protectedPaths: z
@@ -183,13 +190,15 @@ export const WritePermissionSchema = z
 export type WritePermission = z.infer<typeof WritePermissionSchema>;
 
 /** Why the permission check refused a batch before any target was touched. */
-export const WRITE_PERMISSION_DENIALS = [
+export const WRITE_PERMISSION_DENIAL_CODES = [
   'PERMISSION_READ_ONLY',
   'PERMISSION_OUT_OF_SCOPE',
   'PERMISSION_PROTECTED_PATH',
 ] as const;
 
-export const WritePermissionDenialCodeSchema = z.enum(WRITE_PERMISSION_DENIALS);
+export const WritePermissionDenialCodeSchema = z.enum(
+  WRITE_PERMISSION_DENIAL_CODES,
+);
 
 export type WritePermissionDenialCode = z.infer<
   typeof WritePermissionDenialCodeSchema
@@ -296,21 +305,21 @@ export const WriteChangeJournalRecordSchema = z.discriminatedUnion('kind', [
   z
     .object({
       kind: z.literal('intent'),
-      runId: id,
-      revision,
+      runId: identifierSchema,
+      revision: revisionSchema,
       path: WriteTargetPathSchema,
-      beforeSha256: sha256,
+      beforeSha256: sha256Schema,
       at: z.iso.datetime(),
     })
     .strict(),
   z
     .object({
       kind: z.literal('applied'),
-      runId: id,
-      revision,
+      runId: identifierSchema,
+      revision: revisionSchema,
       path: WriteTargetPathSchema,
-      afterSha256: sha256,
-      observedSha256: sha256,
+      afterSha256: sha256Schema,
+      observedSha256: sha256Schema,
       /** Identity the applied bytes landed on; null when the platform has none. */
       observedIdentity: WriteFileIdentitySchema.nullable(),
       verification: z.enum(['verified', 'unverified']),
@@ -331,8 +340,8 @@ export const WriteChangeJournalRecordSchema = z.discriminatedUnion('kind', [
   z
     .object({
       kind: z.literal('failed'),
-      runId: id,
-      revision,
+      runId: identifierSchema,
+      revision: revisionSchema,
       path: WriteTargetPathSchema,
       code: WriteChangeFailureCodeSchema,
       at: z.iso.datetime(),
@@ -341,11 +350,11 @@ export const WriteChangeJournalRecordSchema = z.discriminatedUnion('kind', [
   z
     .object({
       kind: z.literal('recovery'),
-      runId: id,
-      revision,
+      runId: identifierSchema,
+      revision: revisionSchema,
       path: WriteTargetPathSchema,
       action: z.enum(['restore', 'preserve', 'already_restored']),
-      observedSha256: sha256.nullable(),
+      observedSha256: sha256Schema.nullable(),
       at: z.iso.datetime(),
     })
     .strict(),

@@ -13,6 +13,7 @@ import {
   type WriteTargetState,
 } from '../../../shared/contracts/write-permission';
 import type { ReadOnlyToolRejection } from '../../../shared/contracts/read-only-tools';
+import { matchesProtectedPath } from '../../../shared/path-safety';
 import { BoundedReadError, readStableFile } from '../bounded-read';
 import { checkReadOnlyToolRequest } from '../read-only-tool-policy';
 import { sameFileIdentity, sha256OfBytes } from './file-state';
@@ -44,17 +45,6 @@ export interface ObserveTargetOptions {
    * so `.git` stays refused exactly as the spec says.
    */
   allowProtectedPaths?: readonly string[];
-}
-
-/** Whole-segment match, case-insensitive, same rule as the permission check. */
-function isAllowedProtectedPath(
-  path: string,
-  allowProtectedPaths: readonly string[],
-): boolean {
-  const wrapped = `/${path.toLowerCase()}/`;
-  return allowProtectedPaths.some((protectedPath) =>
-    wrapped.includes(`/${protectedPath.toLowerCase()}/`),
-  );
 }
 
 /**
@@ -162,7 +152,7 @@ export async function observeWriteTarget(
     absolutePath = preflight.value.absolutePath;
   } else if (
     preflight.error.code === 'SENSITIVE_PATH' &&
-    isAllowedProtectedPath(target.path, allowProtectedPaths)
+    matchesProtectedPath(target.path, allowProtectedPaths)
   ) {
     // `full_access` may write protected paths, so observation has to read them
     // too. The bypass is limited to the caller's protected list, and the target
