@@ -11,9 +11,10 @@ import {
   type RunStatus,
 } from '../../shared/contracts/pioneer-run';
 import type { RunEventBatch, RunPage } from '../../shared/contracts/run-ipc';
-import type {
-  HarnessToolName,
-  ReadOnlyToolRequest,
+import {
+  HARNESS_TOOL_NAMES,
+  type HarnessToolName,
+  type ReadOnlyToolRequest,
 } from '../../shared/contracts/read-only-tools';
 import type { EgressMaterial } from '../../shared/contracts/egress';
 import type {
@@ -391,12 +392,7 @@ export class RunManager {
         grantId,
         taskDigest: grant.taskDigest,
         projectName: project.projectName,
-        tools: [
-          'read_file',
-          'list_directory',
-          'search_in_files',
-          'propose_file_write',
-        ],
+        tools: [...HARNESS_TOOL_NAMES],
         adapter: this.dependencies.adapterKind,
         model: this.dependencies.modelName,
         expiresAt: new Date(grant.expiresAt).toISOString(),
