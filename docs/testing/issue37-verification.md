@@ -120,5 +120,13 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 - 新增 `tools/design-event-consumer.mjs` 与 `.github/workflows/design-intake.yml`：只在 `repository_dispatch` 的 `figma-design-release` 运行，权限仅 `contents: read`、`pull-requests: read`；复核服务端版本历史、固定节点、单活跃 PR 和同版本去重，产出 `tmp/design-external/` 材料 artifact。它不创建 PR、不调用模型、不评论 Issue。
 - 新增 `tests/design-sync/dispatch.test.mjs` 9/9：禁用配置零网络、合法 dispatch 的确定性材料、错误 webhook、PING/普通编辑忽略、越权字段拒绝、越界文件/标签、旧版本、既有 PR 三次重放、固定版本读回与 schema 边界。原有 `events.test.mjs` 与 `composition.test.mjs` 回归通过。
 - 本地 CLI 已实测：禁用配置返回 `event-disabled` 且退出 1（有 dispatch 但仓库未启用，跑红以暴露配置缺口）；缺 `FIGMA_ACCESS_TOKEN` 返回 `permission-denied` 且退出 1，不产生成功材料。
-- 未验证：n8n 导入/部署、HTTPS 可达性、Webhook 创建、真实 passcode 投递、真实事件三次重放、Draft PR。`design/delivery/events.json` 仍不存在，example 默认 disabled；当前 registry 的 #36/#25 均已关闭，真实 S2 需要一个仍 Open 的 pilot。
+- 未验证：n8n 导入/部署、HTTPS 可达性、Webhook 创建、真实 passcode 投递、真实事件三次重放、Draft PR。Phase A 时 `design/delivery/events.json` 仍不存在，example 默认 disabled；当前 registry 的 #36/#25 均已关闭，真实 S2 需要一个仍 Open 的 pilot。
 - #37、#33 保持 Open；本准备不构成条件 5 的验收。
+
+## 2026-11-03 真实命名版本事件（试点 #19）
+
+- 用团队级 Figma Webhook `4740131` 接收真实 `FILE_VERSION_UPDATE`：版本 `2417598685933588034`，label `Pioneer READY change-approval-preview`，`deliveryId` `3d2ac588...f7523c27`。详见[试点记录](issue37-event-pilot.md)。
+- 文件级 webhook 在该 Education 团队返回 `400 Webhook Limit Exceeded`（文件级 webhook 数为 0 仍失败）；团队级可用，但对草稿文件不送达，需选择团队可见文件。这个限制是真实 Figma 行为，已写入试点记录。
+- 接收器通过临时 Cloudflare Quick Tunnel 完成 passcode 校验并转发受限字段；GitHub run 41624454864 已启动并上传 artifact，因 main 尚无 `events.json` 返回 `event-disabled`。接收器、passcode 与 secret 均未失败。
+- 本地消费同一真实事件（启用试点配置）返回 `awaiting-local-agent`：eventKey `965418ec...9328500`、baseSha `2ff851f`、snapshotSha256 `0cfc2f...cc79a`；快照节点 `830:1593` 完整、无 `imageRef`，未创建 PR。
+- 试点配置（`events.json` + #19 的 `change-approval-preview` 登记）在本分支交由评审；合入后需重放这次真实事件或创建新的命名版本，才能让 GitHub 消费端在配置下产出材料 artifact。Draft PR、S2 实现与最终验收仍未执行；#37、#33 保持 Open。
