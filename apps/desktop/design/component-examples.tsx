@@ -9,6 +9,10 @@ import type { SessionWorkspaceAction } from '../src/renderer/state/session-works
 import { ProjectPoster } from '../src/renderer/components/ProjectPoster';
 import { DockSurface } from '../src/renderer/components/DockSurface';
 import { SessionTabStrip } from '../src/renderer/components/SessionTabStrip';
+import {
+  PermissionCard,
+  type PermissionCardProps,
+} from '../src/renderer/components/PermissionCard';
 
 // Code/Map/Doc deliberately retain the existing seeded gradient. These
 // examples do not classify a project by its name or fabricate catalog data.
@@ -75,6 +79,24 @@ export function SessionTabExamples(
         state={{ ...state, activeTabId: 'library' }}
         dispatch={dispatch}
       />
+    ),
+  };
+}
+
+// The four reviewed Figma states. The design-only note is not runtime copy;
+// the component reports an action to its caller and never grants by itself.
+export function PermissionCardExamples(
+  props: Omit<PermissionCardProps, 'state' | 'onAction' | 'note'>,
+) {
+  const note = '设计示例 · 尚未接入 · 不具授权效力';
+  return {
+    'State=Awaiting': (
+      <PermissionCard {...props} state="Awaiting" note={note} />
+    ),
+    'State=Denied': <PermissionCard {...props} state="Denied" note={note} />,
+    'State=Expired': <PermissionCard {...props} state="Expired" note={note} />,
+    'State=Approved': (
+      <PermissionCard {...props} state="Approved" note={note} />
     ),
   };
 }
