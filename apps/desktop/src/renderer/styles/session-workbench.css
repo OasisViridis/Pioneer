@@ -1015,3 +1015,128 @@
   outline: 2px solid var(--pioneer-focus);
   outline-offset: 2px;
 }
+.permission-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--pioneer-border);
+  border-radius: var(--pioneer-radius);
+  background: var(--pioneer-surface);
+  color: var(--pioneer-foreground);
+}
+
+.permission-card__note {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--pioneer-notice);
+  color: var(--pioneer-foreground);
+  font-size: 12px;
+}
+
+.permission-card__header {
+  display: grid;
+  gap: 4px;
+}
+
+.permission-card__eyebrow {
+  margin: 0;
+  color: var(--pioneer-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.permission-card__header h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.permission-card__message {
+  margin: 0;
+  color: var(--pioneer-muted);
+  font-size: 13px;
+}
+
+.permission-card__details {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.permission-card__details > div {
+  display: grid;
+  gap: 2px;
+}
+
+.permission-card__details dt {
+  color: var(--pioneer-muted);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.permission-card__details dd {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.permission-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.permission-card__action {
+  border: 1px solid var(--pioneer-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--pioneer-surface);
+  color: var(--pioneer-foreground);
+  font: inherit;
+  cursor: pointer;
+}
+
+.permission-card__action--primary {
+  border-color: var(--hazel-navy);
+  background: var(--hazel-navy);
+  color: #fff;
+}
+
+.permission-card__action:hover:not(:disabled) {
+  border-color: var(--hazel-navy);
+}
+
+.permission-card__action:focus-visible {
+  outline: 2px solid var(--pioneer-focus);
+  outline-offset: 2px;
+}
+
+.permission-card__action:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.settings-permission-preview {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.settings-permission-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.permission-card[data-state='Denied'] .permission-card__message,
+.permission-card[data-state='Expired'] .permission-card__message {
+  color: var(--hazel-danger-ink);
+}
+
+.permission-card[data-state='Approved'] .permission-card__message {
+  color: var(--hazel-success-ink);
+}

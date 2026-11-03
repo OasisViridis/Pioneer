@@ -186,6 +186,13 @@ export async function checkMappings({ requireComplete = false } = {}) {
       'utf8',
     ),
   );
+  const extension = JSON.parse(
+    await readFile(
+      path.join(root, 'design/sync/component-index-extension.json'),
+      'utf8',
+    ),
+  );
+  const components = [...s0.components, ...extension.components];
   assert.equal(
     index.route,
     'lightweight-index',
@@ -198,8 +205,8 @@ export async function checkMappings({ requireComplete = false } = {}) {
   );
   assert.deepEqual(
     index.components.map((m) => m.designNode).sort(),
-    s0.components.map((m) => m.ownerId).sort(),
-    'Three pilot inventory mismatch',
+    components.map((m) => m.ownerId).sort(),
+    'Pilot inventory mismatch',
   );
   const exampleFile = path.join(root, index.examples.path);
   const configFile = path.join(root, 'apps/desktop/design/tsconfig.json');
@@ -254,7 +261,7 @@ export async function checkMappings({ requireComplete = false } = {}) {
     }
     validateMapping(
       mapping,
-      s0.components.find((c) => c.ownerId === mapping.designNode),
+      components.find((c) => c.ownerId === mapping.designNode),
       source,
     );
     const symbol = exports.find((s) => s.name === mapping.examplesExport);
@@ -275,7 +282,7 @@ export async function checkMappings({ requireComplete = false } = {}) {
     'Index completion flag disagrees with component evidence',
   );
   console.log(
-    `Mapping evidence valid; ${blocked.length}/3 pilots still incomplete (see design/sync/component-mappings.json)`,
+    `Mapping evidence valid; ${blocked.length}/${index.components.length} pilots still incomplete (see design/sync/component-mappings.json)`,
   );
   if (requireComplete)
     assert.equal(

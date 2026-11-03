@@ -281,10 +281,163 @@
         }
       ],
       "examplesExport": "SessionTabExamples"
+    },
+    {
+      "designNode": "830:1593",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=830-1593",
+      "designProperties": {
+        "Operation#725:23": {
+          "type": "TEXT",
+          "defaultValue": "对象：毕业项目的设计文档"
+        },
+        "Scope#725:28": {
+          "type": "TEXT",
+          "defaultValue": "路径：D:/Project/Pioneer/docs\n权限：只读；不写入、不执行命令"
+        },
+        "Recipient#725:33": {
+          "type": "TEXT",
+          "defaultValue": "接收方：本地示例运行器；不外发"
+        },
+        "Expiry#725:38": {
+          "type": "TEXT",
+          "defaultValue": "时效：仅此一次；目标变更或超时即失效"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Awaiting",
+          "variantOptions": ["Awaiting", "Denied", "Expired", "Approved"]
+        }
+      },
+      "designVersion": "Issue 37 real named version 2417598685933588034; node 830:1593; no Code Connect publication",
+      "status": "mapped",
+      "code": {
+        "exportName": "PermissionCard",
+        "path": "apps/desktop/src/renderer/components/PermissionCard.tsx",
+        "commit": null,
+        "blob": "aac39b4a76b656272ac9ea42571e990d7f722cff",
+        "inAcceptedMain": false,
+        "mainBlob": "0000000000000000000000000000000000000000",
+        "props": {
+          "operation": "string",
+          "scope": "string",
+          "recipient": "string",
+          "expiry": "string",
+          "state": "PermissionCardState",
+          "onAction": "((action: PermissionCardAction) => void) | undefined",
+          "note": "string | undefined",
+          "disabled": "boolean | undefined"
+        },
+        "proposedInThisPR": true,
+        "baseCommit": "7d27d455907822219af530fd310a8dd748fec5be"
+      },
+      "usedProps": [
+        "operation",
+        "scope",
+        "recipient",
+        "expiry",
+        "state",
+        "onAction",
+        "note",
+        "disabled"
+      ],
+      "example": "<PermissionCard operation={operation} scope={scope} recipient={recipient} expiry={expiry} state={state} onAction={onAction} note={note} disabled={disabled} />",
+      "variants": [
+        {
+          "nodeId": "830:1594",
+          "name": "State=Awaiting",
+          "status": "preserved-difference",
+          "reason": "The runtime card keeps the reviewed title, message, four fields and action labels. The design-only 'not connected / no authorization effect' note is rendered only by the preview via note; the component reports an action and never grants.",
+          "exercise": "Open Settings, verify the Awaiting card shows 是否批准本次读取 and both disabled actions; confirm the design note is visible and no permission is recorded.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S2 permission card renders four reviewed states without enabling actions"
+            }
+          ]
+        },
+        {
+          "nodeId": "830:1606",
+          "name": "State=Denied",
+          "status": "preserved-difference",
+          "reason": "The runtime card keeps the Denied title, message and actions. The preview disables the controls until #19 wires a real approval flow; no denial is recorded by the component.",
+          "exercise": "Verify the Denied card shows 你已拒绝本次读取, 重新核对范围 and 返回讨论, both disabled, with no state mutation.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S2 permission card renders four reviewed states without enabling actions"
+            }
+          ]
+        },
+        {
+          "nodeId": "830:1618",
+          "name": "State=Expired",
+          "status": "preserved-difference",
+          "reason": "The runtime card keeps the Expired title, message and actions. It does not reuse or infer an old authorization; the preview is read-only.",
+          "exercise": "Verify the Expired card shows 本次批准已失效 with the two reviewed actions disabled.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S2 permission card renders four reviewed states without enabling actions"
+            }
+          ]
+        },
+        {
+          "nodeId": "830:1630",
+          "name": "State=Approved",
+          "status": "preserved-difference",
+          "reason": "The runtime card keeps the Approved title, message and actions. Approving is not execution; the component never records a grant.",
+          "exercise": "Verify the Approved card shows 本次读取已批准 and both actions disabled; confirm no execution or permission event is produced.",
+          "evidence": [
+            {
+              "path": "tests/e2e/design-mappings.e2e.spec.ts",
+              "test": "S2 permission card renders four reviewed states without enabling actions"
+            }
+          ]
+        }
+      ],
+      "propertyMapping": [
+        {
+          "figma": "Operation#725:23",
+          "code": "operation",
+          "status": "mapped",
+          "reason": "Supplied by the caller; the Figma sample text is not application data."
+        },
+        {
+          "figma": "Scope#725:28",
+          "code": "scope",
+          "status": "mapped",
+          "reason": "Supplied by the caller; the reviewed line break is preserved with white-space: pre-line."
+        },
+        {
+          "figma": "Recipient#725:33",
+          "code": "recipient",
+          "status": "mapped",
+          "reason": "Supplied by the caller; no provider is inferred."
+        },
+        {
+          "figma": "Expiry#725:38",
+          "code": "expiry",
+          "status": "mapped",
+          "reason": "Supplied by the caller; no lifetime is inferred."
+        },
+        {
+          "figma": "State",
+          "code": "state",
+          "status": "mapped",
+          "reason": "The four reviewed states select title, message and action labels; transitions belong to the caller."
+        },
+        {
+          "figma": "Actions",
+          "code": "onAction / disabled",
+          "status": "preserved-difference",
+          "reason": "The component reports an action id and has no authorization side effect. The Settings preview disables the same labels until #19 wires the real flow."
+        }
+      ],
+      "examplesExport": "PermissionCardExamples"
     }
   ],
   "acceptedBaseCommit": "d11dedefbd732f97c5cf549b103f405f3741a3af",
-  "completionScope": "Complete lightweight mappings with explicit retained differences and typed examples; CI must execute the named Electron cases. Same-PR source extensions are proposed, not falsely marked as already accepted in main.",
+  "completionScope": "Complete lightweight mappings with explicit retained differences and typed examples; CI must execute the named Electron cases. Same-PR source extensions are proposed, not falsely marked as already accepted in main. The fourth component is the #37 real-event Permission Card pilot.",
   "examples": {
     "path": "apps/desktop/design/component-examples.tsx",
     "typecheck": "apps/desktop/design/tsconfig.json"
@@ -295,12 +448,12 @@
     "tests/e2e/design-decoration.e2e.spec.ts"
   ],
   "evidenceFiles": {
-    "apps/desktop/design/component-examples.tsx": "eff2447744389d9dc531222ed992b64b92f91b34",
+    "apps/desktop/design/component-examples.tsx": "3fcbb93835473143bfac1819855e9cd01ee7bc6a",
     "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "2d39cd9aeeeb35137a6813016a4cf1e8dce9fcf1",
     "apps/desktop/src/renderer/components/Conversation.tsx": "cf72736a084a10821e93d876ebde2506fc3e13f3",
     "apps/desktop/src/renderer/styles/app.css": "cfce7cf1c923f3e0b4febc85b49a3d1e96b15658",
-    "apps/desktop/src/renderer/styles/session-workbench.css": "e56ebf1ddce9379e22433e65a6f83be47379c49c",
-    "tests/e2e/design-mappings.e2e.spec.ts": "41968a251c1e44c8b29d1ffb704e6dd23815f7e6",
+    "apps/desktop/src/renderer/styles/session-workbench.css": "269c09efeb752e969db1618c1a466d6492fd9d08",
+    "tests/e2e/design-mappings.e2e.spec.ts": "fd338c7b3c41db408791b259373bdd1108ae72fd",
     "tests/e2e/p2-run.e2e.spec.ts": "08363406bd9129bc9891b472a6a95fd3ea952393",
     "tests/e2e/design-decoration.e2e.spec.ts": "ee00c34bc7c5699d7c52bbbd1553b73e3b03da58"
   }

@@ -7,7 +7,7 @@
 - Windows 视觉、真实行为检查与基线审阅已完成，具体最终 SHA/CI 在 PR 正文。
 - 新增 `design:external`：真正的 Dev Resources GET/POST 客户端、写入前证据核验、只补缺项、部分成功/超时回读、容量检查；默认只预览，显式 `--apply` 且审批记录 `approved: true` 才写入。
 - 新增事件检查器：passcode、Webhook ID、白名单/发布标签、服务端历史版本顺序、分页、固定版本节点读取、已有 S2 PR 查找、确定性快照及 S2 请求转换。没有第二个业务状态库。
-- **事件检查器不是已部署的接收器，也不是无人值守实现 Agent。** 新事件返回 `awaiting-local-agent`（退出码 1），现有 PR 返回 `existing-delivery`。快照材料不会自行创建 PR。当前可走本地 Codex 的 S2 实现/发布流程；全自动 `repository_dispatch` 消费者仍需本地选择获准执行环境后实现与验收。
+- **事件检查器不是已部署的接收器，也不是无人值守实现 Agent。** 新事件返回 `awaiting-local-agent`（退出码 1），现有 PR 返回 `existing-delivery`。快照材料不会自行创建 PR。当前可走本地 Codex 的 S2 实现/发布流程；2026-11-03 已准备受限的 `repository_dispatch` 消费者（`tools/design-event-consumer.mjs` + `.github/workflows/design-intake.yml`），但接收器仍未部署，真实事件验收仍需获准环境、Webhook 权益与凭证。
 - Code Connect 只读探测 `get_code_connect_suggestions(921:706)` 再次返回套餐/seat 限制。保留 S1 轻量映射，不设置 `officialCodeConnectPublished`。官方当前套餐文档与 MCP 提示存在差异，须核验实际文件所属团队与授权；不能仅凭旧提示要求购买。
 - 自动测试使用受控服务边界，不能代替真实 Figma 投递/写入记录。#37、#33 仍 Open；未设置 COMPLETED。
 
@@ -109,7 +109,7 @@ pnpm design:delivery verify <RETURNED_PR>
 
 ## C. 自动消费者与 Code Connect：明确待接手
 
-自动消费者不是加一个打印 payload 的 workflow。依照原 #37 顺序，**先验收 A，再部署事件入口**。本地 Codex 必须在获准执行环境中完成：
+自动消费者不是加一个打印 payload 的 workflow。依照原 #37 顺序，**先验收 A，再部署事件入口**。2026-11-03 已准备受限的消费者：`tools/design-event-consumer.mjs` 与 `.github/workflows/design-intake.yml`，通过 `repository_dispatch` 校验固定版本并产出材料 artifact；它不创建 PR、不调用模型，接收器仍未部署。因此本条仍未验收。本地 Codex 必须在获准执行环境中完成：
 
 1. 让成熟接收器校验 passcode、Webhook ID 与事件白名单后，只将受限 file/version 引用交给 GitHub dispatch；原始 passcode 不进入 GitHub。接收器 HTTP 成功响应必须晚于可靠交接，失败保留重试；限制请求体和并发，不把 label/description 拼为 shell 或系统指令。
 2. 将 GitHub dispatch 消费者与这里的固定版本核验/S2 prepare 接通。消费者再次核验服务端版本和节点，按 feature 串行，复用 S2 分支去重；不以收到事件就视为成功。选择本地 Codex 或官方受支持执行环境，明确成本、令牌权限与隔离方式后再启用。当前仓库没有自动调用模型的凭证或授权，不提供默认开启的付费工作流。

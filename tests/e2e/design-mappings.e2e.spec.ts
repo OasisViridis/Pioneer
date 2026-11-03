@@ -187,3 +187,45 @@ test('S1 session and dock compositions preserve selection, focus and close seman
     }
   }
 });
+
+test('S2 permission card renders four reviewed states without enabling actions', async ({}, info) => {
+  const before = await captureFixtureHash(root);
+  const app = await launch(info.outputPath('user-data'));
+  try {
+    const page = await app.firstWindow();
+    await app.evaluate(({ BrowserWindow }) =>
+      BrowserWindow.getAllWindows()[0]?.setContentSize(1440, 1000),
+    );
+    await page.getByRole('tab', { name: 'Settings', exact: true }).click();
+    await expect(
+      page.getByRole('heading', {
+        name: 'Permission Card · design preview',
+        exact: true,
+      }),
+    ).toBeVisible();
+    const states = [
+      ['Awaiting', '是否批准本次读取？', '批准本次读取'],
+      ['Denied', '你已拒绝本次读取', '重新核对范围'],
+      ['Expired', '本次批准已失效', '重新核对范围'],
+      ['Approved', '本次读取已批准', '撤回本次授权'],
+    ] as const;
+    for (const [state, title, action] of states) {
+      const card = page.locator(`.permission-card[data-state="${state}"]`);
+      await expect(card).toBeVisible();
+      await expect(card.getByRole('heading', { name: title })).toBeVisible();
+      await expect(
+        card.getByRole('button', { name: action, exact: true }),
+      ).toBeDisabled();
+      await expect(card).toContainText('不具授权效力');
+    }
+    await page.screenshot({
+      path: info.outputPath('s2-permission-card-states.png'),
+    });
+  } finally {
+    try {
+      await app.close();
+    } finally {
+      expect(await captureFixtureHashAfterClose(root)).toBe(before);
+    }
+  }
+});
