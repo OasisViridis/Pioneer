@@ -9,6 +9,7 @@ import {
 import {
   WRITE_PREVIEW_LIMITS,
   WritePreviewSchema,
+  type WriteApplyReport,
   type WritePreview,
   type WritePreviewState,
   type WritePreviewSummary,
@@ -56,7 +57,13 @@ export type ProposeWriteResult =
   | { ok: false; code: WriteProposalRejectionCode };
 
 export type ProposalLookup =
-  | { ok: true; preview: WritePreview; state: WritePreviewState }
+  | {
+      ok: true;
+      preview: WritePreview;
+      state: WritePreviewState;
+      /** Last apply attempt, including the one auto_review performed. */
+      report: WriteApplyReport | null;
+    }
   | { ok: false; code: 'PROPOSAL_NOT_FOUND' };
 
 export type ProposalActionSnapshot =
@@ -104,6 +111,8 @@ interface StoredProposal {
   contents: Map<string, Buffer>;
   state: WritePreviewState;
   retainedBytes: number;
+  /** Last apply report, so auto_review's result is retrievable from the panel. */
+  report: WriteApplyReport | null;
 }
 
 function rejectionForReadOnly(code: string): WriteProposalRejectionCode {
@@ -245,10 +254,15 @@ export class WriteProposalRegistry {
     return total;
   }
 
-  private evictResolved(): void {
+  /**
+   * Drops resolved proposals until the incoming proposal fits or only pending
+   * ones remain. Evicting before every acceptance is what keeps a long session
+   * from rejecting the 33rd proposal while 32 resolved previews sit in memory.
+   */
+  private evictResolved(incomingBytes: number): void {
     while (
-      this.proposals.size > this.maxRetained ||
-      this.retainedBytes() > this.maxBytes
+      this.proposals.size >= this.maxRetained ||
+      this.retainedBytes() + incomingBytes > this.maxBytes
     ) {
       let victim: string | null = null;
       for (const [id, proposal] of this.proposals) {
@@ -364,7 +378,7 @@ export class WriteProposalRegistry {
       beforeRead.state.bytes +
       after.bytes +
       Buffer.byteLength(diff.text, 'utf-8');
-    this.evictResolved();
+    this.evictResolved(retainedBytes);
     if (
       this.proposals.size >= this.maxRetained ||
       this.retainedBytes() + retainedBytes > this.maxBytes
@@ -385,6 +399,7 @@ export class WriteProposalRegistry {
       contents: new Map([[path, afterBytes]]),
       state: 'pending',
       retainedBytes,
+      report: null,
     });
     return { ok: true, proposalId, previewRevision: 1 };
   }
@@ -425,6 +440,7 @@ export class WriteProposalRegistry {
       ok: true,
       preview: structuredClone(stored.preview),
       state: stored.state,
+      report: stored.report === null ? null : structuredClone(stored.report),
     };
   }
 
@@ -477,6 +493,24 @@ export class WriteProposalRegistry {
       previewRevision: stored.preview.previewRevision + 1,
       targets,
     });
+    const refreshedBytes = targets.reduce(
+      (total, target) =>
+        total +
+        target.before.bytes +
+        target.after.bytes +
+        Buffer.byteLength(target.diff, 'utf-8'),
+      0,
+    );
+    const delta = refreshedBytes - stored.retainedBytes;
+    if (delta > 0) this.evictResolved(delta);
+    const totalBytes =
+      this.retainedBytes() - stored.retainedBytes + refreshedBytes;
+    if (totalBytes > this.maxBytes) {
+      stored.state = 'expired';
+      return { ok: false, code: 'PREVIEW_EXPIRED' };
+    }
+    stored.retainedBytes = refreshedBytes;
+    stored.report = null;
     return { ok: true, preview: structuredClone(stored.preview) };
   }
 
@@ -507,6 +541,7 @@ export class WriteProposalRegistry {
   markState(
     identity: WriteProposalRevision,
     state: WritePreviewState,
+    report?: WriteApplyReport | null,
   ): boolean {
     const stored = this.proposals.get(identity.proposalId);
     if (stored === undefined || !this.bindingMatches(stored, identity)) {
@@ -514,7 +549,15 @@ export class WriteProposalRegistry {
     }
     if (stored.state !== 'pending') return false;
     stored.state = state;
+    if (report !== undefined && report !== null) stored.report = report;
     return true;
+  }
+
+  /** Stores an apply report even when the preview stays pending (auto-review refused). */
+  setReport(identity: WriteProposalIdentity, report: WriteApplyReport): void {
+    const stored = this.proposals.get(identity.proposalId);
+    if (stored === undefined || !this.bindingMatches(stored, identity)) return;
+    stored.report = report;
   }
 
   /** A newer run (or a vanished project) makes a pending preview unusable. */

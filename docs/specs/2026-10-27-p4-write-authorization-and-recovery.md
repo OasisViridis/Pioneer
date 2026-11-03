@@ -162,7 +162,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 | 记录       | 字段                                                                                                   | 含义                                                             |
 | ---------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
 | `intent`   | `runId`、`revision`、`path`、`beforeSha256`、`at`                                                      | 真正写之前先落盘，是"这次运行动过这个目标"的唯一证据             |
-| `applied`  | `runId`、`revision`、`path`、`afterSha256`、`observedSha256`、`observedIdentity`、`verification`、`at` | 写完回读的结果；`verified` 要求 `observedSha256 === afterSha256` |
+| `applied`  | `runId`、`revision`、`path`、`afterSha256`、`observedSha256`、`observedIdentity`、`verification`、`at` | 写完回读的结果；`verified` 要求 `observedSha256` 非空且等于 `afterSha256`；`unverified` 且回读无法证明时允许 `observedSha256` 为 `null` |
 | `failed`   | `runId`、`revision`、`path`、`code`、`at`                                                              | 这个目标没写成，`code` 取失败码                                  |
 | `recovery` | `runId`、`revision`、`path`、`action`、`observedSha256`、`at`                                          | 恢复做了什么，以及当时观察到的哈希                               |
 

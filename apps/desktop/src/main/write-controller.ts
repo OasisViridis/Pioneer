@@ -61,14 +61,24 @@ export type ApplyControllerResult =
   | { ok: false; code: WriteIpcErrorCode; report: WriteApplyReport | null };
 
 export type RefreshControllerResult =
-  | { ok: true; preview: WritePreview; state: WritePreviewState }
+  | {
+      ok: true;
+      preview: WritePreview;
+      state: WritePreviewState;
+      report: null;
+    }
   | { ok: false; code: WriteIpcErrorCode };
 
 export type RejectControllerResult =
   { ok: true } | { ok: false; code: WriteIpcErrorCode };
 
 export type GetControllerResult =
-  | { ok: true; preview: WritePreview; state: WritePreviewState }
+  | {
+      ok: true;
+      preview: WritePreview;
+      state: WritePreviewState;
+      report: WriteApplyReport | null;
+    }
   | { ok: false; code: 'PROPOSAL_NOT_FOUND' };
 
 export type ProposeControllerRequest = ProposeWriteRequest;
@@ -147,7 +157,12 @@ export class WriteController {
   getPreview(identity: WriteProposalIdentity): GetControllerResult {
     const lookup = this.dependencies.proposals.get(identity);
     if (!lookup.ok) return { ok: false, code: lookup.code };
-    return { ok: true, preview: lookup.preview, state: lookup.state };
+    return {
+      ok: true,
+      preview: lookup.preview,
+      state: lookup.state,
+      report: lookup.report,
+    };
   }
 
   refresh(identity: WriteProposalIdentity): Promise<RefreshControllerResult> {
@@ -158,7 +173,12 @@ export class WriteController {
       }
       const refreshed = await this.dependencies.proposals.refresh(identity);
       if (!refreshed.ok) return { ok: false, code: refreshed.code };
-      return { ok: true, preview: refreshed.preview, state: 'pending' };
+      return {
+        ok: true,
+        preview: refreshed.preview,
+        state: 'pending',
+        report: null,
+      };
     });
   }
 
@@ -195,12 +215,21 @@ export class WriteController {
       request.binding.projectId,
       request.binding,
     );
+    let applied = false;
+    let failureCode: WriteIpcErrorCode | null = null;
     if (permission?.mode === 'auto_review') {
-      // The reviewed revision and the apply report stay available; only the
+      // The reviewed revision and its apply report stay retrievable; only the
       // per-change confirmation is skipped, exactly as the P4-D1 decision says.
-      await this.serialize(() => this.applyInternal(identity));
+      const result = await this.serialize(() => this.applyInternal(identity));
+      applied = result.ok;
+      failureCode = result.ok ? null : result.code;
     }
-    return { status: 'accepted', proposalId: created.proposalId };
+    return {
+      status: 'accepted',
+      proposalId: created.proposalId,
+      applied,
+      failureCode,
+    };
   }
 
   async apply(identity: WriteProposalRevision): Promise<ApplyControllerResult> {
@@ -267,25 +296,30 @@ export class WriteController {
       failure: result.report.failure,
     });
 
+    const report = reportFor();
+    // Keep the report attached to the preview even when the apply was refused,
+    // so auto_review's outcome is not lost when no one clicked approve.
+    this.dependencies.proposals.setReport(identity, report);
+
     switch (result.status) {
       case 'applied': {
-        this.dependencies.proposals.markState(identity, 'applied');
-        return { ok: true, report: reportFor() };
+        this.dependencies.proposals.markState(identity, 'applied', report);
+        return { ok: true, report };
       }
       case 'denied':
         // Nothing was written; the preview stays pending so the user can
         // refresh it after a target change or pick another permission.
-        return { ok: false, code: result.code, report: reportFor() };
+        return { ok: false, code: result.code, report };
       case 'journal-unavailable':
-        this.dependencies.proposals.markState(identity, 'failed');
+        this.dependencies.proposals.markState(identity, 'failed', report);
         return {
           ok: false,
           code: 'WRITE_JOURNAL_UNAVAILABLE',
-          report: reportFor(),
+          report,
         };
       case 'failed':
-        this.dependencies.proposals.markState(identity, 'failed');
-        return { ok: false, code: result.code, report: reportFor() };
+        this.dependencies.proposals.markState(identity, 'failed', report);
+        return { ok: false, code: result.code, report };
     }
   }
 

@@ -293,6 +293,37 @@ describe('write controller', () => {
     });
   });
 
+  it('returns the auto-review report from the preview lookup', async () => {
+    await setMode('auto_review', true);
+    const outcome = await controller.propose({
+      binding: BINDING,
+      runId: 'run-0000000000001',
+      revision: 1,
+      projectRoot: root,
+      path: 'README.md',
+      content: 'alpha\nBETA\n',
+    });
+    expect(outcome).toMatchObject({
+      status: 'accepted',
+      applied: true,
+      failureCode: null,
+    });
+    if (outcome.status !== 'accepted') return;
+    const lookup = controller.getPreview({
+      ...BINDING,
+      proposalId: outcome.proposalId,
+      runId: 'run-0000000000001',
+      revision: 1,
+    });
+    expect(lookup).toMatchObject({ ok: true, state: 'applied' });
+    if (!lookup.ok) return;
+    expect(lookup.report).not.toBeNull();
+    expect(lookup.report?.outcomes).toEqual([
+      { path: 'README.md', status: 'applied', code: null },
+    ]);
+    expect(lookup.report?.applied[0]?.verification).toBe('verified');
+  });
+
   it('drops a window permission and its previews when the window goes away', async () => {
     const identity = await propose();
     await setMode('workspace_write');

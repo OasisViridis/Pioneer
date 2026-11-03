@@ -32,7 +32,8 @@ const MODES: {
   {
     mode: 'full_access',
     label: '完全权限',
-    description: '同上，且允许保护路径；仍不越过项目根，也不执行命令。',
+    description:
+      '同工作区内修改；保护路径要等后续票才进入提案，本切片仍只替换已有文本文件。',
     risky: true,
   },
   {

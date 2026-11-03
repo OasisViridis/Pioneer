@@ -129,6 +129,8 @@ function context(
         Promise.resolve({
           status: 'accepted',
           proposalId: 'proposal:test',
+          applied: false,
+          failureCode: null,
         }),
     },
   };
@@ -233,6 +235,8 @@ describe('P2 Pi adapter (offline fakes, no credential)', () => {
             return Promise.resolve({
               status: 'accepted' as const,
               proposalId: 'proposal:test',
+              applied: false,
+              failureCode: null,
             });
           },
         },

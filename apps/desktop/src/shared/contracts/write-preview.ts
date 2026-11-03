@@ -185,7 +185,14 @@ export type WriteProposalRejectionCode = z.infer<
 
 /** The adapter-facing result of asking main to review a proposed change. */
 export type WriteProposalOutcome =
-  | { status: 'accepted'; proposalId: string }
+  | {
+      status: 'accepted';
+      proposalId: string;
+      /** True only when auto_review already applied the reviewed revision. */
+      applied: boolean;
+      /** Why auto_review did not apply; null when it did or did not try. */
+      failureCode: WriteIpcErrorCode | null;
+    }
   | { status: 'rejected'; code: WriteProposalRejectionCode };
 
 /** Fixed write IPC surface. No renderer-controlled path or content channel. */
@@ -316,6 +323,8 @@ export const WritePreviewGetReplySchema = z.discriminatedUnion('ok', [
       ok: z.literal(true),
       preview: WritePreviewSchema,
       state: WritePreviewStateSchema,
+      /** The last apply attempt for this revision, including auto_review. */
+      report: WriteApplyReportSchema.nullable(),
     })
     .strict(),
   z.object({ ok: z.literal(false), code: ipcError }).strict(),

@@ -316,4 +316,59 @@ describe('write proposal registry', () => {
     });
     expect(registry.list(BINDING)[0]?.state).toBe('rejected');
   });
+
+  it('evicts resolved previews before refusing a new one', async () => {
+    for (let file = 0; file < 4; file += 1) {
+      await writeFile(join(root, `f${String(file)}.txt`), 'start\n', 'utf-8');
+    }
+    let first: string | null = null;
+    for (let run = 0; run < 8; run += 1) {
+      const runId = `run-${String(9000000000000 + run)}`;
+      for (let file = 0; file < 4; file += 1) {
+        const proposed = await propose(
+          `f${String(file)}.txt`,
+          `run ${String(run)}\n`,
+          { runId },
+        );
+        expect(proposed.ok).toBe(true);
+        if (!proposed.ok) return;
+        first ??= proposed.proposalId;
+        expect(
+          registry.markState(
+            {
+              ...BINDING,
+              proposalId: proposed.proposalId,
+              runId,
+              revision: 1,
+              previewRevision: 1,
+            },
+            'rejected',
+          ),
+        ).toBe(true);
+      }
+    }
+    expect(registry.list(BINDING)).toHaveLength(32);
+
+    const fresh = await propose('f0.txt', 'fresh\n', {
+      runId: 'run-9000000000008',
+    });
+    expect(fresh.ok).toBe(true);
+    if (!fresh.ok) return;
+    const listed = registry.list(BINDING);
+    expect(listed).toHaveLength(32);
+    expect(listed[0]).toMatchObject({
+      proposalId: fresh.proposalId,
+      state: 'pending',
+    });
+    if (first !== null) {
+      expect(
+        registry.get({
+          ...BINDING,
+          proposalId: first,
+          runId: 'run-9000000000000',
+          revision: 1,
+        }),
+      ).toEqual({ ok: false, code: 'PROPOSAL_NOT_FOUND' });
+    }
+  });
 });

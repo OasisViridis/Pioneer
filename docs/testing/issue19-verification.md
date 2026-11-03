@@ -25,7 +25,7 @@
 | `pnpm test:contract:types`        | 通过（含 `tests/e2e`）                                                                          |
 | `pnpm test:contract`              | 49 个文件、567 项通过                                                                          |
 | `pnpm test:prototype`             | 210/210 通过                                                                                   |
-| `pnpm test:e2e`                   | 42 项通过；包含 `tests/e2e/p4-write.e2e.spec.ts` 的 3 项 P4-A 用例                              |
+| `pnpm test:e2e`                   | 修复前一轮 42 项通过；本轮新增 `auto_review` 用例，完整套件由 PR CI 的 Windows runner 执行（本地不启动可见窗口） |
 | `pnpm package:smoke`              | 包装成功                                                                                       |
 | `pnpm check`                      | 退出码 0；上述各项与最终 package smoke 全部通过                                                 |
 
@@ -58,6 +58,23 @@ pnpm exec vitest run tests/contract/write-diff.test.ts tests/contract/write-prev
 - 权限并发：权限变更、刷新、拒绝、落盘走同一条 main 串行链。
 
 其中“`auto_review` 自动落盘”是 #18 已定档位语义的直接实现，不是对 #19 完成条件的缩减：默认档位与工作区档位仍要求用户查看完整 Diff 并明确批准；自动审查档位是用户显式确认后选择的例外，预览与结果仍可查看。
+
+## 2026-11-04 复审后的阻断修复
+
+第二轮外部意见（同会话，job `jmw0v3fed2ef447d3e4`）与新的双轴审查给出“暂不合并”。三个阻断项、一个结果回传问题和五项规格发现已修复：
+
+1. `rename` 成功、回读无法证明时不再记 `failed(VERIFY_FAILED)`，改记 `applied(verification:'unverified', observedSha256:null)`；#18 的恢复判定把这种记录识别为 `conflict`，而不是“未写入”的 `outOfScope`。契约允许 `observedSha256` 为 null，只有 `verified` 要求非空且等于后像。
+2. 临时文件准备好后、`rename` 前重新检查父目录规范路径、目标前像字节和文件身份；之前只比身份，同 inode 原地改动会被覆盖。新增“替换前就地改动”探针。
+3. 删除回读的 `lstat + readFile` 退化路径；稳定读取失败一律 `verification_failed`，不以更弱证明报告成功。
+4. `auto_review` 的结果不再丢弃：`propose` 返回 `applied`/`failureCode`，`WriteApplyReport` 存入提案表，`write:preview:get` 返回 `report`，面板显示同一份结果；Pi 与受控 adapter 的结果文本按实际结果写。
+5. 提案淘汰死代码修复：接受新提案前按新提案字节淘汰已收尾项；新增 32 条已收尾后再次提案的探针。`refresh` 重算字节并同样受 8 MiB 预算约束。
+6. 面板在运行中每 2 秒刷新列表，运行中到达的提案不再等运行结束。
+7. 权限选择器不再承诺本切片未开放的保护路径；高风险档每次重新确认，当前行只显示 main 已保存的档位。
+8. `chmod` 使用完整 `mode & 0o7777` 并在失败时中止；失败按 `WRITE_FAILED` 返回，目标保持原样。
+
+新增/更新的探针：`write-apply.test.ts` 3 项（就地改动、不可回读的 applied、日志与恢复冲突）、`write-preview.test.ts` 1 项（淘汰）、`write-controller.test.ts` 1 项（`auto_review` 报告），E2E 新增 `auto_review` 用例。
+
+本地已通过：`format`、`lint`、`typecheck`、`test:contract`（50 文件 / 576 项）、`design:check`、`verify:repository`。完整 `pnpm check` 由 PR CI 的 Windows runner 执行；本地未再启动可见 Electron 窗口。
 
 ## 未运行 / 未包含
 

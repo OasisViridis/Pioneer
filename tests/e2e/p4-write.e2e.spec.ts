@@ -248,6 +248,53 @@ test('refuses a changed target, re-reads it and applies only the re-reviewed rev
   }
 });
 
+test('auto-review applies the reviewed revision and keeps its report', async ({}, testInfo) => {
+  const beforeHash = await captureFixtureHash(fixtureRoot);
+  const workspace = await copyWorkspace(testInfo);
+  const scriptPath = await writeRunScript(
+    testInfo.outputPath('run'),
+    REVIEWED_README,
+  );
+  const application = await launchApplication(
+    workspace,
+    testInfo.outputPath('user-data'),
+    scriptPath,
+  );
+  try {
+    const page = await application.firstWindow();
+    await resizeWorkbench(application);
+    await newSessionForProject(page, 'alpha-app');
+    await openRunControls(page);
+    await page
+      .getByRole('radio', { name: '自动审查（EXP）', exact: true })
+      .check();
+    await page
+      .locator('.write-permission__risk input[type="checkbox"]')
+      .check();
+    await expect(
+      page.getByText('写入权限已保存到这个会话', { exact: true }),
+    ).toBeVisible();
+    await startRun(page, '用自动审查更新 README。');
+    await openDiffPanel(page);
+
+    await expect(previewList(page)).toHaveCount(1);
+    await expect(previewList(page).first()).toContainText('已应用');
+    await expect(
+      page.getByRole('heading', { name: '已写入 1 个目标' }),
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: '批准写入' })).toHaveCount(0);
+    expect(
+      await readFile(path.join(workspace, 'alpha-app', 'README.md'), 'utf-8'),
+    ).toBe(REVIEWED_README);
+  } finally {
+    try {
+      await application.close();
+    } finally {
+      expect(await captureFixtureHashAfterClose(fixtureRoot)).toBe(beforeHash);
+    }
+  }
+});
+
 test('refuses to apply under read-only without changing the file', async ({}, testInfo) => {
   const beforeHash = await captureFixtureHash(fixtureRoot);
   const workspace = await copyWorkspace(testInfo);

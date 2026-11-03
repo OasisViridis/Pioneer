@@ -36,6 +36,8 @@ function context(): HarnessContext {
         Promise.resolve({
           status: 'accepted',
           proposalId: `proposal:${input.path}`,
+          applied: false,
+          failureCode: null,
         }),
     },
   };

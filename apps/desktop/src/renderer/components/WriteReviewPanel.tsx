@@ -140,6 +140,22 @@ export function WriteReviewPanel({
   }, [applyList, run.runId, run.status, session.id, session.project.id]);
 
   useEffect(() => {
+    if (run.status !== 'running') return;
+    // Proposals and auto_review results arrive while the run is live; poll the
+    // bounded list so the panel does not wait for the terminal status.
+    const timer = setInterval(() => {
+      void writePort
+        .listPreviews({ sessionId: session.id, projectId: session.project.id })
+        .then((reply) => {
+          if (reply.ok) applyList(reply.previews);
+        });
+    }, 2000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [applyList, run.status, session.id, session.project.id]);
+
+  useEffect(() => {
     if (selectedId === null) return;
     const summary = previews.find((item) => item.proposalId === selectedId);
     if (summary === undefined) return;
@@ -157,6 +173,7 @@ export function WriteReviewPanel({
         if (reply.ok) {
           setPreview(reply.preview);
           setState(reply.state);
+          setReport(reply.report);
         } else {
           setPreview(null);
           setState(null);

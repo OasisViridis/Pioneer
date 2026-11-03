@@ -2264,6 +2264,8 @@ describe('P4-A adapter write proposals', () => {
           return Promise.resolve({
             status: 'accepted' as const,
             proposalId: 'proposal:test',
+            applied: false,
+            failureCode: null,
           });
         },
       },

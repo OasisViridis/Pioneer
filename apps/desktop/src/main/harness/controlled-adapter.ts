@@ -169,6 +169,16 @@ export function createControlledAdapterFactory(
                   type: 'text.delta',
                   text: `提案被拒绝：${outcome.code}`,
                 });
+              } else if (outcome.applied) {
+                emit({
+                  type: 'text.delta',
+                  text: '提案已接受，自动审查已写入。',
+                });
+              } else if (outcome.failureCode !== null) {
+                emit({
+                  type: 'text.delta',
+                  text: `提案已接受；自动审查未写入：${outcome.failureCode}`,
+                });
               }
               break;
             }

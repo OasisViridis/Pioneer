@@ -247,7 +247,7 @@ function buildHarnessTools(
       name: 'propose_file_write',
       label: '提交文件修改',
       description:
-        '提交一次对已有文本文件的完整内容替换，供用户审阅；不会直接写入。path 是项目相对路径，content 是替换后的完整文本。',
+        '提交一次对已有文本文件的完整内容替换，供审阅。自动审查档位下 main 可能在提案后直接写入；其他档位需要用户审阅 Diff 并批准。path 是项目相对路径，content 是替换后的完整文本。',
       parameters: type.Object({
         path: type.String(),
         content: type.String(),
@@ -263,16 +263,17 @@ function buildHarnessTools(
           }),
         );
         if (outcome.status === 'accepted') {
+          const text = outcome.applied
+            ? '修改提案已接受，自动审查已把它写入；可在「改动」面板查看结果。'
+            : outcome.failureCode !== null
+              ? `修改提案已接受，但自动审查未写入（${outcome.failureCode}）；它仍在等待审阅。`
+              : '修改提案已提交，等待用户审阅；尚未写入任何文件。';
           return {
-            content: [
-              {
-                type: 'text',
-                text: '修改提案已提交，等待用户审阅；尚未写入任何文件。',
-              },
-            ],
+            content: [{ type: 'text', text }],
             details: {
               tool: 'propose_file_write',
               proposalId: outcome.proposalId,
+              applied: outcome.applied,
             },
           };
         }
@@ -418,7 +419,7 @@ export function createPiAdapterFactory(
                 trackTool,
               ) as never,
               systemPrompt:
-                '你是 Pioneer 桌面应用内的任务助手。你可以用 read_file、list_directory、search_in_files 三个只读工具查看项目文件；回答文件相关问题时优先调用工具获取真实内容，禁止声称访问过未读取的文件。你可以用 propose_file_write 提交一次对已有文本文件的完整内容替换，但它只是提案：用户必须先审阅 Diff 并批准，文件才会被写入；不要说提案已经落盘或已经完成修改。',
+                '你是 Pioneer 桌面应用内的任务助手。你可以用 read_file、list_directory、search_in_files 三个只读工具查看项目文件；回答文件相关问题时优先调用工具获取真实内容，禁止声称访问过未读取的文件。你可以用 propose_file_write 提交一次对已有文本文件的完整内容替换。默认档位下它只是提案，用户必须先审阅 Diff 并批准，文件才会被写入；自动审查档位下 main 可能在提案后直接写入。不要说提案已经落盘，除非工具结果明确说明已写入。',
             },
           });
           release = (): void => {

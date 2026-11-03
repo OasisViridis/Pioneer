@@ -14,6 +14,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  WRITE_LIMITS,
   WRITE_PROTECTED_PATHS,
   WritePermissionSchema,
   WriteTargetSchema,
@@ -21,6 +22,7 @@ import {
   type WriteTarget,
 } from '../../apps/desktop/src/shared/contracts/write-permission';
 import { applyWriteBatch } from '../../apps/desktop/src/main/harness/write-permission/apply-write';
+import { planRecovery } from '../../apps/desktop/src/main/harness/write-permission/decision';
 import { WriteChangeJournal } from '../../apps/desktop/src/main/harness/write-permission/write-journal';
 import { WritePermissionStore } from '../../apps/desktop/src/main/harness/write-permission/permission-store';
 
@@ -306,6 +308,85 @@ describe('write execution', () => {
     ]);
     expect(result.report.applied[0]?.verification).toBe('unverified');
     expect(await readFile(join(root, 'README.md'), 'utf-8')).toBe('tampered\n');
+  });
+
+  it('refuses an in-place edit made while the temp file is prepared', async () => {
+    const probe = await journalProbe();
+    const result = await applyWriteBatch({
+      projectRoot: root,
+      runId: RUN_ID,
+      revision: 1,
+      targets: [targetOf('README.md', 'alpha\nbeta\n', 'alpha\nBETA\n')],
+      contents,
+      permission: permissionOf(),
+      journal: probe.journal,
+      now: () => AT,
+      hooks: {
+        beforeReplace: (absolutePath) =>
+          writeFile(absolutePath, 'user edit\n', 'utf-8'),
+      },
+    });
+    expect(result).toMatchObject({ status: 'failed', code: 'WRITE_FAILED' });
+    if (result.status !== 'failed') return;
+    expect(result.report.outcomes).toEqual([
+      { path: 'README.md', status: 'failed', code: 'TARGET_CHANGED' },
+    ]);
+    expect(await readFile(join(root, 'README.md'), 'utf-8')).toBe(
+      'user edit\n',
+    );
+    expect(
+      probe.journal.recordsFor(RUN_ID).map((record) => record.kind),
+    ).toEqual(['intent', 'failed']);
+    expect((await readdir(root)).some((name) => name.endsWith('.tmp'))).toBe(
+      false,
+    );
+  });
+
+  it('records an unverified applied state when the post-image cannot be read back', async () => {
+    const probe = await journalProbe();
+    const target = targetOf('README.md', 'alpha\nbeta\n', 'alpha\nBETA\n');
+    const result = await applyWriteBatch({
+      projectRoot: root,
+      runId: RUN_ID,
+      revision: 1,
+      targets: [target],
+      contents,
+      permission: permissionOf(),
+      journal: probe.journal,
+      now: () => AT,
+      hooks: {
+        // Over the read-back budget: the rename happens, the read must not.
+        writeTempFile: (tempPath) =>
+          writeFile(tempPath, Buffer.alloc(WRITE_LIMITS.targetBytes + 1, 0x61)),
+      },
+    });
+    expect(result).toMatchObject({ status: 'failed', code: 'VERIFY_FAILED' });
+    if (result.status !== 'failed') return;
+    expect(result.report.partial).toBe(true);
+    const records = probe.journal.recordsFor(RUN_ID);
+    expect(records.map((record) => record.kind)).toEqual(['intent', 'applied']);
+    expect(records[1]).toMatchObject({
+      kind: 'applied',
+      verification: 'unverified',
+      observedSha256: null,
+    });
+    const plan = planRecovery({
+      runId: RUN_ID,
+      permission: permissionOf(),
+      targets: [target],
+      records,
+      observations: [
+        {
+          path: 'README.md',
+          state: 'changed',
+          observed: null,
+          identity: null,
+        },
+      ],
+    });
+    expect(plan.outOfScope).toEqual([]);
+    expect(plan.conflicts.map((action) => action.path)).toEqual(['README.md']);
+    expect(plan.actions.map((action) => action.action)).toEqual(['conflict']);
   });
 
   it('reports a partial batch when the second target fails', async () => {

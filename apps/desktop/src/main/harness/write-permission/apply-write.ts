@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { chmod, lstat, open, readFile, rename, rm } from 'node:fs/promises';
+import { chmod, lstat, open, realpath, rename, rm } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 import {
@@ -113,10 +113,18 @@ interface ReplaceOutcome {
   code?: WriteRejectionCode | 'WRITE_FAILED';
 }
 
+/** Windows paths differ by case; a canonical check must not reject them. */
+function sameCanonicalPath(left: string, right: string): boolean {
+  return process.platform === 'win32'
+    ? left.toLowerCase() === right.toLowerCase()
+    : left === right;
+}
+
 /**
  * Replaces one existing regular file through a same-directory temp file. The
- * target is untouched until `rename`; a pre-rename identity check narrows the
- * residual race window described in the P4-D1 spec (§3.4).
+ * target is untouched until `rename`; the parent directory, the reviewed bytes
+ * and the file identity are all re-checked after the temp file exists, which is
+ * the narrow residual race window described in the P4-D1 spec (§3.4).
  */
 async function replaceFileAtomically(
   projectRoot: string,
@@ -136,16 +144,44 @@ async function replaceFileAtomically(
     if (original.isSymbolicLink() || !original.isFile())
       return { ok: false, code: 'TARGET_NOT_REGULAR_FILE' };
 
+    // A parent junction/symlink could route the temp file outside the project
+    // even though admission saw the original directory; re-check it here.
+    const canonicalDirectory = await realpath(directory).catch(() => null);
+    if (
+      canonicalDirectory === null ||
+      !sameCanonicalPath(canonicalDirectory, directory)
+    ) {
+      return { ok: false, code: 'TARGET_UNREADABLE' };
+    }
+
     await (hooks.writeTempFile ?? writeTempFileDefault)(tempPath, bytes);
-    await chmod(tempPath, original.mode & 0o777).catch(() => undefined);
+    await chmod(tempPath, original.mode & 0o7777);
 
     await hooks.beforeReplace?.(absolutePath);
 
-    const current = await lstat(absolutePath);
-    if (current.isSymbolicLink() || !current.isFile())
+    // The user may have edited the file in place while the temp file was being
+    // written. Identity alone would miss that, so compare the reviewed bytes.
+    let currentRead;
+    try {
+      currentRead = await readStableFile(
+        absolutePath,
+        WRITE_LIMITS.targetBytes,
+      );
+    } catch {
+      return { ok: false, code: 'TARGET_CHANGED' };
+    }
+    const currentBytes = currentRead.buffer.subarray(0, currentRead.bytesRead);
+    if (
+      currentRead.bytesRead !== target.before.bytes ||
+      sha256OfBytes(currentBytes) !== target.before.sha256
+    ) {
+      return { ok: false, code: 'TARGET_CHANGED' };
+    }
+    if (!currentRead.after.isFile() || currentRead.after.isSymbolicLink()) {
       return { ok: false, code: 'TARGET_NOT_REGULAR_FILE' };
+    }
     if (target.identity !== null) {
-      const identity = platformFileIdentity(current);
+      const identity = platformFileIdentity(currentRead.after);
       if (identity === null)
         return { ok: false, code: 'TARGET_IDENTITY_UNAVAILABLE' };
       // The user may have replaced the file after admission; do not rename
@@ -179,23 +215,9 @@ async function readBackTarget(absolutePath: string): Promise<{
       identity: platformFileIdentity(read.after),
     };
   } catch {
-    // A plain, bounded read still proves the bytes when the stability proof
-    // failed; an unexpected growth is not read at all.
-    try {
-      const stats = await lstat(absolutePath);
-      if (!stats.isFile() || stats.size > WRITE_LIMITS.targetBytes) return null;
-      const bytes = await readFile(absolutePath);
-      return {
-        state: {
-          kind: 'file',
-          bytes: bytes.byteLength,
-          sha256: sha256OfBytes(bytes),
-        },
-        identity: null,
-      };
-    } catch {
-      return null;
-    }
+    // A plain read would bypass the stability proof; the caller must see an
+    // unprovable result instead of a weaker "verified" one.
+    return null;
   }
 }
 
@@ -269,7 +291,7 @@ export async function applyWriteBatch(
         code: null,
       });
     }
-    report.partial = report.applied.length > 0;
+    report.partial = report.partial || report.applied.length > 0;
     return {
       status: 'failed',
       code: failure.code === 'VERIFY_FAILED' ? 'VERIFY_FAILED' : 'WRITE_FAILED',
@@ -336,14 +358,18 @@ export async function applyWriteBatch(
     const absolutePath = join(input.projectRoot, ...target.path.split('/'));
     const observed = await readBackTarget(absolutePath);
     if (observed === null) {
-      // The rename happened but neither read can prove the result. Record the
-      // unprovable state instead of claiming success.
+      // The rename happened but no stable read can prove the result. Record an
+      // unverified `applied` record: recovery sees a real write and treats the
+      // unknown state as a conflict instead of "nothing was written".
       await journal.append({
-        kind: 'failed',
+        kind: 'applied',
         runId: input.runId,
         revision: input.revision,
         path: target.path,
-        code: 'VERIFY_FAILED',
+        afterSha256: target.after.sha256,
+        observedSha256: null,
+        observedIdentity: null,
+        verification: 'unverified',
         at: at(),
       });
       report.outcomes.push({
@@ -351,6 +377,8 @@ export async function applyWriteBatch(
         status: 'verification_failed',
         code: 'VERIFY_FAILED',
       });
+      // A mutation may have landed; do not report the batch as untouched.
+      report.partial = true;
       return finishFailure(index, {
         path: target.path,
         code: 'VERIFY_FAILED',
