@@ -128,7 +128,7 @@ function stateForReadFailure(code: BoundedReadError['code']): WriteTargetState {
  * is likewise indistinguishable from "unknown". Either makes the identity
  * unusable, so the observation reports null instead of a guessed value.
  */
-function identityOf(stats: {
+export function platformFileIdentity(stats: {
   ino: number;
   birthtimeMs: number;
 }): WriteFileIdentity | null {
@@ -206,7 +206,7 @@ export async function observeWriteTarget(
     bytes: read.bytesRead,
     sha256: sha256OfBytes(read.buffer.subarray(0, read.bytesRead)),
   };
-  const identity = identityOf(read.before);
+  const identity = platformFileIdentity(read.before);
   // Content is the primary signal: a different byte stream is `changed` even
   // when the file object also changed. Only identical content with a different
   // file object is `replaced`.

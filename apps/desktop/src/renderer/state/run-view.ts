@@ -223,6 +223,13 @@ export function describe(event: RunEvent): RunDisplayEvent | null {
         text: `${body.result.status} · ${body.result.code}`,
         tone: 'error',
       };
+    case 'write.proposed':
+      return {
+        seq: event.seq,
+        kind: 'marker',
+        text: '已提交待审阅修改（在「改动」面板查看 Diff）',
+        tone: 'host',
+      };
     case 'run.stop_requested':
       return {
         seq: event.seq,

@@ -147,6 +147,17 @@ export const RunEventBodySchema = z.discriminatedUnion('type', [
       ]),
     })
     .strict(),
+  /**
+   * P4-A: main accepted a run's file-change proposal and opened a review
+   * preview. The preview itself is fetched by id through the write surface; the
+   * event only tells the ordered run stream that a review is waiting.
+   */
+  z
+    .object({
+      type: z.literal('write.proposed'),
+      proposalId: id,
+    })
+    .strict(),
   z
     .object({
       type: z.literal('run.stop_requested'),

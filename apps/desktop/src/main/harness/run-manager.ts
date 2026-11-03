@@ -31,6 +31,10 @@ import type {
   HarnessHandle,
 } from './adapter-seam';
 import { executeReadOnlyTool, type ToolOutcome } from './read-only-tools';
+import {
+  WRITE_PREVIEW_LIMITS,
+  type WriteProposalOutcome,
+} from '../../shared/contracts/write-preview';
 
 /**
  * Main-owned run host for the P2 read-only harness. Implements the run
@@ -65,7 +69,9 @@ export interface RunAuthorization {
   grantId: string;
   taskDigest: string;
   projectName: string;
-  tools: readonly ('read_file' | 'list_directory' | 'search_in_files')[];
+  tools: readonly (
+    'read_file' | 'list_directory' | 'search_in_files' | 'propose_file_write'
+  )[];
   adapter: 'controlled' | 'pi';
   model: string | null;
   expiresAt: string;
@@ -149,6 +155,8 @@ interface ActiveRun {
   eventBytes: number;
   outputBytes: number;
   toolCalls: number;
+  /** P4-A proposals this run has requested; bounded by the preview slice. */
+  writeProposals: number;
   /** Serializes tool execution so at most one call is in flight (contract §5). */
   toolChain: Promise<void>;
   /** callIds published without their matching tool.result yet. */
@@ -204,6 +212,23 @@ export interface RunManagerDependencies {
   randomId?: (prefix: string) => string;
   /** Test seam for the tool executor; defaults to the real read-only executor. */
   executeTool?: typeof executeReadOnlyTool;
+  /**
+   * P4-A proposal sink. Main's write controller validates the target and opens
+   * the review preview; without it an adapter can only receive a refusal.
+   */
+  writeProposal?: (input: {
+    binding: {
+      sessionId: string;
+      projectId: string;
+      webContentsId: number;
+      windowEpoch: number;
+    };
+    runId: string;
+    revision: number;
+    projectRoot: string;
+    path: string;
+    content: string;
+  }) => Promise<WriteProposalOutcome>;
 }
 
 const encoder = new TextEncoder();
@@ -365,7 +390,12 @@ export class RunManager {
         grantId,
         taskDigest: grant.taskDigest,
         projectName: project.projectName,
-        tools: ['read_file', 'list_directory', 'search_in_files'],
+        tools: [
+          'read_file',
+          'list_directory',
+          'search_in_files',
+          'propose_file_write',
+        ],
         adapter: this.dependencies.adapterKind,
         model: this.dependencies.modelName,
         expiresAt: new Date(grant.expiresAt).toISOString(),
@@ -512,6 +542,7 @@ export class RunManager {
       eventBytes: 0,
       outputBytes: 0,
       toolCalls: 0,
+      writeProposals: 0,
       toolChain: Promise.resolve(),
       pendingToolCalls: new Set<string>(),
       publishHeld: false,
@@ -623,8 +654,66 @@ export class RunManager {
       task,
       abort: run.abort.signal,
       tools,
+      write: {
+        propose: (input: { path: string; content: string }) =>
+          this.proposeWrite(run, project, input),
+      },
     };
     return this.dependencies.adapterFactory(context, emit);
+  }
+
+  /**
+   * P4-A: an adapter asked main to turn exact bytes into a reviewed preview.
+   * Main owns validation and the preview; the adapter never gets a file handle.
+   * The per-run budget counts refused attempts too, so a model cannot loop the
+   * review surface.
+   */
+  private async proposeWrite(
+    run: ActiveRun,
+    project: ProjectBinding,
+    input: { path: string; content: string },
+  ): Promise<WriteProposalOutcome> {
+    if (this.isTerminal(run) || run.stopRequestedAt !== null) {
+      return { status: 'rejected', code: 'CANCELLED' };
+    }
+    if (run.writeProposals >= WRITE_PREVIEW_LIMITS.proposalsPerRun) {
+      return { status: 'rejected', code: 'PROPOSAL_LIMIT' };
+    }
+    run.writeProposals += 1;
+    const sink = this.dependencies.writeProposal;
+    if (sink === undefined) {
+      return { status: 'rejected', code: 'WRITE_UNAVAILABLE' };
+    }
+    let outcome: WriteProposalOutcome;
+    try {
+      outcome = await sink({
+        binding: {
+          sessionId: run.identity.sessionId,
+          projectId: run.identity.projectId,
+          webContentsId: run.webContentsId,
+          windowEpoch: run.windowEpoch,
+        },
+        runId: run.identity.runId,
+        revision: run.identity.revision,
+        projectRoot: project.root,
+        path: input.path,
+        content: input.content,
+      });
+    } catch {
+      // The sink is main code; a thrown error still answers the adapter with a
+      // refusal instead of breaking the run loop.
+      return { status: 'rejected', code: 'WRITE_UNAVAILABLE' };
+    }
+    // A proposal accepted after the run converged is still reviewable; only a
+    // live run stream can carry the announcement.
+    if (outcome.status === 'accepted') {
+      this.emit(
+        run,
+        { type: 'write.proposed', proposalId: outcome.proposalId },
+        'host',
+      );
+    }
+    return outcome;
   }
 
   private async driveRun(run: ActiveRun, handle: HarnessHandle): Promise<void> {
@@ -958,6 +1047,11 @@ export class RunManager {
       return;
     record.state = 'missing';
     record.reason = reason;
+  }
+
+  /** Newest run revision authorized in a session; older previews are stale. */
+  lastRevisionFor(sessionId: string): number {
+    return this.sessionLastRevision.get(sessionId) ?? 0;
   }
 
   /**

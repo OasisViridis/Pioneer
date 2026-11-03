@@ -68,7 +68,14 @@ export const RunAuthorizationSummarySchema = z
     grantId: RunIdentitySchema.shape.runId,
     taskDigest: z.string().min(1).max(512),
     projectName: z.string().min(1).max(512),
-    tools: z.array(z.enum(['read_file', 'list_directory', 'search_in_files'])),
+    tools: z.array(
+      z.enum([
+        'read_file',
+        'list_directory',
+        'search_in_files',
+        'propose_file_write',
+      ]),
+    ),
     adapter: z.enum(['controlled', 'pi']),
     model: z.string().min(1).max(256).nullable(),
     expiresAt: z.iso.datetime(),

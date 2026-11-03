@@ -54,10 +54,12 @@ vi.mock('@earendil-works/pi-agent-core', () => {
     initialState?: { tools?: FakeTool[] };
   }
   class Agent {
+    static lastTools: FakeTool[] = [];
     state: { messages: unknown[] } = { messages: [] };
     readonly #tools: FakeTool[];
     constructor(options: FakeOptions) {
       this.#tools = options.initialState?.tools ?? [];
+      Agent.lastTools = this.#tools;
     }
     abort(): void {
       // The fake holds no resources to release.
@@ -122,6 +124,13 @@ function context(
     task: '回答问题。',
     abort: new AbortController().signal,
     tools: { execute },
+    write: {
+      propose: () =>
+        Promise.resolve({
+          status: 'accepted',
+          proposalId: 'proposal:test',
+        }),
+    },
   };
 }
 
@@ -202,6 +211,61 @@ describe('P2 Pi adapter (offline fakes, no credential)', () => {
     });
     await expect(adapter.quiescent).resolves.toBeUndefined();
     expect(quiet).toBe(true);
+    await adapter.dispose();
+  });
+
+  it('bridges propose_file_write to main without writing anything itself', async () => {
+    const proposals: { path: string; content: string }[] = [];
+    const adapter = createPiAdapterFactory(piConfig, {
+      PIONEER_TEST_API_KEY: 'test-only-value',
+    })(
+      {
+        ...context(() =>
+          Promise.resolve({
+            status: 'succeeded' as const,
+            text: 'tool-output',
+            truncated: false,
+          }),
+        ),
+        write: {
+          propose: (input) => {
+            proposals.push(input);
+            return Promise.resolve({
+              status: 'accepted' as const,
+              proposalId: 'proposal:test',
+            });
+          },
+        },
+      },
+      () => undefined,
+    );
+    await adapter.start();
+
+    const core = (await import('@earendil-works/pi-agent-core')) as unknown as {
+      Agent: {
+        lastTools: {
+          name: string;
+          execute(
+            callId: string,
+            params: Record<string, string>,
+          ): Promise<unknown>;
+        }[];
+      };
+    };
+    const tool = core.Agent.lastTools.find(
+      (candidate) => candidate.name === 'propose_file_write',
+    );
+    expect(tool).toBeDefined();
+    if (tool === undefined) return;
+    const result = await tool.execute('call-1', {
+      path: 'README.md',
+      content: 'next\n',
+    });
+    expect(proposals).toEqual([{ path: 'README.md', content: 'next\n' }]);
+    const content = (result as { content: { type: string; text: string }[] })
+      .content;
+    expect(content[0]?.type).toBe('text');
+    expect(content[0]?.text).toContain('等待用户审阅');
     await adapter.dispose();
   });
 });

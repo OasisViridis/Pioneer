@@ -2243,3 +2243,78 @@ describe('P3-A read fact survives a later failure (#17)', () => {
     expect(context?.calls[0]).toMatchObject({ state: 'cancelled' });
   });
 });
+
+describe('P4-A adapter write proposals', () => {
+  it('accepts a run proposal, emits write.proposed and binds the run identity', async () => {
+    const proposals: unknown[] = [];
+    const { manager, projectRoot } = await createManager(
+      {
+        steps: [
+          {
+            action: 'propose_write',
+            path: 'README.md',
+            content: 'next\n',
+          },
+          { action: 'complete' },
+        ],
+      },
+      {
+        writeProposal: (input) => {
+          proposals.push(input);
+          return Promise.resolve({
+            status: 'accepted' as const,
+            proposalId: 'proposal:test',
+          });
+        },
+      },
+    );
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+
+    expect(proposals).toEqual([
+      {
+        binding: {
+          sessionId: 'session:test',
+          projectId: 'project:test',
+          webContentsId,
+          windowEpoch,
+        },
+        runId,
+        revision: 1,
+        projectRoot,
+        path: 'README.md',
+        content: 'next\n',
+      },
+    ]);
+    const events = pageOf(manager, runId)?.events ?? [];
+    expect(
+      events.some(
+        (event) =>
+          event.body.type === 'write.proposed' &&
+          event.body.proposalId === 'proposal:test',
+      ),
+    ).toBe(true);
+  });
+
+  it('refuses proposals without a sink and bounds the per-run proposal count', async () => {
+    const { manager } = await createManager({
+      steps: [
+        { action: 'propose_write', path: 'a.md', content: 'a\n' },
+        { action: 'propose_write', path: 'b.md', content: 'b\n' },
+        { action: 'propose_write', path: 'c.md', content: 'c\n' },
+        { action: 'propose_write', path: 'd.md', content: 'd\n' },
+        { action: 'propose_write', path: 'e.md', content: 'e\n' },
+        { action: 'complete' },
+      ],
+    });
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'completed');
+    const events = pageOf(manager, runId)?.events ?? [];
+    const text = events
+      .filter((event) => event.body.type === 'text.delta')
+      .map((event) => (event.body.type === 'text.delta' ? event.body.text : ''))
+      .join('');
+    expect(text.match(/WRITE_UNAVAILABLE/g)?.length).toBe(4);
+    expect(text).toContain('提案被拒绝：PROPOSAL_LIMIT');
+  });
+});

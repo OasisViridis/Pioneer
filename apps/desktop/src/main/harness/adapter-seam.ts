@@ -1,3 +1,4 @@
+import type { WriteProposalOutcome } from '../../shared/contracts/write-preview';
 import type {
   RunFailureCode,
   RunIdentity,
@@ -16,6 +17,18 @@ export interface HarnessToolExecutor {
   execute(request: ReadOnlyToolRequest): Promise<ToolOutcome>;
 }
 
+/**
+ * The only write-shaped request an adapter may make. Main validates the target,
+ * builds the preview and binds it to this Run; the adapter never receives a
+ * file handle and cannot write anything itself.
+ */
+export interface HarnessWriteExecutor {
+  propose(input: {
+    path: string;
+    content: string;
+  }): Promise<WriteProposalOutcome>;
+}
+
 /** The only messages an adapter may emit; raw SDK events never cross this seam. */
 export type AdapterMessage =
   | { type: 'text.delta'; text: string }
@@ -30,6 +43,7 @@ export interface HarnessContext {
   readonly task: string;
   readonly abort: AbortSignal;
   readonly tools: HarnessToolExecutor;
+  readonly write: HarnessWriteExecutor;
 }
 
 export interface AdapterUsage {

@@ -247,7 +247,12 @@ export function RunContextPanel({
   );
 }
 
-const TOOL_ROWS = ['read_file', 'list_directory', 'search_in_files'] as const;
+const TOOL_ROWS = [
+  'read_file',
+  'list_directory',
+  'search_in_files',
+  'propose_file_write',
+] as const;
 
 export function RunCapabilitiesPanel({
   session,
@@ -276,18 +281,20 @@ export function RunCapabilitiesPanel({
                   ? '摘要不可用'
                   : '尚未授权'
                 : authorized.includes(tool)
-                  ? '本次运行已授权 · 只读'
+                  ? tool === 'propose_file_write'
+                    ? '本次运行已授权 · 仅提交待审阅修改'
+                    : '本次运行已授权 · 只读'
                   : '本次未授权'}
             </dd>
           </div>
         ))}
         <div>
           <dt>写入工作区</dt>
-          <dd>未提供（P2 只读边界）</dd>
+          <dd>由会话权限决定 · 批准后只替换预览列出的文件</dd>
         </div>
         <div>
           <dt>执行命令</dt>
-          <dd>未提供（P2 只读边界）</dd>
+          <dd>未提供（写入切片不含命令执行）</dd>
         </div>
       </dl>
       {state.authorization !== null ? (

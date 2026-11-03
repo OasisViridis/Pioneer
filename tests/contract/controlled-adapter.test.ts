@@ -31,6 +31,13 @@ function context(): HarnessContext {
           truncated: false,
         }),
     },
+    write: {
+      propose: (input) =>
+        Promise.resolve({
+          status: 'accepted',
+          proposalId: `proposal:${input.path}`,
+        }),
+    },
   };
 }
 
@@ -233,6 +240,40 @@ describe('P2 controlled adapter (test-only model stand-in)', () => {
     await handle.start();
     await handle.quiescent;
     expect(textChunks(messages)).toEqual([text]);
+  });
+
+  it('passes propose_write to main and surfaces a refusal in the run text', async () => {
+    const messages: AdapterMessage[] = [];
+    const proposals: { path: string; content: string }[] = [];
+    const base = context();
+    const handle = createControlledAdapterFactory({
+      steps: [
+        { action: 'propose_write', path: 'README.md', content: 'next\n' },
+        { action: 'complete' },
+      ],
+    })(
+      {
+        ...base,
+        write: {
+          propose: (input) => {
+            proposals.push(input);
+            return Promise.resolve({
+              status: 'rejected',
+              code: 'TARGET_CHANGED',
+            });
+          },
+        },
+      },
+      (message) => {
+        messages.push(message);
+      },
+    );
+    await handle.start();
+    await handle.quiescent;
+    expect(proposals).toEqual([{ path: 'README.md', content: 'next\n' }]);
+    expect(textChunks(messages).join('')).toContain(
+      '提案被拒绝：TARGET_CHANGED',
+    );
   });
 });
 

@@ -21,6 +21,14 @@ import {
   piCredentialPresent,
   resolvePiRuntimeConfig,
 } from './harness/pi-adapter';
+import {
+  createFileWriteJournalStore,
+  WriteChangeJournal,
+} from './harness/write-permission/write-journal';
+import { WritePermissionStore } from './harness/write-permission/permission-store';
+import { WriteProposalRegistry } from './harness/write-permission/proposal-registry';
+import { WriteController } from './write-controller';
+import type { WriteProposalOutcome } from '../shared/contracts/write-preview';
 
 /**
  * Atomic whole-file journal storage on top of the shared writer, so two writers
@@ -61,6 +69,13 @@ export interface AssembledRunHost {
   adapterKind: 'controlled' | 'pi';
   adapterAvailable: boolean;
   modelName: string | null;
+  /** P4-A write surface assembled in the same main process as the run host. */
+  write: {
+    controller: WriteController;
+    proposals: WriteProposalRegistry;
+    permissions: WritePermissionStore;
+    journal: WriteChangeJournal;
+  };
 }
 
 type RunManagerResolveProject = RunManagerDependencies['resolveProject'];
@@ -139,6 +154,7 @@ export async function assembleRunHost(dependencies: {
   let adapterFactory: HarnessAdapterFactory;
   let adapterAvailable: boolean;
   let modelName: string | null = null;
+  let writeController: WriteController | null = null;
 
   if (selection.kind === 'controlled') {
     adapterAvailable = true;
@@ -170,6 +186,31 @@ export async function assembleRunHost(dependencies: {
     resolveProject: dependencies.resolveProject,
     windowBindings: dependencies.windowBindings,
     sender: dependencies.sender,
+    writeProposal: (input) => {
+      const controller = writeController;
+      if (controller === null) {
+        return Promise.resolve<WriteProposalOutcome>({
+          status: 'rejected',
+          code: 'WRITE_UNAVAILABLE',
+        });
+      }
+      return controller.propose(input);
+    },
+  });
+
+  const writeJournalStore = createFileWriteJournalStore(
+    dependencies.userDataPath,
+  );
+  const { journal: writeJournal } =
+    await WriteChangeJournal.open(writeJournalStore);
+  const proposals = new WriteProposalRegistry();
+  const permissions = new WritePermissionStore();
+  writeController = new WriteController({
+    proposals,
+    permissions,
+    journal: writeJournal,
+    resolveProject: dependencies.resolveProject,
+    currentRevision: (sessionId) => manager.lastRevisionFor(sessionId),
   });
 
   const restored = journal.restorePending();
@@ -177,5 +218,17 @@ export async function assembleRunHost(dependencies: {
     manager.restoreTombstone(accept);
   }
 
-  return { manager, journal, adapterKind, adapterAvailable, modelName };
+  return {
+    manager,
+    journal,
+    adapterKind,
+    adapterAvailable,
+    modelName,
+    write: {
+      controller: writeController,
+      proposals,
+      permissions,
+      journal: writeJournal,
+    },
+  };
 }

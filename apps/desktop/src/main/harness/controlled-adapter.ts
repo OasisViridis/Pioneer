@@ -29,6 +29,14 @@ export const ControlledStepSchema = z.discriminatedUnion('action', [
       request: ReadOnlyToolRequestSchema,
     })
     .strict(),
+  /** P4-A: asks main to turn exact bytes into a reviewed replace_file preview. */
+  z
+    .object({
+      action: z.literal('propose_write'),
+      path: z.string().min(1).max(1024),
+      content: z.string().max(1_048_576),
+    })
+    .strict(),
   z
     .object({
       action: z.literal('unknown_tool'),
@@ -147,6 +155,23 @@ export function createControlledAdapterFactory(
               emit({ type: 'tool.request', request: step.request });
               await track(context.tools.execute(step.request));
               break;
+            case 'propose_write': {
+              const outcome = await track(
+                context.write.propose({
+                  path: step.path,
+                  content: step.content,
+                }),
+              );
+              if (outcome.status === 'rejected') {
+                // The stand-in model has no branching script; surface the
+                // refusal in the run text instead of pretending it succeeded.
+                emit({
+                  type: 'text.delta',
+                  text: `提案被拒绝：${outcome.code}`,
+                });
+              }
+              break;
+            }
             case 'unknown_tool':
               emit({ type: 'tool.unknown', name: step.name });
               break;

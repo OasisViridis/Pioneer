@@ -1445,7 +1445,7 @@ describe('recovery planning', () => {
   });
 });
 
-describe('write surface stays closed', () => {
+describe('P4-D1 decision surface', () => {
   async function listSourceFiles(root: string): Promise<string[]> {
     const entries = await readdir(root, { withFileTypes: true });
     const files: string[] = [];
@@ -1463,24 +1463,35 @@ describe('write surface stays closed', () => {
     return files;
   }
 
-  it('keeps every write call out of the decision modules', async () => {
-    // Scope is this ticket's own surface: a decision module that could write
-    // would defeat the point, and a repository-wide allowlist would break every
-    // time another ticket adds an unrelated writer on main.
-    const reviewedRoots = ['main/harness/write-permission', 'shared/contracts'];
+  it('keeps every write call in the P4-A executor instead of the decision modules', async () => {
+    // The decision layer must stay pure so a preview or a permission check can
+    // never touch disk. The executor and its journal are the only writers added
+    // by #19; a new writer anywhere else in this directory fails the probe.
     const writeCall = /\b(writeFile|appendFile|rm|unlink|rename|copyFile)\s*\(/;
+    const allowedWriters = new Set([
+      'main/harness/write-permission/apply-write.ts',
+      'main/harness/write-permission/write-journal.ts',
+    ]);
     const offenders: string[] = [];
-    for (const relativeRoot of reviewedRoots) {
-      for (const file of await listSourceFiles(
-        join(sourceRoot, relativeRoot),
-      )) {
-        const relativeFile = file
-          .slice(sourceRoot.length + 1)
-          .split(sep)
-          .join('/');
-        if (writeCall.test(await readFile(file, 'utf-8'))) {
-          offenders.push(relativeFile);
-        }
+    for (const file of await listSourceFiles(
+      join(sourceRoot, 'main/harness/write-permission'),
+    )) {
+      const relativeFile = file
+        .slice(sourceRoot.length + 1)
+        .split(sep)
+        .join('/');
+      if (!writeCall.test(await readFile(file, 'utf-8'))) continue;
+      if (!allowedWriters.has(relativeFile)) offenders.push(relativeFile);
+    }
+    for (const file of await listSourceFiles(
+      join(sourceRoot, 'shared/contracts'),
+    )) {
+      const relativeFile = file
+        .slice(sourceRoot.length + 1)
+        .split(sep)
+        .join('/');
+      if (writeCall.test(await readFile(file, 'utf-8'))) {
+        offenders.push(relativeFile);
       }
     }
     expect(offenders).toEqual([]);

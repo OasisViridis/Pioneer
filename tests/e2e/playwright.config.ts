@@ -15,6 +15,7 @@ export default defineConfig({
     'session-lifecycle.e2e.spec.ts',
     'p2-run.e2e.spec.ts',
     'p3-panels.e2e.spec.ts',
+    'p4-write.e2e.spec.ts',
   ],
   outputDir: 'test-output/artifacts',
   fullyParallel: false,

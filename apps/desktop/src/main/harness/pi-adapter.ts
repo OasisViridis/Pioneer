@@ -165,12 +165,14 @@ interface TypeBoxLike {
 type TrackTool = <T>(execute: () => Promise<T>) => Promise<T>;
 
 /**
- * Bridges the three read-only tools to Pi's AgentTool shape. Execution goes
- * through the harness executor port (main's wrapped executor), so every call
- * is rechecked by the #11 preflight, budgeted by §5, and published as wire
- * tool.requested/tool.result events with main-assigned callIds.
+ * Bridges the read-only tools plus the review-only write proposal to Pi's
+ * AgentTool shape. Execution goes through the harness executor port (main's
+ * wrapped executor), so every call is rechecked by the #11 preflight, budgeted
+ * by §5, and published as wire tool.requested/tool.result events with
+ * main-assigned callIds. `propose_file_write` cannot write: main turns the
+ * argument into a preview that a person must approve first.
  */
-function buildReadOnlyTools(
+function buildHarnessTools(
   type: TypeBoxLike,
   context: Parameters<HarnessAdapterFactory>[0],
   trackTool: TrackTool,
@@ -240,6 +242,51 @@ function buildReadOnlyTools(
       '搜索文本',
       type.Object({ path: type.String(), query: type.String() }),
     ),
+    {
+      name: 'propose_file_write',
+      label: '提交文件修改',
+      description:
+        '提交一次对已有文本文件的完整内容替换，供用户审阅；不会直接写入。path 是项目相对路径，content 是替换后的完整文本。',
+      parameters: type.Object({
+        path: type.String(),
+        content: type.String(),
+      }),
+      execute: async (
+        _toolCallId: string,
+        params: Record<string, string>,
+      ): Promise<Record<string, unknown>> => {
+        const outcome = await trackTool(() =>
+          context.write.propose({
+            path: params.path ?? '',
+            content: params.content ?? '',
+          }),
+        );
+        if (outcome.status === 'accepted') {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: '修改提案已提交，等待用户审阅；尚未写入任何文件。',
+              },
+            ],
+            details: {
+              tool: 'propose_file_write',
+              proposalId: outcome.proposalId,
+            },
+          };
+        }
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `修改提案被拒绝：${outcome.code}`,
+            },
+          ],
+          details: { tool: 'propose_file_write', code: outcome.code },
+          isError: true,
+        };
+      },
+    },
   ];
 }
 
@@ -364,13 +411,13 @@ export function createPiAdapterFactory(
             identity: { attribution: null },
             initialState: {
               model,
-              tools: buildReadOnlyTools(
+              tools: buildHarnessTools(
                 ai.Type as unknown as TypeBoxLike,
                 context,
                 trackTool,
               ) as never,
               systemPrompt:
-                '你是 Pioneer 桌面应用内的只读任务助手。你只能通过三个只读工具查看项目文件：read_file、list_directory、search_in_files。回答文件相关问题时优先调用工具获取真实内容；禁止声称访问过未读取的文件。',
+                '你是 Pioneer 桌面应用内的任务助手。你可以用 read_file、list_directory、search_in_files 三个只读工具查看项目文件；回答文件相关问题时优先调用工具获取真实内容，禁止声称访问过未读取的文件。你可以用 propose_file_write 提交一次对已有文本文件的完整内容替换，但它只是提案：用户必须先审阅 Diff 并批准，文件才会被写入；不要说提案已经落盘或已经完成修改。',
             },
           });
           release = (): void => {

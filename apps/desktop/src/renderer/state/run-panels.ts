@@ -169,14 +169,15 @@ const CALL_CODE_TEXT: Record<string, string> = {
 export const callCodeText = (code: string): string =>
   CALL_CODE_TEXT[code] ?? code;
 
-export const TOOL_LABELS: Record<ReadOnlyToolName, string> = {
+export const TOOL_LABELS: Record<string, string> = {
   read_file: '读取文件',
   list_directory: '列目录',
   search_in_files: '搜索文本',
+  propose_file_write: '提交文件修改',
 };
 
-export const toolLabel = (tool: ReadOnlyToolName | null): string =>
-  tool === null ? '未知工具' : TOOL_LABELS[tool];
+export const toolLabel = (tool: string | null): string =>
+  tool === null ? '未知工具' : (TOOL_LABELS[tool] ?? tool);
 
 /** `2026-10-27T10:00:00.000Z` -> `10:00:00`. */
 export const formatUtcTime = (iso: string): string =>

@@ -7,6 +7,7 @@ import type { RunSnapshot } from '../../shared/contracts/run-context';
 import type { Session } from '../../shared/contracts/session-workspace';
 import { runViews } from '../state/run-view-instance';
 import { failureText, rejectionText, visibleStatus } from '../state/run-view';
+import { WritePermissionPicker } from './WritePermissionPicker';
 
 /**
  * Run controls + live event log. The task typed here is what the model
@@ -94,7 +95,7 @@ export function RunPanel({
           {status ?? '未运行'}
         </span>
         <span className="metadata">
-          只读运行 · read_file / list_directory / search_in_files
+          读取 + 待审阅修改 · read_file / propose_file_write
         </span>
       </header>
       {state.rejectionCode !== null ? (
@@ -102,6 +103,11 @@ export function RunPanel({
           {rejectionText(state.rejectionCode)}
         </p>
       ) : null}
+      <WritePermissionPicker
+        sessionId={session.id}
+        projectId={project.id}
+        disabled={authorizing}
+      />
       <label className="run-panel__task">
         运行任务
         <textarea

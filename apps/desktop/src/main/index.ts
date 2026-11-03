@@ -28,10 +28,12 @@ import {
   RUN_IPC_CHANNELS,
   type RunEventBatch,
 } from '../shared/contracts/run-ipc';
+import { WRITE_IPC_CHANNELS } from '../shared/contracts/write-preview';
 import { RUN_LIMITS } from '../shared/contracts/pioneer-run';
 import { assembleRunHost, type AssembledRunHost } from './run-host';
 import { listProjectMaterials } from './harness/egress-materials';
 import { registerRunIpc } from './run-ipc';
+import { registerWriteIpc } from './write-ipc';
 import { probePiRuntime } from './harness/pi-adapter';
 import {
   createPendingSaveTracker,
@@ -106,7 +108,7 @@ const appLifecycle = createAppWindowCoordinator({
   },
   reportTrayUnavailable: () => undefined,
   reportOperationFailure: (reason) => {
-    dialog.showErrorBox('Pioneer 无法完成窗口操作', reason);
+    dialog.showErrorBox('Pioneer 鏃犳硶瀹屾垚绐楀彛鎿嶄綔', reason);
   },
   settleAcceptedSaves: () => acceptedSaves.settle(),
 });
@@ -194,10 +196,11 @@ const openMainWindow = (service: CatalogService): void => {
       if (isMainFrame && !isInPlace) {
         closeCoordinator.disconnect();
         closeBarrier.invalidate();
-        // Contract §1: a navigation rebuilds the window binding. Runs from the
+        // Contract 搂1: a navigation rebuilds the window binding. Runs from the
         // previous document lose their window and are stopped instead of keep
         // running behind a dead renderer.
         runHost?.manager.abandonWindow(boundWebContentsId);
+        runHost?.write.controller.forgetWindow(boundWebContentsId);
         windowEpochCounter += 1;
         activeWindowBinding = {
           webContentsId: boundWebContentsId,
@@ -210,6 +213,7 @@ const openMainWindow = (service: CatalogService): void => {
     closeCoordinator.disconnect();
     closeBarrier.invalidate();
     runHost?.manager.abandonWindow(boundWebContentsId);
+    runHost?.write.controller.forgetWindow(boundWebContentsId);
     windowEpochCounter += 1;
     activeWindowBinding = {
       webContentsId: boundWebContentsId,
@@ -220,6 +224,7 @@ const openMainWindow = (service: CatalogService): void => {
     closeCoordinator.disconnect();
     closeBarrier.invalidate();
     runHost?.manager.abandonWindow(boundWebContentsId);
+    runHost?.write.controller.forgetWindow(boundWebContentsId);
     if (activeWindowBinding?.webContentsId === boundWebContentsId) {
       activeWindowBinding = null;
     }
@@ -230,6 +235,7 @@ const openMainWindow = (service: CatalogService): void => {
     ...Object.values(IPC_CHANNELS),
     ...Object.values(SESSION_IPC_CHANNELS),
     ...Object.values(RUN_IPC_CHANNELS),
+    ...Object.values(WRITE_IPC_CHANNELS),
   ]) {
     ipcMain.removeHandler(channel);
   }
@@ -326,6 +332,22 @@ const openMainWindow = (service: CatalogService): void => {
           return null;
         }
       },
+      windowEpoch: () => activeWindowBinding?.epoch ?? windowEpochCounter,
+    });
+    registerWriteIpc({
+      ipcMain: {
+        handle: (channel, handler) => {
+          ipcMain.handle(channel, (event, ...args: unknown[]) =>
+            handler(event, ...args),
+          );
+        },
+      },
+      mainWindow: { webContents: trustedWindow.webContents },
+      expectedRendererUrl:
+        new URL(MAIN_WINDOW_WEBPACK_ENTRY).protocol === 'file:'
+          ? MAIN_WINDOW_WEBPACK_ENTRY
+          : new URL(MAIN_WINDOW_WEBPACK_ENTRY).origin,
+      controller: runHost.write.controller,
       windowEpoch: () => activeWindowBinding?.epoch ?? windowEpochCounter,
     });
   }

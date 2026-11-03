@@ -91,12 +91,23 @@ export const RunContextReplySchema = z.discriminatedUnion('ok', [
  * stream itself is not persisted; the summary keeps provenance and call
  * outcomes only, and the panels say so instead of replaying invented events.
  */
+export const RunSnapshotToolsSchema = z
+  .array(
+    z.enum([
+      'read_file',
+      'list_directory',
+      'search_in_files',
+      'propose_file_write',
+    ]),
+  )
+  .max(4);
+
 export const RunSnapshotSchema = z
   .object({
     identity: RunIdentitySchema,
     /** Only a converged run is worth persisting as the session's last summary. */
     status: z.enum(['completed', 'failed', 'stopped']),
-    tools: z.array(ReadOnlyToolNameSchema).max(3),
+    tools: RunSnapshotToolsSchema,
     materials: z.array(RunContextMaterialSchema).max(EGRESS_MATERIAL_LIMIT),
     calls: z.array(RunContextCallSchema).max(32),
     recordedAt: z.iso.datetime(),
