@@ -981,6 +981,66 @@
   font-size: 16px;
 }
 
+.change-review__form {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--pioneer-border);
+  border-radius: var(--pioneer-radius);
+  background: var(--pioneer-surface);
+}
+
+.change-review__field {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--pioneer-muted);
+}
+
+.change-review__field input {
+  border: 1px solid #858d92;
+  border-radius: 8px;
+  background: var(--hazel-surface);
+  color: var(--hazel-ink);
+  font: inherit;
+  font-size: 13px;
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.change-review__field input:focus-visible {
+  outline: 2px solid var(--pioneer-focus);
+  outline-offset: 2px;
+}
+
+.change-review__modes {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--pioneer-border);
+  border-radius: 8px;
+}
+
+.change-review__modes legend {
+  padding: 0 4px;
+  font-size: 12px;
+  color: var(--pioneer-muted);
+}
+
+.change-review__modes label {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.change-review__modes label .metadata {
+  overflow-wrap: anywhere;
+}
+
 .change-review__diff,
 .change-review__result {
   display: grid;

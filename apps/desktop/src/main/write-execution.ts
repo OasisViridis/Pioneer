@@ -1,11 +1,13 @@
-import { lstat, realpath } from 'node:fs/promises';
+import { appendFile, lstat, realpath } from 'node:fs/promises';
 import { isAbsolute, join, parse, relative } from 'node:path';
 
 import {
   WRITE_LIMITS,
   WRITE_PROTECTED_PATHS,
+  WriteChangeJournalRecordSchema,
   WritePermissionSchema,
   WriteTargetPathSchema,
+  type WriteChangeJournalRecord,
   type WriteFileIdentity,
   type WriteFileState,
   type WritePermission,
@@ -20,6 +22,7 @@ import {
   WRITE_EXECUTION_VERSION,
   WriteExecutionRequestSchema,
   WriteExecutionResultSchema,
+  WriteReviewModeSchema,
   WriteReviewReplySchema,
   type WriteExecutionCode,
   type WriteExecutionRequest,
@@ -27,6 +30,7 @@ import {
   type WriteExecutionTarget,
   type WriteExecutionTargetResult,
   type WriteReviewDenialCode,
+  type WriteReviewMode,
   type WriteReviewPrepare,
   type WriteReviewReply,
 } from '../shared/contracts/write-execution';
@@ -86,6 +90,13 @@ export interface WriteExecutionHooks {
 export interface WriteExecutionDependencies {
   /** Main resolves the project root from its own catalog, never the request. */
   resolveProjectRoot: (projectId: string) => Promise<string | null>;
+  /**
+   * Append-only JSONL change journal. Production points it at
+   * `<userData>/write-journal.jsonl`; it must stay outside every project it
+   * describes, because a journal inside the project would make the write batch
+   * change the workspace it is proving.
+   */
+  journalPath: string;
   now?: () => Date;
   hooks?: WriteExecutionHooks;
 }
@@ -186,6 +197,12 @@ export class WriteExecutionService {
  * Reads one project-relative target and returns the exact request main is
  * prepared to execute. The renderer receives this request for review; it never
  * authors the pre-image, the post-image hash or the permission binding.
+ *
+ * `read_only` is refused here with the same denial code the executor would
+ * return, before the project root is even resolved, so choosing that mode
+ * touches neither the catalog nor a file. The issued permission record always
+ * carries the mode the caller chose, so the review, the record and the write
+ * check agree on one mode.
  */
 export async function prepareControlledReview(
   dependencies: WriteExecutionDependencies,
@@ -195,6 +212,10 @@ export async function prepareControlledReview(
   try {
     const targetPath = WriteTargetPathSchema.safeParse(input.targetPath);
     if (!targetPath.success) return reviewRefusal('INVALID_REQUEST');
+    const parsedMode = WriteReviewModeSchema.safeParse(input.mode);
+    if (!parsedMode.success) return reviewRefusal('INVALID_REQUEST');
+    const mode: WriteReviewMode = parsedMode.data;
+    if (mode === 'read_only') return reviewRefusal('PERMISSION_READ_ONLY');
     const projectRoot = await dependencies.resolveProjectRoot(input.projectId);
     if (projectRoot === null) return reviewRefusal('PROJECT_UNAVAILABLE');
     const now = dependencies.now?.() ?? new Date();
@@ -202,7 +223,9 @@ export async function prepareControlledReview(
       version: 1,
       sessionId: input.sessionId,
       projectId: input.projectId,
-      mode: 'workspace_write',
+      mode,
+      // One prepared target is the whole batch, so `all_targets` names exactly
+      // what was reviewed; a subset would only restate the same path.
       scope: 'all_targets',
       protectedPaths: [...WRITE_PROTECTED_PATHS],
       webContentsId: expectation.webContentsId,
@@ -231,6 +254,8 @@ export async function prepareControlledReview(
       version: WRITE_EXECUTION_VERSION,
       sessionId: input.sessionId,
       projectId: input.projectId,
+      runId: input.runId,
+      revision: input.revision,
       windowEpoch: expectation.windowEpoch,
       permission: permission.data,
       targets: [
@@ -398,6 +423,8 @@ export async function executeControlledWrite(
       hooks,
       projectRoot,
       permission: controlled.permission,
+      runId: controlled.runId,
+      revision: controlled.revision,
       targets: controlled.targets,
       reads: confirmedReads,
       completedAt,
@@ -425,15 +452,57 @@ interface WriteVerifiedBatchOptions {
   hooks: WriteExecutionHooks | undefined;
   projectRoot: string;
   permission: WritePermission;
+  runId: string;
+  revision: number;
   targets: readonly WriteExecutionTarget[];
   reads: ReadTarget[];
   completedAt: string;
 }
 
+/**
+ * One observed post-image: the bytes main read back and the file object they
+ * landed on. `identity` is what the `applied` journal record stores, so #20 can
+ * tell "our write" from "someone else's bytes" without re-hashing history.
+ */
+interface ObservedTarget {
+  state: WriteFileState;
+  identity: WriteFileIdentity | null;
+}
+
+/**
+ * Appends exactly one JSONL line. The record is validated first, so a malformed
+ * entry can never become durable evidence, and the file is opened in append
+ * mode so no existing line is rewritten or removed.
+ */
+async function appendJournalRecord(
+  journalPath: string,
+  record: WriteChangeJournalRecord,
+): Promise<void> {
+  const parsed = WriteChangeJournalRecordSchema.parse(record);
+  await appendFile(journalPath, `${JSON.stringify(parsed)}\n`, {
+    encoding: 'utf8',
+    flag: 'a',
+  });
+}
+
+/**
+ * The journal is main's own evidence file, so it must be an absolute path
+ * outside the project it describes. Writing it into the project would make the
+ * journal itself part of the workspace the batch is changing.
+ */
+function journalIsUsable(projectRoot: string, journalPath: string): boolean {
+  return isAbsolute(journalPath) && !isPathInsideRoot(projectRoot, journalPath);
+}
+
 async function writeVerifiedBatch(
   options: WriteVerifiedBatchOptions,
 ): Promise<WriteExecutionResult> {
-  const { targets, reads, completedAt } = options;
+  const { dependencies, targets, reads, completedAt, runId, revision } =
+    options;
+  const journalPath = dependencies.journalPath;
+  const journalUsable = journalIsUsable(options.projectRoot, journalPath);
+  const nowIso = (): string =>
+    (dependencies.now?.() ?? new Date()).toISOString();
   const results: WriteExecutionTargetResult[] = targets.map((target) => ({
     path: target.path,
     status: 'unchanged',
@@ -459,6 +528,39 @@ async function writeVerifiedBatch(
       );
     }
 
+    // §4.1: `intent` lands before the bytes do. Without a durable intent there
+    // is no proof this run was allowed to touch the path, so the file is left
+    // untouched and the batch reports a write failure.
+    const intentRecorded = journalUsable
+      ? await appendJournalRecord(journalPath, {
+          kind: 'intent',
+          runId,
+          revision,
+          path: target.path,
+          beforeSha256: target.before.sha256,
+          at: nowIso(),
+        }).then(
+          () => true,
+          () => false,
+        )
+      : false;
+    if (!intentRecorded) {
+      results[index] = {
+        path: target.path,
+        status: 'failed',
+        code: 'WRITE_FAILED',
+        observedSha256: null,
+        verification: 'not_attempted',
+      };
+      return failBatch({
+        ...options,
+        results,
+        written,
+        status: 'failed',
+        code: 'WRITE_FAILED',
+      });
+    }
+
     try {
       await writeFileAtomic(read.absolutePath, target.content);
     } catch {
@@ -467,18 +569,29 @@ async function writeVerifiedBatch(
       const current = await tryReadState(read.absolutePath);
       const landed =
         current !== null &&
-        current.bytes === target.after.bytes &&
-        current.sha256 === target.after.sha256;
+        current.state.bytes === target.after.bytes &&
+        current.state.sha256 === target.after.sha256;
       if (!landed) {
         const unchanged =
           current !== null &&
-          current.bytes === target.before.bytes &&
-          current.sha256 === target.before.sha256;
+          current.state.bytes === target.before.bytes &&
+          current.state.sha256 === target.before.sha256;
+        const code: WriteExecutionCode = unchanged ? 'WRITE_FAILED' : 'UNKNOWN';
+        // The batch is already a failure; a lost `failed` line must not turn
+        // it into a different result, so this append stays best effort.
+        await appendJournalRecord(journalPath, {
+          kind: 'failed',
+          runId,
+          revision,
+          path: target.path,
+          code,
+          at: nowIso(),
+        }).catch(() => undefined);
         results[index] = {
           path: target.path,
           status: unchanged ? 'failed' : 'unknown',
-          code: unchanged ? 'WRITE_FAILED' : 'UNKNOWN',
-          observedSha256: current?.sha256 ?? null,
+          code,
+          observedSha256: current?.state.sha256 ?? null,
           verification: 'not_attempted',
         };
         return failBatch({
@@ -486,7 +599,7 @@ async function writeVerifiedBatch(
           results,
           written,
           status: unchanged ? 'failed' : 'unknown',
-          code: unchanged ? 'WRITE_FAILED' : 'UNKNOWN',
+          code,
         });
       }
     }
@@ -497,15 +610,66 @@ async function writeVerifiedBatch(
     await options.hooks?.afterWrite?.(target.path).catch(() => undefined);
 
     const observed = await tryReadState(read.absolutePath);
-    if (
-      observed?.bytes !== target.after.bytes ||
-      observed.sha256 !== target.after.sha256
-    ) {
+    const verifiedAfter =
+      observed !== null &&
+      observed.state.bytes === target.after.bytes &&
+      observed.state.sha256 === target.after.sha256;
+    // §4.1: the `applied` line carries what main actually observed. A verified
+    // record must observe the after hash, which `verifiedAfter` guarantees; an
+    // unverified one records the mismatch instead of hiding it.
+    const outcomeRecorded =
+      observed === null
+        ? await appendJournalRecord(journalPath, {
+            kind: 'failed',
+            runId,
+            revision,
+            path: target.path,
+            code: 'VERIFY_FAILED',
+            at: nowIso(),
+          }).then(
+            () => true,
+            () => false,
+          )
+        : await appendJournalRecord(journalPath, {
+            kind: 'applied',
+            runId,
+            revision,
+            path: target.path,
+            afterSha256: target.after.sha256,
+            observedSha256: observed.state.sha256,
+            observedIdentity: observed.identity,
+            verification: verifiedAfter ? 'verified' : 'unverified',
+            at: nowIso(),
+          }).then(
+            () => true,
+            () => false,
+          );
+    if (!outcomeRecorded) {
+      // The bytes landed but the outcome could not be recorded, so the change
+      // has no proof chain. It is reported as a failure and left in place:
+      // §2.5/§4.4 forbid an automatic rollback.
+      results[index] = {
+        path: target.path,
+        status: 'failed',
+        code: 'WRITE_FAILED',
+        observedSha256: observed?.state.sha256 ?? null,
+        verification: 'failed',
+      };
+      return failBatch({
+        ...options,
+        results,
+        written,
+        status: 'failed',
+        code: 'WRITE_FAILED',
+      });
+    }
+
+    if (!verifiedAfter) {
       results[index] = {
         path: target.path,
         status: 'verification_failed',
         code: 'VERIFY_FAILED',
-        observedSha256: observed?.sha256 ?? null,
+        observedSha256: observed?.state.sha256 ?? null,
         verification: 'failed',
       };
       // §2.5/§4.4: stop here, keep the scene, and leave recovery to #20. A
@@ -526,7 +690,7 @@ async function writeVerifiedBatch(
       path: target.path,
       status: 'applied',
       code: null,
-      observedSha256: observed.sha256,
+      observedSha256: observed.state.sha256,
       verification: 'verified_after',
     };
   }
@@ -721,13 +885,16 @@ async function readProjectTarget(
 
 async function tryReadState(
   absolutePath: string,
-): Promise<WriteFileState | null> {
+): Promise<ObservedTarget | null> {
   try {
     const read = await readStableFile(absolutePath, WRITE_LIMITS.targetBytes);
     return {
-      kind: 'file',
-      bytes: read.bytesRead,
-      sha256: sha256OfBytes(read.buffer.subarray(0, read.bytesRead)),
+      state: {
+        kind: 'file',
+        bytes: read.bytesRead,
+        sha256: sha256OfBytes(read.buffer.subarray(0, read.bytesRead)),
+      },
+      identity: identityOf(read.before),
     };
   } catch {
     return null;
@@ -931,6 +1098,8 @@ function sameControlledRequest(
   if (
     left.sessionId !== right.sessionId ||
     left.projectId !== right.projectId ||
+    left.runId !== right.runId ||
+    left.revision !== right.revision ||
     left.windowEpoch !== right.windowEpoch ||
     left.targets.length !== right.targets.length
   ) {

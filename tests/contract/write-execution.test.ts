@@ -5,6 +5,7 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  readdir,
   realpath,
   rm,
   symlink,
@@ -21,9 +22,16 @@ import {
   WRITE_EXECUTION_PREVIEW_MARKER,
   WriteExecutionRequestSchema,
   WriteExecutionResultSchema,
+  WriteReviewPrepareSchema,
   type WriteExecutionRequest,
+  type WriteReviewMode,
+  type WriteReviewPrepare,
 } from '../../apps/desktop/src/shared/contracts/write-execution';
-import type { WriteTarget } from '../../apps/desktop/src/shared/contracts/write-permission';
+import {
+  WriteChangeJournalRecordSchema,
+  type WriteChangeJournalRecord,
+  type WriteTarget,
+} from '../../apps/desktop/src/shared/contracts/write-permission';
 import {
   registerWriteExecutionIpc,
   type IpcInvokeEventLike,
@@ -51,6 +59,8 @@ const fixtureAlpha = join(
 );
 const SESSION_ID = 'session:write-execution';
 const PROJECT_ID = 'project:alpha';
+const RUN_ID = 'run:write-execution';
+const REVISION = 3;
 const EXPECTATION: WriteExecutionExpectation = {
   webContentsId: 42,
   windowEpoch: 7,
@@ -88,13 +98,20 @@ function stateOf(text: string) {
   };
 }
 
+/** The journal lives beside the temporary project, never inside it. */
+function journalFor(root: string): string {
+  return join(dirname(root), 'write-journal.jsonl');
+}
+
 function dependenciesFor(
   root: string,
   hooks?: WriteExecutionHooks,
+  journalPath: string = journalFor(root),
 ): WriteExecutionDependencies {
   return {
     resolveProjectRoot: (projectId) =>
       Promise.resolve(projectId === PROJECT_ID ? root : null),
+    journalPath,
     now: () => FIXED_NOW,
     ...(hooks === undefined ? {} : { hooks }),
   };
@@ -103,25 +120,53 @@ function dependenciesFor(
 function serviceFor(
   root: string,
   hooks?: WriteExecutionHooks,
+  journalPath?: string,
 ): WriteExecutionService {
-  return new WriteExecutionService(dependenciesFor(root, hooks));
+  return new WriteExecutionService(dependenciesFor(root, hooks, journalPath));
 }
 
 async function preparedReview(
   service: WriteExecutionService,
   targetPath = 'README.md',
+  mode: WriteReviewMode = 'workspace_write',
 ) {
   const reply = await service.prepare(
     {
       action: 'prepare',
       sessionId: SESSION_ID,
       projectId: PROJECT_ID,
+      runId: RUN_ID,
+      revision: REVISION,
       targetPath,
+      mode,
     },
     EXPECTATION,
   );
   if (!reply.ok) throw new Error(`prepare refused: ${reply.code}`);
   return reply;
+}
+
+function prepareInput(
+  targetPath = 'README.md',
+  mode: WriteReviewMode = 'workspace_write',
+): WriteReviewPrepare {
+  return {
+    action: 'prepare' as const,
+    sessionId: SESSION_ID,
+    projectId: PROJECT_ID,
+    runId: RUN_ID,
+    revision: REVISION,
+    targetPath,
+    mode,
+  };
+}
+
+async function readJournal(path: string): Promise<WriteChangeJournalRecord[]> {
+  const raw = await readFile(path, 'utf8');
+  return raw
+    .split('\n')
+    .filter((line) => line !== '')
+    .map((line) => WriteChangeJournalRecordSchema.parse(JSON.parse(line)));
 }
 
 async function executeReview(
@@ -165,6 +210,10 @@ describe('controlled write contract (#19)', () => {
     const review = await preparedReview(service);
 
     expect(review.beforePreview).toBe(original);
+    // The completed run this review came from is carried into the request, so
+    // the journal and the review name the same run instead of a session.
+    expect(review.request.runId).toBe(RUN_ID);
+    expect(review.request.revision).toBe(REVISION);
     expect(review.request.permission.mode).toBe('workspace_write');
     expect(review.request.permission.webContentsId).toBe(
       EXPECTATION.webContentsId,
@@ -179,6 +228,59 @@ describe('controlled write contract (#19)', () => {
       stateOf(`${original}${WRITE_EXECUTION_PREVIEW_MARKER}`),
     );
     // Preparing is read-only: the reviewed file has not moved.
+    expect(await readFile(readme, 'utf8')).toBe(original);
+    expect(await exists(journalFor(root))).toBe(false);
+  });
+
+  it('writes a non-README text file and leaves the rest of the project alone', async () => {
+    const root = await makeProject();
+    const nested = join(root, 'nested/not-a-project.txt');
+    const readme = join(root, 'README.md');
+    const nestedBefore = await readFile(nested, 'utf8');
+    const readmeBefore = await readFile(readme, 'utf8');
+    const service = serviceFor(root);
+
+    const review = await preparedReview(service, 'nested/not-a-project.txt');
+    expect(review.request.targets[0]?.path).toBe('nested/not-a-project.txt');
+    const result = await executeReview(service, review.request);
+
+    expect(result.ok).toBe(true);
+    expect(result.targets[0]).toMatchObject({
+      path: 'nested/not-a-project.txt',
+      status: 'applied',
+      verification: 'verified_after',
+    });
+    expect(await readFile(nested, 'utf8')).toBe(
+      `${nestedBefore}${WRITE_EXECUTION_PREVIEW_MARKER}`,
+    );
+    expect(await readFile(readme, 'utf8')).toBe(readmeBefore);
+  });
+
+  it('refuses a request whose run identity was swapped after prepare', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const original = await readFile(readme, 'utf8');
+    const service = serviceFor(root);
+    const review = await preparedReview(service);
+    const swappedRun = WriteExecutionRequestSchema.parse({
+      ...review.request,
+      runId: 'run:other',
+    });
+
+    const runResult = await executeReview(service, swappedRun);
+    expect(runResult.ok).toBe(false);
+    expect(runResult.code).toBe('BINDING_MISMATCH');
+    expect(await readFile(readme, 'utf8')).toBe(original);
+
+    // The first refusal consumed the pending review; prepare again to test the
+    // revision half of the binding.
+    const retried = await preparedReview(service);
+    const revisionResult = await executeReview(service, {
+      ...retried.request,
+      revision: retried.request.revision + 1,
+    });
+    expect(revisionResult.ok).toBe(false);
+    expect(revisionResult.code).toBe('BINDING_MISMATCH');
     expect(await readFile(readme, 'utf8')).toBe(original);
   });
 
@@ -519,12 +621,7 @@ describe('controlled write contract (#19)', () => {
     const root = await makeProject();
     const service = serviceFor(root);
     const missing = await service.prepare(
-      {
-        action: 'prepare',
-        sessionId: SESSION_ID,
-        projectId: PROJECT_ID,
-        targetPath: 'MISSING.md',
-      },
+      prepareInput('MISSING.md'),
       EXPECTATION,
     );
     expect(missing).toEqual({ ok: false, code: 'TARGET_MISSING' });
@@ -547,15 +644,7 @@ describe('controlled write contract (#19)', () => {
       }
       throw error;
     }
-    const linked = await service.prepare(
-      {
-        action: 'prepare',
-        sessionId: SESSION_ID,
-        projectId: PROJECT_ID,
-        targetPath: 'LINK.md',
-      },
-      EXPECTATION,
-    );
+    const linked = await service.prepare(prepareInput('LINK.md'), EXPECTATION);
     expect(linked).toEqual({ ok: false, code: 'TARGET_LINK_NOT_ALLOWED' });
     expect(await readFile(outside, 'utf8')).toBe('outside\n');
   });
@@ -574,6 +663,8 @@ describe('controlled write contract (#19)', () => {
       version: 1,
       sessionId: SESSION_ID,
       projectId: PROJECT_ID,
+      runId: RUN_ID,
+      revision: REVISION,
       windowEpoch: EXPECTATION.windowEpoch,
       permission: {
         version: 1,
@@ -622,6 +713,161 @@ describe('controlled write contract (#19)', () => {
         targets: [{ ...valid.targets[0], unknown: true }],
       }).success,
     ).toBe(false);
+    // Run identity is required, not optional provenance.
+    expect(
+      WriteExecutionRequestSchema.safeParse({ ...valid, runId: undefined })
+        .success,
+    ).toBe(false);
+    expect(
+      WriteExecutionRequestSchema.safeParse({ ...valid, revision: 0 }).success,
+    ).toBe(false);
+    expect(
+      WriteExecutionRequestSchema.safeParse({ ...valid, revision: undefined })
+        .success,
+    ).toBe(false);
+  });
+});
+
+describe('durable change journal (#19)', () => {
+  it('appends intent then applied as one JSONL line each', async () => {
+    const root = await makeProject();
+    const service = serviceFor(root);
+    const review = await preparedReview(service);
+    const before = review.request.targets[0];
+    if (before === undefined) throw new Error('missing prepared target');
+
+    const result = await executeReview(service, review.request);
+
+    expect(result.ok).toBe(true);
+    const journalPath = journalFor(root);
+    const raw = await readFile(journalPath, 'utf8');
+    expect(raw.endsWith('\n')).toBe(true);
+    expect(raw.split('\n').filter((line) => line !== '')).toHaveLength(2);
+    const records = await readJournal(journalPath);
+    expect(records.map((record) => record.kind)).toEqual(['intent', 'applied']);
+    expect(records[0]).toEqual({
+      kind: 'intent',
+      runId: RUN_ID,
+      revision: REVISION,
+      path: 'README.md',
+      beforeSha256: before.before.sha256,
+      at: FIXED_NOW.toISOString(),
+    });
+    const applied = records[1];
+    if (applied?.kind !== 'applied') throw new Error('missing applied record');
+    expect(applied).toMatchObject({
+      runId: RUN_ID,
+      revision: REVISION,
+      path: 'README.md',
+      afterSha256: before.after.sha256,
+      observedSha256: before.after.sha256,
+      verification: 'verified',
+      at: FIXED_NOW.toISOString(),
+    });
+    const identity = applied.observedIdentity;
+    expect(identity).not.toBeNull();
+    expect(typeof identity?.fileId).toBe('string');
+    expect(typeof identity?.birthtimeMs).toBe('number');
+    // The journal never lands inside the project it describes.
+    expect(await exists(join(root, 'write-journal.jsonl'))).toBe(false);
+  });
+
+  it('records an unverified applied entry when the read-back disagrees', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const service = serviceFor(root, {
+      afterWrite: async () => {
+        await writeFile(readme, 'external bytes after write\n', 'utf8');
+      },
+    });
+    const review = await preparedReview(service);
+
+    const result = await executeReview(service, review.request);
+
+    expect(result.status).toBe('verification_failed');
+    const records = await readJournal(journalFor(root));
+    expect(records.map((record) => record.kind)).toEqual(['intent', 'applied']);
+    const applied = records[1];
+    if (applied?.kind !== 'applied') throw new Error('missing applied record');
+    expect(applied.verification).toBe('unverified');
+    expect(applied.observedSha256).toBe(
+      sha256Of(Buffer.from('external bytes after write\n', 'utf8')),
+    );
+    expect(await readFile(readme, 'utf8')).toBe('external bytes after write\n');
+  });
+
+  it('records a failed entry when the post-write read-back observes nothing', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const service = serviceFor(root, {
+      afterWrite: async () => {
+        await rm(readme);
+        await mkdir(readme);
+      },
+    });
+    const review = await preparedReview(service);
+
+    const result = await executeReview(service, review.request);
+
+    expect(result.status).toBe('verification_failed');
+    expect(result.restore).toBe('not_needed');
+    const records = await readJournal(journalFor(root));
+    expect(records.map((record) => record.kind)).toEqual(['intent', 'failed']);
+    expect(records[1]).toEqual({
+      kind: 'failed',
+      runId: RUN_ID,
+      revision: REVISION,
+      path: 'README.md',
+      code: 'VERIFY_FAILED',
+      at: FIXED_NOW.toISOString(),
+    });
+  });
+
+  it('refuses to touch the file when the intent cannot be journaled', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const original = await readFile(readme, 'utf8');
+    const journalDir = join(dirname(root), 'journal-dir');
+    await mkdir(journalDir, { recursive: true });
+    const service = serviceFor(root, undefined, journalDir);
+    const review = await preparedReview(service);
+
+    const result = await executeReview(service, review.request);
+
+    expect(result.ok).toBe(false);
+    expect(result.status).toBe('failed');
+    expect(result.code).toBe('WRITE_FAILED');
+    expect(result.restore).toBe('not_needed');
+    expect(result.targets[0]).toMatchObject({
+      path: 'README.md',
+      status: 'failed',
+      code: 'WRITE_FAILED',
+      observedSha256: null,
+      verification: 'not_attempted',
+    });
+    expect(await readFile(readme, 'utf8')).toBe(original);
+    expect(await readdir(journalDir)).toEqual([]);
+  });
+
+  it('refuses a journal path inside the project and touches nothing', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const original = await readFile(readme, 'utf8');
+    const journalInside = join(root, 'write-journal.jsonl');
+    const service = serviceFor(root, undefined, journalInside);
+    const review = await preparedReview(service);
+
+    const result = await executeReview(service, review.request);
+
+    expect(result.ok).toBe(false);
+    expect(result.code).toBe('WRITE_FAILED');
+    expect(result.targets[0]).toMatchObject({
+      status: 'failed',
+      code: 'WRITE_FAILED',
+      verification: 'not_attempted',
+    });
+    expect(await readFile(readme, 'utf8')).toBe(original);
+    expect(await exists(journalInside)).toBe(false);
   });
 });
 
@@ -662,7 +908,10 @@ describe('controlled write IPC (#19)', () => {
       action: 'prepare',
       sessionId: SESSION_ID,
       projectId: PROJECT_ID,
+      runId: RUN_ID,
+      revision: REVISION,
       targetPath: 'README.md',
+      mode: 'workspace_write',
     };
 
     await expect(
@@ -712,7 +961,10 @@ describe('controlled write IPC (#19)', () => {
       action: 'prepare',
       sessionId: SESSION_ID,
       projectId: PROJECT_ID,
+      runId: RUN_ID,
+      revision: REVISION,
       targetPath: 'README.md',
+      mode: 'workspace_write',
     });
     if (
       typeof reply !== 'object' ||
@@ -741,14 +993,10 @@ describe('controlled write preparation (#19)', () => {
     const reply = await prepareControlledReview(
       {
         resolveProjectRoot: () => Promise.resolve(null),
+        journalPath: join(tmpdir(), 'pioneer-unused-journal.jsonl'),
         now: () => FIXED_NOW,
       },
-      {
-        action: 'prepare',
-        sessionId: SESSION_ID,
-        projectId: PROJECT_ID,
-        targetPath: 'README.md',
-      },
+      prepareInput(),
       EXPECTATION,
     );
     expect(reply).toEqual({ ok: false, code: 'PROJECT_UNAVAILABLE' });
@@ -756,18 +1004,65 @@ describe('controlled write preparation (#19)', () => {
 
   it('does not trust an absolute or escaping target path', async () => {
     const root = await makeProject();
-    for (const targetPath of ['/etc/passwd', 'C:/Windows/win.ini', '../x']) {
+    for (const targetPath of [
+      '/etc/passwd',
+      'C:/Windows/win.ini',
+      '../x',
+      'nested/../README.md',
+      '..\\escape.txt',
+    ]) {
       const reply = await prepareControlledReview(
         dependenciesFor(root),
-        {
-          action: 'prepare',
-          sessionId: SESSION_ID,
-          projectId: PROJECT_ID,
-          targetPath,
-        },
+        prepareInput(targetPath),
         EXPECTATION,
       );
       expect(reply).toEqual({ ok: false, code: 'INVALID_REQUEST' });
     }
+    // No traversal ever reached the parent directory of the project.
+    expect(await exists(join(dirname(root), 'x'))).toBe(false);
+    expect(await exists(join(dirname(root), 'escape.txt'))).toBe(false);
+  });
+
+  it('refuses read_only before resolving or reading the project', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const original = await readFile(readme, 'utf8');
+    let resolved = false;
+    const reply = await prepareControlledReview(
+      {
+        resolveProjectRoot: () => {
+          resolved = true;
+          return Promise.resolve(root);
+        },
+        journalPath: journalFor(root),
+        now: () => FIXED_NOW,
+      },
+      prepareInput('README.md', 'read_only'),
+      EXPECTATION,
+    );
+    expect(reply).toEqual({ ok: false, code: 'PERMISSION_READ_ONLY' });
+    expect(resolved).toBe(false);
+    expect(await readFile(readme, 'utf8')).toBe(original);
+    expect(await exists(journalFor(root))).toBe(false);
+  });
+
+  it('limits the review mode to read_only and workspace_write', () => {
+    const base = prepareInput();
+    expect(WriteReviewPrepareSchema.safeParse(base).success).toBe(true);
+    expect(
+      WriteReviewPrepareSchema.safeParse({ ...base, mode: 'read_only' })
+        .success,
+    ).toBe(true);
+    expect(
+      WriteReviewPrepareSchema.safeParse({ ...base, mode: 'full_access' })
+        .success,
+    ).toBe(false);
+    expect(
+      WriteReviewPrepareSchema.safeParse({ ...base, mode: 'auto_review' })
+        .success,
+    ).toBe(false);
+    expect(
+      WriteReviewPrepareSchema.safeParse({ ...base, mode: undefined }).success,
+    ).toBe(false);
   });
 });

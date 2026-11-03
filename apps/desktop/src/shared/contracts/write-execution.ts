@@ -96,14 +96,19 @@ export const WriteExecutionTargetSchema = WriteTargetSchema.extend({
 /**
  * One controlled batch. Session, project and window epoch appear both at the
  * top level and inside the permission record so a mismatch is a schema error,
- * not something an executor can overlook. The window's webContents id is not
- * in the request: main binds it from the trusted IPC sender instead.
+ * not something an executor can overlook. `runId` and `revision` name the run
+ * whose read the review was prepared from, so the journal and the review can
+ * point back at one run instead of an anonymous session. The window's
+ * webContents id is not in the request: main binds it from the trusted IPC
+ * sender instead.
  */
 export const WriteExecutionRequestSchema = z
   .object({
     version: z.literal(WRITE_EXECUTION_VERSION),
     sessionId: RunIdentitySchema.shape.sessionId,
     projectId: RunIdentitySchema.shape.projectId,
+    runId: RunIdentitySchema.shape.runId,
+    revision: RunIdentitySchema.shape.revision,
     windowEpoch: z.number().int().nonnegative(),
     permission: WritePermissionSchema,
     targets: z
@@ -338,16 +343,48 @@ export const WriteExecutionResultSchema = z
 export type WriteExecutionResult = z.infer<typeof WriteExecutionResultSchema>;
 
 /**
+ * The permission modes this one-shot review entry offers.
+ *
+ * `read_only` is accepted so main can answer with the shared permission denial
+ * code (`PERMISSION_READ_ONLY`) instead of the renderer pretending the mode was
+ * never chosen. `workspace_write` is the only mode that can produce a review.
+ *
+ * `full_access` and `auto_review` are deliberately absent:
+ * - `full_access` may write protected paths and its record is only legal with an
+ *   explicit risk acknowledgement; a one-shot preview cannot record that
+ *   acknowledgement honestly, so offering it would let the UI claim a grant the
+ *   user never gave.
+ * - `auto_review` exists to skip the per-change confirmation. This entry *is*
+ *   the per-change confirmation, so exposing it would only let the review lie
+ *   about who decided.
+ * Both remain in the shared permission contract for the session-level selector
+ * and are still enforced by `checkWritePermission`.
+ */
+export const WRITE_REVIEW_MODES = ['read_only', 'workspace_write'] as const;
+
+export const WriteReviewModeSchema = z.enum(WRITE_REVIEW_MODES);
+
+export type WriteReviewMode = z.infer<typeof WriteReviewModeSchema>;
+
+/**
  * First stage of the one write channel: main reads the target from the
  * selected project and returns the exact request it is prepared to execute.
  * The renderer never authors the pre-image or the hashes.
+ *
+ * `runId` and `revision` bind the review to the completed run whose read it
+ * came from; they are copied into the request so the journal records which run
+ * touched a path. `mode` is limited to the two permission modes this entry can
+ * honestly represent; see `WRITE_REVIEW_MODES`.
  */
 export const WriteReviewPrepareSchema = z
   .object({
     action: z.literal('prepare'),
     sessionId: RunIdentitySchema.shape.sessionId,
     projectId: RunIdentitySchema.shape.projectId,
+    runId: RunIdentitySchema.shape.runId,
+    revision: RunIdentitySchema.shape.revision,
     targetPath: WriteTargetPathSchema,
+    mode: WriteReviewModeSchema,
   })
   .strict();
 
@@ -368,8 +405,14 @@ export type WriteReviewPrepare = z.infer<typeof WriteReviewPrepareSchema>;
 export type WriteExecutionAction = z.infer<typeof WriteExecutionActionSchema>;
 export type WriteIpcRequest = z.infer<typeof WriteIpcRequestSchema>;
 
+/**
+ * Every code a prepare call may answer with. The permission denial codes are
+ * reused verbatim so a `read_only` refusal is the same `PERMISSION_READ_ONLY`
+ * the executor would produce, not a renderer-side euphemism.
+ */
 export const WRITE_REVIEW_DENIAL_CODES = [
   ...WRITE_EXECUTION_REJECTION_CODES,
+  ...WritePermissionDenialCodeSchema.options,
   'TARGET_MISSING',
   'TARGET_NOT_REGULAR_FILE',
   'TARGET_LINK_NOT_ALLOWED',

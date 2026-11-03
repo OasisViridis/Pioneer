@@ -1,4 +1,5 @@
 import { app, dialog, ipcMain } from 'electron';
+import { join } from 'node:path';
 
 import { CatalogService } from './catalog/catalog-service';
 import { scanWorkspace } from './catalog/scanner';
@@ -172,6 +173,9 @@ const openMainWindow = (service: CatalogService): void => {
           ?.absolutePath ?? null
       );
     },
+    // The change journal lives with the app's own data, never inside a project:
+    // the executor refuses a journal path under the project it describes.
+    journalPath: join(app.getPath('userData'), 'write-journal.jsonl'),
   });
   if (store === null)
     throw new Error(

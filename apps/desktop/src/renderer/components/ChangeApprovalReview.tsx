@@ -2,10 +2,12 @@ import { useState } from 'react';
 
 import type { Session } from '../../shared/contracts/session-workspace';
 import type { PioneerDesktopApi } from '../../shared/contracts/ipc';
+import { WriteTargetPathSchema } from '../../shared/contracts/write-permission';
 import type {
   WriteExecutionRequest,
   WriteExecutionResult,
   WriteReviewDenialCode,
+  WriteReviewMode,
   WriteReviewReply,
 } from '../../shared/contracts/write-execution';
 import { PermissionCard, type PermissionCardState } from './PermissionCard';
@@ -15,9 +17,36 @@ import { PermissionCard, type PermissionCardState } from './PermissionCard';
  * summary, and an explicit approve/deny pair. `approve` is the only path that
  * calls the write channel, and the panel only shows `applied` after main
  * returns a verified read-back. `deny` never crosses the bridge.
+ *
+ * The review is bound to the newest completed run of the session: main copies
+ * that run's `runId` and `revision` into the request and the journal, so the
+ * change can be traced back to one run instead of an anonymous session. When
+ * no completed run can name its own revision, the panel says so and never calls
+ * prepare.
  */
 
-const PREVIEW_TARGET = 'README.md';
+const DEFAULT_TARGET_PATH = 'README.md';
+
+/**
+ * Why the selector only offers two modes: `full_access` can write protected
+ * paths and needs a risk acknowledgement this one-shot preview cannot record,
+ * and `auto_review` exists to skip the confirmation this panel is. Both stay in
+ * the shared permission contract; this entry just does not pretend to offer
+ * them.
+ */
+const MODE_OPTIONS: { value: WriteReviewMode; label: string; note: string }[] =
+  [
+    {
+      value: 'workspace_write',
+      label: '工作区内修改',
+      note: '在项目内替换已有普通文件；保护路径与越界路径始终拒绝。',
+    },
+    {
+      value: 'read_only',
+      label: '仅可查看',
+      note: '只读档位不写入；main 会按权限拒绝，不会生成可批准的审阅。',
+    },
+  ];
 
 const DENIAL_COPY: Record<WriteReviewDenialCode, string> = {
   INVALID_REQUEST: '请求没有通过校验；没有读取或写入任何文件。',
@@ -25,8 +54,13 @@ const DENIAL_COPY: Record<WriteReviewDenialCode, string> = {
   BINDING_MISMATCH: '审阅记录与当前窗口或项目不一致；没有执行。',
   PROJECT_UNAVAILABLE: '当前项目不可用；先选择工作区并重新扫描。',
   CONTENT_MISMATCH: '内容与声明的哈希不一致；没有执行。',
+  PERMISSION_READ_ONLY:
+    '当前档位是「仅可查看」；main 按权限拒绝（PERMISSION_READ_ONLY），没有读取或写入任何文件。选择「工作区内修改」后重新审阅。',
+  PERMISSION_OUT_OF_SCOPE: '目标不在已授权的作用域内；没有写入。',
+  PERMISSION_PROTECTED_PATH:
+    '目标位于保护路径（如 .git）；工作区档位不写入保护路径。',
   TARGET_MISSING:
-    '项目里没有 README.md。受控写入只替换已有文本文件，不会创建新文件。',
+    '项目里没有这个文件。受控写入只替换已有文本文件，不会创建新文件。',
   TARGET_NOT_REGULAR_FILE: '目标不是普通文件，不能写入。',
   TARGET_LINK_NOT_ALLOWED: '目标是链接或路径别名，不允许写入。',
   TARGET_TOO_LARGE: '目标超过 1 MiB 预算，不能进入批次。',
@@ -131,6 +165,31 @@ function hasWriteApi(): boolean {
   );
 }
 
+interface SourceRun {
+  runId: string;
+  revision: number;
+}
+
+/**
+ * The newest completed run of this session, or null when its identity cannot
+ * be proven. The bounded history record carries `runId` but not the revision,
+ * and the only main-derived revision is the persisted run summary; when that
+ * summary names a different run, the revision is unknown rather than guessed,
+ * so the review refuses to start.
+ */
+function sourceRunFor(session: Session): SourceRun | null {
+  for (let index = session.runHistory.length - 1; index >= 0; index -= 1) {
+    const record = session.runHistory[index];
+    if (record?.status !== 'completed') continue;
+    const snapshot = session.lastRunView;
+    if (snapshot?.identity.runId === record.runId) {
+      return { runId: record.runId, revision: snapshot.identity.revision };
+    }
+    return null;
+  }
+  return null;
+}
+
 export function ChangeApprovalReview({
   session,
 }: {
@@ -141,8 +200,12 @@ export function ChangeApprovalReview({
   const [denial, setDenial] = useState<WriteReviewDenialCode | null>(null);
   const [result, setResult] = useState<WriteExecutionResult | null>(null);
   const [bridgeError, setBridgeError] = useState<string | null>(null);
+  const [targetPath, setTargetPath] = useState(DEFAULT_TARGET_PATH);
+  const [mode, setMode] = useState<WriteReviewMode>('workspace_write');
 
   const apiAvailable = hasWriteApi();
+  const sourceRun = sourceRunFor(session);
+  const targetPathCheck = WriteTargetPathSchema.safeParse(targetPath);
 
   const reset = (): void => {
     setPhase('idle');
@@ -153,6 +216,8 @@ export function ChangeApprovalReview({
   };
 
   const prepare = async (): Promise<void> => {
+    if (sourceRun === null) return;
+    if (!WriteTargetPathSchema.safeParse(targetPath).success) return;
     setPhase('preparing');
     setReview(null);
     setDenial(null);
@@ -163,7 +228,10 @@ export function ChangeApprovalReview({
         action: 'prepare',
         sessionId: session.id,
         projectId: session.project.id,
-        targetPath: PREVIEW_TARGET,
+        runId: sourceRun.runId,
+        revision: sourceRun.revision,
+        targetPath,
+        mode,
       });
       if (reply.ok) {
         setReview(reply);
@@ -233,10 +301,70 @@ export function ChangeApprovalReview({
         </p>
       ) : null}
 
-      {phase === 'idle' && apiAvailable ? (
-        <button type="button" onClick={() => void prepare()}>
-          审阅受控变更
-        </button>
+      {apiAvailable && sourceRun === null ? (
+        <p role="status" className="form-error">
+          没有可绑定身份的已完成运行（unsupported）：审阅需要本次会话里一个已完成
+          Run 的 runId
+          与修订号。先完成一次运行再回来；这里不会调用审阅通道，也不会
+          读取或写入任何文件。
+        </p>
+      ) : null}
+
+      {sourceRun !== null ? (
+        <p className="metadata">
+          {`来源运行 ${sourceRun.runId} · 修订 ${String(sourceRun.revision)}`}
+        </p>
+      ) : null}
+
+      {phase === 'idle' && apiAvailable && sourceRun !== null ? (
+        <div className="change-review__form">
+          <label className="change-review__field">
+            目标路径（项目相对）
+            <input
+              type="text"
+              aria-label="目标路径（项目相对）"
+              value={targetPath}
+              onChange={(event) => {
+                setTargetPath(event.currentTarget.value);
+              }}
+            />
+          </label>
+          {!targetPathCheck.success ? (
+            <p role="alert" className="form-error">
+              路径必须是项目相对路径：用 / 分隔，不能以 / 开头，不能含
+              ..、盘符或反斜杠。
+            </p>
+          ) : null}
+          <fieldset className="change-review__modes">
+            <legend>权限档位</legend>
+            {MODE_OPTIONS.map((option) => (
+              <label key={option.value}>
+                <input
+                  type="radio"
+                  name="write-review-mode"
+                  value={option.value}
+                  checked={mode === option.value}
+                  onChange={() => {
+                    setMode(option.value);
+                  }}
+                />
+                <span>{option.label}</span>
+                <span className="metadata">{option.note}</span>
+              </label>
+            ))}
+          </fieldset>
+          <p className="metadata">
+            不提供「完全权限」与「自动审查」：前者会写保护路径且需要单独的风险确认，
+            后者取消逐次确认；这个入口只做一次人工复核的受控替换。
+          </p>
+          <button
+            type="button"
+            disabled={!targetPathCheck.success}
+            onClick={() => void prepare()}
+          >
+            审阅受控变更
+          </button>
+        </div>
       ) : null}
 
       {phase === 'preparing' ? (
@@ -268,6 +396,9 @@ export function ChangeApprovalReview({
               <h4>{`变更预览 · ${session.project.name}/${target.path}`}</h4>
               <p className="metadata">
                 {`${String(target.before.bytes)} B → ${String(target.after.bytes)} B · BEFORE ${shortHash(target.before.sha256)} · AFTER ${shortHash(target.after.sha256)}`}
+              </p>
+              <p className="metadata">
+                {`来源运行 ${review.request.runId} · 修订 ${String(review.request.revision)} · 档位 ${review.request.permission.mode}`}
               </p>
             </header>
             <ol className="change-review__lines" aria-label="变更行">
@@ -301,7 +432,11 @@ export function ChangeApprovalReview({
             onAction={undefined}
             operation={`对象：受控写入 · ${session.project.name}/${target.path}`}
             recipient="接收方：本机 main 进程；不外发"
-            scope={`路径：${target.path}\n权限：工作区内修改；仅替换已有文本文件`}
+            scope={`路径：${target.path}\n权限：${
+              review.request.permission.mode === 'workspace_write'
+                ? '工作区内修改'
+                : '仅可查看'
+            }；仅替换已有文本文件`}
             state={cardStateFor(phase)}
           />
           <p className="metadata">
