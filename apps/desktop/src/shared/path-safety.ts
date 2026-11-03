@@ -1,7 +1,8 @@
 /**
- * One rule for "may this path component appear in a project path", shared by the
- * write-permission contract and the read-only tool policy. Both paths guard the
- * same boundary, so the segment rule lives once to keep them from drifting.
+ * Path rules shared by the write-permission contract, the read-only tool policy
+ * and the write observer: the segment rule, the component cap and the
+ * protected-path matcher. Both write-side callers use the matcher below, so the
+ * permission check and the observation allowance cannot drift apart.
  */
 
 /** Windows reserves these device names even when a suffix follows. */

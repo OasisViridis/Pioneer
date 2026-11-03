@@ -56,10 +56,11 @@ export function checkWritePermission(
     };
   }
   if (permission.scope !== 'all_targets') {
-    const allowed = new Set(permission.scope.map((path) => path.toLowerCase()));
-    const outside = targets.find(
-      (target) => !allowed.has(target.path.toLowerCase()),
-    );
+    // Exact match, never case-folded: on a case-sensitive volume `src/A.ts`
+    // and `src/a.ts` are different files, so folding would let a target outside
+    // the chosen subset through. Callers pass the batch's own path strings.
+    const allowed = new Set(permission.scope);
+    const outside = targets.find((target) => !allowed.has(target.path));
     if (outside !== undefined) {
       return {
         ok: false,
@@ -159,9 +160,9 @@ export function authorizeWrite(
 }
 
 /**
- * Whether a grant still belongs to the window and project that issued it.
- * `#19` calls this before trusting a stored permission; the decision layer
- * itself only sees the grant, so the expected binding is passed in.
+ * Whether a permission record still belongs to the window and project that
+ * issued it. `#19` calls this before trusting a stored permission; the decision
+ * layer itself only sees the record, so the expected binding is passed in.
  */
 export function checkPermissionBinding(
   permission: WritePermission,

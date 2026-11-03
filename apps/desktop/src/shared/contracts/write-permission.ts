@@ -13,9 +13,8 @@ import { MAX_PATH_COMPONENTS, isSafePathSegment } from '../path-safety';
  * the declared target scope, the protected paths and the current bytes.
  *
  * Nothing in this module writes, deletes, renames or restores project files.
- * The human confirmation of the P4-D1 decision is a precondition for any
- * executor that consumes these records; until then no capability flag, IPC
- * channel or executor reaches them.
+ * The P4-D1 decision is recorded (Issue #18); the executor that consumes these
+ * records is #19, and no capability flag, IPC channel or executor exists yet.
  */
 
 export const WRITE_LIMITS = Object.freeze({
@@ -139,7 +138,9 @@ export const WritePermissionModeSchema = z.enum(WRITE_PERMISSION_MODES);
 /**
  * What the selector's scope covers: every target of the batch ("全部 N 个
  * 文件"), or an explicit subset. A subset can only narrow the batch, never add
- * a path the batch does not carry.
+ * a path the batch does not carry. Subset paths match exactly, never case-folded:
+ * on a case-sensitive volume `src/A.ts` and `src/a.ts` are different files, so
+ * the caller passes the batch's own path strings.
  */
 export const WritePermissionScopeSchema = z.union([
   z.literal('all_targets'),
@@ -150,12 +151,12 @@ export const WritePermissionScopeSchema = z.union([
 export const WRITE_PROTECTED_PATHS = ['.git'] as const;
 
 /**
- * One permission grant. It is bound to the session, project and window epoch,
+ * One permission record. It is bound to the session, project and window epoch,
  * not to a single Diff: switching project, closing the window or restarting
  * main invalidates it. A task switch inside one session does not, because the
- * grant is session-scoped and the task text is egress material. `full_access`
- * and `auto_review` require an
- * explicit risk acknowledgement, recorded here so the UI can prove it happened.
+ * permission is session-scoped and the task text is egress material.
+ * `full_access` and `auto_review` require an explicit risk acknowledgement,
+ * recorded here so the UI can prove it happened.
  */
 export const WritePermissionSchema = z
   .object({

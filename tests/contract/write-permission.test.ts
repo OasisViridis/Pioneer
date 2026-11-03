@@ -412,6 +412,19 @@ describe('write permission scope', () => {
     ).toMatchObject({ ok: true });
   });
 
+  it('does not fold case when matching an explicit scope', () => {
+    expect(
+      checkWritePermission(
+        [targetOf('src/a.ts', 'a', 'b')],
+        permissionOf({ scope: ['src/A.ts'] }),
+      ),
+    ).toMatchObject({
+      ok: false,
+      code: 'PERMISSION_OUT_OF_SCOPE',
+      path: 'src/a.ts',
+    });
+  });
+
   it('marks auto review as the only mode without a per-apply confirmation', () => {
     const targets = [targetOf('src/a.ts', 'a', 'b')];
     expect(
@@ -552,11 +565,9 @@ describe('full access and protected paths', () => {
     });
     const outside = await makeProject();
     await write(outside, 'config', 'outside');
-    const { symlink } = await import('node:fs/promises');
-    try {
-      await symlink(outside, join(projectRoot, '.git'), 'junction');
-    } catch {
-      context.skip();
+    if (
+      !(await createJunctionOrSkip(outside, join(projectRoot, '.git'), context))
+    ) {
       return;
     }
     const target = targetOf('.git/config', 'outside', 'outside\nedited');
@@ -578,11 +589,13 @@ describe('full access and protected paths', () => {
     await mkdir(join(projectRoot, '.git'), { recursive: true });
     const outside = await makeProject();
     await write(outside, 'config', 'outside');
-    const { symlink } = await import('node:fs/promises');
-    try {
-      await symlink(outside, join(projectRoot, '.git/objects'), 'junction');
-    } catch {
-      context.skip();
+    if (
+      !(await createJunctionOrSkip(
+        outside,
+        join(projectRoot, '.git/objects'),
+        context,
+      ))
+    ) {
       return;
     }
     const target = targetOf(
@@ -827,6 +840,34 @@ async function write(
   await writeFile(join(root, relativePath), content);
 }
 
+/**
+ * Creates a junction for a link probe. Skips only when the platform refuses to
+ * create one (no privilege); any other error is a real failure, not a skip.
+ */
+async function createJunctionOrSkip(
+  target: string,
+  linkPath: string,
+  context: { skip: () => void },
+): Promise<boolean> {
+  const { symlink } = await import('node:fs/promises');
+  try {
+    await symlink(target, linkPath, 'junction');
+    return true;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (
+      code === 'EPERM' ||
+      code === 'EACCES' ||
+      code === 'ENOTSUP' ||
+      code === 'UNKNOWN'
+    ) {
+      context.skip();
+      return false;
+    }
+    throw error;
+  }
+}
+
 async function seed(
   root: string,
   relativePath: string,
@@ -938,16 +979,15 @@ describe('target observation', () => {
   });
 
   it('reports a link at the target path as link_not_allowed, or skips', async (context) => {
-    const { symlink } = await import('node:fs/promises');
     await mkdir(join(projectRoot, 'src'), { recursive: true });
     const target = targetOf('src/link.ts', 'a', 'b');
-    try {
-      await symlink(
+    if (
+      !(await createJunctionOrSkip(
         join(projectRoot, 'src', 'elsewhere.ts'),
         join(projectRoot, 'src/link.ts'),
-      );
-    } catch {
-      context.skip();
+        context,
+      ))
+    ) {
       return;
     }
     expect((await observeWriteTarget(projectRoot, target)).state).toBe(
@@ -1221,6 +1261,24 @@ describe('recovery planning', () => {
     expect(plan.conflicts).toHaveLength(1);
     expect(plan.conflicts[0]).toMatchObject({ action: 'conflict' });
     expect(plan.outOfScope).toEqual([]);
+  });
+
+  it('preserves a deleted target instead of recreating it', async () => {
+    const target = await seed(projectRoot, 'src/index.ts', 'before\n');
+    await rm(join(projectRoot, 'src/index.ts'));
+    const observations = await observeWriteTargets(projectRoot, [target]);
+    const plan = planRecovery({
+      runId: RUN_ID,
+      permission: permissionOf(),
+      targets: [target],
+      records: provenWrite(target),
+      observations,
+    });
+    expect(plan.conflicts).toHaveLength(1);
+    expect(plan.conflicts[0]).toMatchObject({
+      action: 'conflict',
+      state: 'missing',
+    });
   });
 
   it('keeps a target with no record out of scope', async () => {
