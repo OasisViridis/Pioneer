@@ -182,6 +182,12 @@ async function withDrill(run) {
   try {
     return await run({ state, figma });
   } finally {
+    // Close before asserting so a failed assertion cannot leave the test
+    // runner holding the listening socket.
+    server.closeAllConnections();
+    server.close();
+    // A keep-alive client socket must not keep the test-runner child alive.
+    server.unref();
     // Every drill scenario may touch only the Dev Resources endpoint; a
     // writeback must never create a named version, so it cannot loop a
     // FILE_VERSION_UPDATE back into the intake.
@@ -193,10 +199,6 @@ async function withDrill(run) {
       ),
       `Unexpected endpoint: ${state.endpoints.join(', ')}`,
     );
-    server.closeAllConnections();
-    server.close();
-    // A keep-alive client socket must not keep the test-runner child alive.
-    server.unref();
   }
 }
 
