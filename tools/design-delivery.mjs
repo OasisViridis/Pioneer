@@ -356,16 +356,22 @@ export function validateOutput(root, pkg, raw) {
     );
   if (!result.files.length) fail('empty-output', 'No implementation diff');
   const seen = new Set();
+  const matches = (file, p) =>
+    p.endsWith('/') ? file.path.startsWith(p) : p === file.path;
   for (const file of result.files) {
     if (seen.has(file.path)) fail('invalid-input', 'Duplicate output path');
     seen.add(file.path);
+    const backend = (pkg.policy.backendPaths ?? []).some((p) =>
+      matches(file, p),
+    );
+    const allowed =
+      backend || pkg.policy.allowedPaths.some((p) => matches(file, p));
     if (
-      !pkg.policy.allowedPaths.some((p) =>
-        p.endsWith('/') ? file.path.startsWith(p) : p === file.path,
-      ) ||
-      /^(apps\/desktop\/src\/(main|preload|shared)\/|design\/deliveries\/|\.env|\.githooks\/)/.test(
+      !allowed ||
+      (/^(apps\/desktop\/src\/(main|preload|shared)\/|design\/deliveries\/|\.env|\.githooks\/)/.test(
         file.path,
-      )
+      ) &&
+        !backend)
     )
       fail('behavior-conflict', `Unapproved output path: ${file.path}`);
     const original = readOptional(root, result.baseSha, file.path);

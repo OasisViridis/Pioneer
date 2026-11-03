@@ -31,7 +31,9 @@ pnpm design:delivery verify <PR编号>
 
 `request` 使用现有 Zod 校验，关联功能、Issue、变更类型、代码基线、设计 commit/path/SHA-256、版本和节点范围。设计包内嵌所选节点及 S1 映射，保留其原始历史说明，并另外记录实际已接受代码 SHA、源码 hash、契约和测试的固定引用。`packageHash` 采用排序后的 JSON 计算，不包含运行时间；保留差异也在固定输入中。
 
-`capture` 只读取暂存区，不执行生成代码。输出包含每个文件在基线的内容 hash、替换内容、设计包 hash 和 Agent 状态。空输出、失败输出、不同输入的旧结果、越出注册路径及 main/preload/shared 行为层修改均拒绝发布。首版不自动删除、重命名或更改文件模式。路径与声明检查不等于自动证明代码行为安全：当前会话仍须审阅 Diff，PR 仍需人审，契约测试仍需执行。
+`capture` 只读取暂存区，不执行生成代码。输出包含每个文件在基线的内容 hash、替换内容、设计包 hash 和 Agent 状态。空输出、失败输出、不同输入的旧结果、越出注册路径及未登记的 main/preload/shared 行为层修改均拒绝发布。首版不自动删除、重命名或更改文件模式。路径与声明检查不等于自动证明代码行为安全：当前会话仍须审阅 Diff，PR 仍需人审，契约测试仍需执行。
+
+`backendPaths` 是 feature 级的精确白名单：只有 `features.json` 当前 feature 明确列出的 main/preload/shared 文件或目录可以进入输出；未列出的同层文件仍按 `behavior-conflict` 拒绝。`design/deliveries/`、`.env`、`.githooks/` 等保护路径即使写入白名单也继续拒绝。白名单只放宽 S2 输出路径，不授予合并、发布、Figma 写入或绕过人工审阅的权限。
 
 固定分支为 `codex/design-<featureId>`。首次成功创建一个 Git tree、commit、branch 和 Draft PR；设计包同时进入该分支 `design/deliveries/<featureId>/package.json`，没有第二套任务数据库。分支创建使用 GitHub 原子创建，工具没有 update-ref、force push、合并、Issue 状态变更、评论或 Figma 写入能力。
 
@@ -42,7 +44,12 @@ pnpm design:delivery verify <PR编号>
 默认传输为现有 `gh api` 登录。也可添加 `--stdio --actor <已核实的GitHub登录名>`，由已有 Codex 连接器处理 JSON Lines：
 
 ```json
-{"type":"github-request","id":1,"method":"GET","endpoint":"/repos/OasisViridis/Pioneer/issues/36"}
+{
+  "type": "github-request",
+  "id": 1,
+  "method": "GET",
+  "endpoint": "/repos/OasisViridis/Pioneer/issues/36"
+}
 ```
 
 调用方返回同一 id 的 `value`（GitHub REST 对象），或 `error: {status, message}`。GET 对应 GitHub `fetch`；POST 仅对应现有 `create_tree`、`create_commit`、`create_branch`、`create_pull_request` 工具。桥接方必须限定仓库与这些操作，不能执行请求中的任意命令或 URL；连接器返回格式归一化后再交给工具。结束消息为 `type: result`。这是同一工作流的工具传输适配，不是新的 HTTP 服务或模型运行平台。
@@ -62,18 +69,18 @@ pnpm design:delivery verify <PR编号>
 
 回执保存在 `tmp/design-delivery/receipt.json`，包含当前 head、检查 run URL、run ID 和读取时间；不把回执写成另一个待验证提交，避免无限改变 head。PR 本身列出节点、源版本、固定包、影响文件、检查入口与待办，不自动更新人工内容。CI 获取完整 Git 历史，以便离线重读固定设计与契约版本。
 
-| 状态 | 重试方式 |
-| --- | --- |
-| `missing-input` / `invalid-input` / `stale-input` | 补充固定输入、重新核验映射后重试 prepare |
-| `materials-only` / `stale-base` | 在原任务解决依赖或责任人/行为决策；基线变化时重做输入与实现 |
-| `agent-failed` / `empty-output` / `stale-output` | 修复当前会话产物，重新 capture；不复用别的输入结果 |
-| `permission-denied` | 先修复对应凭证或权限；回执 `retryable: false`，条件修复后重新运行原请求 |
-| `rate-limited` / `retryable-error` | 遵守回执 `retryAfter` 或恢复连接，可直接重跑原请求 |
-| `review-required` | 审阅本地候选和原 PR；保留人工修改，不自动强推 |
-| `validation-not-triggered` / `validation-pending` | 确认触发或等待真实运行，再 verify |
-| `validation-failed` / `validation-incomplete` / `stale-validation` | 修复或重跑最终提交对应的完整门禁，再 verify |
-| `no-op` | 同一 PR 已存在；没有新提交、评论或自动完成声明 |
-| `verified` | 仅证明回执所列 head 的要求检查通过，合并仍需人工授权 |
+| 状态                                                               | 重试方式                                                                |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `missing-input` / `invalid-input` / `stale-input`                  | 补充固定输入、重新核验映射后重试 prepare                                |
+| `materials-only` / `stale-base`                                    | 在原任务解决依赖或责任人/行为决策；基线变化时重做输入与实现             |
+| `agent-failed` / `empty-output` / `stale-output`                   | 修复当前会话产物，重新 capture；不复用别的输入结果                      |
+| `permission-denied`                                                | 先修复对应凭证或权限；回执 `retryable: false`，条件修复后重新运行原请求 |
+| `rate-limited` / `retryable-error`                                 | 遵守回执 `retryAfter` 或恢复连接，可直接重跑原请求                      |
+| `review-required`                                                  | 审阅本地候选和原 PR；保留人工修改，不自动强推                           |
+| `validation-not-triggered` / `validation-pending`                  | 确认触发或等待真实运行，再 verify                                       |
+| `validation-failed` / `validation-incomplete` / `stale-validation` | 修复或重跑最终提交对应的完整门禁，再 verify                             |
+| `no-op`                                                            | 同一 PR 已存在；没有新提交、评论或自动完成声明                          |
+| `verified`                                                         | 仅证明回执所列 head 的要求检查通过，合并仍需人工授权                    |
 
 发布阶段 `elapsedMs` 为实际测量值，不是模型运行总耗时。模型费用未知时保持 null；当前会话不需要新的付费调用。`manualInterventions` 记录交付过程中的额外人工介入；不编造省时或成本收益。#13、#33、#17、#21 的状态和范围不由本工具改写。
 

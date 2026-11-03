@@ -292,6 +292,28 @@ test('stale output, empty output, agent failure and backend capability changes c
   }
 });
 
+test('only explicitly registered backendPaths may change main/preload/shared', () => {
+  const backendPkg = structuredClone(pkg);
+  backendPkg.policy.backendPaths = ['apps/desktop/src/main/write-execution.ts'];
+  const allowed = output();
+  allowed.files[0] = {
+    path: 'apps/desktop/src/main/write-execution.ts',
+    content: '// controlled backend implementation fixture\n',
+    beforeSha256: null,
+  };
+  assert.doesNotThrow(() => validateOutput(root, backendPkg, allowed));
+  const unlisted = output();
+  unlisted.files[0] = {
+    path: 'apps/desktop/src/main/run.ts',
+    content: '// unregistered backend path\n',
+    beforeSha256: null,
+  };
+  assert.throws(
+    () => validateOutput(root, backendPkg, unlisted),
+    /Unapproved output path/,
+  );
+});
+
 test('PR creation failure resumes a verified identical branch without another commit', async () => {
   const { deliver, state } = boundary();
   state.failPr = true;

@@ -113,8 +113,22 @@
         "apps/desktop/src/renderer/components/",
         "apps/desktop/src/renderer/styles/",
         "tests/e2e/",
+        "tests/contract/",
         "docs/testing/",
         "design/sync/component-mappings.json"
+      ],
+      "backendPaths": [
+        "apps/desktop/src/shared/contracts/write-permission.ts",
+        "apps/desktop/src/shared/contracts/write-execution.ts",
+        "apps/desktop/src/shared/contracts/ipc.ts",
+        "apps/desktop/src/main/write-execution.ts",
+        "apps/desktop/src/main/ipc.ts",
+        "apps/desktop/src/main/index.ts",
+        "apps/desktop/src/main/atomic-file.ts",
+        "apps/desktop/src/preload/write-api.ts",
+        "apps/desktop/src/preload/index.ts",
+        "tests/contract/write-execution.test.ts",
+        "tests/e2e/change-approval.e2e.spec.ts"
       ],
       "basis": [
         "design/sync/component-mappings.json",
