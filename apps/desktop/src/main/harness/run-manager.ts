@@ -1226,7 +1226,7 @@ export class RunManager {
       const currentEpoch = this.dependencies.windowBindings.epochFor(
         subscriber.webContentsId,
       );
-      if (currentEpoch === null || currentEpoch !== subscriber.windowEpoch) {
+      if (currentEpoch !== subscriber.windowEpoch) {
         run.subscribers.delete(subscriber.webContentsId);
         continue;
       }

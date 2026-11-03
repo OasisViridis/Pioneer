@@ -1172,8 +1172,10 @@ describe('P2 run manager review hardening', () => {
       ...identityOf(runId),
       afterSeq: sender.batches[0]?.page.nextAfterSeq ?? 0,
     });
+    // Wait past the scripted 200ms text event so the delivery attempt happens
+    // after the epoch flip; a shorter wait asserts before the guard can run.
     await new Promise((resolve) => {
-      setTimeout(resolve, 80);
+      setTimeout(resolve, 350);
     });
     // The run keeps the old epoch; the rebuilt window's id must not receive
     // the pre-rebuild run's next batch.
