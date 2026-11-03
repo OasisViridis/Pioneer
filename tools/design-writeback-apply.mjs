@@ -117,10 +117,11 @@ export async function writeback({
   try {
     found = await read();
   } catch (error) {
+    const failure = remoteFailure(error);
     return {
       ...receipt,
-      ...remoteFailure(error),
-      retryable: true,
+      ...failure,
+      retryable: retryableState(failure.state),
       phase: 'preflight',
     };
   }
@@ -168,10 +169,11 @@ export async function writeback({
   try {
     found = await read();
   } catch (error) {
+    const failure = remoteFailure(error);
     return {
       ...receipt,
-      ...remoteFailure(error),
-      retryable: true,
+      ...failure,
+      retryable: retryableState(failure.state),
       phase: 'readback',
       writeOutcome: 'unknown',
     };

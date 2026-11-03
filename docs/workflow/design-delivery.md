@@ -67,7 +67,8 @@ pnpm design:delivery verify <PR编号>
 | `missing-input` / `invalid-input` / `stale-input` | 补充固定输入、重新核验映射后重试 prepare |
 | `materials-only` / `stale-base` | 在原任务解决依赖或责任人/行为决策；基线变化时重做输入与实现 |
 | `agent-failed` / `empty-output` / `stale-output` | 修复当前会话产物，重新 capture；不复用别的输入结果 |
-| `permission-denied` / `rate-limited` / `retryable-error` | 恢复对应凭证、配额或连接，重新运行原请求 |
+| `permission-denied` | 先修复对应凭证或权限；回执 `retryable: false`，条件修复后重新运行原请求 |
+| `rate-limited` / `retryable-error` | 遵守回执 `retryAfter` 或恢复连接，可直接重跑原请求 |
 | `review-required` | 审阅本地候选和原 PR；保留人工修改，不自动强推 |
 | `validation-not-triggered` / `validation-pending` | 确认触发或等待真实运行，再 verify |
 | `validation-failed` / `validation-incomplete` / `stale-validation` | 修复或重跑最终提交对应的完整门禁，再 verify |

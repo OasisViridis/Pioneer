@@ -130,6 +130,8 @@ function fakeFigma() {
       /^\/v1\/files\/[A-Za-z0-9]+\/dev_resources$/.test(url.pathname)
     ) {
       state.reads++;
+      if (state.mode === 'denied-read')
+        return json(403, { error: 'no read access' });
       if (state.failRead > 0 && state.reads > 1) {
         state.failRead--;
         return json(500, { error: 'readback unavailable' });
@@ -180,6 +182,17 @@ async function withDrill(run) {
   try {
     return await run({ state, figma });
   } finally {
+    // Every drill scenario may touch only the Dev Resources endpoint; a
+    // writeback must never create a named version, so it cannot loop a
+    // FILE_VERSION_UPDATE back into the intake.
+    assert.ok(
+      state.endpoints.every(
+        (endpoint) =>
+          endpoint === 'POST /v1/dev_resources' ||
+          /^GET \/v1\/files\/[A-Za-z0-9]+\/dev_resources$/.test(endpoint),
+      ),
+      `Unexpected endpoint: ${state.endpoints.join(', ')}`,
+    );
     server.closeAllConnections();
     server.close();
     // A keep-alive client socket must not keep the test-runner child alive.
@@ -259,7 +272,7 @@ test('drill: readback failure reports an unknown outcome, then a rerun reads ins
   });
 });
 
-test('drill: rate limits and expired credentials stay visible and do not create links', async () => {
+test('drill: rate limits and permission failures stay visible and do not create links', async () => {
   for (const [mode, expected] of [
     ['rate', 'rate-limited'],
     ['denied', 'permission-denied'],
@@ -283,6 +296,19 @@ test('drill: rate limits and expired credentials stay visible and do not create 
       assert.equal(JSON.stringify(result).includes('no access'), false);
     });
   }
+});
+
+test('drill: a permission failure on the preflight read is permanent and sends no POST', async () => {
+  await withDrill(async ({ state, figma }) => {
+    state.mode = 'denied-read';
+    const result = await run(figma);
+    assert.equal(result.state, 'permission-denied');
+    assert.equal(result.retryable, false);
+    assert.equal(result.phase, 'preflight');
+    assert.equal(state.posts.length, 0);
+    assert.equal(state.links.length, 0);
+    assert.equal(JSON.stringify(result).includes('no read access'), false);
+  });
 });
 
 test('drill: per-node capacity blocks before any POST and preserves human links', async () => {

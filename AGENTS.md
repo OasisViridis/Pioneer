@@ -21,8 +21,9 @@
   - **Contract Tests**：`pnpm test:contract`，验证共享契约、路径、扫描器、IPC、安全边界、设置存储、Tabs reducer 与 renderer 状态投影。
   - **Prototype Tests**：`pnpm test:prototype`，冻结 M1 Prototype Tests 为 210/210；这是模拟器和探针证据，不是 Electron proof。
   - **Real E2E**：`pnpm test:e2e`，由 Playwright 启动真实 Electron，跨越 main → preload → renderer，并校验 fixture 不变性。
+  - **Visual Regression**：`pnpm test:visual`，在独立 Windows job 用真实 Electron 截图与经审阅的 1440/900/640 基线比较；失败上传 expected/actual/diff 和 trace。它不在 `pnpm check` 内，不替代行为、授权、停止或隔离验证。
   - **Packaged Acceptance**：`pnpm acceptance:packaged`，重新打包后启动 `@pioneer-desktop.exe`，经 `PIONEER_ACCEPTANCE=1` 双重开关跑通一次只读运行并留下启动报告、journal、截图与日志。它不并入 `pnpm check`（打包耗时），证据层级与 Real E2E 分开记录。
-  - `pnpm check` 依次执行 design:check、格式、lint、类型检查、Contract / Prototype / Real E2E 三层测试与最终 package smoke；Packaged Acceptance 单独运行。M2 已完成，M3 继续以该门禁作为主线质量基线。
+  - `pnpm check` 依次执行 design:check、格式、lint、类型检查、Contract / Prototype / Real E2E 三层测试与最终 package smoke；Visual Regression 在 `quality.yml` 的独立 Windows job 运行；Packaged Acceptance 单独运行。M2 已完成，M3 继续以该门禁作为主线质量基线。
 - **工作流规范**：
   - 采用 TheMasterplan 单一交付责任人机制，子代理可协助编码与调研，但主交付责任人统管最终 Diff 审阅、VCS 提交与人类交接；
   - 已有 `.jj` 的工作副本优先使用 `jj`；当前 Git-only 副本使用 Git，保留继承的未跟踪候选，不切分支覆盖或整包提交；
@@ -39,8 +40,8 @@
 
 ## 测试真相与里程碑边界
 
-- [`TEST_INFRA.md`](TEST_INFRA.md) 是 Contract Tests、Prototype Tests、Real E2E 与 Packaged Acceptance 的验证分类和命令边界。
-- `pnpm test:contract`、`pnpm test:prototype`、`pnpm test:e2e` 与 `pnpm acceptance:packaged` 都是可执行的真实命令，证据层级不可混用。
+- [`TEST_INFRA.md`](TEST_INFRA.md) 是 Contract Tests、Prototype Tests、Real E2E、Visual Regression 与 Packaged Acceptance 的验证分类和命令边界。
+- `pnpm test:contract`、`pnpm test:prototype`、`pnpm test:e2e`、`pnpm test:visual` 与 `pnpm acceptance:packaged` 都是可执行的真实命令，证据层级不可混用。
 - 文档格式与词汇边界由 `pnpm verify:repository` 机械校验（严禁绝对路径链接，210 声明必须限定为 Prototype Tests）。修改文档后应优先运行此项验证。
 - 原生目录选择器不在确定性 E2E fixture seam 内；没有穿越 Electron main → preload → renderer 的真实流程，不能宣称 Real E2E。
 - 原生目录选择器不属于确定性 E2E seam；M2 的人工验收证据已完成并保存在 `docs/testing/m2-native-picker-smoke.md`，后续 fixture seam 仍不得冒充该类人工证据。

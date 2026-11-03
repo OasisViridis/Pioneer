@@ -17,11 +17,12 @@
 | HTTP 200 部分成功           | 18 条中只提交 2 条，响应同时带 `links_created` 与 `errors`      | `partial-write`，`missing: 16`；再次执行只提交缺失的 16 条，最终 `links-verified`                      | POST 2 次，最终 18 条唯一链接，无覆盖                                     |
 | 提交后连接中断              | 先写入全部资源，再销毁 socket                                  | 回读发现全部链接，返回 `links-verified`；重放 `created: 0`                                             | POST 1 次，不盲目重发                                                    |
 | 写入后回读失败              | 写入全部资源，下一次 GET 返回 500                              | `retryable-error`，`phase: readback`，`writeOutcome: unknown`；再次执行读回并完成                     | POST 1 次，重跑不重复写                                                  |
-| 429 限流                    | POST 返回 429 与 `retry-after: 45`                             | `rate-limited`，`retryable: true`，`retryAfter: 45`                                                    | 不创建链接，响应体不外泄，POST 1 次                                      |
+| 429 限流                    | POST 返回 429 与 `retry-after: 45`                             | `rate-limited`，`retryable: true`，`retryAfter: '45'`                                                  | 不创建链接，响应体不外泄，POST 1 次                                      |
 | 403 授权失败                | POST 返回 403                                                  | `permission-denied`，`retryable: false`（先修凭证）                                                    | 不创建链接，响应体不外泄，POST 1 次                                      |
+| 预检 GET 403                | 第一次读取就返回 403                                           | `permission-denied`，`retryable: false`，`phase: preflight`                                            | 0 次 POST，响应体不外泄                                                  |
 | 单节点容量不足              | 目标节点已有 5 条人工链接，待补 6 条                           | `capacity-blocked`                                                                                     | 0 次 POST，5 条人工链接原样保留                                          |
 | 成功后的三次重放            | 链接已齐全                                                     | 三次均 `links-verified`、`created: 0`                                                                  | POST 总数 1，19 条链接，人工链接仍为第一条，资源集合哈希不变             |
-| 回传循环的结构性排除        | 记录全部请求路径                                               | 只出现 `GET/POST /v1/dev_resources`                                                                    | 回填传输没有创建命名版本的接口；Dev Resources 写入不能产生 `FILE_VERSION_UPDATE` |
+| 回传循环的结构性排除        | 记录全部请求路径                                               | 每个场景只出现 `GET/POST /v1/dev_resources`                                                            | 回填传输没有创建命名版本的接口；Dev Resources 写入不能产生 `FILE_VERSION_UPDATE` |
 
 另外，`tests/design-sync/writeback.test.mjs` 新增了错误分类断言：HTTP 400/422 归类为 `invalid-input`，401/403 为 `permission-denied`，404 为 `missing-input`，429 为 `rate-limited`，5xx 与连接错误为 `retryable-error`。`retryableState()` 只把 `rate-limited` 与 `retryable-error` 视为可直接重试；回填结果另把 `partial-write` 视为可通过“先读再补”重跑，403/400 等永久错误返回 `retryable: false`，需要先修凭证、输入或范围。
 
@@ -31,7 +32,7 @@
 node --test tests/design-sync/writeback-drill.test.mjs
 ```
 
-2026-11-03 本机 Windows 结果：6/6 通过，耗时 0.5 秒。该命令不联网、不读凭证，可在普通本地会话复跑。
+2026-11-03 本机 Windows 结果：7/7 通过。该命令不访问外网（仅 localhost）、不读凭证，可在普通本地会话复跑。
 
 ## 仍未覆盖
 
