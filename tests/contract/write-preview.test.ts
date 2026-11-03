@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -36,7 +36,9 @@ describe('write proposal registry', () => {
   let registry: WriteProposalRegistry;
 
   beforeEach(async () => {
-    root = await mkdtemp(join(tmpdir(), 'pioneer-proposal-'));
+    // Canonicalize because the #18 preflight compares canonical roots; a CI
+    // temp root with 8.3 short names would fail before observing the target.
+    root = await realpath(await mkdtemp(join(tmpdir(), 'pioneer-proposal-')));
     registry = new WriteProposalRegistry({ now: () => AT });
   });
 

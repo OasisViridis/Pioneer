@@ -4,6 +4,7 @@ import {
   mkdtemp,
   readdir,
   readFile,
+  realpath,
   rm,
   writeFile,
 } from 'node:fs/promises';
@@ -82,7 +83,9 @@ describe('write execution', () => {
   let contents: Map<string, Buffer>;
 
   beforeEach(async () => {
-    root = await mkdtemp(join(tmpdir(), 'pioneer-apply-'));
+    // The #18 preflight compares canonical roots; CI's 8.3 temp path would
+    // otherwise be rejected before any target is observed.
+    root = await realpath(await mkdtemp(join(tmpdir(), 'pioneer-apply-')));
     await writeFile(join(root, 'README.md'), 'alpha\nbeta\n', 'utf-8');
     await writeFile(join(root, 'notes.txt'), 'one\ntwo\n', 'utf-8');
     contents = new Map([

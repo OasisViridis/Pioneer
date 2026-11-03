@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -32,7 +32,9 @@ describe('write controller', () => {
   let sessionRevision: number;
 
   beforeEach(async () => {
-    root = await mkdtemp(join(tmpdir(), 'pioneer-controller-'));
+    // Canonicalize because the #18 preflight compares canonical roots; a CI
+    // temp root with 8.3 short names would fail before observing the target.
+    root = await realpath(await mkdtemp(join(tmpdir(), 'pioneer-controller-')));
     await writeFile(join(root, 'README.md'), 'alpha\nbeta\n', 'utf-8');
     sessionRevision = 1;
     registry = new WriteProposalRegistry({ now: () => AT });
