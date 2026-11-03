@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "source": "docs/research/design-sync-s0/component-index.json",
+  "reason": "Issue 37 real named version 2417598685933588034; fourth pilot component reviewed without changing the frozen S0 snapshot.",
+  "components": [
+    {
+      "instanceId": "830:1594",
+      "instanceName": "Permission / Awaiting",
+      "componentId": "830:1594",
+      "componentName": "State=Awaiting",
+      "ownerId": "830:1593",
+      "ownerName": "Pioneer v3 / Permission Card",
+      "ownerType": "COMPONENT_SET",
+      "properties": {
+        "Operation#725:23": {
+          "type": "TEXT",
+          "defaultValue": "对象：毕业项目的设计文档"
+        },
+        "Scope#725:28": {
+          "type": "TEXT",
+          "defaultValue": "路径：D:/Project/Pioneer/docs\n权限：只读；不写入、不执行命令"
+        },
+        "Recipient#725:33": {
+          "type": "TEXT",
+          "defaultValue": "接收方：本地示例运行器；不外发"
+        },
+        "Expiry#725:38": {
+          "type": "TEXT",
+          "defaultValue": "时效：仅此一次；目标变更或超时即失效"
+        },
+        "State": {
+          "type": "VARIANT",
+          "defaultValue": "Awaiting",
+          "variantOptions": ["Awaiting", "Denied", "Expired", "Approved"]
+        }
+      },
+      "variants": [
+        {
+          "id": "830:1594",
+          "name": "State=Awaiting",
+          "width": 504,
+          "height": 360
+        },
+        {
+          "id": "830:1606",
+          "name": "State=Denied",
+          "width": 504,
+          "height": 360
+        },
+        {
+          "id": "830:1618",
+          "name": "State=Expired",
+          "width": 504,
+          "height": 360
+        },
+        {
+          "id": "830:1630",
+          "name": "State=Approved",
+          "width": 504,
+          "height": 360
+        }
+      ],
+      "pageId": "824:1278",
+      "designUrl": "https://www.figma.com/design/EQis9ep9ZQsEenrUVXwlFU/Pioneer?node-id=830-1593",
+      "code": {
+        "exportName": "PermissionCard",
+        "path": "apps/desktop/src/renderer/components/PermissionCard.tsx",
+        "commit": "7d27d455907822219af530fd310a8dd748fec5be",
+        "blob": "aac39b4a76b656272ac9ea42571e990d7f722cff",
+        "inAcceptedMain": false,
+        "mainBlob": "0000000000000000000000000000000000000000",
+        "props": {
+          "operation": "string",
+          "scope": "string",
+          "recipient": "string",
+          "expiry": "string",
+          "state": "PermissionCardState",
+          "onAction": "((action: PermissionCardAction) => void) | undefined",
+          "note": "string | undefined",
+          "disabled": "boolean | undefined"
+        }
+      },
+      "mappingStatus": "mapped-candidate",
+      "productionDesignMapping": false,
+      "propertyMapping": [
+        {
+          "figma": "Operation#725:23",
+          "code": "operation",
+          "status": "mapped",
+          "reason": "The operation text is supplied by the caller; the Figma sample is not application data."
+        },
+        {
+          "figma": "Scope#725:28",
+          "code": "scope",
+          "status": "mapped",
+          "reason": "The scope is supplied by the caller and preserves the reviewed line break."
+        },
+        {
+          "figma": "Recipient#725:33",
+          "code": "recipient",
+          "status": "mapped",
+          "reason": "The recipient is supplied by the caller; no provider is inferred."
+        },
+        {
+          "figma": "Expiry#725:38",
+          "code": "expiry",
+          "status": "mapped",
+          "reason": "The expiry is supplied by the caller; no lifetime is inferred."
+        },
+        {
+          "figma": "State",
+          "code": "state",
+          "status": "mapped",
+          "reason": "The four reviewed states select the title, message and action labels; the caller owns transitions."
+        },
+        {
+          "figma": "Actions",
+          "code": "onAction / disabled",
+          "status": "preserved-difference",
+          "reason": "The component reports an action id and never grants by itself. Preview surfaces disable the same labels until a real approval flow is wired."
+        }
+      ],
+      "acceptance": [
+        {
+          "commit": "7d27d455907822219af530fd310a8dd748fec5be",
+          "path": "tests/contract/permission-card.test.ts"
+        },
+        {
+          "commit": "7d27d455907822219af530fd310a8dd748fec5be",
+          "path": "tests/e2e/design-mappings.e2e.spec.ts"
+        }
+      ],
+      "next": "Wire PermissionCard to the real #19 approval state in S2; the Settings preview is read-only and must not become an authorization source."
+    }
+  ]
+}
