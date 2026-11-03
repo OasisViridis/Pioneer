@@ -6,7 +6,7 @@
 
 代码准备了检查入口、Windows 像素比较与候选图工作流，以及合并后回填流程。2026-10-28 用户委托 Codex 完成剩余视觉核验；已复核原图、修复输入框焦点对比度并接受[当前状态基线](../../tests/e2e/visual-baselines/README.md)，详见[审阅结论](issue37-visual-review.md)。2026-10-30 会话标签试点已合并且真实 Dev Resources 链接已回读，具体证据见下文。**本票尚未完成**：真实命名版本事件接收与完整自动链路尚未验收。不得用这份准备工作的 PR 自动关闭 #37。
 
-S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook 接收器、scoped REST 凭证、Dev Resources 写入或 Code Connect 发布权益；此后 Dev Resources 已通过受控 REST 客户端真实写入。S2 试点走当前 Codex 会话 + 发布工具，并没有 `repository_dispatch` 事件消费者，也没有获准的无人值守模型执行环境。不能把一个只打印 payload 的 workflow 当作已接通 S2。
+S0 的[能力报告](../research/design-sync-s0/README.md)没有确认 Webhook 接收器、scoped REST 凭证、Dev Resources 写入或 Code Connect 发布权益；此后 Dev Resources 已通过受控 REST 客户端真实写入。S2 试点走当前 Codex 会话 + 发布工具。2026-11-03 已准备受限的 `repository_dispatch` 消费者（`design-intake.yml` + `design-event-consumer.mjs`），但仍未部署接收器、未创建 Webhook，也没有真实事件验收；消费者不创建 PR、不调用模型。不能把受控 dispatch 当作真实 Figma 事件，也不能把只打印 payload 的 workflow 当作已接通 S2。
 
 ## 旧测试盘点与真实选择范围
 
@@ -113,3 +113,12 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 - S2 的 `verify` 现在要求质量与视觉两个 job 都成功；没有视觉 job 的旧 S2 PR 返回 `validation-incomplete`。这是有意收紧，不把旧绿色或本地 `pnpm check` 当作当前视觉通过。
 - 下载提交 `6292c51` 的 CI artifact 复核：`electron-evidence-6292c51...` 的 `results.json` 为 12 suites / 39 specs 全部通过；`visual-comparison-6292c51...` 含 HTML/JSON 报告和故意反色故障的 expected/actual/diff 三张 PNG，user-data 文件为 0。此前 `2283fd9` 的 artifact 仍带 Chromium 临时 user-data 目录，因此本 PR 的 `quality.yml` 与 `visual-candidate.yml` 改为按报告、结果 JSON、候选/截图/trace 精确收集。
 - 真实命名版本事件接收与完整自动链路仍未验收；真实 Figma 部分失败/超时、Code Connect 发布、真人设备与真实 Provider 人工验收也仍未执行。#37、#33 保持 Open，未创建或修改 Figma 版本，未标记 COMPLETED。
+
+## 2026-11-03 接收端准备（Phase A）
+
+- 新增 `inspectDispatch`：接收器已在外部校验 passcode；GitHub 侧只接受 `schemaVersion/webhookId/eventType/fileKey/versionId/label/deliveryId/receivedAt`，额外字段、节点、Issue、命令和提示词一律拒绝。路由、Issue、节点范围来自仓库 `events.json`/`features.json`，不来自 dispatch 正文。
+- 新增 `tools/design-event-consumer.mjs` 与 `.github/workflows/design-intake.yml`：只在 `repository_dispatch` 的 `figma-design-release` 运行，权限仅 `contents: read`、`pull-requests: read`；复核服务端版本历史、固定节点、单活跃 PR 和同版本去重，产出 `tmp/design-external/` 材料 artifact。它不创建 PR、不调用模型、不评论 Issue。
+- 新增 `tests/design-sync/dispatch.test.mjs` 9/9：禁用配置零网络、合法 dispatch 的确定性材料、错误 webhook、PING/普通编辑忽略、越权字段拒绝、越界文件/标签、旧版本、既有 PR 三次重放、固定版本读回与 schema 边界。原有 `events.test.mjs` 与 `composition.test.mjs` 回归通过。
+- 本地 CLI 已实测：禁用配置返回 `event-disabled` 且退出 1（有 dispatch 但仓库未启用，跑红以暴露配置缺口）；缺 `FIGMA_ACCESS_TOKEN` 返回 `permission-denied` 且退出 1，不产生成功材料。
+- 未验证：n8n 导入/部署、HTTPS 可达性、Webhook 创建、真实 passcode 投递、真实事件三次重放、Draft PR。`design/delivery/events.json` 仍不存在，example 默认 disabled；当前 registry 的 #36/#25 均已关闭，真实 S2 需要一个仍 Open 的 pilot。
+- #37、#33 保持 Open；本准备不构成条件 5 的验收。

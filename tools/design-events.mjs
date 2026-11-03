@@ -207,6 +207,210 @@ function projectNode(node, budget, composition = false) {
   return result;
 }
 
+function routeFor(config, policy, { fileKey, label }) {
+  const routes =
+    config.routes?.filter(
+      (r) =>
+        r.label === label && policy.features[r.featureId]?.fileKey === fileKey,
+    ) ?? [];
+  if (routes.length !== 1)
+    fail('invalid-input', 'File or release label is outside the registry');
+  const route = routes[0];
+  const feature = policy.features[route.featureId];
+  if (
+    !/^[a-z][a-z0-9-]{2,60}$/.test(route.featureId) ||
+    !/^[a-zA-Z0-9]+$/.test(feature.fileKey) ||
+    !Array.isArray(route.nodes) ||
+    !route.nodes.length ||
+    new Set(route.nodes).size !== route.nodes.length ||
+    route.nodes.some(
+      (id) => !/^\d+:\d+$/.test(id) || !feature.nodes.includes(id),
+    ) ||
+    !feature.changeTypes.includes(route.changeType) ||
+    !Array.isArray(route.behaviorChanges)
+  )
+    fail('invalid-input', 'Unreviewed route configuration');
+  return { route, feature };
+}
+
+const dispatchKeys = new Set([
+  'schemaVersion',
+  'webhookId',
+  'eventType',
+  'fileKey',
+  'versionId',
+  'label',
+  'deliveryId',
+  'receivedAt',
+]);
+
+// The receiver, not the event author, owns routing. Any extra field is a
+// request to override a trusted decision and is rejected before any read.
+function parseDispatchPayload(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+    fail('invalid-input', 'Invalid dispatch payload');
+  for (const key of Object.keys(raw))
+    if (!dispatchKeys.has(key))
+      fail('invalid-input', 'Dispatch may not override trusted routing');
+  const {
+    schemaVersion,
+    webhookId,
+    eventType,
+    fileKey,
+    versionId,
+    label,
+    deliveryId,
+    receivedAt,
+  } = raw;
+  if (schemaVersion !== 1) fail('invalid-input', 'Unsupported dispatch schema');
+  if (typeof webhookId !== 'string' || !webhookId || webhookId.length > 64)
+    fail('invalid-input', 'Invalid webhook identity');
+  if (typeof eventType !== 'string' || !eventType || eventType.length > 64)
+    fail('invalid-input', 'Invalid event type');
+  if (typeof fileKey !== 'string' || !/^[a-zA-Z0-9]{1,64}$/.test(fileKey))
+    fail('invalid-input', 'Invalid file key');
+  if (
+    typeof versionId !== 'string' ||
+    !/^[a-zA-Z0-9_-]{1,128}$/.test(versionId)
+  )
+    fail('invalid-input', 'Invalid fixed version');
+  if (typeof label !== 'string' || !label || label.length > 200)
+    fail('invalid-input', 'Invalid release label');
+  if (typeof deliveryId !== 'string' || !/^[a-f0-9]{64}$/.test(deliveryId))
+    fail('invalid-input', 'Invalid delivery id');
+  if (
+    typeof receivedAt !== 'string' ||
+    !Number.isFinite(Date.parse(receivedAt))
+  )
+    fail('invalid-input', 'Invalid receive time');
+  return {
+    schemaVersion,
+    webhookId,
+    eventType,
+    fileKey,
+    versionId,
+    label,
+    deliveryId,
+    receivedAt,
+  };
+}
+
+async function resolveRelease({ route, feature, versionId, figma, github }) {
+  if (typeof versionId !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(versionId))
+    fail('invalid-input', 'Missing fixed version');
+  const history = await versions(figma, feature.fileKey);
+  const releases = history.filter((v) => v.label === route.label);
+  if (
+    !releases.length ||
+    releases.some((v) => !Number.isFinite(Date.parse(v.created_at)))
+  )
+    fail('missing-input', 'Release history unavailable');
+  releases.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  if (releases[1] && releases[1].created_at === releases[0].created_at)
+    fail('review-required', 'Ambiguous release ordering');
+  if (!releases.some((v) => v.id === versionId))
+    fail('invalid-input', 'Event version/label not confirmed by Figma');
+  if (releases[0].id !== versionId)
+    return { state: 'ignored-old-version', retryable: false };
+  const branch = `codex/design-${route.featureId}`;
+  const prs = await github(
+    'GET',
+    `${prefix}/pulls?state=all&head=OasisViridis:${branch}&per_page=100`,
+  );
+  if (
+    !Array.isArray(prs) ||
+    prs.length >= 100 ||
+    prs.filter((p) => p.state === 'open').length > 1
+  )
+    fail('review-required', 'Ambiguous delivery history');
+  for (const pr of prs) {
+    const proof = metadata(pr.body);
+    if (proof?.featureId !== route.featureId || proof.issue !== feature.issue)
+      fail('review-required', 'Delivery slot has unrelated history');
+    const stored = await github(
+      'GET',
+      `${prefix}/contents/design/deliveries/${route.featureId}/package.json?ref=${pr.head.sha}`,
+    );
+    if (stored.encoding !== 'base64')
+      fail('missing-input', 'Delivery package unavailable');
+    const pkg = JSON.parse(
+      Buffer.from(stored.content, 'base64').toString('utf8'),
+    );
+    if (
+      pkg.request?.design?.version === versionId &&
+      pkg.request.design.fileKey === feature.fileKey
+    )
+      return {
+        state: 'existing-delivery',
+        retryable: false,
+        pr: pr.html_url,
+        headSha: pr.head.sha,
+      };
+    if (pr.state === 'open')
+      return { state: 'review-required', retryable: false, pr: pr.html_url };
+  }
+  const query = new URLSearchParams({
+    ids: route.nodes.join(','),
+    version: versionId,
+  });
+  const source = await figma(
+    'GET',
+    `/v1/files/${feature.fileKey}/nodes?${query}`,
+  );
+  if (source.version !== versionId)
+    fail('invalid-input', 'Fixed version read mismatch');
+  const budget = { count: 0 };
+  const nodes = route.nodes.map((id) => {
+    const node = source.nodes?.[id]?.document;
+    if (node?.id !== id)
+      fail('missing-input', 'Required node missing from fixed version');
+    return projectNode(
+      node,
+      budget,
+      Object.hasOwn(feature.compositionMappings ?? {}, id),
+    );
+  });
+  const base = await github('GET', `${prefix}/git/ref/heads/main`);
+  if (!/^[a-f0-9]{40}$/.test(base.object?.sha))
+    fail('missing-input', 'Accepted main unavailable');
+  const snapshot = {
+    schemaVersion: 1,
+    kind: 'version',
+    fileKey: feature.fileKey,
+    historicalVersionId: versionId,
+    historicalLabel: route.label,
+    scope:
+      'Selected node structure; excludes image bytes, vectors and external asset URLs. Not pixel reconstruction.',
+    nodes,
+  };
+  const eventKey = hash(
+    canonical({
+      featureId: route.featureId,
+      fileKey: feature.fileKey,
+      version: versionId,
+      nodes: [...route.nodes].sort(),
+    }),
+  );
+  const snapshotText = JSON.stringify(snapshot, null, 2) + '\n';
+  return {
+    state: 'awaiting-local-agent',
+    retryable: false,
+    eventKey,
+    featureId: route.featureId,
+    issue: feature.issue,
+    baseSha: base.object.sha,
+    changeType: route.changeType,
+    behaviorChanges: route.behaviorChanges,
+    fileKey: feature.fileKey,
+    nodes: route.nodes,
+    version: versionId,
+    snapshotPath: `design/delivery/events/${eventKey}.json`,
+    snapshotSha256: hash(snapshotText),
+    snapshotText,
+    automation: 'not-deployed',
+  };
+}
+
 export async function inspectEvent({
   event,
   config,
@@ -239,145 +443,62 @@ export async function inspectEvent({
     )
   )
     fail('invalid-input', 'Event may not override trusted routing');
-  const routes =
-    config.routes?.filter(
-      (r) =>
-        r.label === event.label &&
-        policy.features[r.featureId]?.fileKey === event.file_key,
-    ) ?? [];
-  if (routes.length !== 1)
-    fail('invalid-input', 'File or release label is outside the registry');
-  const route = routes[0];
-  const feature = policy.features[route.featureId];
-  if (
-    !/^[a-z][a-z0-9-]{2,60}$/.test(route.featureId) ||
-    !/^[a-zA-Z0-9]+$/.test(feature.fileKey) ||
-    !Array.isArray(route.nodes) ||
-    !route.nodes.length ||
-    new Set(route.nodes).size !== route.nodes.length ||
-    route.nodes.some(
-      (id) => !/^\d+:\d+$/.test(id) || !feature.nodes.includes(id),
-    ) ||
-    !feature.changeTypes.includes(route.changeType) ||
-    !Array.isArray(route.behaviorChanges)
-  )
-    fail('invalid-input', 'Unreviewed route configuration');
-  if (
-    typeof event.version_id !== 'string' ||
-    !/^[a-zA-Z0-9_-]+$/.test(event.version_id)
-  )
-    fail('invalid-input', 'Missing fixed version');
-  const history = await versions(figma, feature.fileKey);
-  const releases = history.filter((v) => v.label === route.label);
-  if (
-    !releases.length ||
-    releases.some((v) => !Number.isFinite(Date.parse(v.created_at)))
-  )
-    fail('missing-input', 'Release history unavailable');
-  releases.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
-  if (releases[1] && releases[1].created_at === releases[0].created_at)
-    fail('review-required', 'Ambiguous release ordering');
-  if (!releases.some((v) => v.id === event.version_id))
-    fail('invalid-input', 'Event version/label not confirmed by Figma');
-  if (releases[0].id !== event.version_id)
-    return { state: 'ignored-old-version', retryable: false };
-  const branch = `codex/design-${route.featureId}`;
-  const prs = await github(
-    'GET',
-    `${prefix}/pulls?state=all&head=OasisViridis:${branch}&per_page=100`,
-  );
-  if (
-    !Array.isArray(prs) ||
-    prs.length >= 100 ||
-    prs.filter((p) => p.state === 'open').length > 1
-  )
-    fail('review-required', 'Ambiguous delivery history');
-  for (const pr of prs) {
-    const proof = metadata(pr.body);
-    if (proof?.featureId !== route.featureId || proof.issue !== feature.issue)
-      fail('review-required', 'Delivery slot has unrelated history');
-    const stored = await github(
-      'GET',
-      `${prefix}/contents/design/deliveries/${route.featureId}/package.json?ref=${pr.head.sha}`,
-    );
-    if (stored.encoding !== 'base64')
-      fail('missing-input', 'Delivery package unavailable');
-    const pkg = JSON.parse(
-      Buffer.from(stored.content, 'base64').toString('utf8'),
-    );
-    if (
-      pkg.request?.design?.version === event.version_id &&
-      pkg.request.design.fileKey === feature.fileKey
-    )
-      return {
-        state: 'existing-delivery',
-        retryable: false,
-        pr: pr.html_url,
-        headSha: pr.head.sha,
-      };
-    if (pr.state === 'open')
-      return { state: 'review-required', retryable: false, pr: pr.html_url };
-  }
-  const query = new URLSearchParams({
-    ids: route.nodes.join(','),
-    version: event.version_id,
+  const { route, feature } = routeFor(config, policy, {
+    fileKey: event.file_key,
+    label: event.label,
   });
-  const source = await figma(
-    'GET',
-    `/v1/files/${feature.fileKey}/nodes?${query}`,
-  );
-  if (source.version !== event.version_id)
-    fail('invalid-input', 'Fixed version read mismatch');
-  const budget = { count: 0 };
-  const nodes = route.nodes.map((id) => {
-    const node = source.nodes?.[id]?.document;
-    if (node?.id !== id)
-      fail('missing-input', 'Required node missing from fixed version');
-    return projectNode(
-      node,
-      budget,
-      Object.hasOwn(feature.compositionMappings ?? {}, id),
-    );
+  return resolveRelease({
+    route,
+    feature,
+    versionId: event.version_id,
+    figma,
+    github,
   });
-  const base = await github('GET', `${prefix}/git/ref/heads/main`);
-  if (!/^[a-f0-9]{40}$/.test(base.object?.sha))
-    fail('missing-input', 'Accepted main unavailable');
-  const snapshot = {
-    schemaVersion: 1,
-    kind: 'version',
-    fileKey: feature.fileKey,
-    historicalVersionId: event.version_id,
-    historicalLabel: route.label,
-    scope:
-      'Selected node structure; excludes image bytes, vectors and external asset URLs. Not pixel reconstruction.',
-    nodes,
-  };
-  const eventKey = hash(
-    canonical({
-      featureId: route.featureId,
-      fileKey: feature.fileKey,
-      version: event.version_id,
-      nodes: [...route.nodes].sort(),
-    }),
-  );
-  const snapshotText = JSON.stringify(snapshot, null, 2) + '\n';
-  return {
-    state: 'awaiting-local-agent',
-    retryable: false,
-    eventKey,
-    featureId: route.featureId,
-    issue: feature.issue,
-    baseSha: base.object.sha,
-    changeType: route.changeType,
-    behaviorChanges: route.behaviorChanges,
-    fileKey: feature.fileKey,
-    nodes: route.nodes,
-    version: event.version_id,
-    snapshotPath: `design/delivery/events/${eventKey}.json`,
-    snapshotSha256: hash(snapshotText),
-    snapshotText,
-    automation: 'not-deployed',
-  };
+}
+
+// The receiver has already authenticated the Figma delivery. Only a restricted
+// payload crosses the GitHub dispatch boundary; routing comes from trusted
+// repository config, never from the dispatched object.
+export async function inspectDispatch({
+  payload,
+  config,
+  policy,
+  figma,
+  github,
+}) {
+  if (config?.enabled !== true)
+    return {
+      state: 'event-disabled',
+      retryable: false,
+      transport: 'repository_dispatch',
+    };
+  const event = parseDispatchPayload(payload);
+  if (!config.webhookId || String(event.webhookId) !== String(config.webhookId))
+    fail('permission-denied', 'Webhook identity mismatch');
+  if (event.eventType === 'PING')
+    return {
+      state: 'ignored-ping',
+      retryable: false,
+      transport: 'repository_dispatch',
+    };
+  if (event.eventType !== 'FILE_VERSION_UPDATE')
+    return {
+      state: 'ignored-event-type',
+      retryable: false,
+      transport: 'repository_dispatch',
+    };
+  const { route, feature } = routeFor(config, policy, {
+    fileKey: event.fileKey,
+    label: event.label,
+  });
+  const result = await resolveRelease({
+    route,
+    feature,
+    versionId: event.versionId,
+    figma,
+    github,
+  });
+  return { ...result, transport: 'repository_dispatch' };
 }
 
 // After a local agent reviews and commits the snapshot, reuse the real S2 validator.
