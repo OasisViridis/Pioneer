@@ -143,6 +143,12 @@ export interface RunPort {
     revision: number;
     afterSeq: number;
   }): Promise<void>;
+  unsubscribeRun(request: {
+    sessionId: string;
+    projectId: string;
+    runId: string;
+    revision: number;
+  }): Promise<void>;
   onRunEventBatch(callback: (batch: RunEventBatch) => void): () => void;
 }
 
@@ -301,6 +307,11 @@ export class RunViewStore {
   private port: RunPort;
   private batchUnsubscribe: (() => void) | null = null;
   private readonly boundSessions = new Set<string>();
+  /** Main-side subscription that must be revoked when its run terminates. */
+  private readonly subscriptions = new Map<
+    string,
+    { projectId: string; runId: string; revision: number }
+  >();
   /** Serialized per-session context refreshes: the last queued read wins. */
   private readonly contextChains = new Map<string, Promise<void>>();
 
@@ -317,6 +328,16 @@ export class RunViewStore {
 
   get = (sessionId: string): RunViewState =>
     this.states.get(sessionId) ?? IDLE_STATE;
+
+  /** Revokes the main-side subscription once its run can produce no more events. */
+  private releaseSubscription(sessionId: string): void {
+    const subscription = this.subscriptions.get(sessionId);
+    if (subscription === undefined) return;
+    this.subscriptions.delete(sessionId);
+    void this.port
+      .unsubscribeRun({ sessionId, ...subscription })
+      .catch(() => undefined);
+  }
 
   private update(
     sessionId: string,
@@ -489,13 +510,17 @@ export class RunViewStore {
       void this.refreshContext(sessionId);
     }
     this.advanceCursor(identity.runId, batch.page.nextAfterSeq);
-    await this.port.acknowledgeRunPage({
-      sessionId: identity.sessionId,
-      projectId: identity.projectId,
-      runId: identity.runId,
-      revision: identity.revision,
-      afterSeq: batch.page.nextAfterSeq,
-    });
+    try {
+      await this.port.acknowledgeRunPage({
+        sessionId: identity.sessionId,
+        projectId: identity.projectId,
+        runId: identity.runId,
+        revision: identity.revision,
+        afterSeq: batch.page.nextAfterSeq,
+      });
+    } finally {
+      if (terminal) this.releaseSubscription(sessionId);
+    }
   }
 
   /** Captures the durable task/result summary while wire events are fresh. */
@@ -792,13 +817,20 @@ export class RunViewStore {
         contextState: 'loading',
         contextError: false,
       });
-      await this.port.subscribeRun({
+      const subscribed = await this.port.subscribeRun({
         sessionId: input.sessionId,
         projectId: input.projectId,
         runId: started.runId,
         revision: input.revision,
         afterSeq: 0,
       });
+      if (subscribed) {
+        this.subscriptions.set(input.sessionId, {
+          projectId: input.projectId,
+          runId: started.runId,
+          revision: input.revision,
+        });
+      }
       const page = await this.port.getRun({
         sessionId: input.sessionId,
         projectId: input.projectId,
@@ -831,6 +863,7 @@ export class RunViewStore {
             // first page still records the durable terminal summary.
             this.update(input.sessionId, { phase: 'terminal' });
             this.recordTerminal(input.sessionId, started.runId);
+            this.releaseSubscription(input.sessionId);
           }
         }
       }

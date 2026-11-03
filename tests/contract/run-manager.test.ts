@@ -161,23 +161,29 @@ async function launchRun(
   return { request, runId: started.runId };
 }
 
-const pageOf = (manager: RunManager, runId: string, afterSeq = 0) =>
-  manager.getRun({
-    sessionId: 'session:test',
-    projectId: 'project:test',
-    runId,
-    revision: 1,
-    afterSeq,
-    ...binding,
-  });
-
-const identityOf = (runId: string) => ({
+const identityOf = (
+  runId: string,
+  overrides: Partial<{
+    sessionId: string;
+    projectId: string;
+    revision: number;
+    webContentsId: number;
+    windowEpoch: number;
+  }> = {},
+) => ({
   sessionId: 'session:test',
   projectId: 'project:test',
   runId,
   revision: 1,
   ...binding,
+  ...overrides,
 });
+
+const pageOf = (manager: RunManager, runId: string, afterSeq = 0) =>
+  manager.getRun({
+    ...identityOf(runId),
+    afterSeq,
+  });
 
 describe('P2 run manager admission and lifecycle (contract §1/§3/§4)', () => {
   it('runs an authorized read-only task to completion with a full event sequence', async () => {
@@ -1064,28 +1070,26 @@ describe('P2 run manager review hardening', () => {
     await waitFor(() => sender.batches.length === 1);
     const first = sender.batches[0]?.page.nextAfterSeq ?? 0;
     manager.acknowledge({
-      ...identityOf(runId),
-      sessionId: 'session:other',
+      ...identityOf(runId, { sessionId: 'session:other' }),
       afterSeq: first,
     });
-    manager.unsubscribe({
-      ...identityOf(runId),
-      sessionId: 'session:other',
+    manager.unsubscribe(identityOf(runId, { sessionId: 'session:other' }));
+    manager.acknowledge({
+      ...identityOf(runId, { windowEpoch: windowEpoch + 1 }),
+      afterSeq: first,
+    });
+    manager.unsubscribe(identityOf(runId, { projectId: 'project:other' }));
+    manager.acknowledge({
+      ...identityOf(runId, { revision: 2 }),
+      afterSeq: first,
     });
     manager.acknowledge({
-      ...identityOf(runId),
-      windowEpoch: windowEpoch + 1,
+      ...identityOf(runId, { webContentsId: webContentsId + 1 }),
       afterSeq: first,
     });
-    manager.unsubscribe({
-      ...identityOf(runId),
-      projectId: 'project:other',
-    });
-    manager.acknowledge({
-      ...identityOf(runId),
-      revision: 2,
-      afterSeq: first,
-    });
+    manager.unsubscribe(
+      identityOf(runId, { webContentsId: webContentsId + 1 }),
+    );
     await new Promise((resolve) => {
       setTimeout(resolve, 60);
     });
@@ -1095,6 +1099,31 @@ describe('P2 run manager review hardening', () => {
     manager.acknowledge({ ...identityOf(runId), afterSeq: first });
     await waitFor(() => sender.batches.length > 1);
     manager.unsubscribe(identityOf(runId));
+  });
+
+  it('revokes the window subscription when its window is abandoned', async () => {
+    const { manager, sender } = await createManager({
+      steps: [{ action: 'wait', ms: 200 }, { action: 'complete' }],
+    });
+    const { runId } = await launchRun(manager);
+    await waitFor(() => pageOf(manager, runId)?.status === 'running');
+    expect(manager.subscribe({ ...identityOf(runId), afterSeq: 0 })).toBe(true);
+    await waitFor(() => sender.batches.length === 1);
+    const before = sender.batches.length;
+    manager.abandonWindow(webContentsId);
+    await new Promise((resolve) => {
+      setTimeout(resolve, 60);
+    });
+    manager.acknowledge({
+      ...identityOf(runId),
+      afterSeq: sender.batches[0]?.page.nextAfterSeq ?? 0,
+    });
+    await new Promise((resolve) => {
+      setTimeout(resolve, 60);
+    });
+    // The abandoned subscription is gone; the stop_requested event must not
+    // be delivered to a window that no longer owns it.
+    expect(sender.batches).toHaveLength(before);
   });
 
   it('clamps an over-claiming ACK to what was actually delivered', async () => {

@@ -969,12 +969,7 @@ export class RunManager {
   }): RunContext | null {
     const run = this.runs.get(input.runId);
     if (run === undefined) return null;
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      !this.matchesIdentity(run.identity, input)
-    )
-      return null;
+    if (!this.ownsRun(run, input)) return null;
     return {
       identity: run.identity,
       status: run.status,
@@ -1045,6 +1040,27 @@ export class RunManager {
     );
   }
 
+  private ownsRun(
+    run: {
+      webContentsId: number;
+      windowEpoch: number;
+      identity: RunIdentity;
+    },
+    input: {
+      sessionId: string;
+      projectId: string;
+      revision: number;
+      webContentsId: number;
+      windowEpoch: number;
+    },
+  ): boolean {
+    return (
+      run.webContentsId === input.webContentsId &&
+      run.windowEpoch === input.windowEpoch &&
+      this.matchesIdentity(run.identity, input)
+    );
+  }
+
   stop(input: {
     sessionId: string;
     projectId: string;
@@ -1063,11 +1079,7 @@ export class RunManager {
         return { ok: false, code: 'BINDING_MISMATCH' };
       return { ok: true, status: 'unknown' };
     }
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      !this.matchesIdentity(run.identity, input)
-    )
+    if (!this.ownsRun(run, input))
       return { ok: false, code: 'BINDING_MISMATCH' };
     if (this.isTerminal(run)) return { ok: true, status: run.status };
     this.requestStop(run, 'user');
@@ -1099,12 +1111,7 @@ export class RunManager {
         hasMore: false,
       };
     }
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      !this.matchesIdentity(run.identity, input)
-    )
-      return null;
+    if (!this.ownsRun(run, input)) return null;
     return this.buildPage(run, input.afterSeq);
   }
 
@@ -1138,12 +1145,7 @@ export class RunManager {
   }): boolean {
     const run = this.runs.get(input.runId);
     if (run === undefined) return false;
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      !this.matchesIdentity(run.identity, input)
-    )
-      return false;
+    if (!this.ownsRun(run, input)) return false;
     // A stale cursor past the newest seq must still receive future events
     // instead of waiting for a page that can never exist.
     const startSeq = Math.min(input.afterSeq, run.events.at(-1)?.seq ?? 0);
@@ -1171,12 +1173,7 @@ export class RunManager {
   }): void {
     const run = this.runs.get(input.runId);
     if (run === undefined) return;
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      !this.matchesIdentity(run.identity, input)
-    )
-      return;
+    if (!this.ownsRun(run, input)) return;
     const subscriber = run.subscribers.get(input.webContentsId);
     if (subscriber === undefined) return;
     subscriber.lastActivityAt = this.now();
@@ -1205,12 +1202,7 @@ export class RunManager {
   }): void {
     const run = this.runs.get(input.runId);
     if (run === undefined) return;
-    if (
-      run.webContentsId !== input.webContentsId ||
-      run.windowEpoch !== input.windowEpoch ||
-      !this.matchesIdentity(run.identity, input)
-    )
-      return;
+    if (!this.ownsRun(run, input)) return;
     run.subscribers.delete(input.webContentsId);
   }
 
@@ -1228,6 +1220,10 @@ export class RunManager {
     if (run.publishHeld) return;
     const now = this.now();
     for (const subscriber of [...run.subscribers.values()]) {
+      if (subscriber.windowEpoch !== run.windowEpoch) {
+        run.subscribers.delete(subscriber.webContentsId);
+        continue;
+      }
       if (now - subscriber.lastActivityAt > this.limits.subscriberAckMs) {
         if (subscriber.awaitingBatch) {
           run.subscribers.delete(subscriber.webContentsId);
@@ -1445,7 +1441,11 @@ export class RunManager {
       ...(this.runsByWindow.get(String(webContentsId)) ?? []),
     ]) {
       const run = this.runs.get(runId);
-      if (run === undefined || this.isTerminal(run)) continue;
+      if (run === undefined) continue;
+      // The window that owned this subscription is gone. Revoke it now; the
+      // 2s ACK sweep is a fallback, not the revocation path.
+      run.subscribers.delete(webContentsId);
+      if (this.isTerminal(run)) continue;
       this.requestStop(run, 'window_closed');
     }
   }

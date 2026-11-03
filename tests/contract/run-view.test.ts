@@ -73,6 +73,12 @@ function sequence(from: number, to: number): RunEvent[] {
 
 interface FakeRunPort extends RunPort {
   readonly ackedPages: number[];
+  readonly unsubscribedRuns: {
+    sessionId: string;
+    projectId: string;
+    runId: string;
+    revision: number;
+  }[];
   emit(batch: RunEventBatch): void;
 }
 
@@ -84,9 +90,11 @@ function createFakeRunPort(options: {
   getRun?: () => Promise<RunPage | null>;
 }): FakeRunPort {
   const ackedPages: number[] = [];
+  const unsubscribedRuns: FakeRunPort['unsubscribedRuns'] = [];
   let batchCallback: ((batch: RunEventBatch) => void) | null = null;
   return {
     ackedPages,
+    unsubscribedRuns,
     emit: (batch) => {
       batchCallback?.(batch);
     },
@@ -127,6 +135,10 @@ function createFakeRunPort(options: {
     subscribeRun: () => Promise.resolve(true),
     acknowledgeRunPage: (request) => {
       ackedPages.push(request.afterSeq);
+      return Promise.resolve();
+    },
+    unsubscribeRun: (request) => {
+      unsubscribedRuns.push({ ...request });
       return Promise.resolve();
     },
     onRunEventBatch: (callback) => {
@@ -188,6 +200,49 @@ describe('run view delivery cursor', () => {
     expect(store.get(SESSION_ID).events.map((event) => event.seq)).toEqual(
       sequence(1, 40).map((event) => event.seq),
     );
+  });
+
+  it('revokes the main subscription after the terminal batch is acknowledged', async () => {
+    const completed: RunEvent = {
+      ...IDENTITY,
+      version: 1,
+      seq: 1,
+      at: '2026-10-25T00:00:02.000Z',
+      source: 'host',
+      adapter: 'controlled',
+      body: {
+        type: 'run.completed',
+        usage: { inputTokens: null, outputTokens: null },
+      },
+    };
+    const port = createFakeRunPort({
+      getRunPage: null,
+      stopReply: { ok: true, status: 'completed' },
+    });
+    const store = new RunViewStore(port);
+    await launch(store);
+    expect(port.unsubscribedRuns).toEqual([]);
+
+    port.emit({
+      page: pageOf({
+        status: 'completed',
+        events: [completed],
+        lastSeq: 1,
+        nextAfterSeq: 1,
+        hasMore: false,
+      }),
+    });
+    await flushBatches();
+
+    expect(store.get(SESSION_ID).phase).toBe('terminal');
+    expect(port.unsubscribedRuns).toEqual([
+      {
+        sessionId: SESSION_ID,
+        projectId: PROJECT_ID,
+        runId: RUN_ID,
+        revision: REVISION,
+      },
+    ]);
   });
 });
 
