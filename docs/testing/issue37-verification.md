@@ -106,8 +106,8 @@ Code Connect MCP 只读探测仍返回套餐/seat 限制，没有新建模板或
 
 ## 2026-11-03 本地复核与故障演练
 
-- 在 origin/main `13ccfe5` 的独立 worktree 上、于本分支复跑 `pnpm check`：设计同步 109/109（origin/main 为 102，新增 6 项演练与 1 项错误分类）、Contract Tests 505/505（43 文件）、Prototype Tests 210/210、真实 Electron E2E 39/39、package smoke 通过；本地需要清除 `ELECTRON_RUN_AS_NODE=1`，否则 Electron 以 Node 模式启动并拒绝 `--remote-debugging-port`。该变量来自本地宿主环境，不是仓库配置，也没有改动门禁。
-- 新增 [回填故障恢复演练](issue37-writeback-drill.md)：用 localhost 有状态假服务走生产 `figmaApi` 与 `writeback`，覆盖部分 200、提交后断连、回读失败、429、403、容量不足和三次重放，6/6 通过。`writeback.test.mjs` 同时补了 400/422 永久错误与可重试错误的分类断言。该演练不读取 Figma 凭证，不是真实 Figma 验收。
+- 在 origin/main `13ccfe5` 的独立 worktree 上、于本分支复跑 `pnpm check`：设计同步 110/110（origin/main 为 102，新增 7 项演练与 1 项错误分类）、Contract Tests 505/505（43 文件）、Prototype Tests 210/210、真实 Electron E2E 39/39、package smoke 通过；本地需要清除 `ELECTRON_RUN_AS_NODE=1`，否则 Electron 以 Node 模式启动并拒绝 `--remote-debugging-port`。该变量来自本地宿主环境，不是仓库配置，也没有改动门禁。
+- 新增 [回填故障恢复演练](issue37-writeback-drill.md)：用 localhost 有状态假服务走生产 `figmaApi` 与 `writeback`，覆盖部分 200、提交后断连、回读失败、429、403、预检 GET 403、容量不足和三次重放，7/7 通过。`writeback.test.mjs` 同时补了 400/422 永久错误与可重试错误的分类断言。该演练不读取 Figma 凭证，不是真实 Figma 验收。
 - 修正旧记录与当前测试的偏差：runner image 已退出环境断言（2026-11-02），`design-decoration` 不再覆盖已移除的意图 `.form-error`；S1 文档中的 artifact 名改为实际的 `electron-evidence-<sha>` 与 `visual-comparison-<sha>`；token 计数改为 27；`TEST_INFRA.md` 补充 Visual Regression 入口。
 - 计划里“固定 Windows runner 镜像”没有按字面执行：GitHub 托管的 `windows-2025` 镜像版本会滚动，同一提交可能分到不同镜像，镜像门禁会让同一 SHA 随机失败。当前固定的是渲染相关环境字段，runner image 只写入附件供溯源。要改成镜像级断言需要自托管 runner，本次未启用。
 - S2 的 `verify` 现在要求质量与视觉两个 job 都成功；没有视觉 job 的旧 S2 PR 返回 `validation-incomplete`。这是有意收紧，不把旧绿色或本地 `pnpm check` 当作当前视觉通过。

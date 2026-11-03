@@ -1,4 +1,5 @@
 import { planWriteback } from './design-writeback.mjs';
+import { retryableState } from './design-remote.mjs';
 import { execFileSync } from 'node:child_process';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -205,9 +206,10 @@ try {
   )
     process.exitCode = 1;
 } catch (error) {
+  const state = classify(error);
   const receipt = {
-    state: classify(error),
-    retryable: true,
+    state,
+    retryable: retryableState(state),
     detail: error.message,
   };
   await save('receipt.json', receipt);
