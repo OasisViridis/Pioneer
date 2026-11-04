@@ -14,7 +14,7 @@
 ## 与规格的一致性
 
 - §4.1：`intent` 在写入前落盘（`runId`/`revision`/`path`/`beforeSha256`/`at`）；`intent` 追加失败时不碰文件并返回 `failed` + `WRITE_FAILED`；回读后追加 `applied`（`afterSha256`/`observedSha256`/`observedIdentity`/`verification`）或 `failed`（`code`）。没有 `intent` 的写入不会被报告为 `applied`。
-- §4.2：只有 `intent` + `applied` + `verified` 且哈希一致的路径才是 `applied`；回读不一致记 `unverified`；回读拿不到哈希时记 `failed(VERIFY_FAILED)`。
+- §4.2：只有 `intent` + `applied` + `verified` 且哈希一致的路径才是 `applied`；回读不一致记 `unverified`；回读拿不到哈希时记 `applied(unverified, observedSha256:null)`（2026-11-04 加固，见下）。
 - §2.5/§4.4：写后回读不一致记 `verification_failed`，停止后续写入，**保留现场，不自动回滚**，结果 `restore: 'not_needed'`。恢复留给 #20。
 - 权限：`read_only` 在 `prepare` 阶段返回既有 `PERMISSION_READ_ONLY`；`full_access` 与 `auto_review` 不在这一个审阅入口的档位里（前者会写保护路径且需要单独的风险确认，后者取消逐次确认），仍由共享权限契约与 `checkWritePermission` 约束。
 - 拒绝与未执行目标保持 `unchanged`/`rejected`，不显示为已应用。
@@ -64,12 +64,12 @@
 
 按第二轮复审的三项代码发现补充，不改入口、不加通道：
 
-1. **结果携带来源 Run**：`WriteExecutionResult` 现在带 `runId` 与 `revision`；执行器包装层在 IPC 边界统一盖章，服务在 `BINDING_MISMATCH` 等提前拒绝时使用**已审阅 pending 请求**的身份，调用方篡改后的副本不会写进回执。只有 `invalidate()` 或重放后没有 pending 请求时，两者才为 null；`ok: true` 的回执必须非空。成功结果、验证失败结果、被篡改 Run/修订的拒绝回执各有断言，不只依赖日志。
+1. **结果携带来源 Run**：`WriteExecutionResult` 现在带 `runId` 与 `revision`；执行器包装层在 IPC 边界统一盖章，服务在 `BINDING_MISMATCH` 等提前拒绝时使用**已审阅 pending 请求**的身份，调用方篡改后的副本不会写进回执。只有没有 pending 审阅（`invalidate()` 或重放）或 execute 阶段被 IPC 拒绝的畸形请求，两者才为 null；`ok: true` 的回执必须非空。成功结果、验证失败结果、被篡改 Run/修订的拒绝回执各有断言，不只依赖日志。
 2. **预览取消**：新增“准备后不执行”的探针，比较目标字节与 SHA-256 不变、且没有生成变更日志。这是 Issue 条件 2 的预览阶段取消；实际写入后的取消按 P4-B 记录部分副作用，本切片不实现也不声称支持。
 3. **失效的批准**：新增 `invalidate()` 探针，准备后调用 `invalidate()` 再执行，得到 `BINDING_MISMATCH`，目标不变、无日志。`#18` 明确不用 TTL，失效语义就是被新运行/窗口事件取代。
 
 验证：
 
 - `pnpm exec vitest run tests/contract/write-execution.test.ts`：33/33。
-- 本地 `format:check`、`lint`、`typecheck`、`test:contract:types`、`test:contract`（46 文件 / 558 项）、`design:check`、`verify:repository` 通过；Electron E2E 由 PR CI 执行。
+- 本地 `format:check`、`lint`、`typecheck`、`test:contract:types`、`test:contract`（46 文件 / 559 项）、`design:check`、`verify:repository` 通过；Electron E2E 由 PR CI 执行。
 - Windows 人工验收仍未运行，需单独记录可信批准入口与目标文件结果。
