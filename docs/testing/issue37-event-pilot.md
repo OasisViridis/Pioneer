@@ -44,8 +44,15 @@
 - `design/delivery/features.json`：新增 `change-approval-preview`，含 issue 19、fileKey、节点 `830:1593`、`changeTypes: ["ui"]`、试点 allowedPaths 与现有 basis 文件。
 - 该 feature 是**试点登记**，不是 #19 的功能验收；实现与验收仍需单独执行。`basis` 只引用当前已存在的文件，`prepare` 不会读取不存在的路径。
 
+## 2026-11-04 后续结果
+
+- 真实事件材料经 `event-request` / `prepare` 生成 S2 请求，Draft PR [#75](https://github.com/OasisViridis/Pioneer/pull/75) 创建并合并为 `c3855ff8898b68bfa6c55d3351e5704ae78b94fc`；最终 head `d1235fb` 的两项 Windows job 通过，main 同 SHA 的 quality run `41669290728` 通过。
+- 用真实 Figma 令牌向节点 `830:1593` 回填 6 条 Dev Resources（Issue #19、PR #75、commit、CI、固定包、验收记录）；回执 `links-verified`，顺序重放 3 次均为 `created: 0`。令牌未进 Git/PR/日志，回填后删除。
+- 固定设计包的 `outputHash` 是首次交付的 `7dc2…`，补丁后最终输出为 `87b5…`；`deliver` 对变化输出返回 `review-required`，本次是人工补到同一分支后合并。这是元数据缺口，不能称为干净的自动 S2 更新。
+
 ## 仍未完成
 
-- 配置合入 main 后，需要重放这次真实事件或创建一个新的命名版本，让 GitHub 消费端在配置下产出材料 artifact；重放必须保留原 `deliveryId` 并标注为 replay，不能伪装成新事件。
-- 本地 S2 实现、固定快照提交、Draft PR、head CI 与最终验收仍未执行；#37、#33 保持 Open。
-- Code Connect、真实 Dev Resources 部分失败、真人 Windows/Provider 验收仍未执行。
+- 永久接收器/Webhook 仍缺：临时 Cloudflare Quick Tunnel、团队 Webhook `4740131`、passcode 与 GitHub secret 已删除；真实事件链路只在临时环境成功过一次。
+- 同一真实事件在 PR 产生后三次重放、错误 passcode/旧版本/越界节点/限流在永久接收器上的复验仍未执行。
+- Code Connect 官方发布与节点读回、真人 Windows/真实 Provider 人工验收仍未执行。
+- #19 仍是受控切片：固定后像内容、无会话级持久权限、无 #20 恢复、无 Visual Regression 基线。#37、#33 保持 Open。
