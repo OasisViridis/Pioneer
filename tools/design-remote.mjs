@@ -54,13 +54,23 @@ export function figmaApi(token, fetcher = fetch) {
     )
       throw invalidInput('Unsupported Figma operation');
     // Never retry POST automatically: the caller must reconcile by reading first.
-    const response = await fetcher(url, {
-      method,
-      headers: { 'X-Figma-Token': token, 'Content-Type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
-      redirect: 'error',
-      signal: AbortSignal.timeout(120_000),
-    });
+    // GETs are idempotent; retry a transient 503 twice before failing closed.
+    let response;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      response = await fetcher(url, {
+        method,
+        headers: {
+          'X-Figma-Token': token,
+          'Content-Type': 'application/json',
+          'User-Agent': 'pioneer-design-consumer/1.0',
+        },
+        body: body === undefined ? undefined : JSON.stringify(body),
+        redirect: 'error',
+        signal: AbortSignal.timeout(120_000),
+      });
+      if (response.status !== 503 || attempt === 3) break;
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
+    }
     if (!response.ok)
       throw Object.assign(new Error('Figma request failed'), {
         status: response.status,
