@@ -159,29 +159,35 @@ export class WriteExecutionService {
     expectation: WriteExecutionExpectation,
   ): Promise<WriteExecutionResult> {
     return this.enqueue(async () => {
-      const receipt = (
-        result: WriteExecutionResultCore,
-      ): WriteExecutionResult =>
-        WriteExecutionResultSchema.parse({
-          ...result,
-          runId: request.runId,
-          revision: request.revision,
-        });
       const pending = this.pending;
       // Single use: clear before doing anything so a replayed or concurrent
       // call cannot consume the reviewed request twice.
       this.pending = null;
       if (pending === null) {
-        return receipt(executionRefusal('BINDING_MISMATCH', this.now()));
+        // Nothing is being reviewed, so no Run can be claimed for this receipt.
+        return stampExecutionResult(
+          executionRefusal('BINDING_MISMATCH', this.now()),
+          null,
+          null,
+        );
       }
       if (
         pending.webContentsId !== expectation.webContentsId ||
         pending.windowEpoch !== expectation.windowEpoch
       ) {
-        return receipt(executionRefusal('BINDING_MISMATCH', this.now()));
+        return stampExecutionResult(
+          executionRefusal('BINDING_MISMATCH', this.now()),
+          pending.request.runId,
+          pending.request.revision,
+        );
       }
       if (!sameControlledRequest(pending.request, request)) {
-        return receipt(executionRefusal('BINDING_MISMATCH', this.now()));
+        // The caller's copy was swapped; the reviewed request is the truth.
+        return stampExecutionResult(
+          executionRefusal('BINDING_MISMATCH', this.now()),
+          pending.request.runId,
+          pending.request.revision,
+        );
       }
       return executeControlledWrite(
         this.dependencies,
@@ -311,11 +317,7 @@ export async function executeControlledWrite(
     request,
     expectation,
   );
-  return WriteExecutionResultSchema.parse({
-    ...result,
-    runId: request.runId,
-    revision: request.revision,
-  });
+  return stampExecutionResult(result, request.runId, request.revision);
 }
 
 /**
@@ -1242,6 +1244,37 @@ function sameIdentity(
 ): boolean {
   if (left === null || right === null) return left === right;
   return sameFileIdentity(left, right);
+}
+
+/**
+ * Adds the reviewed Run identity to a core result. A malformed identity falls
+ * back to an INVALID_REQUEST receipt with no provenance instead of throwing out
+ * of the IPC handler.
+ */
+export function stampExecutionResult(
+  result: WriteExecutionResultCore,
+  runId: string | null,
+  revision: number | null,
+): WriteExecutionResult {
+  const parsed = WriteExecutionResultSchema.safeParse({
+    ...result,
+    runId,
+    revision,
+  });
+  if (parsed.success) return parsed.data;
+  return WriteExecutionResultSchema.parse({
+    version: WRITE_EXECUTION_VERSION,
+    ok: false,
+    status: 'rejected',
+    code: 'INVALID_REQUEST',
+    permissionCode: null,
+    targets: [],
+    verification: 'not_attempted',
+    restore: 'not_attempted',
+    completedAt: result.completedAt,
+    runId: null,
+    revision: null,
+  });
 }
 
 /**

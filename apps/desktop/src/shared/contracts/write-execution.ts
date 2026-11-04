@@ -328,6 +328,13 @@ export const WriteExecutionResultSchema = WriteExecutionResultBaseSchema.extend(
           message: 'A successful result must be applied.',
         });
       }
+      if (result.runId === null || result.revision === null) {
+        context.addIssue({
+          code: 'custom',
+          path: ['runId'],
+          message: 'A successful result must name the Run it belongs to.',
+        });
+      }
       if (result.verification !== 'verified') {
         context.addIssue({
           code: 'custom',
