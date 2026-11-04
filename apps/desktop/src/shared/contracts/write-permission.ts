@@ -319,7 +319,8 @@ export const WriteChangeJournalRecordSchema = z.discriminatedUnion('kind', [
       revision: revisionSchema,
       path: WriteTargetPathSchema,
       afterSha256: sha256Schema,
-      observedSha256: sha256Schema,
+      /** The read-back hash; null when the rename happened but no read proved it. */
+      observedSha256: sha256Schema.nullable(),
       /** Identity the applied bytes landed on; null when the platform has none. */
       observedIdentity: WriteFileIdentitySchema.nullable(),
       verification: z.enum(['verified', 'unverified']),
@@ -328,7 +329,10 @@ export const WriteChangeJournalRecordSchema = z.discriminatedUnion('kind', [
     .strict()
     .superRefine((record, context) => {
       if (record.verification === 'verified') {
-        if (record.observedSha256 !== record.afterSha256) {
+        if (
+          record.observedSha256 === null ||
+          record.observedSha256 !== record.afterSha256
+        ) {
           context.addIssue({
             code: 'custom',
             path: ['observedSha256'],

@@ -45,3 +45,17 @@
 - 回读失败后保留的是外部写入后的现场，不做恢复；这是规格要求，但需要 #20 的人工恢复入口。
 - 写入执行器只防应用自身错误、并发编辑与陈旧目标，不防恶意本地进程或内核级逃逸。
 - 固定标记会进入文件内容；预览会显示完整后像哈希，批准前可核对。
+
+## 2026-11-04 加固（issue #19 复审后的移植）
+
+在既有 `write-execution` 实现上补充三项复审发现的加固，不新增通道、不改变审阅入口：
+
+1. **rename 后回读无法证明时的日志**：原先记 `failed(VERIFY_FAILED)`，#18 的恢复判定会把它当作“未写入”。现在记 `applied(verification:'unverified', observedSha256:null)`；契约允许 `observedSha256` 为 null，只有 `verified` 要求非空且等于后像。#20 的恢复判定因此进入 `conflict`，不会漏掉真实副作用。
+2. **落盘前最终复核**：`intent` 落盘后、`writeFileAtomic` 前，执行器重新走同一套路径策略读取目标，比对前像字节与文件身份；父目录被 junction 替换、目标被就地改写或被换成另一个文件对象时拒绝写入。新增 `beforeWrite` main 私有测试钩子，仅用于在最终复核前模拟竞态；生产依赖不提供它。新增两条探针：`beforeWrite` 中就地改写目标、`beforeWrite` 中移动项目目录并建 junction。
+3. **回读不再降级**：`tryReadState` 只用共享稳定读取；读不到就按上面的 unverified/null 记录，不把更弱的读法当成 `verified`。
+
+验证：
+
+- `pnpm exec vitest run tests/contract/write-execution.test.ts`：30/30（新增 2 项竞态探针，更新 1 项回读为 null 的日志断言）。
+- 本地 `format:check`、`lint`、`typecheck`、`test:contract:types`、`test:contract`（46 文件 / 556 项）、`design:check`、`verify:repository` 通过。
+- 本次未在本地启动 Electron E2E，完整 `pnpm check` 由 PR CI 执行。

@@ -45,6 +45,7 @@ import {
   evaluateWriteTargets,
   permissionDeniedOutcomes,
   rejectedOutcomes,
+  rejectionCodeFor,
 } from './harness/write-permission/decision';
 import {
   sameFileIdentity,
@@ -80,6 +81,12 @@ export interface WriteExecutionExpectation {
 }
 
 export interface WriteExecutionHooks {
+  /**
+   * Test seam: runs after intent and before the final pre-write re-read. The
+   * production dependencies never supply it; it lets a probe simulate an edit
+   * or a parent-directory swap in the narrow admission-to-write window.
+   */
+  beforeWrite?: (path: WriteTargetPath) => Promise<void>;
   /**
    * Test seam: runs after a target's bytes land and before the read-back. The
    * production dependencies never supply it.
@@ -561,12 +568,54 @@ async function writeVerifiedBatch(
       });
     }
 
+    await options.hooks?.beforeWrite?.(target.path);
+
+    // Admission ran before the journal and the temp-file work. Re-read the
+    // target through the same path policy immediately before the write, so an
+    // in-place edit, a replaced file object or a swapped parent refuses instead
+    // of being overwritten. The bytes and the identity must both still match.
+    const finalRead = await readProjectTarget(
+      options.projectRoot,
+      target.path,
+      options.permission,
+    );
+    const refuseFinal = async (
+      state: WriteTargetState,
+    ): Promise<WriteExecutionResult> => {
+      // Nothing has been written; the journal records the failed attempt.
+      await appendJournalRecord(journalPath, {
+        kind: 'failed',
+        runId,
+        revision,
+        path: target.path,
+        code: 'WRITE_FAILED',
+        at: nowIso(),
+      }).catch(() => undefined);
+      results[index] = {
+        path: target.path,
+        status: 'failed',
+        code: rejectionCodeFor(state),
+        observedSha256: null,
+        verification: 'not_attempted',
+      };
+      return failBatch({
+        ...options,
+        results,
+        written,
+        status: 'failed',
+        code: 'WRITE_FAILED',
+      });
+    };
+    if (!finalRead.ok) return await refuseFinal(finalRead.state);
+    const finalState = writeTimeState(target, finalRead.value);
+    if (finalState !== 'unchanged') return await refuseFinal(finalState);
+
     try {
-      await writeFileAtomic(read.absolutePath, target.content);
+      await writeFileAtomic(finalRead.value.absolutePath, target.content);
     } catch {
       // A failed atomic write may still have landed (the rename is the last
       // step). Only a read-back decides which state the file is in.
-      const current = await tryReadState(read.absolutePath);
+      const current = await tryReadState(finalRead.value.absolutePath);
       const landed =
         current !== null &&
         current.state.bytes === target.after.bytes &&
@@ -609,22 +658,27 @@ async function writeVerifiedBatch(
     written.push({ index, target, read });
     await options.hooks?.afterWrite?.(target.path).catch(() => undefined);
 
-    const observed = await tryReadState(read.absolutePath);
+    const observed = await tryReadState(finalRead.value.absolutePath);
     const verifiedAfter =
       observed !== null &&
       observed.state.bytes === target.after.bytes &&
       observed.state.sha256 === target.after.sha256;
     // §4.1: the `applied` line carries what main actually observed. A verified
     // record must observe the after hash, which `verifiedAfter` guarantees; an
-    // unverified one records the mismatch instead of hiding it.
+    // unverified one records the mismatch, and a read that cannot prove anything
+    // records null. The rename has happened either way, so recovery must treat
+    // the target as possibly written, never as out of scope.
     const outcomeRecorded =
       observed === null
         ? await appendJournalRecord(journalPath, {
-            kind: 'failed',
+            kind: 'applied',
             runId,
             revision,
             path: target.path,
-            code: 'VERIFY_FAILED',
+            afterSha256: target.after.sha256,
+            observedSha256: null,
+            observedIdentity: null,
+            verification: 'unverified',
             at: nowIso(),
           }).then(
             () => true,
