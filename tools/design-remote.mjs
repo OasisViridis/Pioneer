@@ -66,7 +66,7 @@ export function figmaApi(token, fetcher = fetch) {
         },
         body: body === undefined ? undefined : JSON.stringify(body),
         redirect: 'error',
-        signal: AbortSignal.timeout(120_000),
+        signal: AbortSignal.timeout(300_000),
       });
       if (response.status !== 503 || attempt === 3) break;
       await new Promise((resolve) => setTimeout(resolve, attempt * 1_000));
