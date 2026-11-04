@@ -1,0 +1,10 @@
+name = "pioneer-figma-webhook"
+main = "src/index.js"
+compatibility_date = "2026-11-04"
+workers_dev = true
+
+# Secrets are set with `wrangler secret put`, never committed:
+# FIGMA_PASSCODE
+# GITHUB_DISPATCH_TOKEN
+[vars]
+GITHUB_REPOSITORY = "OasisViridis/Pioneer"
