@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';
+﻿import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 
@@ -28,7 +28,7 @@ function validBody(overrides = {}) {
   return {
     passcode: PASSCODE,
     event_type: 'FILE_VERSION_UPDATE',
-    webhook_id: '4740131',
+    webhook_id: '4741884',
     file_key: 'EQis9ep9ZQsEenrUVXwlFU',
     version_id: '2417598685933588034',
     label: 'Pioneer READY change-approval-preview',
@@ -101,7 +101,7 @@ test('a named version dispatches only the bounded payload', async () => {
   assert.equal(body.event_type, 'figma-design-release');
   assert.deepEqual(body.client_payload, {
     schemaVersion: 1,
-    webhookId: '4740131',
+    webhookId: '4741884',
     eventType: 'FILE_VERSION_UPDATE',
     fileKey: 'EQis9ep9ZQsEenrUVXwlFU',
     versionId: '2417598685933588034',

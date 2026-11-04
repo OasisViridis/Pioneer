@@ -44,6 +44,30 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: node tools/design-event-consumer.mjs
 
+      - name: Report intake handoff
+        if: always()
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'tmp/design-external/receipt.json';
+          if (!fs.existsSync(path)) process.exit(0);
+          const receipt = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const lines = [
+            '# Design intake',
+            '',
+            `- state: ${receipt.state}`,
+            `- phase: ${receipt.phase ?? 'terminal'}`,
+            `- delivery complete: ${receipt.deliveryComplete === true}`,
+            `- Draft PR created: ${receipt.draftPrCreated === true}`,
+            `- next action: ${receipt.nextAction ?? 'none'}`,
+            `- event key: ${receipt.eventKey ?? 'n/a'}`,
+          ];
+          fs.appendFileSync(
+            process.env.GITHUB_STEP_SUMMARY,
+            lines.join('\n') + '\n',
+          );
+          NODE
+
       - name: Upload intake material and receipt
         if: always()
         uses: actions/upload-artifact@v4
