@@ -59,3 +59,17 @@
 - `pnpm exec vitest run tests/contract/write-execution.test.ts`：30/30（新增 2 项竞态探针，更新 1 项回读为 null 的日志断言）。
 - 本地 `format:check`、`lint`、`typecheck`、`test:contract:types`、`test:contract`（46 文件 / 556 项）、`design:check`、`verify:repository` 通过。
 - 本次未在本地启动 Electron E2E，完整 `pnpm check` 由 PR CI 执行。
+
+## 2026-11-05 关闭前补齐（结果溯源、取消、失效）
+
+按第二轮复审的三项代码发现补充，不改入口、不加通道：
+
+1. **结果携带来源 Run**：`WriteExecutionResult` 现在带 `runId` 与 `revision`；执行器包装层在 IPC 边界统一盖章，服务在拒绝提前返回时也补同一份身份。只有“请求在解析前就被拒绝”的畸形请求把两者置为 null。成功结果与验证失败结果各有一条断言，不只依赖日志。
+2. **预览取消**：新增“准备后不执行”的探针，比较目标字节与 SHA-256 不变、且没有生成变更日志。这是 Issue 条件 2 的预览阶段取消；实际写入后的取消按 P4-B 记录部分副作用，本切片不实现也不声称支持。
+3. **失效的批准**：新增 `invalidate()` 探针，准备后调用 `invalidate()` 再执行，得到 `BINDING_MISMATCH`，目标不变、无日志。`#18` 明确不用 TTL，失效语义就是被新运行/窗口事件取代。
+
+验证：
+
+- `pnpm exec vitest run tests/contract/write-execution.test.ts`：32/32。
+- 本地 `format:check`、`lint`、`typecheck`、`test:contract:types`、`design:check`、`verify:repository` 通过；完整 `test:contract` 与 Electron E2E 由 PR CI 执行。
+- Windows 人工验收仍未运行，需单独记录可信批准入口与目标文件结果。

@@ -202,7 +202,13 @@ export function registerWriteExecutionIpc(
       const refuse = (
         code: 'INVALID_REQUEST' | 'UNTRUSTED_SENDER',
       ): WriteReviewReply | WriteExecutionResult =>
-        stage === 'prepare' ? prepareRefusal(code) : refusedExecution(code);
+        stage === 'prepare'
+          ? prepareRefusal(code)
+          : WriteExecutionResultSchema.parse({
+              ...refusedExecution(code),
+              runId: null,
+              revision: null,
+            });
       if (
         !isTrustedSender(
           event,

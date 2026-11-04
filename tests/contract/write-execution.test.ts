@@ -285,6 +285,37 @@ describe('controlled write contract (#19)', () => {
     expect(await readFile(readme, 'utf8')).toBe(original);
   });
 
+  it('cancelling a prepared review leaves bytes, hash and journal untouched', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const before = await readFile(readme);
+    const service = serviceFor(root);
+    await preparedReview(service);
+    // No execute: the user cancelled the review at the preview stage.
+    const after = await readFile(readme);
+    expect(after.equals(before)).toBe(true);
+    expect(sha256Of(after)).toBe(sha256Of(before));
+    expect(await exists(journalFor(root))).toBe(false);
+  });
+
+  it('invalidates a prepared review so a later execute cannot write', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const original = await readFile(readme, 'utf8');
+    const service = serviceFor(root);
+    const review = await preparedReview(service);
+
+    service.invalidate();
+    const result = await executeReview(service, review.request);
+
+    expect(result.ok).toBe(false);
+    expect(result.code).toBe('BINDING_MISMATCH');
+    expect(result.runId).toBe(RUN_ID);
+    expect(result.revision).toBe(REVISION);
+    expect(await readFile(readme, 'utf8')).toBe(original);
+    expect(await exists(journalFor(root))).toBe(false);
+  });
+
   it('refuses read_only permissions without touching the file', async () => {
     const root = await makeProject();
     const readme = join(root, 'README.md');
@@ -463,6 +494,8 @@ describe('controlled write contract (#19)', () => {
     expect(result.status).toBe('applied');
     expect(result.verification).toBe('verified');
     expect(result.restore).toBe('not_needed');
+    expect(result.runId).toBe(RUN_ID);
+    expect(result.revision).toBe(REVISION);
     expect(result.permissionCode).toBeNull();
     expect(result.targets).toHaveLength(1);
     expect(result.targets[0]).toMatchObject({
@@ -568,6 +601,8 @@ describe('controlled write contract (#19)', () => {
     expect(result.code).toBe('VERIFY_FAILED');
     expect(result.verification).toBe('failed');
     expect(result.restore).toBe('not_needed');
+    expect(result.runId).toBe(RUN_ID);
+    expect(result.revision).toBe(REVISION);
     expect(result.targets[0]).toMatchObject({
       path: 'README.md',
       status: 'verification_failed',
