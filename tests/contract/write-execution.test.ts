@@ -7,6 +7,7 @@ import {
   readFile,
   readdir,
   realpath,
+  rename,
   rm,
   symlink,
   writeFile,
@@ -480,6 +481,72 @@ describe('controlled write contract (#19)', () => {
     expect(sha256Of(await readFile(fixtureReadme))).toBe(fixtureHashBefore);
   });
 
+  it('refuses a target edited in place after admission and preserves the edit', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const service = serviceFor(root, {
+      beforeWrite: async () => {
+        await writeFile(readme, 'user edit before write\n', 'utf8');
+      },
+    });
+    const review = await preparedReview(service);
+
+    const result = await executeReview(service, review.request);
+
+    expect(result.ok).toBe(false);
+    expect(result.status).toBe('failed');
+    expect(result.targets[0]).toMatchObject({
+      path: 'README.md',
+      status: 'failed',
+      code: 'TARGET_CHANGED',
+      verification: 'not_attempted',
+    });
+    expect(await readFile(readme, 'utf8')).toBe('user edit before write\n');
+    const records = await readJournal(journalFor(root));
+    expect(records.map((record) => record.kind)).toEqual(['intent', 'failed']);
+    expect(records[1]).toMatchObject({
+      kind: 'failed',
+      path: 'README.md',
+      code: 'WRITE_FAILED',
+    });
+  });
+
+  it('refuses a parent directory swapped for a junction before the write', async () => {
+    const root = await makeProject();
+    const moved = `${root}-moved`;
+    const state = { swapped: false };
+    const service = serviceFor(root, {
+      beforeWrite: async () => {
+        await rename(root, moved);
+        try {
+          await symlink(moved, root, 'junction');
+          state.swapped = true;
+        } catch (error) {
+          await rename(moved, root);
+          throw error;
+        }
+      },
+    });
+    try {
+      const review = await preparedReview(service);
+      const result = await executeReview(service, review.request);
+      if (!state.swapped) return;
+      expect(result.ok).toBe(false);
+      expect(result.targets[0]).toMatchObject({
+        path: 'README.md',
+        status: 'failed',
+        code: 'TARGET_UNREADABLE',
+        verification: 'not_attempted',
+      });
+      expect(await readFile(join(moved, 'README.md'), 'utf8')).toBe(
+        await readFile(join(fixtureAlpha, 'README.md'), 'utf8'),
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true }).catch(() => undefined);
+      await rm(moved, { recursive: true, force: true }).catch(() => undefined);
+    }
+  });
+
   it('preserves the post-image and reports verification_failed on a bad read-back', async () => {
     const root = await makeProject();
     const readme = join(root, 'README.md');
@@ -796,7 +863,7 @@ describe('durable change journal (#19)', () => {
     expect(await readFile(readme, 'utf8')).toBe('external bytes after write\n');
   });
 
-  it('records a failed entry when the post-write read-back observes nothing', async () => {
+  it('records an unverified applied entry when the post-write read-back observes nothing', async () => {
     const root = await makeProject();
     const readme = join(root, 'README.md');
     const service = serviceFor(root, {
@@ -812,13 +879,16 @@ describe('durable change journal (#19)', () => {
     expect(result.status).toBe('verification_failed');
     expect(result.restore).toBe('not_needed');
     const records = await readJournal(journalFor(root));
-    expect(records.map((record) => record.kind)).toEqual(['intent', 'failed']);
-    expect(records[1]).toEqual({
-      kind: 'failed',
+    expect(records.map((record) => record.kind)).toEqual(['intent', 'applied']);
+    expect(records[1]).toMatchObject({
+      kind: 'applied',
       runId: RUN_ID,
       revision: REVISION,
       path: 'README.md',
-      code: 'VERIFY_FAILED',
+      afterSha256: review.request.targets[0]?.after.sha256,
+      observedSha256: null,
+      observedIdentity: null,
+      verification: 'unverified',
       at: FIXED_NOW.toISOString(),
     });
   });

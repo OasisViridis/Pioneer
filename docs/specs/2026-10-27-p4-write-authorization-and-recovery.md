@@ -142,6 +142,8 @@
 
 威胁边界：本票不防恶意本地进程（它们可以绕过任何应用层检查），防的是本应用自己的错误、并发编辑与陈旧目标。
 
+#19 的执行器把上述窗口再缩小一次：`intent` 落盘后、`writeFileAtomic` 前，重新走同一套路径策略读取目标并比对前像字节与文件身份；父目录被 junction 替换、目标被就地改写或被换成另一个文件对象时都拒绝写入。写后回读仍保留，残余窗口只剩最终复核到 `rename` 之间；这不改变纪要 9 的结论，也不引入文件锁。
+
 ### 3.5 四档的真实能力边界
 
 - `read_only`：只读，写入侧一律拒绝。
@@ -162,7 +164,7 @@ main 按目标追加记录，顺序是 `intent` → `applied` / `failed`，恢�
 | 记录       | 字段                                                                                                   | 含义                                                             |
 | ---------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
 | `intent`   | `runId`、`revision`、`path`、`beforeSha256`、`at`                                                      | 真正写之前先落盘，是"这次运行动过这个目标"的唯一证据             |
-| `applied`  | `runId`、`revision`、`path`、`afterSha256`、`observedSha256`、`observedIdentity`、`verification`、`at` | 写完回读的结果；`verified` 要求 `observedSha256 === afterSha256` |
+| `applied`  | `runId`、`revision`、`path`、`afterSha256`、`observedSha256`、`observedIdentity`、`verification`、`at` | 写完回读的结果；`verified` 要求 `observedSha256` 非空且等于 `afterSha256`；`unverified` 且回读无法证明时允许 `observedSha256` 为 `null` |
 | `failed`   | `runId`、`revision`、`path`、`code`、`at`                                                              | 这个目标没写成，`code` 取失败码                                  |
 | `recovery` | `runId`、`revision`、`path`、`action`、`observedSha256`、`at`                                          | 恢复做了什么，以及当时观察到的哈希                               |
 
