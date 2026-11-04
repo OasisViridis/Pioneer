@@ -271,6 +271,9 @@ describe('controlled write contract (#19)', () => {
     const runResult = await executeReview(service, swappedRun);
     expect(runResult.ok).toBe(false);
     expect(runResult.code).toBe('BINDING_MISMATCH');
+    // The receipt names the reviewed Run, not the caller's swapped copy.
+    expect(runResult.runId).toBe(RUN_ID);
+    expect(runResult.revision).toBe(REVISION);
     expect(await readFile(readme, 'utf8')).toBe(original);
 
     // The first refusal consumed the pending review; prepare again to test the
@@ -282,7 +285,65 @@ describe('controlled write contract (#19)', () => {
     });
     expect(revisionResult.ok).toBe(false);
     expect(revisionResult.code).toBe('BINDING_MISMATCH');
+    expect(revisionResult.runId).toBe(retried.request.runId);
+    expect(revisionResult.revision).toBe(retried.request.revision);
     expect(await readFile(readme, 'utf8')).toBe(original);
+  });
+
+  it('preparing a review without executing leaves bytes, hash and journal untouched', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const before = await readFile(readme);
+    const service = serviceFor(root);
+    await preparedReview(service);
+    // No execute: the user cancelled the review at the preview stage.
+    const after = await readFile(readme);
+    expect(after.equals(before)).toBe(true);
+    expect(sha256Of(after)).toBe(sha256Of(before));
+    expect(await exists(journalFor(root))).toBe(false);
+  });
+
+  it('invalidates a prepared review so a later execute cannot write', async () => {
+    const root = await makeProject();
+    const readme = join(root, 'README.md');
+    const original = await readFile(readme, 'utf8');
+    const service = serviceFor(root);
+    const review = await preparedReview(service);
+
+    service.invalidate();
+    const result = await executeReview(service, review.request);
+
+    expect(result.ok).toBe(false);
+    expect(result.code).toBe('BINDING_MISMATCH');
+    expect(result.runId).toBeNull();
+    expect(result.revision).toBeNull();
+    expect(await readFile(readme, 'utf8')).toBe(original);
+    expect(await exists(journalFor(root))).toBe(false);
+  });
+
+  it('rejects a successful receipt that does not name its Run', () => {
+    const receipt = {
+      version: 1 as const,
+      ok: true,
+      status: 'applied' as const,
+      code: null,
+      permissionCode: null,
+      targets: [
+        {
+          path: 'README.md',
+          status: 'applied' as const,
+          code: null,
+          observedSha256: 'a'.repeat(64),
+          verification: 'verified_after' as const,
+        },
+      ],
+      verification: 'verified' as const,
+      restore: 'not_needed' as const,
+      completedAt: FIXED_NOW.toISOString(),
+      runId: null,
+      revision: null,
+    };
+    expect(WriteExecutionResultSchema.safeParse(receipt).success).toBe(false);
   });
 
   it('refuses read_only permissions without touching the file', async () => {
@@ -463,6 +524,8 @@ describe('controlled write contract (#19)', () => {
     expect(result.status).toBe('applied');
     expect(result.verification).toBe('verified');
     expect(result.restore).toBe('not_needed');
+    expect(result.runId).toBe(RUN_ID);
+    expect(result.revision).toBe(REVISION);
     expect(result.permissionCode).toBeNull();
     expect(result.targets).toHaveLength(1);
     expect(result.targets[0]).toMatchObject({
@@ -568,6 +631,8 @@ describe('controlled write contract (#19)', () => {
     expect(result.code).toBe('VERIFY_FAILED');
     expect(result.verification).toBe('failed');
     expect(result.restore).toBe('not_needed');
+    expect(result.runId).toBe(RUN_ID);
+    expect(result.revision).toBe(REVISION);
     expect(result.targets[0]).toMatchObject({
       path: 'README.md',
       status: 'verification_failed',

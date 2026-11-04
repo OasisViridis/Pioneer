@@ -21,12 +21,14 @@ import {
   WRITE_EXECUTION_PREVIEW_MARKER,
   WRITE_EXECUTION_VERSION,
   WriteExecutionRequestSchema,
+  WriteExecutionResultBaseSchema,
   WriteExecutionResultSchema,
   WriteReviewModeSchema,
   WriteReviewReplySchema,
   type WriteExecutionCode,
   type WriteExecutionRequest,
   type WriteExecutionResult,
+  type WriteExecutionResultCore,
   type WriteExecutionTarget,
   type WriteExecutionTargetResult,
   type WriteReviewDenialCode,
@@ -162,16 +164,30 @@ export class WriteExecutionService {
       // call cannot consume the reviewed request twice.
       this.pending = null;
       if (pending === null) {
-        return executionRefusal('BINDING_MISMATCH', this.now());
+        // Nothing is being reviewed, so no Run can be claimed for this receipt.
+        return stampExecutionResult(
+          executionRefusal('BINDING_MISMATCH', this.now()),
+          null,
+          null,
+        );
       }
       if (
         pending.webContentsId !== expectation.webContentsId ||
         pending.windowEpoch !== expectation.windowEpoch
       ) {
-        return executionRefusal('BINDING_MISMATCH', this.now());
+        return stampExecutionResult(
+          executionRefusal('BINDING_MISMATCH', this.now()),
+          pending.request.runId,
+          pending.request.revision,
+        );
       }
       if (!sameControlledRequest(pending.request, request)) {
-        return executionRefusal('BINDING_MISMATCH', this.now());
+        // The caller's copy was swapped; the reviewed request is the truth.
+        return stampExecutionResult(
+          executionRefusal('BINDING_MISMATCH', this.now()),
+          pending.request.runId,
+          pending.request.revision,
+        );
       }
       return executeControlledWrite(
         this.dependencies,
@@ -287,15 +303,32 @@ export async function prepareControlledReview(
 }
 
 /**
- * The executor proper. It is exported separately from the service so contract
- * probes can exercise the guards without going through the pending-review
- * handshake; the IPC layer only reaches it through the service.
+ * Public executor result. The core guards only see targets and bytes; this
+ * wrapper stamps the Run and its revision onto the receipt, so success and
+ * failure stay traceable without reading the journal.
  */
 export async function executeControlledWrite(
   dependencies: WriteExecutionDependencies,
   request: WriteExecutionRequest,
   expectation: WriteExecutionExpectation,
 ): Promise<WriteExecutionResult> {
+  const result = await executeControlledWriteCore(
+    dependencies,
+    request,
+    expectation,
+  );
+  return stampExecutionResult(result, request.runId, request.revision);
+}
+
+/**
+ * The executor proper. Contract probes go through the public wrapper above;
+ * this core only produces the target-level result.
+ */
+async function executeControlledWriteCore(
+  dependencies: WriteExecutionDependencies,
+  request: WriteExecutionRequest,
+  expectation: WriteExecutionExpectation,
+): Promise<WriteExecutionResultCore> {
   const completedAt = (dependencies.now?.() ?? new Date()).toISOString();
   const hooks = dependencies.hooks;
   try {
@@ -503,7 +536,7 @@ function journalIsUsable(projectRoot: string, journalPath: string): boolean {
 
 async function writeVerifiedBatch(
   options: WriteVerifiedBatchOptions,
-): Promise<WriteExecutionResult> {
+): Promise<WriteExecutionResultCore> {
   const { dependencies, targets, reads, completedAt, runId, revision } =
     options;
   const journalPath = dependencies.journalPath;
@@ -581,7 +614,7 @@ async function writeVerifiedBatch(
     );
     const refuseFinal = async (
       state: WriteTargetState,
-    ): Promise<WriteExecutionResult> => {
+    ): Promise<WriteExecutionResultCore> => {
       // Nothing has been written; the journal records the failed attempt.
       await appendJournalRecord(journalPath, {
         kind: 'failed',
@@ -768,7 +801,7 @@ function failBatch(
     status: 'failed' | 'unknown';
     code: WriteExecutionCode;
   },
-): WriteExecutionResult {
+): WriteExecutionResultCore {
   // No automatic rollback: already-written targets stay as they are and the
   // batch reports what actually happened. Recovery is a separate #20 action.
   return finalizeResult(
@@ -1008,10 +1041,10 @@ function reviewRefusal(code: WriteReviewDenialCode): WriteReviewReply {
 
 function resultOf(
   targets: WriteExecutionTargetResult[],
-  status: WriteExecutionResult['status'],
+  status: WriteExecutionResultCore['status'],
   code: WriteExecutionCode,
   completedAt: string,
-): WriteExecutionResult {
+): WriteExecutionResultCore {
   return {
     version: WRITE_EXECUTION_VERSION,
     ok: false,
@@ -1029,7 +1062,7 @@ function permissionRefusal(
   targets: readonly WriteExecutionTarget[],
   code: WritePermissionDenialCode,
   completedAt: string,
-): WriteExecutionResult {
+): WriteExecutionResultCore {
   return {
     version: WRITE_EXECUTION_VERSION,
     ok: false,
@@ -1047,7 +1080,7 @@ function rejectEveryTarget(
   targets: readonly WriteExecutionTarget[],
   code: WriteExecutionCode,
   completedAt: string,
-): WriteExecutionResult {
+): WriteExecutionResultCore {
   return {
     version: WRITE_EXECUTION_VERSION,
     ok: false,
@@ -1071,7 +1104,7 @@ function rejectedTargetsResult(
   code: WriteRejectionCode,
   outcomes: readonly WriteTargetOutcome[],
   completedAt: string,
-): WriteExecutionResult {
+): WriteExecutionResultCore {
   return {
     version: WRITE_EXECUTION_VERSION,
     ok: false,
@@ -1099,12 +1132,12 @@ function rejectedOutcomesFrom(
 
 function buildResult(
   targets: WriteExecutionTargetResult[],
-  status: WriteExecutionResult['status'],
+  status: WriteExecutionResultCore['status'],
   code: WriteExecutionCode | null,
-  verification: WriteExecutionResult['verification'],
-  restore: WriteExecutionResult['restore'],
+  verification: WriteExecutionResultCore['verification'],
+  restore: WriteExecutionResultCore['restore'],
   completedAt: string,
-): WriteExecutionResult {
+): WriteExecutionResultCore {
   return {
     version: WRITE_EXECUTION_VERSION,
     ok:
@@ -1122,8 +1155,10 @@ function buildResult(
   };
 }
 
-function finalizeResult(result: WriteExecutionResult): WriteExecutionResult {
-  const parsed = WriteExecutionResultSchema.safeParse(result);
+function finalizeResult(
+  result: WriteExecutionResultCore,
+): WriteExecutionResultCore {
+  const parsed = WriteExecutionResultBaseSchema.safeParse(result);
   if (parsed.success) return parsed.data;
   return {
     version: WRITE_EXECUTION_VERSION,
@@ -1141,7 +1176,7 @@ function finalizeResult(result: WriteExecutionResult): WriteExecutionResult {
 function executionRefusal(
   code: WriteExecutionCode,
   now: Date,
-): WriteExecutionResult {
+): WriteExecutionResultCore {
   return finalizeResult(resultOf([], 'rejected', code, now.toISOString()));
 }
 
@@ -1212,12 +1247,43 @@ function sameIdentity(
 }
 
 /**
+ * Adds the reviewed Run identity to a core result. A malformed identity falls
+ * back to an INVALID_REQUEST receipt with no provenance instead of throwing out
+ * of the IPC handler.
+ */
+export function stampExecutionResult(
+  result: WriteExecutionResultCore,
+  runId: string | null,
+  revision: number | null,
+): WriteExecutionResult {
+  const parsed = WriteExecutionResultSchema.safeParse({
+    ...result,
+    runId,
+    revision,
+  });
+  if (parsed.success) return parsed.data;
+  return WriteExecutionResultSchema.parse({
+    version: WRITE_EXECUTION_VERSION,
+    ok: false,
+    status: 'rejected',
+    code: 'INVALID_REQUEST',
+    permissionCode: null,
+    targets: [],
+    verification: 'not_attempted',
+    restore: 'not_attempted',
+    completedAt: result.completedAt,
+    runId: null,
+    revision: null,
+  });
+}
+
+/**
  * Exported for the contract probes: a deterministic result body for a request
  * that never reached the executor (untrusted sender, malformed payload).
  */
 export function refusedExecution(
   code: WriteExecutionCode,
   now: Date = new Date(),
-): WriteExecutionResult {
+): WriteExecutionResultCore {
   return executionRefusal(code, now);
 }

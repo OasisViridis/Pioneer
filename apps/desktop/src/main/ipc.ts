@@ -16,7 +16,7 @@ import {
   EmptyIpcRequestSchema,
 } from '../shared/validation';
 import type { CatalogService } from './catalog/catalog-service';
-import { refusedExecution } from './write-execution';
+import { refusedExecution, stampExecutionResult } from './write-execution';
 
 export interface SenderFrameLike {
   url: string;
@@ -202,7 +202,9 @@ export function registerWriteExecutionIpc(
       const refuse = (
         code: 'INVALID_REQUEST' | 'UNTRUSTED_SENDER',
       ): WriteReviewReply | WriteExecutionResult =>
-        stage === 'prepare' ? prepareRefusal(code) : refusedExecution(code);
+        stage === 'prepare'
+          ? prepareRefusal(code)
+          : stampExecutionResult(refusedExecution(code), null, null);
       if (
         !isTrustedSender(
           event,

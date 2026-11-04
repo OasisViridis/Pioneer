@@ -281,11 +281,11 @@ export const WRITE_EXECUTION_RESTORES = [
 export const WriteExecutionRestoreSchema = z.enum(WRITE_EXECUTION_RESTORES);
 
 /**
- * Strict result. `ok` is true only when every target was applied and its
- * post-image was read back byte-for-byte; nothing else may be presented as a
- * completed change.
+ * The executor's result before the IPC boundary stamps the run provenance.
+ * `ok` is true only when every target was applied and its post-image was read
+ * back byte-for-byte; nothing else may be presented as a completed change.
  */
-export const WriteExecutionResultSchema = z
+export const WriteExecutionResultBaseSchema = z
   .object({
     version: z.literal(WRITE_EXECUTION_VERSION),
     ok: z.boolean(),
@@ -300,6 +300,24 @@ export const WriteExecutionResultSchema = z
     restore: WriteExecutionRestoreSchema,
     completedAt: z.iso.datetime(),
   })
+  .strict();
+
+export type WriteExecutionResultCore = z.infer<
+  typeof WriteExecutionResultBaseSchema
+>;
+
+/**
+ * Strict receipt returned to the caller: the executor result plus the Run whose
+ * reviewed revision it belongs to, so success and failure stay traceable even
+ * when the renderer only sees the final reply.
+ */
+export const WriteExecutionResultSchema = WriteExecutionResultBaseSchema.extend(
+  {
+    /** The Run the receipt belongs to; null only for a request that never ran. */
+    runId: RunIdentitySchema.shape.runId.nullable(),
+    revision: RunIdentitySchema.shape.revision.nullable(),
+  },
+)
   .strict()
   .superRefine((result, context) => {
     if (result.ok) {
@@ -308,6 +326,13 @@ export const WriteExecutionResultSchema = z
           code: 'custom',
           path: ['status'],
           message: 'A successful result must be applied.',
+        });
+      }
+      if (result.runId === null || result.revision === null) {
+        context.addIssue({
+          code: 'custom',
+          path: ['runId'],
+          message: 'A successful result must name the Run it belongs to.',
         });
       }
       if (result.verification !== 'verified') {
