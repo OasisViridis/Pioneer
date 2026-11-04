@@ -58,6 +58,12 @@ try {
     result = await persistEventMaterial(out, result);
   const receipt = {
     ...result,
+    phase:
+      result.state === 'awaiting-local-agent' ? 'intake-prepared' : 'terminal',
+    deliveryComplete: false,
+    draftPrCreated: result.state === 'existing-delivery',
+    nextAction:
+      result.state === 'awaiting-local-agent' ? 'local-s2-agent' : null,
     receiptVersion: 1,
     deliveryId: payload?.deliveryId ?? null,
     receivedAt: payload?.receivedAt ?? null,
@@ -66,6 +72,7 @@ try {
   console.log(JSON.stringify({ type: 'result', ...receipt }));
   if (
     ![
+      'awaiting-local-agent',
       'ignored-ping',
       'ignored-event-type',
       'ignored-old-version',
