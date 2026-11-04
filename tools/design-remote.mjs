@@ -59,7 +59,7 @@ export function figmaApi(token, fetcher = fetch) {
       headers: { 'X-Figma-Token': token, 'Content-Type': 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body),
       redirect: 'error',
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(120_000),
     });
     if (!response.ok)
       throw Object.assign(new Error('Figma request failed'), {
