@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { format } from 'prettier';
 import { retryableState } from './design-remote.mjs';
+import { deliveryBranch } from './design-delivery-branch.mjs';
 
 const require = createRequire(
   new URL('../apps/desktop/package.json', import.meta.url),
@@ -471,7 +472,10 @@ export async function publish({ root, pkg, output, api, actor }) {
       return { ...receipt, state: 'materials-only', retryable: false, reasons };
     const result = validateOutput(root, pkg, output);
     const outputHash = hash(canonical(result.files));
-    const branch = `codex/design-${pkg.request.featureId}`;
+    const branch = deliveryBranch(
+      pkg.request.featureId,
+      pkg.request.design.version,
+    );
     const packagePath = `design/deliveries/${pkg.request.featureId}/package.json`;
     // Stable branch + Issue registry is the unique delivery slot, not a second task DB.
     const prs = await api(

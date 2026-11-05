@@ -7,6 +7,7 @@ import {
   qualityJobsPassed,
   fail,
 } from './design-delivery.mjs';
+import { deliveryBranch } from './design-delivery-branch.mjs';
 
 // GET only. Preparing a reviewable list grants no Figma write/merge authority.
 export async function planWriteback(api, number, featureId, policy) {
@@ -40,8 +41,10 @@ export async function planWriteback(api, number, featureId, policy) {
   if (hash(canonical(frozen)) !== packageHash)
     fail('invalid-input', 'Delivery package hash mismatch');
   const proof = metadata(pr.body);
+  const expectedBranch = deliveryBranch(featureId, pkg.request.design.version);
+  const legacyBranch = `codex/design-${featureId}`;
   if (
-    pr.head.ref !== `codex/design-${featureId}` ||
+    ![expectedBranch, legacyBranch].includes(pr.head.ref) ||
     pr.head.repo?.full_name !== repository ||
     proof?.featureId !== featureId ||
     proof.packageHash !== packageHash ||
