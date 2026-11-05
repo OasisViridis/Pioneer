@@ -11,6 +11,7 @@ import {
   requestSchema,
   prepare,
 } from './design-delivery.mjs';
+import { deliveryBranch } from './design-delivery-branch.mjs';
 
 const prefix = `/repos/${repository}`;
 const secretHash = (s) => createHash('sha256').update(s).digest();
@@ -312,7 +313,7 @@ async function resolveRelease({ route, feature, versionId, figma, github }) {
     fail('invalid-input', 'Event version/label not confirmed by Figma');
   if (releases[0].id !== versionId)
     return { state: 'ignored-old-version', retryable: false };
-  const branch = `codex/design-${route.featureId}`;
+  const branch = deliveryBranch(route.featureId, versionId);
   const prs = await github(
     'GET',
     `${prefix}/pulls?state=all&head=OasisViridis:${branch}&per_page=100`,
