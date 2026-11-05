@@ -5,14 +5,13 @@ import {
   type RunStatus,
 } from '../../shared/contracts/pioneer-run';
 import type {
-  RunAuthorizeReply,
+  RunDesktopApi,
   RunAuthorizationSummary,
   RunEventBatch,
   RunPage,
 } from '../../shared/contracts/run-ipc';
 import type {
   RunContext,
-  RunContextReply,
   RunSnapshot,
 } from '../../shared/contracts/run-context';
 import {
@@ -74,78 +73,8 @@ export interface RunViewState {
   ignoredPages: number;
 }
 
-export interface RunPort {
-  authorizeRun(request: {
-    sessionId: string;
-    projectId: string;
-    expectedRevision: number;
-    task: string;
-    materials: string[];
-  }): Promise<RunAuthorizeReply>;
-  listRunMaterials(request: {
-    projectId: string;
-  }): Promise<
-    | { ok: true; materials: EgressCandidate[] }
-    | { ok: false; code: 'INVALID_REQUEST' }
-  >;
-  startRun(request: {
-    sessionId: string;
-    projectId: string;
-    expectedRevision: number;
-    requestId: string;
-    grantId: string;
-  }): Promise<{ ok: true; runId: string } | { ok: false; code: string }>;
-  stopRun(request: {
-    sessionId: string;
-    projectId: string;
-    runId: string;
-    revision: number;
-    requestId: string;
-  }): Promise<{ ok: true; status: RunStatus } | { ok: false; code: string }>;
-  getRun(request: {
-    sessionId: string;
-    projectId: string;
-    runId: string;
-    revision: number;
-    afterSeq: number;
-  }): Promise<{
-    identity: {
-      sessionId: string;
-      projectId: string;
-      runId: string;
-      revision: number;
-    };
-    status: RunStatus;
-    lastSeq: number;
-    oldestSeq: number;
-    gap: boolean;
-    events: RunEvent[];
-    nextAfterSeq: number;
-    hasMore: boolean;
-  } | null>;
-  getRunContext(request: {
-    sessionId: string;
-    projectId: string;
-    runId: string;
-    revision: number;
-  }): Promise<RunContextReply>;
-  subscribeRun(request: {
-    sessionId: string;
-    projectId: string;
-    runId: string;
-    revision: number;
-    afterSeq: number;
-  }): Promise<boolean>;
-  acknowledgeRunPage(request: {
-    sessionId: string;
-    projectId: string;
-    runId: string;
-    revision: number;
-    afterSeq: number;
-  }): Promise<void>;
-  unsubscribeRun(request: RunIdentity): Promise<void>;
-  onRunEventBatch(callback: (batch: RunEventBatch) => void): () => void;
-}
+/** Use the shared preload contract for both the desktop bridge and test ports. */
+export type RunPort = RunDesktopApi;
 
 const failureCopy: Record<string, string> = {
   START_FAILED: '启动失败',
