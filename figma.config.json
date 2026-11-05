@@ -1,0 +1,8 @@
+{
+  "codeConnect": {
+    "include": ["design/code-connect/*.figma.ts"],
+    "parser": "react",
+    "label": "React",
+    "language": "jsx"
+  }
+}
