@@ -14,7 +14,7 @@
 
 ## 约定
 
-- **Create an issue**: `gh issue create --title "..." --body "..."`。多行 body 使用 heredoc。
+- **Create an issue**: `gh issue create --title "..." --body "..."`。多行正文先写 UTF-8 文件，再用 `--body-file`，不要拼接 shell 字符串。
 - **Read an issue**: `gh issue view <number> --comments`，用 `jq` 过滤 comments，并同时获取 labels。
 - **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'`，按需加上 `--label` 和 `--state` filters。
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
@@ -49,7 +49,9 @@ GitHub 在 issues 和 PRs 之间共享一个 number space，因此裸 `#42` 可�
 
 - **Map**: 单个带 `wayfinder:map` label 的 issue，保存 Notes / Decisions-so-far / Fog body。`gh issue create --label wayfinder:map`。
 - **Child ticket**: 作为 GitHub sub-issue 链接到 map 的 issue（通过 sub-issues endpoint 使用 `gh api`）。未启用 sub-issues 时，把 child 加入 map body 中的 task list，并在 child body 顶部写 `Part of #<map>`。Labels：`wayfinder:<type>`（`research`/`prototype`/`grilling`/`task`）。一旦被 claim，ticket 被 assign 给 driving dev。
-- **Blocking**: GitHub 的 **native issue dependencies**，canonical、UI 可见的表达。用 `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>` 添加 edge，其中 `<blocker-db-id>` 是 blocker 的数字 **database id**（`gh api repos/<owner>/<repo>/issues/<n> --jq .id`，_不是_ `#number` 或 `node_id`）。GitHub 报告 `issue_dependencies_summary.blocked_by`（仅 open blockers，即 live gate）。依赖不可用时，回退到 child body 顶部的 `Blocked by: #<n>, #<n>` 行。当所有 blockers 都关闭时，ticket 即为 unblocked。
-- **Frontier query**: 列出 map 的 open children（`gh issue list --state open`，限定在 map 的 sub-issues / task list），丢弃任何带有 open blocker 的（`issue_dependencies_summary.blocked_by > 0`，或 `Blocked by` 行中的 open issue）或带有 assignee 的；按 map 顺序第一个胜出。
-- **Claim**: `gh issue edit <n> --add-assignee @me`，session 的第一次写入。
-- **Resolve**: `gh issue comment <n> --body "<answer>"`，然后 `gh issue close <n>`，再向 map 的 Decisions-so-far 追加 context pointer（gist + link）。
+- **Blocking**: 使用 GitHub native dependencies 表达当前实现必须消费的上游结果；正文说明具体接口/产物。添加边用 blocked_by endpoint 和上游数字 database id。最终发布/里程碑验收条件放在清单，不整票阻塞可独立交付的只读能力、Windows 验证或实验准备。改依赖同时更新正文，保留原安全条件。
+- **Frontier query**: 列出 #9 的开放执行子票，筛选 ready-for-agent、无负责人、无开放开工 blocker；再核对上游所需实现已合入 main 且验收通过，或文档决定已接受。closed / cancelled / duplicate 和平台的零 blocker 都不能单独证明可用。按用户优先级与独立交付能力选择，不能仅按编号把全仓串行化。
+- **Claim**: 开工前将当前执行者设为唯一 Assignee 并回读；存在活跃 PR/其他写入者时先核对，不因账号相同或未指派就接管。复杂新任务可在创建时指派。一个执行票对应独立 worktree/ref/PR。
+- **Resolve**: 在 Issue/PR 记录合并提交、所需验收与证据后关闭实现票；未合并时保持开放。历史已关闭但产物未合并的票在 #9 明示条件，下游不能直接消费。决策票按其已接受决定关闭，不把仅完成文档当成实现完成。
+
+完整开工、并行、技术选择与人类交接规则见 [delivery](delivery.md)。#9 只维护当前队列和链接；产品规格保留在仓库，避免在总票正文复制整份规格和过期状态。

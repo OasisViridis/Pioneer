@@ -1,148 +1,51 @@
-# Pioneer · Wayfinder 端到端全生命周期开发规划 (2026.10 — 2027.06)
+# Pioneer · 开发计划（2026.10—2027.06）
 
-> **课题名称**：基于TypeScript的模块化智能体交互系统设计与实现（2026-10-08 导师确认正式题目）  
-> **项目代号**：Pioneer · **代码主目录**：[apps/desktop](../../apps/desktop/)（相对根目录：[apps/desktop](apps/desktop/)）  
-> **GitHub 远端主决策地图**：[Issue #9：Pioneer 开发计划（至 2027 年 6 月）](https://github.com/OasisViridis/Pioneer/issues/9)
-> **前置计划替代说明**：本计划正式替代 [2026-10-01 冻结原型开发计划](2026-10-01-pioneer-frozen-prototype-development-plan.md) 的后续实施队列；阶段总纲仍以 [themasterplan/ROADMAP.md](../../themasterplan/ROADMAP.md) 为准。
-> **2026-10-26 更新**：P2 已通过 PR #16 合并进 `main`（`3f262fe`，后续 PR #40 到 `fd26d06`）。#12 已关闭，#13 票据仍开放、验收收口另计；P3 三票已合并并关闭（#17 由 PR #57 合并）。两分钟简报、后续工作包与验收条件见[长期规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)。
+课题：**基于TypeScript的模块化智能体交互系统设计与实现**。代码在 [apps/desktop](../../apps/desktop/)。本计划接替 [10-01 计划](2026-10-01-pioneer-frozen-prototype-development-plan.md)，2026-11-05 按 [#84](https://github.com/OasisViridis/Pioneer/issues/84) 修订。
 
----
+## 阅读入口
 
-## 1. 终点锚定 (Destination: 2027.06 毕设终版归档)
-
-在 2027 年 6 月完成毕业设计终版归档，实现课题《基于TypeScript的模块化智能体交互系统设计与实现》的完整工程与学术交付闭环：
-- 交付具备「一切皆 UI」特征的桌面端模块化智能体交互系统（媒体库海报墙 + 会话内可停靠的工作区面板）；
-- 复用 Pi-Agent Harness 运行底座（轻量上下文组装、能力模块化沙箱、统一模型接口接入）；
-- 产出相同模型与任务下的 Harness 对比实验数据（Token 消耗、任务完成率、端到端延迟）；
-- 交付符合数字媒体技术专业规范的「设计、技术、内容、智能」四合一成果（源码、论文、高清演示视频与归档资产包）。
-
----
-
-## 2. 核心架构与工程基线 (Notes)
-
-### 2.1 双主线架构协同
-Pioneer 的研发不是单纯给现有 Agent 套壳，也不是先写完所有静态 UI 面板再接模型，而是两条主线深度协同：
-1. **主线一：交互系统 (Interaction System)**
-   - **顶级框架**：Tabs 多标签页系统（`[ 📚 媒体库 ] | [ 📦 项目工作区 ] | [ ⚙️ 系统设置 ]`）；
-   - **媒体库管理**：Jellyfin 风格项目工作区海报墙、即时子目录只读扫描、项目内多会话独立隔离；
-   - **模块化工作区**：借鉴专业工作站（Adobe Premiere Pro / Blender）的可停靠布局理念，以会话内两列停靠容器为核心（自研，未引入第三方停靠库），对话为主控入口，改动 (Changes)、上下文 (Context)、能力 (Capabilities)、产物 (Artifacts)、日志 (RunLog) 按需显式打开与停靠；
-   - **意图核对 (Intent Review)**：将任务编写、可选意图澄清、修改重提与显式确认收敛在会话内部，不设立全局阻塞式模式切换。
-2. **主线二：Harness 工程 (Harness Engineering)**
-   - **轻量上下文组装**：只装配当前任务所需的只读引用与必要信息，记录 Token 消耗，杜绝盲目注入全局技能文本与整库上下文；
-   - **能力模块化**：工具白名单受控放行，严格区分只读工具与文件写入权限；
-   - **统一运行时接入**：复用 Pi-Agent Harness 运行底座（`pi-ai` 模型接口、`agent-core` 运行核心），保留主进程宿主适配器；`coding-agent` 会话抽象按 M4 实际需要另行评估。
-
-### 2.2 治理与交付准则 (TheMasterplan Single Delivery Owner)
-- 严格遵循单一交付责任人机制：统管最终代码 Diff 审阅、Schema 迁移、数据存储升级与 VCS 提交；
-- 继承并保护工作区未跟踪与修改内容，严禁执行 `git clean -fd` 等破坏性清理或盲目跨分支整包提交；
-- 严格的人工审批关卡 (HITL)：数据外发、真实磁盘写入与破坏性操作必须经过人类明确许可。
-
-### 2.3 测试真相体系 (Test Truth Hierarchy)
-严格遵守 [TEST_INFRA.md](../../TEST_INFRA.md) 的三层证据边界，禁止层级冒充：
-- **Contract Tests (`pnpm test:contract`)**：验证共享契约、路径安全遏制、IPC 通信、设置存储与 Tabs Reducer；
-- **Prototype Tests (`pnpm test:prototype`)**：冻结 M1 原型模拟器 210 项历史证据（声明严格限定为 Prototype Tests: 210/210 passed，不可冒充 Electron 测试）；
-- **Real Electron E2E (`pnpm test:e2e`)**：Playwright 启动真实 Electron 跨越 main → preload → renderer 的完整生命周期流水线；
-- 原生文件选择器与辅助读屏归属于人工验收门（见 `docs/testing/m2-native-picker-smoke.md`），自动化测试 seam 不得伪造人工证据。
-
-### 2.4 本地安全与数据红线
-- 本地代码与用户数据默认不外发；真实模型仅使用明确获准的 Provider、模型与外发材料清单，保持零意外删除；
-- 只读阶段严格锁定目录白名单，禁止 shell、项目写入和未授权网络调用；读取许可不等于外发许可；
-- 凭证隔离，严禁将 API Key 写入代码库或版本控制。
-
----
-
-## 3. 已决决策与完成切片 (Decisions so far)
-
-- **M1 · 开题定音 (COMPLETE)**：完成设计基线收敛与交互原型，权威源收敛于 Figma `Pioneer-PPT`，原型保持 Prototype Tests: 210/210 passed 历史记录。
-- **M1.5 · 仓库规范化 (COMPLETE)**：统一公开身份、规范相对路径与三层测试真相，`pnpm check:m15` 门禁通过。
-- **M2 · 桌面只读基础切片 (COMPLETE)**：Electron + React + TypeScript 桌面骨架，即时子目录只读扫描，受限 IPC/preload，Jellyfin 海报墙，通过完整 Contract、Real E2E、人工选择器门禁。
-- **P0 · 整合底座与多源资产收敛 (COMPLETE, 2026-10-03)**：
-  - 详见验收文档：[P0 收口报告](../testing/p0-integration-closeout-2026-10-03.md)；
-  - 保持 Git-only main 事实与未提交资产快照；统一 Electron Forge + React 19 构建链；
-  - 建立独立会话 state/reducer/IPC 合同，引入离线 Noto 字体并添加离线字体 E2E 测试；
-  - 通过 194 项 Contract Tests、9 项 Real Electron E2E 测试，以及 Prototype Tests: 210/210 passed。
-- **P1 · 可恢复任务会话与单布局工作区 (COMPLETE, 2026-10-03)**：
-  - 详见验收文档：[P1 收口报告](../testing/p1-session-closeout-2026-10-03.md)；
-  - 媒体库连接会话创建与恢复，实现同项目多会话独立隔离；
-  - `SessionWorkbench` 采用自研两列停靠布局，彻底移除旧三模式入口；
-  - 草稿、消息、可选意图澄清与单布局持久化通过 sender origin 校验写入 `userData`，不污染项目目录；
-  - 本地 `RuntimeSession` bootstrap 仅生成状态合法快照（capabilities 均为 false），无假执行；
-  - 通过 200 项 Contract Tests、21 项 Real Electron E2E 测试，以及 Prototype Tests: 210/210 passed。
-
----
-
-## 4. 当前施工前沿 (The Frontier: P3 面板体验与运行提示)
-
-P3 三票（#17、#41、#42）已合并并关闭；P2、P3 的验收收口另计。
-
-### 4.1 当前施工队列（2026-10-26 核对）
-
-总入口为已置顶的 [Issue #9 · Pioneer 开发计划](https://github.com/OasisViridis/Pioneer/issues/9)。长期规格已并入该票；本地镜像见[长期开发计划与验收规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)。
-
-| 顺序 | 任务 | 状态与交付 |
-| --- | --- | --- |
-| 已完成 | [#12 · Runtime：读取权限与停止规则](https://github.com/OasisViridis/Pioneer/issues/12) | 已关闭；交付为已合并 PR #15，停止语义以后续人类确认评论为准 |
-| 已合并 | [#13 · Harness：只读接入与验证](https://github.com/OasisViridis/Pioneer/issues/13) | PR #16 已合并（`3f262fe`）；七轮复审修复与 PR #40 已在 `main`（`fd26d06`）；票据仍开放，验收收口另计 |
-| 当前 | [#17 · P3-A 面板](https://github.com/OasisViridis/Pioneer/issues/17)、[#41](https://github.com/OasisViridis/Pioneer/issues/41)、[#42](https://github.com/OasisViridis/Pioneer/issues/42) | #41 移除意图卡改为直接填任务，#42 修正运行提示；均已合并并关闭（#17 由 PR #57 合并） |
-
-原 #10、#11 已归并至 #12，原 #14 规格并入 #9 后归档。#9 仍为置顶总入口；#17 至 #32 十六张已发布，#33 至 #37 为设计同步票，#41、#42 于 2026-10-26 追加。
-
-远程 `main` 为 `fd26d06`；P2 的最后一次完整门禁记录在 `0bfd5de`（Contract 375/375、Prototype 210/210、Real Electron 24/24、package smoke，退出码 0），合并后 CI 的一次用例超时已在 `474fb16` 修复。真实 Provider A09 为 PASS（开发入口）：一次 completed 含四次真实只读工具调用与路径拒绝后的自行恢复，一次运行中停止收敛为 `stopped`。详见 [Issue #13 验证记录](../testing/issue13-verification.md)。
-
-### 4.2 P2 完成验收条件
-1. 在隔离测试工作区中，主进程能成功调度只读 Harness 执行确定性目标（例如读取指定代码并输出分析报告）；
-2. 渲染进程能够实时接收结构化流式事件并展示来源；
-3. 用户触发中途停止时，能在主进程中确定性取消调用并返回确认，无虚假完成；
-4. 自动化测试通过受控适配器验证，工作区 fixture 不变量未被破坏；
-5. 真实 Provider 与成品运行分别留证，缺少授权或未运行明确保留待办；完成口径沿用 #13，自动化通过不替代真实模型验证。
-
----
-
-### 4.3 后续 Issue 导航
-
-P2、P3 已合并；#17、#41、#42 均已关闭。
-
-| 阶段 | 已发布任务 |
+| 需要了解 | 唯一维护位置 |
 | --- | --- |
-| P3 面板与结果 | [#17](https://github.com/OasisViridis/Pioneer/issues/17) 上下文/能力/日志；[#21](https://github.com/OasisViridis/Pioneer/issues/21) 真实结果审阅；[#41](https://github.com/OasisViridis/Pioneer/issues/41) 移除意图卡；[#42](https://github.com/OasisViridis/Pioneer/issues/42) 修正运行提示 |
-| P4 权限、修改与恢复 | [#18](https://github.com/OasisViridis/Pioneer/issues/18) 写入决策 → [#19](https://github.com/OasisViridis/Pioneer/issues/19) 最小写入 → [#20](https://github.com/OasisViridis/Pioneer/issues/20) 恢复；[#22](https://github.com/OasisViridis/Pioneer/issues/22) 命令决策 → [#23](https://github.com/OasisViridis/Pioneer/issues/23) 限定命令 |
-| M3 验收 | [#24](https://github.com/OasisViridis/Pioneer/issues/24) 同版本证据与验收建议 |
-| M4 会话与能力 | [#25](https://github.com/OasisViridis/Pioneer/issues/25) 会话分支；[#26](https://github.com/OasisViridis/Pioneer/issues/26) 能力与 Runbook |
-| P5 Windows | [#27](https://github.com/OasisViridis/Pioneer/issues/27) 独立成品；[#28](https://github.com/OasisViridis/Pioneer/issues/28) 可选陪伴体验 |
-| M5 实验与论文 | [#29](https://github.com/OasisViridis/Pioneer/issues/29) 方案/先导 → [#30](https://github.com/OasisViridis/Pioneer/issues/30) 正式实验/初稿 |
-| M6 终验与归档 | [#31](https://github.com/OasisViridis/Pioneer/issues/31) 候选冻结/终验 → [#32](https://github.com/OasisViridis/Pioneer/issues/32) 终稿/展演/归档 |
+| 当前执行票、负责人、在途 PR、具体开工条件 | [GitHub #9 主地图](https://github.com/OasisViridis/Pioneer/issues/9)，向下链接执行票和原生依赖 |
+| 正式里程碑状态 | [ROADMAP](../../themasterplan/ROADMAP.md) |
+| 产品行为、长期范围与验收要求 | [长期规格](../specs/2026-10-24-pioneer-long-term-development-spec.md) |
+| 开工、并行、技术选择与 PR 交付 | [交付工作流](../agents/delivery.md) |
+| 验证层次与命令 | [TEST_INFRA](../../TEST_INFRA.md) |
 
-P3 至 M6 共 16 张子票、24 条原生依赖；另有 #33 至 #37 设计同步票与 2026-10-26 追加的 #41、#42。不要只按编号先后开工；准备材料可并行，核心交付不依赖可选陪伴票。
+本文件说明推进方式，不复制动态状态、当前 main SHA、测试计数或整张依赖表。历史研究、原型和验收报告只证明其记录的版本；原计划的历史正文保存在 Git 历史中。
 
-## 5. 后续阶段与待定实现
+## 目标与架构
 
-长期阶段目标、时间窗口和验收条件已在[长期规格](../specs/2026-10-24-pioneer-long-term-development-spec.md)中细化。各阶段实施票已发布为 #17—#32；具体接口、权限决定和验收以子票为准，未决内容在进入前沿时确认：
+到 2027 年 6 月交付可独立运行的 Windows 模块化智能体交互系统、可复核实验、论文和演示归档。日期是内部窗口，学校截止日期以实际通知为准。
 
-- **Layer 1: M3 任务执行与受控工作区操作后半程**
-  - **P3 完整面板体验与真实内容接线**：上下文、能力、日志、文本/产物视图按需加载与定位，布局持久性保持，窄窗自适应；
-  - **P4 受控写入与命令执行安全切片**：一次性授权机制，代码修改 vs 产物生成分流，路径逃逸拦截，可逆快照与回滚机制；
-  - **P5 Windows 成品体验、桌宠与发布包**：红绿灯原生窗口控制，离线字体打包分发，`dsh-manqu-pet` 薄宿主接入，安装包打包冒烟。
-- **Layer 2: M4 调度与扩展闭环**
-  - 复用主进程 IPC 双向事件，新增传输先证明实际需要；
-  - 会话分支与历史查看；历史恢复和文件回滚是不同动作；
-  - Zod Schema 原子插件库（文件处理、工程整理、Runbook 沉淀）。
-- **Layer 3: M5 实验数据固化与毕业论文初稿**
-  - Harness 对比实验方案设计（测量相同模型与任务下的上下文用量、完成率与耗时）；
-  - 冻结 M1 原型测试数据整理为论文图表；
-  - 毕业论文核心章节起稿（《需求分析》《界面设计》《系统实现》）。
-- **Layer 4: M6 答辩演练与最终封版归档**
-  - 高清交互演示视频录制（双主线协同运转全流程）；
-  - 作品展演双模保障方案（在线模型调用 + 本地离线兜底演示包）；
-  - 查重、AIGC 使用记录留痕（对齐 `docs/academic/` 规范）与全工程交付归档。
+- 交互主线：媒体库海报墙 → 同项目多会话 → 直接输入任务 → 流式运行与停止 → 按需打开上下文、能力、日志、改动和产物面板。沿用现有两列停靠布局；#41 已移除意图摘要/核对，不重新引入该步骤。
+- Harness 主线：复用固定版本的 `pi-agent-core` 与 `pi-ai`；Pioneer main 持有授权、受限工具、IPC 和产品状态。继续采用现有 IPC，需要新的隔离或传输时先比较成熟方案并验证具体缺口。
+- 能力增长以真实任务驱动；优先复用 shared 类型、现有工具和验证入口。未证明需要时，不增加 SDK、插件市场、通用调度器、第二套会话事实源或额外平台。
 
----
+## 按用户结果推进
 
-## 6. 明确排除范围 (Out of scope)
+| 工作线 | 交付结果与进入条件 |
+| --- | --- |
+| 修改与恢复 | 沿 #19/#20/#21 完成一种有用的单文件文本任务：建议来源明确、完整 Diff 可审阅、按已确认规则批准后写入、冲突拒绝、恢复不覆盖用户新编辑。先完成在途 PR 的既定范围，再递进真实任务接入；不让固定 marker 的安全探针替代用户任务价值。 |
+| 有限命令与 M3 验收 | #23 消费 #22 的已接受命令规则与 #20 所需恢复能力；#24 汇总 #21/#23 的同版本证据。不得因解阻取消安全前置或已承诺的命令场景。 |
+| 可复用能力 | #26 先以已有 read/list/search 交付一个只读 Runbook；写能力子项继续等待适用的写入与恢复条件。只读开工不等于整票全部承诺已完成。 |
+| Windows 成品 | #27 的安装、源码树外启动、升级恢复、坏档保护和平台交互可独立推进；复用成品自动化。最终候选按实际包含的功能补验，不提前宣称 M3 完成。 |
+| 实验与论文 | #29/#30 消费可用的协议、采集工具、冻结软件与实际授权。只读实验不等待全部写入/命令/能力库；若增加写入样本，才引入相应前置。受控数据与真实 Provider 数据分开。 |
+| 设计同步与可选体验 | #33/#37 维护已工作的设计交付；#28 为可选陪伴。它们不阻塞产品主链，未完成承诺仍明确保留。 |
+| 最终冻结与归档 | #31/#32 消费成品、实验和论文的对应版本证据；完成干净配置排练、真实与离线演示区分、哈希清单及归档。 |
 
-以下内容已明确排除在 2027.06 目标之外，永久关闭，不升级为决策票：
-- ❌ **车机 HMI (Supersonic) 及 `CockpitService` 车机单一权威模型**：全面作废，不作为交付物；
-- ❌ **「多模型自适应 / 动态模型路由」作为独立宣传卖点**：降级为统一接入内部底层机制，不作为创新点主张；
-- ❌ **传统 Chatbot 僵化三栏布局与常驻左侧历史会话栏**：彻底废弃，采用媒体库海报墙 + 会话内可停靠面板；
-- ❌ **TUI 字符终端与多端时间观承诺**：保留历史记录，不作为开题与答辩承诺；
-- ❌ **原型假 runner、假计时器推进、localStorage 模拟执行与全部成功的假结果**：严禁进入生产代码；
-- ❌ **未经人类明确审批的自动化代码合并与破坏性清理**。
+原生依赖只表达当前切片必须消费的结果；最终验收条件保留在清单。解除依赖前核对所需合并提交/接受决定，不把 Issue 关闭当作结果已经可用。单一负责人按交付单元计算，独立工作树可以并行，不能同时接管一个在途任务。
+
+## 完成与取舍
+
+- 每个小 PR 交付一种可观察行为或必要安全不变量；超过数天的工作继续拆小实现批次，保留既有 Issue，避免为文件、错误码或常规选择增加票链。
+- 技术选择在现有 Issue/PR 写明需求、仓库复用与成熟方案比较、一手来源/版本、支持范围和验证；普通可逆实现不增加审批。范围、权限和发布改变按既有授权规则处理。
+- 日常跑受影响检查，push 前执行 `pnpm verify:repository` 与完整 `pnpm check`；真实 Provider、成品、视觉和 Windows 人工证据按各自层次记录。CI 不重复执行已经通过的完整测试序列。
+- 延期时先减少可选装饰、额外预览格式、更多 Provider、插件广度和自动化扩展；不得减少授权、路径检查、停止、恢复、实验真实性或归档要求。已承诺范围调整保留明确决定。
+- 当前工作与下一步由 #9 更新；里程碑达到退出条件后再更新 ROADMAP。关闭一组票或月份到达都不能自动升级里程碑。
+
+## 历史依据与排除范围
+
+P0/P1 证据见 [P0 报告](../testing/p0-integration-closeout-2026-10-03.md)、[P1 报告](../testing/p1-session-closeout-2026-10-03.md)；P2 见 [#13 验证](../testing/issue13-verification.md)。Pi 取舍见[固定版本研究](../research/2026-10-23-p2-pi-host-adapter.md)。这些记录不替代新候选验证。
+
+继续排除车机 HMI/CockpitService、动态模型路由独立卖点、旧三模式 Chatbot、TUI/多端同步承诺、任意 shell、假 runner 与假完成。用户数据默认不外发；读取与外发、写入与命令、PR 与合并分别按明确范围授权。保留未知工作区内容，不进行未经许可的清理、合并或发布。
