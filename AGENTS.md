@@ -33,10 +33,18 @@
 
 1. 系统安全、隐私、本地数据保护要求（数据不出本机、零意外删除）
 2. 受保护分支与发布限制
-3. 根部 `AGENTS.md` 与 `themasterplan/THEMASTERPLAN.md` 架构总纲
-4. 当前 Issue / 用户明确指令
+3. 当前用户明确指令与已接受的 Issue 决定（授权范围内，不越过上述边界）
+4. 根部 `AGENTS.md` 与 `themasterplan/THEMASTERPLAN.md` 架构总纲
 5. 项目架构、设计规范（`docs/design/`）与测试清单（`tests/`）
 6. README 与辅助说明文档
+
+## Context Router 与开工检查
+
+- 日常开发、规范与计划修改：先读 [交付工作流](docs/agents/delivery.md)，首次写入前记录任务来源、工作区/基线、范围和验证入口。缺项先核实，不覆盖已有 worktree 或在途 PR。
+- Issue 认领、依赖和进度：[Issue tracker](docs/agents/issue-tracker.md)；标签含义见 [triage](docs/agents/triage-labels.md)。原生依赖解除后仍要核对上游实际产物，closed 不等于已合并/可消费。
+- 产品范围与里程碑：[开发计划入口](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)、[ROADMAP](themasterplan/ROADMAP.md)；具体实现只读所需规格与共享契约。
+- 验证与 PR：[TEST_INFRA](TEST_INFRA.md)、[PR 模板](.github/pull_request_template.md)。push 前完整门禁与最终 Diff 审阅；独立技术审阅绑定候选，Agent 审阅不代替人类批准。
+- 单一交付责任人按交付单元计算，不把整个仓库强制串行。独立任务可并行，涉及同一接口先明确写入者。日常已授权的安全工作不逐步确认；合并/发布/破坏性操作仍需明确授权。
 
 ## 测试真相与里程碑边界
 
@@ -52,7 +60,7 @@
 
 当前工作副本为 Git-only，使用标准 Git 配合 TheMasterplan 门禁流程。若工作副本具备 `.jj`，请参阅 [Jujutsu 工作流](docs/workflow/jujutsu.md)。
 
-用户于 2026-10-03 验收 v8 展示视频并恢复应用开发；P0 底座、P1 可恢复会话与 P2 真实只读 Harness（PR #16，2026-10-26 合并）均已完成。P3 三票已完成：面板接真实数据（#17，PR #57）、移除意图卡（#41）、修正运行提示（#42）；后续队列见[Wayfinder 端到端开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)与 [GitHub Issues #9 主地图](https://github.com/OasisViridis/Pioneer/issues/9)。
+当前执行队列与在途 PR 只维护在 [GitHub Issues #9 主地图](https://github.com/OasisViridis/Pioneer/issues/9)。[Wayfinder 开发计划](docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)说明阶段与推进方式；正式里程碑状态由 ROADMAP 维护，历史验证不自动认证当前改动。
 
 ```powershell
 # 1. 检查当前工作副本状态与变更

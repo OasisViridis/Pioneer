@@ -72,7 +72,9 @@ jobs:
         run: pnpm package:smoke
 
       - name: Confirm aggregate quality and S1 acceptance
-        run: pnpm design:acceptance
+        # The quality steps above already ran pnpm check's full sequence.
+        # Keep this evidence step name stable for S2/S3 receipt consumers.
+        run: node tools/design-mappings.mjs --require-complete
 
       - name: Upload Electron behavior and design evidence
         if: always()

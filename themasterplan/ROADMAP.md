@@ -24,18 +24,17 @@
    │  - Contract Tests 与跨越 Electron main → preload → renderer 的 Real E2E
    ▼
 [2026-11 ~ 12] 阶段 3: 任务执行与受控工作区操作 (M3) [IN PROGRESS]
-   │  - 已完成纵向切片：输入 → Intent Review → READY → Runtime Session INITIALIZED → START REQUESTED
-   │  - 本地 append-only lifecycle event stream 已建立；事件只记录授权边界，不代表真实 Agent 执行
-   │  - 后续 UI 采用 F9 会话内模块化面板，不恢复专注 / 审阅 / 交付分页
-   │  - P1 会话 Tabs 已接入：同项目多会话，草稿／消息／意图／布局保存与重启恢复通过
-   │  - 下一步：P2 接真实只读 Harness（模型接入 + 三只读工具 + 停止语义）；文件写入仍保持关闭
-   │  - 文件变更、可逆快照、Agent Files / Diff 与 Artifacts 继续按独立授权边界渐进实现
+   │  - 可恢复会话、真实只读 Harness 与按需运行面板已有阶段交付
+   │  - 直接输入任务，不恢复已移除的意图摘要/核对
+   │  - 继续完成真实修改、结果审阅、安全恢复及一项受限命令
+   │  - 各执行票完成不等于 M3 验收完成；当前队列只见 GitHub #9
    ▼
-[2026-12 ~ 2027-01] 阶段 4: Pi-Agent 微内核底座桥接与插件库 (M4: 调度与扩展闭环)
-   │  - 双向 WebSocket/SSE 事件总线通信打通
-   │  - 会话分支树 (Session Tree) 与时光机回退
-   │  - Zod Schema 原子插件库（文件处理、工程整理、Runbook 沉淀）
+[2026-12 ~ 2027-01] 阶段 4: 会话与能力扩展 (M4: 调度与扩展闭环)
+   │  - 复用 Pi 与现有主进程 IPC；不预设新的 WebSocket/SSE 总线
+   │  - 会话分支/历史恢复、少量内建能力与 Runbook
+   │  - 会话历史恢复与文件恢复分别验收，写能力遵循已接受的权限规则
    ▼
+
 [2027-02 ~ 03] 阶段 5: 论文撰写与实验数据固化 (M5: 毕业论文初稿 + 评测数据)
    │  - 210 项冻结 M1 Prototype Tests 数据图表化写入论文第三、四章
    │  - 整理完成《需求分析》、《界面设计》与《系统实现》
@@ -51,7 +50,7 @@
 | M1 | **COMPLETE** | M1 设计原型与开题材料已完成设计基线收敛；后续产品方向以 F9 会话内模块化面板与当前开发计划为准，旧场景语义保留为历史，原型测试保持 100% PASS。 |
 | M1.5 | **COMPLETE** | 仓库规范化、三层测试真相与 `pnpm check:m15` 门禁已完成。 |
 | M2 | **COMPLETE** | Electron + React + TypeScript 只读桌面基础切片已完成；Contract Tests、Real Electron E2E、Windows Native Picker 人工验收、Package Smoke 与最终 Windows Quality Gate 均已通过。M2 不包含文件写入、工作区重组或快照；其只读安全边界继续作为 M3 基线。 |
-| M3 | **IN PROGRESS** | 纵向切片 `Input → Intent Review → READY → Runtime Session INITIALIZED → START REQUESTED` 与确定性 append-only 本地生命周期事件流已合并 `main`；P1 会话 Tabs 已接入，同项目可有多会话，草稿／消息／意图／单布局保存与重启恢复通过。P2 只读 Harness 已并入 `main`（PR #16，2026-10-26）：模型接入与 `read_file`／`list_directory`／`search_in_files` 三只只读工具在显式授权下可用，A09 真实 Provider 已留证；文件写入、命令执行、通用文件系统 IPC 与 Runtime 子进程仍关闭。P3 三票（#17 面板、#41 移除意图卡、#42 运行提示）均已关闭；#17 由 PR #57 合并（2026-10-29）。P1 完成不等于整个 M3 完成。 |
+| M3 | **IN PROGRESS** | P0/P1、只读 Harness 与运行面板已有阶段交付；仍需按接受范围完成真实修改、结果审阅、恢复和限定命令的整体验收。执行进度、在途 PR 与可消费产物只见 [#9](https://github.com/OasisViridis/Pioneer/issues/9)，本表不复制当前实现状态。 |
 
 ---
 
@@ -59,11 +58,11 @@
 
 用户已验收 v8 展示视频并明确恢复应用开发。M3 仍为 **IN PROGRESS**。现役计划 P0 底座与 P1 可恢复会话均已完成：生产 main / preload / App 接通，媒体库支持同项目多会话，草稿／消息／可选意图／单一停靠布局可保存、关闭重开和重启恢复，旧三模式入口已移除。新完整 `pnpm check` exit 0（200 Contract、21 Real Electron E2E、最终 package；冻结 Prototype 门同时通过）。下一片 P2 接真实、可停止的只读 Harness；模型／工具／写入当前仍关闭。见[P1 收口](../docs/testing/p1-session-closeout-2026-10-03.md)和[Wayfinder 端到端开发计划](../docs/plans/2026-10-10-pioneer-wayfinder-development-plan.md)（接替 [10-01 计划](../docs/plans/2026-10-01-pioneer-frozen-prototype-development-plan.md)）。
 
-### 2026-10-26 P2 合并
+### 2026-10-26 P2 合并（历史证据）
 
 P2 真实只读 Harness 经 PR #16 合并进 `main`（merge commit `3f262fe`），随后合入七轮复审修复与 PR #40（`fd26d06`）。PR #16 合并时的完整门禁记录在提交 `0bfd5de`：Contract 375/375（39 文件）、Prototype 210/210、Real Electron 24/24、package smoke，退出码 0；合并后 CI 的一次 200/201 目录边界用例超时已在 `474fb16` 修复。PR #50 删除意图契约后 Contract 数为 335/335（35 文件）。真实 Provider 由 A09 记录留证：一次 completed（含四次真实只读工具调用与路径拒绝后的自行恢复），一次运行中停止并收敛为 `stopped`。
 
-### 2026-10-27 P2 收口补全
+### 2026-10-27 P2 收口补全（历史证据）
 
 分支 `codex/issue13-remaining` 补齐 Issue #13 的剩余产品项：终态任务/结果写入 session state v6（每会话最多 20 条，重启恢复）；journal 终态记录首次停止请求的 main UTC 时间；受控与 Pi 适配器新增断连消息，宽限到期落 `failed(ADAPTER_DISCONNECTED)`；停止后在途工具的真实结果不再发布，只保留 cancelled 配对；授权阶段生成外发材料清单（相对路径、字节数、SHA-256），未列入清单返回 `MATERIAL_NOT_ALLOWED`，内容变化返回 `CONTENT_NOT_ALLOWED` 并停止为 `AUTHORIZATION_REVOKED`。
 
@@ -77,22 +76,9 @@ M3 仍为 **IN PROGRESS**：#17 已随 PR #57 合并（2026-10-29），#41、#42
 
 当前 `main` 的 renderer 使用 `ProjectWorkspace`。停靠、持久化与窗口扩展文件仍在本地，未接入此入口。10/1 WC1 完整门禁所绑定的 136 项输入已有 26 项变化，不能当作当前整合树通过；Windows 人工门仍待验。[本轮只读核对](../docs/testing/workspace-closeout-2026-10-02.json)保留差异，不改变 M2/M3 里程碑等级。
 
-## 二、基于 jj (Jujutsu) 的 Masterplan 工作流规范
+## 二、交付与版本控制
 
-本项目支持 **Jujutsu (jj) + Git 协同工作流**。当前 checkout 是 Git-only，无 `.jj` 且未找到 `jj`；不自动转换仓库。下列 jj 说明仅在已有 jj 副本中使用，审批与质量门不变：
-
-1. **工作副本快照机制 (Zero Commit Friction)**：
-   - 日常开发无需频繁手动 `git add`，`jj` 会在每一次命令执行前自动快照当前修改；
-   - 每完成一个里程碑小步，使用 `jj describe -m "feat/fix: ..."` 显式添加语义化说明。
-2. **分支管理与匿名变更 (Branchless Evolution)**：
-   - 探索性原型与临时试验直接基于匿名变更（`jj new`）进行，验证通过后使用 `jj bookmark create <name>` 锁定；
-   - 主线保持在 `main` 书签，通过 `jj bookmark set main -r @` 持续同步前进。
-3. **安全回滚与撤销网络 (Operation Log)**：
-   - 若实验过程中出现代码或状态混乱，使用 `jj op log` 查看操作历史，通过 `jj op restore <op_id>` 一秒恢复，杜绝数据损坏。
-4. **与 GitHub 协同**：
-   - 本地借助 `jj` 的原子性和变更 ID 进行开发，通过 `jj git push`（或 `git push`）同步至远程 GitHub。
-
----
+日常开工、独立工作树、并行边界、验证与 PR 交付统一见[交付工作流](../docs/agents/delivery.md)。当前 Git-only 副本使用 Git；已有 jj 副本按 [jj 说明](../docs/workflow/jujutsu.md)执行。不自动转换仓库，不直接推进受保护 main，不用快照或 reset 覆盖未知修改。
 
 ## 三、反倦怠与防风险机制 (Anti-Burnout Protocol)
 
