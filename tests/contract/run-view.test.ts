@@ -86,7 +86,7 @@ function createFakeRunPort(options: {
   getRunPage: RunPage | null;
   stopReply: RunStopReply;
   getRunContext?: () => Promise<RunContextReply>;
-  startReply?: { ok: true; runId: string } | { ok: false; code: string };
+  startReply?: Awaited<ReturnType<RunPort['startRun']>>;
   getRun?: () => Promise<RunPage | null>;
   acknowledge?: (
     request: Parameters<RunPort['acknowledgeRunPage']>[0],
