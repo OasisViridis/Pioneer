@@ -928,20 +928,26 @@ export class RunManager {
     const observed = run.trackedMaterials.get(material.path);
     if (observed?.state !== 'read' && observed?.state !== 'scanned')
       return { status: 'rejected', code: 'MATERIAL_NOT_ALLOWED' };
+    // The writer may finish after a forced timeout. Adopt its material version
+    // only while this run is live; terminal context must remain immutable.
+    const editedMaterial = { ...material };
     const outcome = await executeAgentEdit({
       request,
       identity: run.identity,
       webContentsId: run.webContentsId,
       windowEpoch: run.windowEpoch,
       projectRoot: project.root,
-      material,
+      material: editedMaterial,
       signal: run.abort.signal,
       dependencies,
       onReceipt: (receipt) => {
-        run.edit = receipt;
+        if (!this.isTerminal(run)) run.edit = receipt;
       },
     });
+    if (this.isTerminal(run)) return { status: 'cancelled', code: 'CANCELLED' };
     if (outcome.status === 'succeeded') {
+      material.bytes = editedMaterial.bytes;
+      material.sha256 = editedMaterial.sha256;
       observed.bytes = material.bytes;
       observed.sha256 = material.sha256;
     } else if (outcome.status === 'failed') this.failWith(run, 'TOOL_FAILED');
@@ -1369,10 +1375,13 @@ export class RunManager {
     usage?: { inputTokens: number | null; outputTokens: number | null },
   ): Promise<void> {
     if (this.isTerminal(run)) return;
-    // A started disk write cannot be abandoned like a model response. Drain its
-    // cancellation/read-back before publishing terminal facts.
-    if (run.edit?.state === 'pending') await run.toolChain;
-    if (this.isTerminal(run)) return;
+    // Normal completion already awaits adapter quiescence, including tools.
+    // Forced termination must stay bounded even if a write cannot settle. Its
+    // effects are unknown, not rolled back; ignore any later receipt.
+    if (run.edit?.state === 'pending') {
+      run.abort.abort();
+      run.edit = { ...run.edit, state: 'unverified', code: code ?? 'UNKNOWN' };
+    }
     if (run.deadlineTimer !== null) clearTimeout(run.deadlineTimer);
     if (run.stopTimer !== null) clearTimeout(run.stopTimer);
     // Hold delivery until the terminal record is durable (contract §4): a

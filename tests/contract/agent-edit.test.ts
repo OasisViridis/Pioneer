@@ -12,6 +12,8 @@ import { executeAgentEdit } from '../../apps/desktop/src/main/harness/agent-edit
 import { buildEgressManifest } from '../../apps/desktop/src/main/harness/egress-materials';
 import { RunManager } from '../../apps/desktop/src/main/harness/run-manager';
 import { RunJournal } from '../../apps/desktop/src/main/harness/run-journal';
+import type { HarnessHandle } from '../../apps/desktop/src/main/harness/adapter-seam';
+import { RUN_LIMITS } from '../../apps/desktop/src/shared/contracts/pioneer-run';
 import {
   createControlledAdapterFactory,
   type ControlledScript,
@@ -250,6 +252,121 @@ describe('real task text editing', () => {
         expect(manager.getContext({ ...owner, webContentsId: 99 })).toBeNull();
       } finally {
         await manager.shutdown();
+      }
+    },
+  );
+
+  it.each([
+    ['beforeWrite', 'stop'],
+    ['afterWrite', 'stop'],
+    ['beforeWrite', 'shutdown'],
+    ['afterWrite', 'shutdown'],
+  ] as const)(
+    '%s stalled writer cannot block %s or change terminal facts later',
+    async (boundary, action) => {
+      const f = await fixture();
+      const { journal } = await RunJournal.open({
+        load: () => Promise.resolve(null),
+        save: () => Promise.resolve(),
+      });
+      const held = Promise.withResolvers<void>();
+      const admitted = Promise.withResolvers<void>();
+      const factory = createControlledAdapterFactory({
+        steps: [
+          {
+            action: 'tool',
+            request: { tool: 'read_file', arguments: { path: 'note.txt' } },
+          },
+          { action: 'tool', request },
+          { action: 'complete' },
+        ],
+      });
+      let handle: HarnessHandle | undefined;
+      const manager = new RunManager({
+        journal,
+        adapterFactory: (context, emit) => {
+          handle = factory(context, emit);
+          return handle;
+        },
+        adapterKind: 'controlled',
+        adapterAvailable: true,
+        modelName: null,
+        resolveProject: () =>
+          Promise.resolve({
+            root: f.input.projectRoot,
+            projectName: 'fixture',
+          }),
+        windowBindings: { epochFor: () => 0 },
+        sender: { send: () => undefined },
+        limits: { ...RUN_LIMITS, stopGraceMs: 80 },
+        editDependencies: {
+          ...f.input.dependencies,
+          hooks: {
+            [boundary]: async () => {
+              admitted.resolve();
+              await held.promise;
+            },
+          },
+        },
+      });
+      let shutdown: Promise<void> | undefined;
+      try {
+        const auth = await manager.authorize({
+          ...identity,
+          ...binding,
+          task: 'edit note',
+          materials: ['note.txt'],
+          editMode: 'workspace_write',
+        });
+        if (!auth.ok) throw new Error(auth.code);
+        const started = await manager.start(
+          {
+            ...identity,
+            expectedRevision: 1,
+            requestId: 'request:stalled-write',
+            grantId: auth.authorization.grantId,
+          },
+          binding,
+        );
+        if (!started.ok) throw new Error(started.code);
+        const owner = { ...identity, ...binding, runId: started.runId };
+        await admitted.promise;
+        let shutdownSettled = false;
+        if (action === 'stop') manager.stop(owner);
+        else {
+          shutdown = manager.shutdown().then(() => {
+            shutdownSettled = true;
+          });
+        }
+        await expect
+          .poll(() => manager.getContext(owner)?.status, { timeout: 1_000 })
+          .toBe('failed');
+        if (action === 'shutdown') {
+          await expect.poll(() => shutdownSettled).toBe(true);
+        }
+        const context = manager.getContext(owner);
+        const page = manager.getRun({ ...owner, afterSeq: 0 });
+        expect(context?.edit).toMatchObject({
+          state: 'unverified',
+          code: 'STOP_TIMEOUT',
+        });
+        expect(page?.events.at(-1)?.body).toMatchObject({
+          type: 'run.failed',
+          code: 'STOP_TIMEOUT',
+        });
+        held.resolve();
+        await handle?.quiescent;
+        expect(manager.getContext(owner)).toEqual(context);
+        expect(manager.getRun({ ...owner, afterSeq: 0 })).toEqual(page);
+        expect(await readFile(f.target, 'utf8')).toBe(
+          boundary === 'beforeWrite'
+            ? 'before old after\r\n'
+            : 'before 新内容 after\r\n',
+        );
+      } finally {
+        held.resolve();
+        await handle?.quiescent;
+        await (shutdown ?? manager.shutdown());
       }
     },
   );
