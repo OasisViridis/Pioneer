@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
+import type { EditMode } from '../../shared/contracts/agent-edit';
 import type { ProjectSummary } from '../../shared/contracts/catalog';
 import type { EgressCandidate } from '../../shared/contracts/egress';
 import type { SessionRunRecord } from '../../shared/contracts/session-run-history';
@@ -23,6 +24,7 @@ export function RunPanel({
   onRunSnapshot,
   onRunStarted,
   onOpenLog,
+  onOpenChanges,
 }: {
   session: Session;
   project: ProjectSummary;
@@ -30,11 +32,26 @@ export function RunPanel({
   onRunSnapshot: (snapshot: RunSnapshot) => void;
   onRunStarted: (revision: number) => void;
   onOpenLog: () => void;
+  onOpenChanges: () => void;
 }): React.JSX.Element {
   const state = useSyncExternalStore(runViews.subscribe, () =>
     runViews.get(session.id),
   );
   const status = visibleStatus(state);
+  const [permission, setPermission] = useState<{
+    sessionId: string;
+    projectId: string;
+    mode: EditMode;
+  } | null>(null);
+  const editMode =
+    permission?.sessionId === session.id && permission.projectId === project.id
+      ? permission.mode
+      : 'read_only';
+  const edit = state.runId
+    ? state.context?.edit
+    : session.lastRunView?.identity.revision === session.runRevision
+      ? session.lastRunView.edit
+      : undefined;
   const [task, setTask] = useState(
     () => session.messages.at(-1) ?? session.draft,
   );
@@ -50,7 +67,11 @@ export function RunPanel({
       ? selection.paths
       : null;
   const canStart =
-    !active && !authorizing && task.trim().length > 0 && materials !== null;
+    !active &&
+    !authorizing &&
+    task.trim().length > 0 &&
+    materials !== null &&
+    (editMode === 'read_only' || materials.length === 1);
   const selectMaterials = useCallback(
     (paths: string[]): void => {
       setSelection({ projectId: project.id, paths });
@@ -68,6 +89,7 @@ export function RunPanel({
       revision,
       task: instruction,
       materials: materials ?? [],
+      editMode,
       summaryText: project.name,
       onTerminal: onRunTerminal,
       onSnapshot: onRunSnapshot,
@@ -94,7 +116,7 @@ export function RunPanel({
           {status ?? '未运行'}
         </span>
         <span className="metadata">
-          只读运行 · read_file / list_directory / search_in_files
+          {editMode === 'read_only' ? '只读运行' : '工作区修改 · 所选文本文件'}
         </span>
       </header>
       {state.rejectionCode !== null ? (
@@ -115,8 +137,33 @@ export function RunPanel({
           }}
         />
       </label>
+      <label className="run-panel__task">
+        文件权限
+        <select
+          aria-label="文件权限"
+          value={editMode}
+          disabled={active || authorizing}
+          onChange={(event) => {
+            setPermission({
+              sessionId: session.id,
+              projectId: project.id,
+              mode: event.currentTarget.value as EditMode,
+            });
+          }}
+        >
+          <option value="read_only">只读</option>
+          <option value="workspace_write">工作区内修改</option>
+        </select>
+      </label>
+      {editMode === 'workspace_write' ? (
+        <p className="metadata">
+          选择一个文本文件（最多 64 KiB）。Agent
+          可直接修改一次，完成后可查看改动；停止不会撤销已经写入的内容。
+        </p>
+      ) : null}
       <MaterialPicker
         key={project.id}
+        single={editMode === 'workspace_write'}
         projectId={project.id}
         disabled={active || authorizing}
         onChange={selectMaterials}
@@ -152,6 +199,19 @@ export function RunPanel({
       </p>
       <button type="button" className="quiet-button" onClick={onOpenLog}>
         打开运行日志
+      </button>
+      {edit ? (
+        <p role="status">
+          {edit.state === 'applied'
+            ? '已修改文件：'
+            : edit.state === 'not_applied'
+              ? '未写入文件：'
+              : '文件结果待核对：'}
+          {edit.path}
+        </p>
+      ) : null}
+      <button type="button" className="quiet-button" onClick={onOpenChanges}>
+        查看改动
       </button>
       {session.runHistory.length > 0 ? (
         <section className="run-history" aria-label="历史运行">
@@ -193,10 +253,12 @@ export function RunPanel({
  * only allows a launch when the list belongs to the current project.
  */
 function MaterialPicker({
+  single,
   projectId,
   disabled,
   onChange,
 }: {
+  single: boolean;
   projectId: string;
   disabled: boolean;
   onChange: (paths: string[]) => void;
@@ -208,7 +270,9 @@ function MaterialPicker({
     let current = true;
     void runViews.materials(projectId).then((next) => {
       if (!current) return;
-      const paths = next.map((material) => material.path);
+      const paths = next
+        .map((material) => material.path)
+        .slice(0, single ? 1 : undefined);
       setCandidates(next);
       setSelected(paths);
       onChange(paths);
@@ -216,13 +280,15 @@ function MaterialPicker({
     return () => {
       current = false;
     };
-  }, [projectId, onChange]);
+  }, [projectId, onChange, single]);
 
   const toggle = (path: string, checked: boolean): void => {
     setSelected((current) => {
       if (current === null) return current;
       const next = checked
-        ? [...current, path]
+        ? single
+          ? [path]
+          : [...current, path]
         : current.filter((item) => item !== path);
       onChange(next);
       return next;
@@ -247,7 +313,8 @@ function MaterialPicker({
             <li key={candidate.path}>
               <label>
                 <input
-                  type="checkbox"
+                  type={single ? 'radio' : 'checkbox'}
+                  name={single ? 'edit-target' : undefined}
                   checked={selected?.includes(candidate.path) ?? false}
                   onChange={(event) => {
                     toggle(candidate.path, event.currentTarget.checked);

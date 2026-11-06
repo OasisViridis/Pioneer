@@ -82,6 +82,13 @@ export function Conversation({
                       revision,
                     });
                   }}
+                  onOpenChanges={() => {
+                    dispatch({
+                      type: 'SHOW_PANEL',
+                      id: session.id,
+                      panel: 'diff',
+                    });
+                  }}
                   onOpenLog={() => {
                     dispatch({
                       type: 'SHOW_PANEL',

@@ -8,8 +8,10 @@ import type {
   RunToolCallState,
 } from '../../shared/contracts/run-context';
 import type { RunAuthorizationSummary } from '../../shared/contracts/run-ipc';
-import type { ReadOnlyToolName } from '../../shared/contracts/read-only-tools';
+import type { HarnessToolRequest } from '../../shared/contracts/agent-edit';
 import type { RunViewState } from './run-view';
+
+type HarnessToolName = HarnessToolRequest['tool'];
 
 /**
  * Pure projections for the P3-A workbench panels. The panel components render
@@ -18,7 +20,7 @@ import type { RunViewState } from './run-view';
 
 export interface CapabilityCallView {
   callId: string;
-  tool: ReadOnlyToolName | null;
+  tool: HarnessToolName | null;
   state: RunToolCallState;
   code: string | null;
   seq: number;
@@ -169,13 +171,14 @@ const CALL_CODE_TEXT: Record<string, string> = {
 export const callCodeText = (code: string): string =>
   CALL_CODE_TEXT[code] ?? code;
 
-export const TOOL_LABELS: Record<ReadOnlyToolName, string> = {
+export const TOOL_LABELS: Record<HarnessToolName, string> = {
+  edit_file: '修改文本',
   read_file: '读取文件',
   list_directory: '列目录',
   search_in_files: '搜索文本',
 };
 
-export const toolLabel = (tool: ReadOnlyToolName | null): string =>
+export const toolLabel = (tool: HarnessToolName | null): string =>
   tool === null ? '未知工具' : TOOL_LABELS[tool];
 
 /** `2026-10-27T10:00:00.000Z` -> `10:00:00`. */

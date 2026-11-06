@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 
-import { ReadOnlyToolRequestSchema } from '../../shared/contracts/read-only-tools';
+import { HarnessToolRequestSchema } from '../../shared/contracts/agent-edit';
 import type {
   AdapterOutcome,
   AdapterUsage,
@@ -26,7 +26,7 @@ export const ControlledStepSchema = z.discriminatedUnion('action', [
   z
     .object({
       action: z.literal('tool'),
-      request: ReadOnlyToolRequestSchema,
+      request: HarnessToolRequestSchema,
     })
     .strict(),
   z

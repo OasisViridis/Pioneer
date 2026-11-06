@@ -108,6 +108,7 @@ export interface WriteExecutionDependencies {
   journalPath: string;
   now?: () => Date;
   hooks?: WriteExecutionHooks;
+  signal?: AbortSignal;
 }
 
 interface PendingReview {
@@ -307,17 +308,29 @@ export async function prepareControlledReview(
  * wrapper stamps the Run and its revision onto the receipt, so success and
  * failure stay traceable without reading the journal.
  */
+let writeQueue: Promise<void> = Promise.resolve();
+
 export async function executeControlledWrite(
   dependencies: WriteExecutionDependencies,
   request: WriteExecutionRequest,
   expectation: WriteExecutionExpectation,
 ): Promise<WriteExecutionResult> {
-  const result = await executeControlledWriteCore(
-    dependencies,
-    request,
-    expectation,
-  );
-  return stampExecutionResult(result, request.runId, request.revision);
+  const previous = writeQueue;
+  let release: () => void = () => undefined;
+  writeQueue = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await previous;
+  try {
+    const result = await executeControlledWriteCore(
+      dependencies,
+      request,
+      expectation,
+    );
+    return stampExecutionResult(result, request.runId, request.revision);
+  } finally {
+    release();
+  }
 }
 
 /**
@@ -644,7 +657,11 @@ async function writeVerifiedBatch(
     if (finalState !== 'unchanged') return await refuseFinal(finalState);
 
     try {
-      await writeFileAtomic(finalRead.value.absolutePath, target.content);
+      await writeFileAtomic(
+        finalRead.value.absolutePath,
+        target.content,
+        dependencies.signal,
+      );
     } catch {
       // A failed atomic write may still have landed (the rename is the last
       // step). Only a read-back decides which state the file is in.
@@ -920,7 +937,7 @@ type ReadProjectTargetResult =
   { ok: true; value: ReadTarget } | { ok: false; state: WriteTargetState };
 
 /** Reads one target through the shared stable reader and proves exact text. */
-async function readProjectTarget(
+export async function readProjectTarget(
   projectRoot: string,
   targetPath: WriteTargetPath,
   permission: WritePermission,

@@ -92,6 +92,7 @@ export function registerRunIpc(dependencies: RunIpcDependencies): void {
         revision: parsed.data.expectedRevision,
         task: parsed.data.task,
         materials: parsed.data.materials,
+        editMode: parsed.data.editMode,
         ...binding(event),
       });
       return RunAuthorizeReplySchema.parse(

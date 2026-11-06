@@ -5,7 +5,7 @@ import type {
   Session,
 } from '../../shared/contracts/session-workspace';
 import type { SessionWorkspaceAction } from '../state/session-workspace-reducer';
-import { ChangeApprovalReview } from './ChangeApprovalReview';
+import { AgentChanges } from './AgentChanges';
 import { LocalTabs } from './LocalTabs';
 import {
   RunCapabilitiesPanel,
@@ -39,7 +39,7 @@ export function WorkbenchPanel({
   if (panel === 'capabilities')
     return <RunCapabilitiesPanel session={session} />;
   if (panel === 'runlog') return <RunLogPanel session={session} />;
-  if (panel === 'diff') return <ChangeApprovalReview session={session} />;
+  if (panel === 'diff') return <AgentChanges session={session} />;
   return (
     <div className="module-content">
       <LocalTabs

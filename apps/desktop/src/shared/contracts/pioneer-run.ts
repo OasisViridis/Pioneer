@@ -1,9 +1,7 @@
 import { z } from 'zod';
+import { HarnessToolNameSchema } from './agent-edit';
 
-import {
-  ReadOnlyToolNameSchema,
-  ReadOnlyToolRejectionSchema,
-} from './read-only-tools';
+import { ReadOnlyToolRejectionSchema } from './read-only-tools';
 
 /** Protocol v1 limits. Enforcement by the main host is required in #13. */
 export const RUN_LIMITS = Object.freeze({
@@ -123,7 +121,7 @@ export const RunEventBodySchema = z.discriminatedUnion('type', [
     .object({
       type: z.literal('tool.requested'),
       ...call,
-      tool: ReadOnlyToolNameSchema.nullable(),
+      tool: HarnessToolNameSchema.nullable(),
     })
     .strict(),
   z

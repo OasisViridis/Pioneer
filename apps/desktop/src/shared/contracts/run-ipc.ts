@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { EditModeSchema, HarnessToolNameSchema } from './agent-edit';
 
 import {
   EGRESS_MATERIAL_LIMIT,
@@ -57,6 +58,8 @@ export const RunAuthorizeRequestSchema = z
     expectedRevision: RunIdentitySchema.shape.revision,
     /** The task text itself is the egress material; main computes its digest. */
     task: z.string().min(1).max(16_384),
+    /** Explicit user choice; omission preserves the read-only default. */
+    editMode: EditModeSchema.optional(),
     /** Explicit file materials whose content may be sent to the model. */
     materials: z.array(z.string().min(1).max(1024)).max(EGRESS_MATERIAL_LIMIT),
   })
@@ -68,7 +71,7 @@ export const RunAuthorizationSummarySchema = z
     grantId: RunIdentitySchema.shape.runId,
     taskDigest: z.string().min(1).max(512),
     projectName: z.string().min(1).max(512),
-    tools: z.array(z.enum(['read_file', 'list_directory', 'search_in_files'])),
+    tools: z.array(HarnessToolNameSchema),
     adapter: z.enum(['controlled', 'pi']),
     model: z.string().min(1).max(256).nullable(),
     expiresAt: z.iso.datetime(),

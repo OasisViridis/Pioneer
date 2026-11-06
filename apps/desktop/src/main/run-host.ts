@@ -170,6 +170,11 @@ export async function assembleRunHost(dependencies: {
     resolveProject: dependencies.resolveProject,
     windowBindings: dependencies.windowBindings,
     sender: dependencies.sender,
+    editDependencies: {
+      resolveProjectRoot: async (projectId) =>
+        (await dependencies.resolveProject(projectId))?.root ?? null,
+      journalPath: join(dependencies.userDataPath, 'write-journal.jsonl'),
+    },
   });
 
   const restored = journal.restorePending();

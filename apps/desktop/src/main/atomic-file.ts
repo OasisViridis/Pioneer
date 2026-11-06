@@ -10,10 +10,13 @@ import { rename, unlink, writeFile } from 'node:fs/promises';
 export async function writeFileAtomic(
   filePath: string,
   content: string,
+  signal?: AbortSignal,
 ): Promise<void> {
   const temporaryPath = `${filePath}.${randomUUID()}.tmp`;
   try {
+    signal?.throwIfAborted();
     await writeFile(temporaryPath, content, { encoding: 'utf-8', flag: 'wx' });
+    signal?.throwIfAborted();
     await rename(temporaryPath, filePath);
   } catch (error) {
     await unlink(temporaryPath).catch(() => undefined);
