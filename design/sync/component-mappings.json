@@ -450,7 +450,7 @@
   "evidenceFiles": {
     "apps/desktop/design/component-examples.tsx": "3fcbb93835473143bfac1819855e9cd01ee7bc6a",
     "apps/desktop/src/renderer/components/ProjectLibrary.tsx": "2d39cd9aeeeb35137a6813016a4cf1e8dce9fcf1",
-    "apps/desktop/src/renderer/components/Conversation.tsx": "1a34a66a0655ce5c8102f4a025ffd92bd83d5616",
+    "apps/desktop/src/renderer/components/Conversation.tsx": "ac1820abf866b2d96bdbce4f889630323aac0af3",
     "apps/desktop/src/renderer/styles/app.css": "cfce7cf1c923f3e0b4febc85b49a3d1e96b15658",
     "apps/desktop/src/renderer/styles/session-workbench.css": "0ecc14401585e7938f6ef140329a4789055aeed4",
     "tests/e2e/design-mappings.e2e.spec.ts": "fd338c7b3c41db408791b259373bdd1108ae72fd",
