@@ -82,6 +82,13 @@ export function Conversation({
                       revision,
                     });
                   }}
+                  onOpenChanges={() => {
+                    dispatch({
+                      type: 'SHOW_PANEL',
+                      id: session.id,
+                      panel: 'diff',
+                    });
+                  }}
                   onOpenLog={() => {
                     dispatch({
                       type: 'SHOW_PANEL',
@@ -112,7 +119,7 @@ export function Conversation({
                 <div>
                   <strong>运行器默认不启动</strong>
                   <p>
-                    先整理任务并保存。点击「运行控制」里的启动按钮后才会调用模型，工具仅限只读；过程与结果在「运行日志」面板里。
+                    先整理任务并保存。点击「运行控制」里的启动按钮后才会调用模型，工具默认只读；过程与结果在「运行日志」面板里。
                   </p>
                 </div>
               </div>

@@ -45,6 +45,7 @@ vi.mock('@earendil-works/pi-ai/providers/deepseek', () => ({
 
 vi.mock('@earendil-works/pi-agent-core', () => {
   interface FakeTool {
+    name: string;
     execute: (
       callId: string,
       params: Record<string, string>,
@@ -63,11 +64,16 @@ vi.mock('@earendil-works/pi-agent-core', () => {
       // The fake holds no resources to release.
     }
     prompt(): Promise<void> {
-      const tool = this.#tools[0];
+      const tool =
+        this.#tools.find((tool) => tool.name === 'edit_file') ?? this.#tools[0];
       if (tool !== undefined) {
         // Deliberately not awaited: the callback may still be running when the
         // loop resolves, so only the tool counter can prove quiescence.
-        void tool.execute('fake-call', { path: 'a.txt' });
+        void tool.execute('fake-call', {
+          path: 'a.txt',
+          oldText: 'old',
+          newText: 'new',
+        });
       }
       this.state.messages = [
         {
@@ -138,6 +144,25 @@ function noopExecute(): Promise<ToolOutcome> {
 }
 
 describe('P2 Pi adapter (offline fakes, no credential)', () => {
+  it('registers the real edit tool only with a main-owned target and forwards exact arguments', async () => {
+    const execute = vi.fn((): Promise<ToolOutcome> =>
+      Promise.resolve({
+        status: 'succeeded',
+        text: 'applied',
+        truncated: false,
+      }),
+    );
+    const adapter = createPiAdapterFactory(piConfig, {
+      PIONEER_TEST_API_KEY: 'test-only',
+    })({ ...context(execute), editTarget: 'a.txt' }, () => undefined);
+    await adapter.start();
+    await adapter.quiescent;
+    expect(execute).toHaveBeenCalledWith({
+      tool: 'edit_file',
+      arguments: { path: 'a.txt', oldText: 'old', newText: 'new' },
+    });
+    await adapter.dispose();
+  });
   it('never claims quiescence before start() ran', async () => {
     const adapter = createPiAdapterFactory(piConfig, {})(
       context(noopExecute),

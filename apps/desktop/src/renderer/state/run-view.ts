@@ -547,6 +547,7 @@ export class RunViewStore {
       tools: state.authorization?.tools ?? [],
       materials: context.materials,
       calls: context.calls,
+      ...(context.edit ? { edit: context.edit } : {}),
       recordedAt: new Date().toISOString(),
     });
   }
@@ -657,6 +658,7 @@ export class RunViewStore {
     revision: number;
     task: string;
     materials: string[];
+    editMode?: 'read_only' | 'workspace_write';
     summaryText?: string;
     onTerminal?: (record: SessionRunRecord) => void;
     onSnapshot?: (snapshot: RunSnapshot) => void;
@@ -683,6 +685,7 @@ export class RunViewStore {
         expectedRevision: input.revision,
         task: input.task,
         materials: input.materials,
+        ...(input.editMode ? { editMode: input.editMode } : {}),
       });
       if (!authorization.ok) {
         this.update(input.sessionId, {

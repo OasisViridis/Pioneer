@@ -11,7 +11,13 @@ import {
   type RunStatus,
 } from '../../shared/contracts/pioneer-run';
 import type { RunEventBatch, RunPage } from '../../shared/contracts/run-ipc';
-import type { ReadOnlyToolRequest } from '../../shared/contracts/read-only-tools';
+import type {
+  HarnessToolRequest,
+  EditMode,
+  RunEdit,
+} from '../../shared/contracts/agent-edit';
+import { executeAgentEdit } from './agent-edit';
+import type { WriteExecutionDependencies } from '../write-execution';
 import type { EgressMaterial } from '../../shared/contracts/egress';
 import type {
   RunContext,
@@ -57,6 +63,7 @@ export interface RunAuthorizationRequest {
   revision: number;
   task: string;
   materials: readonly string[];
+  editMode?: EditMode;
   webContentsId: number;
   windowEpoch: number;
 }
@@ -65,7 +72,9 @@ export interface RunAuthorization {
   grantId: string;
   taskDigest: string;
   projectName: string;
-  tools: readonly ('read_file' | 'list_directory' | 'search_in_files')[];
+  tools: readonly (
+    'read_file' | 'list_directory' | 'search_in_files' | 'edit_file'
+  )[];
   adapter: 'controlled' | 'pi';
   model: string | null;
   expiresAt: string;
@@ -107,6 +116,7 @@ interface GrantRecord {
   createdAt: number;
   expiresAt: number;
   consumed: boolean;
+  editMode: EditMode;
   revoked: boolean;
 }
 
@@ -143,6 +153,7 @@ interface ActiveRun {
   trackedMaterials: Map<string, TrackedMaterial>;
   /** Bounded tool-call log; the event wire never carries raw arguments. */
   calls: RunContextCall[];
+  edit?: RunEdit;
   requestId: string;
   requestPayload: string;
   events: RunEvent[];
@@ -204,6 +215,7 @@ export interface RunManagerDependencies {
   randomId?: (prefix: string) => string;
   /** Test seam for the tool executor; defaults to the real read-only executor. */
   executeTool?: typeof executeReadOnlyTool;
+  editDependencies?: WriteExecutionDependencies;
 }
 
 const encoder = new TextEncoder();
@@ -242,7 +254,7 @@ function materialReasonOf(code: string): RunMaterialReason | null {
  */
 export function normalizedToolTarget(
   projectRoot: string,
-  request: ReadOnlyToolRequest,
+  request: HarnessToolRequest,
 ): string | null {
   const normalized = request.arguments.path.replaceAll('\\', '/');
   if (normalized.length === 0 || normalized.length > 1024) return null;
@@ -339,6 +351,11 @@ export class RunManager {
       return { ok: false, code: 'INVALID_REQUEST' };
     }
 
+    if (
+      request.editMode === 'workspace_write' &&
+      (materials.length !== 1 || !this.dependencies.editDependencies)
+    )
+      return { ok: false, code: 'INVALID_REQUEST' };
     const grantId = this.randomId('grant');
     const createdAt = this.now();
     const grant: GrantRecord = {
@@ -354,6 +371,7 @@ export class RunManager {
       createdAt,
       expiresAt: createdAt + this.limits.grantMs,
       consumed: false,
+      editMode: request.editMode ?? 'read_only',
       revoked: false,
     };
     this.grants.set(grantId, grant);
@@ -365,7 +383,14 @@ export class RunManager {
         grantId,
         taskDigest: grant.taskDigest,
         projectName: project.projectName,
-        tools: ['read_file', 'list_directory', 'search_in_files'],
+        tools: [
+          'read_file',
+          'list_directory',
+          'search_in_files',
+          ...(grant.editMode === 'workspace_write'
+            ? ['edit_file' as const]
+            : []),
+        ],
         adapter: this.dependencies.adapterKind,
         model: this.dependencies.modelName,
         expiresAt: new Date(grant.expiresAt).toISOString(),
@@ -614,7 +639,7 @@ export class RunManager {
       this.acceptAdapterMessage(run, message);
     };
     const tools = {
-      execute: async (request: ReadOnlyToolRequest): Promise<ToolOutcome> => {
+      execute: async (request: HarnessToolRequest): Promise<ToolOutcome> => {
         return this.executeTool(run, project, request);
       },
     };
@@ -623,6 +648,9 @@ export class RunManager {
       task,
       abort: run.abort.signal,
       tools,
+      ...(run.grant.editMode === 'workspace_write'
+        ? { editTarget: run.materials[0]?.path }
+        : {}),
     };
     return this.dependencies.adapterFactory(context, emit);
   }
@@ -779,7 +807,7 @@ export class RunManager {
   private async executeTool(
     run: ActiveRun,
     project: ProjectBinding,
-    request: ReadOnlyToolRequest,
+    request: HarnessToolRequest,
   ): Promise<ToolOutcome> {
     // Contract §5: at most one tool call in flight per run. The chain tail is
     // the mutex; it is bounded by the call budget enforced below.
@@ -817,18 +845,25 @@ export class RunManager {
       );
       run.pendingToolCalls.add(callId);
       try {
-        const outcome = await (
-          this.dependencies.executeTool ?? executeReadOnlyTool
-        )(project.root, request, run.abort.signal, run.materials, {
-          // Main observes what the tool actually read or found changed; the
-          // event wire still carries no arguments.
-          onMaterial: (path, state) => {
-            // A tool that finishes after the run converged must not change the
-            // terminal facts a snapshot or the context query reports.
-            if (this.isTerminal(run)) return;
-            this.trackMaterial(run, path, state);
-          },
-        });
+        const outcome =
+          request.tool === 'edit_file'
+            ? await this.editFile(run, project, request)
+            : await (this.dependencies.executeTool ?? executeReadOnlyTool)(
+                project.root,
+                request,
+                run.abort.signal,
+                run.materials,
+                {
+                  // Main observes what the tool actually read or found changed; the
+                  // event wire still carries no arguments.
+                  onMaterial: (path, state) => {
+                    // A tool that finishes after the run converged must not change the
+                    // terminal facts a snapshot or the context query reports.
+                    if (this.isTerminal(run)) return;
+                    this.trackMaterial(run, path, state);
+                  },
+                },
+              );
         // terminate() already published the cancelled pair for a run that
         // ended while this call was in flight. A stop request that landed
         // while the tool was running must not publish the late real body: the
@@ -874,6 +909,51 @@ export class RunManager {
     }
   }
 
+  private async editFile(
+    run: ActiveRun,
+    project: ProjectBinding,
+    request: Extract<HarnessToolRequest, { tool: 'edit_file' }>,
+  ): Promise<ToolOutcome> {
+    const material = run.materials[0];
+    const dependencies = this.dependencies.editDependencies;
+    if (
+      run.grant.editMode !== 'workspace_write' ||
+      !dependencies ||
+      !material ||
+      run.materials.length !== 1 ||
+      run.edit ||
+      request.arguments.path !== material.path
+    )
+      return { status: 'rejected', code: 'TOOL_NOT_ALLOWED' };
+    const observed = run.trackedMaterials.get(material.path);
+    if (observed?.state !== 'read' && observed?.state !== 'scanned')
+      return { status: 'rejected', code: 'MATERIAL_NOT_ALLOWED' };
+    // The writer may finish after a forced timeout. Adopt its material version
+    // only while this run is live; terminal context must remain immutable.
+    const editedMaterial = { ...material };
+    const outcome = await executeAgentEdit({
+      request,
+      identity: run.identity,
+      webContentsId: run.webContentsId,
+      windowEpoch: run.windowEpoch,
+      projectRoot: project.root,
+      material: editedMaterial,
+      signal: run.abort.signal,
+      dependencies,
+      onReceipt: (receipt) => {
+        if (!this.isTerminal(run)) run.edit = receipt;
+      },
+    });
+    if (this.isTerminal(run)) return { status: 'cancelled', code: 'CANCELLED' };
+    if (outcome.status === 'succeeded') {
+      material.bytes = editedMaterial.bytes;
+      material.sha256 = editedMaterial.sha256;
+      observed.bytes = material.bytes;
+      observed.sha256 = material.sha256;
+    } else if (outcome.status === 'failed') this.failWith(run, 'TOOL_FAILED');
+    return outcome;
+  }
+
   /** Records a material state observed by a real tool execution (Issue #17). */
   private trackMaterial(
     run: ActiveRun,
@@ -913,7 +993,7 @@ export class RunManager {
 
   private trackOutcome(
     run: ActiveRun,
-    request: ReadOnlyToolRequest,
+    request: HarnessToolRequest,
     target: string | null,
     outcome: ToolOutcome,
   ): void {
@@ -983,6 +1063,7 @@ export class RunManager {
         (material): RunContextMaterial => ({ ...material }),
       ),
       calls: structuredClone(run.calls),
+      ...(run.edit ? { edit: { ...run.edit } } : {}),
     };
   }
 
@@ -1294,6 +1375,13 @@ export class RunManager {
     usage?: { inputTokens: number | null; outputTokens: number | null },
   ): Promise<void> {
     if (this.isTerminal(run)) return;
+    // Normal completion already awaits adapter quiescence, including tools.
+    // Forced termination must stay bounded even if a write cannot settle. Its
+    // effects are unknown, not rolled back; ignore any later receipt.
+    if (run.edit?.state === 'pending') {
+      run.abort.abort();
+      run.edit = { ...run.edit, state: 'unverified', code: code ?? 'UNKNOWN' };
+    }
     if (run.deadlineTimer !== null) clearTimeout(run.deadlineTimer);
     if (run.stopTimer !== null) clearTimeout(run.stopTimer);
     // Hold delivery until the terminal record is durable (contract §4): a

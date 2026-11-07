@@ -283,7 +283,9 @@ export function RunCapabilitiesPanel({
         ))}
         <div>
           <dt>写入工作区</dt>
-          <dd>未提供（P2 只读边界）</dd>
+          <dd>
+            {authorized.includes('edit_file') ? '可修改所选文本文件' : '未授权'}
+          </dd>
         </div>
         <div>
           <dt>执行命令</dt>

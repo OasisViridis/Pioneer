@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { EGRESS_MATERIAL_LIMIT } from './egress';
 import { RunIdentitySchema, RunStatusSchema } from './pioneer-run';
-import { ReadOnlyToolNameSchema } from './read-only-tools';
+import { HarnessToolNameSchema, RunEditSchema } from './agent-edit';
 
 /**
  * Bounded, main-generated projection of a run's context (Issue #17): which
@@ -62,7 +62,7 @@ export const RunToolCallStateSchema = z.enum(RUN_TOOL_CALL_STATES);
 export const RunContextCallSchema = z
   .object({
     callId: z.string().min(1).max(512),
-    tool: ReadOnlyToolNameSchema.nullable(),
+    tool: HarnessToolNameSchema.nullable(),
     /** Project-relative target, or null when no safe target can be named. */
     target: z.string().min(1).max(1024).nullable(),
     state: RunToolCallStateSchema,
@@ -77,6 +77,7 @@ export const RunContextSchema = z
     status: RunStatusSchema,
     materials: z.array(RunContextMaterialSchema).max(EGRESS_MATERIAL_LIMIT),
     calls: z.array(RunContextCallSchema).max(32),
+    edit: RunEditSchema.optional(),
   })
   .strict();
 
@@ -96,9 +97,10 @@ export const RunSnapshotSchema = z
     identity: RunIdentitySchema,
     /** Only a converged run is worth persisting as the session's last summary. */
     status: z.enum(['completed', 'failed', 'stopped']),
-    tools: z.array(ReadOnlyToolNameSchema).max(3),
+    tools: z.array(HarnessToolNameSchema).max(4),
     materials: z.array(RunContextMaterialSchema).max(EGRESS_MATERIAL_LIMIT),
     calls: z.array(RunContextCallSchema).max(32),
+    edit: RunEditSchema.optional(),
     recordedAt: z.iso.datetime(),
   })
   .strict();

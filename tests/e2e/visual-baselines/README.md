@@ -32,3 +32,12 @@
 - PR #63 把 `environment.txt` 的 image 更新到 `20261030.294.1` 后，PR 的视觉检查通过；合入 main 的 merge commit `2110444` 又被分到 image `20261021.278.1`，同一个提交因镜像分配不同而失败。
 - GitHub 的 `windows-latest` 池混用两个镜像版本。`environment.txt` 现在只断言渲染相关字段：OS、Electron/Chrome、pixelRatio、字体哈希、locale、time、motion、colorScheme。runner image 仍写入附件 `environment`，供追溯，不再参与断言。
 - 四张 PNG 未改；PR #63 在新镜像上已用同一组图片通过严格比较，说明镜像差异没有改变本次检查的像素。
+
+## 2026-11-06 Agent 编辑权限文案复核
+
+- #91 加入显式开启的文本编辑模式，首页说明由“工具仅限只读”改为“工具默认只读”。旧基线在 [quality run 42220805664](https://github.com/OasisViridis/Pioneer/actions/runs/42220805664) 正确报告差异；同次 Windows 功能门禁通过。
+- 候选来自 [Windows candidate run 42220823653](https://github.com/OasisViridis/Pioneer/actions/runs/42220823653)，实际 checkout 为 `d70c540fa7b5144aaf4e7a692750c350f8197e09`。[原始 artifact](https://github.com/OasisViridis/Pioneer/actions/runs/42220823653/artifacts/13502923811) 的 SHA-256 为 `9c2391399d3481b34f69369d1e5551432a9b66dacd801a7de7f4d836c28c49a8`。
+- Codex 逐张对照旧图检查 1440、900、640 正常图与长文本焦点图。标题、说明、输入框和保存按钮无重叠或裁切，窄窗正常换行，长文本焦点和滚动条清晰。环境文件逐字节相同，保持原文件。
+- 原始 RGBA 像素比较：四图分别变化 286、299、286、298 个像素。每图 286 个位于“仅限”改为“默认”的字形内；900 图另有 13 个像素位于面板左下圆角 `(16, 943)–(27, 954)`，长文本图另有 12 个位于同一圆角 `(8, 947)–(19, 958)`，各颜色通道差不超过 2，未改变几何或可见布局。接受这些原始截图，不调整比较阈值。
+- 四张 PNG 原样复制，未重编码。按上述顺序的 SHA-256 为 `a52624876cb42ee0b482349ef7f675e4294020d4203b905b44b77a6364f94741`、`e9cb97c691d0795fa7d81e19fd7fab1cf0740d8be6db87a5983e017735aa1548`、`db6a9e88f50aefeb7b68f689a220f037d3185ece33e470c076f97b88edf38619`、`f2dd1151584714666e9c3a79f2c46abee9ce516277c27a1624cf0cb83b4a6123`。
+- 候选截图不等于回归通过。最终提交仍须通过严格比较、故意反色失败及恢复检查，结果记录在 PR #92；不据此宣称真实 Provider 编辑或真人 Windows 验收。

@@ -2,7 +2,7 @@
 
 日期：2026-10-27（2026-11-02 改为权限模式模型）。来源：[Issue #18](https://github.com/OasisViridis/Pioneer/issues/18)，属于[主地图 #9](https://github.com/OasisViridis/Pioneer/issues/9) 的 P4 决策票。
 
-本规格只定义决策，不实现写入。写入能力保持关闭，直到 #19/#20 实现并通过验收：没有新增 IPC 通道、preload 方法、renderer 组件、能力位或 Run 事件字段。
+本规格记录 #18 当时的决策范围，不代表当前实现状态。#19 已交付受控写入守卫；业主后续要求 Diff 按需查看，#91 将真实 Agent 文本编辑接入现有 writer，当前权限与恢复边界见[实现说明](../testing/issue91-agent-edit.md)。下文四档会话权限与恢复设计不能整体视为已经实现。
 
 ## 本次决策与交付范围
 

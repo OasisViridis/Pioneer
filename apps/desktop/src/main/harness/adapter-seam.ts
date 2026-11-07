@@ -2,7 +2,7 @@ import type {
   RunFailureCode,
   RunIdentity,
 } from '../../shared/contracts/pioneer-run';
-import type { ReadOnlyToolRequest } from '../../shared/contracts/read-only-tools';
+import type { HarnessToolRequest } from '../../shared/contracts/agent-edit';
 import type { ToolOutcome } from './read-only-tools';
 
 /**
@@ -13,13 +13,13 @@ import type { ToolOutcome } from './read-only-tools';
  */
 
 export interface HarnessToolExecutor {
-  execute(request: ReadOnlyToolRequest): Promise<ToolOutcome>;
+  execute(request: HarnessToolRequest): Promise<ToolOutcome>;
 }
 
 /** The only messages an adapter may emit; raw SDK events never cross this seam. */
 export type AdapterMessage =
   | { type: 'text.delta'; text: string }
-  | { type: 'tool.request'; request: ReadOnlyToolRequest }
+  | { type: 'tool.request'; request: HarnessToolRequest }
   | { type: 'tool.unknown'; name: string }
   | { type: 'usage'; inputTokens: number | null; outputTokens: number | null }
   /** Transport-level disconnect; main owns the stop path and fixed outcome. */
@@ -30,6 +30,7 @@ export interface HarnessContext {
   readonly task: string;
   readonly abort: AbortSignal;
   readonly tools: HarnessToolExecutor;
+  readonly editTarget?: string;
 }
 
 export interface AdapterUsage {
