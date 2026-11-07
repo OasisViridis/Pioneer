@@ -269,8 +269,14 @@ describe('real task text editing', () => {
         load: () => Promise.resolve(null),
         save: () => Promise.resolve(),
       });
-      const held = Promise.withResolvers<void>();
-      const admitted = Promise.withResolvers<void>();
+      let releaseWrite: () => void = () => undefined;
+      const held = new Promise<void>((resolve) => {
+        releaseWrite = resolve;
+      });
+      let markAdmitted: () => void = () => undefined;
+      const admitted = new Promise<void>((resolve) => {
+        markAdmitted = resolve;
+      });
       const factory = createControlledAdapterFactory({
         steps: [
           {
@@ -303,8 +309,8 @@ describe('real task text editing', () => {
           ...f.input.dependencies,
           hooks: {
             [boundary]: async () => {
-              admitted.resolve();
-              await held.promise;
+              markAdmitted();
+              await held;
             },
           },
         },
@@ -330,7 +336,7 @@ describe('real task text editing', () => {
         );
         if (!started.ok) throw new Error(started.code);
         const owner = { ...identity, ...binding, runId: started.runId };
-        await admitted.promise;
+        await admitted;
         let shutdownSettled = false;
         if (action === 'stop') manager.stop(owner);
         else {
@@ -354,7 +360,7 @@ describe('real task text editing', () => {
           type: 'run.failed',
           code: 'STOP_TIMEOUT',
         });
-        held.resolve();
+        releaseWrite();
         await handle?.quiescent;
         expect(manager.getContext(owner)).toEqual(context);
         expect(manager.getRun({ ...owner, afterSeq: 0 })).toEqual(page);
@@ -364,7 +370,7 @@ describe('real task text editing', () => {
             : 'before 新内容 after\r\n',
         );
       } finally {
-        held.resolve();
+        releaseWrite();
         await handle?.quiescent;
         await (shutdown ?? manager.shutdown());
       }
