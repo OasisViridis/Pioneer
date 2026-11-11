@@ -22,7 +22,11 @@ for (const stopAfterWrite of [false, true]) {
     await mkdir(userData, { recursive: true });
     await cp(fixtures, workspace, { recursive: true });
     const target = path.join(workspace, 'alpha-app/README.md');
-    const before = await readFile(target, 'utf8');
+    const original = await readFile(target, 'utf8');
+    const before =
+      original +
+      '\n## Setup\n\nInstall the dependencies.\nStart the application.\n\nThis unchanged section is outside the diff.\n';
+    await writeFile(target, before);
     const script = info.outputPath('script.json');
     await writeFile(
       script,
@@ -134,13 +138,19 @@ for (const stopAfterWrite of [false, true]) {
       await page.getByRole('button', { name: '查看改动', exact: true }).click();
       const diff = page.locator('[data-panel-id="diff"]');
       await expect(
-        diff.getByText('已写入并核对', { exact: true }),
+        diff.getByRole('heading', { name: 'README.md' }),
+      ).toBeVisible();
+      await expect(
+        diff.getByText('本次运行 · 已写入并核对', { exact: true }),
       ).toBeVisible();
       await expect(diff.getByLabel('文本改动')).toContainText(
-        'A checked and corrected application fixture.',
+        '+ A checked and corrected application fixture.',
       );
       await expect(diff.getByLabel('文本改动')).toContainText(
-        'An alpha application fixture.',
+        '- An alpha application fixture.',
+      );
+      await expect(diff.getByLabel('文本改动')).not.toContainText(
+        'This unchanged section is outside the diff.',
       );
       await expect(diff.getByLabel('文本改动')).not.toContainText(
         'A mistaken attempt.',
@@ -168,7 +178,7 @@ for (const stopAfterWrite of [false, true]) {
         await expect(
           page
             .locator('[data-panel-id="diff"]')
-            .getByText('已写入并核对', { exact: true }),
+            .getByText('本次运行 · 已写入并核对', { exact: true }),
         ).toBeVisible();
         await expect(
           page.locator('[data-panel-id="diff"]').getByLabel('文本改动'),
@@ -181,7 +191,7 @@ for (const stopAfterWrite of [false, true]) {
       await app.close();
       expect(await captureFixtureHashAfterClose(fixtures)).toBe(fixtureHash);
       // Restore only the disposable copy to compare every unrelated file.
-      await writeFile(target, before);
+      await writeFile(target, original);
       expect(await captureFixtureHash(workspace)).toBe(fixtureHash);
     }
   });

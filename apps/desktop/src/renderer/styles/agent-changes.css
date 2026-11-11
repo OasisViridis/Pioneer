@@ -1,0 +1,30 @@
+.agent-changes__file h3 {
+  margin: 0 0 3px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.agent-changes__file p {
+  margin: 0;
+}
+
+.module-content.agent-changes .change-review__lines {
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--hazel-line);
+}
+
+.module-content.agent-changes pre.change-review__lines {
+  padding: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.change-review__range {
+  margin: 0;
+  padding: 6px 10px;
+  border-block-end: 1px solid var(--hazel-line);
+  background: var(--hazel-tool-surface);
+  color: var(--hazel-secondary);
+  font-weight: 500;
+}
