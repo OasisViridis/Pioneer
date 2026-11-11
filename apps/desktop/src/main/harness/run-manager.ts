@@ -921,7 +921,8 @@ export class RunManager {
       !dependencies ||
       !material ||
       run.materials.length !== 1 ||
-      run.edit ||
+      run.edit?.state === 'pending' ||
+      run.edit?.state === 'unverified' ||
       request.arguments.path !== material.path
     )
       return { status: 'rejected', code: 'TOOL_NOT_ALLOWED' };
@@ -931,6 +932,7 @@ export class RunManager {
     // The writer may finish after a forced timeout. Adopt its material version
     // only while this run is live; terminal context must remain immutable.
     const editedMaterial = { ...material };
+    const previousEdit = run.edit;
     const outcome = await executeAgentEdit({
       request,
       identity: run.identity,
@@ -941,7 +943,21 @@ export class RunManager {
       signal: run.abort.signal,
       dependencies,
       onReceipt: (receipt) => {
-        if (!this.isTerminal(run)) run.edit = receipt;
+        if (this.isTerminal(run)) return;
+        // Keep verified content visible while a later write is pending or
+        // unverified. The receipt state still describes the latest attempt.
+        if (previousEdit?.state === 'applied' && receipt.state !== 'applied') {
+          run.edit = {
+            ...previousEdit,
+            state: receipt.state === 'not_applied' ? 'applied' : receipt.state,
+            code: receipt.code,
+          };
+        } else {
+          run.edit = {
+            ...receipt,
+            before: previousEdit?.before ?? receipt.before,
+          };
+        }
       },
     });
     if (this.isTerminal(run)) return { status: 'cancelled', code: 'CANCELLED' };
@@ -1085,23 +1101,24 @@ export class RunManager {
     run.handle?.requestStop();
     if (run.deadlineTimer !== null) clearTimeout(run.deadlineTimer);
     run.stopTimer = setTimeout(() => {
-      this.forceEnd(run);
+      void this.forceEnd(run).catch(() => undefined);
     }, this.limits.stopGraceMs);
     return true;
   }
 
   /** Stop-grace expiry: the stopping path must converge to a fixed code. */
-  private forceEnd(run: ActiveRun): void {
+  private async forceEnd(run: ActiveRun): Promise<void> {
     if (this.isTerminal(run)) return;
     const code =
       run.pendingFailure ??
       (run.disconnected ? 'ADAPTER_DISCONNECTED' : 'STOP_TIMEOUT');
-    run.stopTimer = null;
-    // Contract §2: dispose is the normal release after quiescence; the forced
-    // end is not quiescent, but §4 still asks for a best-effort release. The
-    // rejection is swallowed so a failing terminal write never surfaces as an
-    // unhandled rejection from a timer.
-    void this.terminateAndRelease(run, 'failed', code).catch(() => undefined);
+    try {
+      await this.terminate(run, 'failed', code);
+    } finally {
+      // Disposal may still be waiting for the tool that exhausted the grace
+      // period. Let it drain without blocking shutdown.
+      void this.disposeAdapter(run).catch(() => undefined);
+    }
   }
 
   /**
@@ -1584,7 +1601,7 @@ export class RunManager {
       });
     }
     for (const run of this.runs.values()) {
-      await this.terminateAndRelease(run, 'failed', 'STOP_TIMEOUT');
+      await this.forceEnd(run);
     }
   }
 

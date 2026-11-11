@@ -2,6 +2,8 @@
 
 日期：2026-11-03。来源：[Issue #22](https://github.com/OasisViridis/Pioneer/issues/22)，属于[主地图 #9](https://github.com/OasisViridis/Pioneer/issues/9) 的 P4 决策票。前置 [#18](https://github.com/OasisViridis/Pioneer/issues/18) 已关闭。
 
+> 2026-11-08 范围补充：用户接受 [#20](https://github.com/OasisViridis/Pioneer/issues/20) 改为模型连续编辑与纠错，通用快照、自动回滚及跨重启文件恢复暂缓。本文历史“#20 恢复”不再是自动恢复器的交付要求；#23 消费的是连续编辑的实际结果与停止语义。下文已接受的命令许可、进程控制及副作用报告决定继续有效，命令仍不承诺回滚。
+
 本规格只定义决策，不实现命令执行。命令能力保持关闭，直到 #23 按本规格实现并通过验收：没有注册工具名、没有新增 IPC 通道、preload 方法、Run 事件、失败码、能力位或进程执行器。仓库当前没有任何进程执行面：`apps/` 内没有 `child_process`、`spawn`、`execFile`、`utilityProcess`、`node-pty` 或 `worker_threads` 调用；现有四组 IPC 通道（目录、会话、运行、窗口；成品验收只覆盖其中不含窗口的运行相关通道）里没有接收可执行文件、参数、工作目录或环境变量的通道；[RunManager.executeTool](../../apps/desktop/src/main/harness/run-manager.ts) 只分发三个只读工具。
 
 ## 1. 本次决策与交付范围

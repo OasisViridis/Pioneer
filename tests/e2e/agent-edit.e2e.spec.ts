@@ -38,8 +38,34 @@ for (const stopAfterWrite of [false, true]) {
               tool: 'edit_file',
               arguments: {
                 path: 'README.md',
+                oldText: 'This text is not in the file.',
+                newText: 'A mistaken attempt.',
+              },
+            },
+          },
+          {
+            action: 'tool',
+            request: {
+              tool: 'edit_file',
+              arguments: {
+                path: 'README.md',
                 oldText: 'An alpha application fixture.',
                 newText: 'A task-edited application fixture.',
+              },
+            },
+          },
+          {
+            action: 'tool',
+            request: { tool: 'read_file', arguments: { path: 'README.md' } },
+          },
+          {
+            action: 'tool',
+            request: {
+              tool: 'edit_file',
+              arguments: {
+                path: 'README.md',
+                oldText: 'A task-edited application fixture.',
+                newText: 'A checked and corrected application fixture.',
               },
             },
           },
@@ -93,7 +119,7 @@ for (const stopAfterWrite of [false, true]) {
         .toBe(
           before.replace(
             'An alpha application fixture.',
-            'A task-edited application fixture.',
+            'A checked and corrected application fixture.',
           ),
         );
       if (stopAfterWrite)
@@ -111,10 +137,16 @@ for (const stopAfterWrite of [false, true]) {
         diff.getByText('已写入并核对', { exact: true }),
       ).toBeVisible();
       await expect(diff.getByLabel('文本改动')).toContainText(
-        'A task-edited application fixture.',
+        'A checked and corrected application fixture.',
       );
       await expect(diff.getByLabel('文本改动')).toContainText(
         'An alpha application fixture.',
+      );
+      await expect(diff.getByLabel('文本改动')).not.toContainText(
+        'A mistaken attempt.',
+      );
+      await expect(diff.getByLabel('文本改动')).not.toContainText(
+        'A task-edited application fixture.',
       );
       await page.screenshot({ path: info.outputPath('agent-edit.png') });
       if (!stopAfterWrite) {
@@ -125,7 +157,9 @@ for (const stopAfterWrite of [false, true]) {
               path.join(userData, 'pioneer-session-state.json'),
               'utf8',
             ).catch(() => '');
-            return content.includes('A task-edited application fixture.');
+            return content.includes(
+              'A checked and corrected application fixture.',
+            );
           })
           .toBe(true);
         await app.close();
@@ -136,6 +170,12 @@ for (const stopAfterWrite of [false, true]) {
             .locator('[data-panel-id="diff"]')
             .getByText('已写入并核对', { exact: true }),
         ).toBeVisible();
+        await expect(
+          page.locator('[data-panel-id="diff"]').getByLabel('文本改动'),
+        ).toContainText('An alpha application fixture.');
+        await expect(
+          page.locator('[data-panel-id="diff"]').getByLabel('文本改动'),
+        ).toContainText('A checked and corrected application fixture.');
       }
     } finally {
       await app.close();

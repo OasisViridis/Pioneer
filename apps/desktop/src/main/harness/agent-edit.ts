@@ -16,7 +16,7 @@ import {
 import { sha256OfBytes } from './write-permission/file-state';
 import type { ToolOutcome } from './read-only-tools';
 
-/** One narrowly scoped edit per run. The existing writer owns all disk guards. */
+/** One exact replacement per call. The existing writer owns all disk guards. */
 export async function executeAgentEdit(input: {
   request: EditToolRequest;
   identity: RunIdentity;

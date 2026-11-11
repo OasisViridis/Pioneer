@@ -16,8 +16,14 @@ export function AgentChanges({
       ? session.lastRunView
       : null;
   const current = state.runId !== null;
-  const edit = current ? state.context?.edit : snapshot?.edit;
+  const view = current ? state.context : snapshot;
+  const edit = view?.edit;
   const runId = current ? state.runId : snapshot?.identity.runId;
+  const showsVerifiedContent =
+    edit?.state === 'applied' ||
+    view?.calls.some(
+      (call) => call.tool === 'edit_file' && call.state === 'succeeded',
+    ) === true;
   const parts = edit
     ? diffLines(edit.before, edit.after, { timeout: 100, maxEditLength: 2000 })
     : undefined;
@@ -33,11 +39,20 @@ export function AgentChanges({
               ? '已写入并核对'
               : edit.state === 'not_applied'
                 ? '未写入；下方仅为尝试的改动'
-                : '写入结果尚未确认；下方为尝试的改动'}
+                : showsVerifiedContent
+                  ? '最新写入尚未确认。下方显示此前已核对的改动。'
+                  : '写入结果尚未确认；下方为尝试的改动'}
           </p>
-          {edit.code ? <p className="metadata">结果代码：{edit.code}</p> : null}
+          {edit.code ? (
+            <p className="metadata">
+              {edit.state === 'applied'
+                ? '显示已核对的改动。写入结果代码：'
+                : '结果代码：'}
+              {edit.code}
+            </p>
+          ) : null}
           <p className="metadata">
-            这是本次执行时的记录，不代表文件此刻的内容。停止运行不会撤销已写入的改动。
+            这是本次运行的累计改动记录，不代表文件此刻的内容。停止运行不会撤销已写入的改动。
           </p>
           {parts ? (
             <pre className="change-review__lines" aria-label="文本改动">
@@ -56,7 +71,9 @@ export function AgentChanges({
               <p>改动较多，请对照前后内容。</p>
               <h4>修改前</h4>
               <pre className="change-review__lines">{edit.before}</pre>
-              <h4>修改后（尝试内容）</h4>
+              <h4>
+                {showsVerifiedContent ? '已核对的内容' : '尝试写入的内容'}
+              </h4>
               <pre className="change-review__lines">{edit.after}</pre>
             </>
           )}
