@@ -944,13 +944,20 @@ export class RunManager {
       dependencies,
       onReceipt: (receipt) => {
         if (this.isTerminal(run)) return;
-        // Keep a bounded net diff. A failed later write must not erase the
-        // earlier verified changes; individual attempts remain in the writer
-        // journal and tool results. Unknown effects still stay unverified.
-        run.edit =
-          receipt.state === 'not_applied' && previousEdit?.state === 'applied'
-            ? { ...previousEdit, code: receipt.code }
-            : { ...receipt, before: previousEdit?.before ?? receipt.before };
+        // Keep verified content visible while a later write is pending or
+        // unverified. The receipt state still describes the latest attempt.
+        if (previousEdit?.state === 'applied' && receipt.state !== 'applied') {
+          run.edit = {
+            ...previousEdit,
+            state: receipt.state === 'not_applied' ? 'applied' : receipt.state,
+            code: receipt.code,
+          };
+        } else {
+          run.edit = {
+            ...receipt,
+            before: previousEdit?.before ?? receipt.before,
+          };
+        }
       },
     });
     if (this.isTerminal(run)) return { status: 'cancelled', code: 'CANCELLED' };

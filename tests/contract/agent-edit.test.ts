@@ -547,10 +547,13 @@ describe('real task text editing', () => {
           state: 'unverified',
           code: 'STOP_TIMEOUT',
           before: 'before old after\r\n',
-          after: priorEdit
-            ? 'before final content after\r\n'
-            : 'before 新内容 after\r\n',
+          after: 'before 新内容 after\r\n',
         });
+        expect(
+          context?.calls
+            .filter((call) => call.tool === 'edit_file')
+            .map((call) => call.state),
+        ).toEqual(priorEdit ? ['succeeded', 'cancelled'] : ['cancelled']);
         expect(page?.events.at(-1)?.body).toMatchObject({
           type: 'run.failed',
           code: 'STOP_TIMEOUT',
