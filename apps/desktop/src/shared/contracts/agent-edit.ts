@@ -36,7 +36,7 @@ export const HarnessToolNameSchema = z.enum([
 export type HarnessToolRequest = z.infer<typeof HarnessToolRequestSchema>;
 export type EditToolRequest = z.infer<typeof EditToolRequestSchema>;
 
-/** Actual writer receipt, separate from model prose and run cancellation. */
+/** Bounded net diff across a run; unknown effects stay unverified. */
 export const RunEditSchema = z
   .object({
     path: z.string().min(1).max(1024),

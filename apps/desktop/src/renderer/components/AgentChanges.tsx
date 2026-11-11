@@ -35,9 +35,16 @@ export function AgentChanges({
                 ? '未写入；下方仅为尝试的改动'
                 : '写入结果尚未确认；下方为尝试的改动'}
           </p>
-          {edit.code ? <p className="metadata">结果代码：{edit.code}</p> : null}
+          {edit.code ? (
+            <p className="metadata">
+              {edit.state === 'applied'
+                ? '显示已核对的改动。写入结果代码：'
+                : '结果代码：'}
+              {edit.code}
+            </p>
+          ) : null}
           <p className="metadata">
-            这是本次执行时的记录，不代表文件此刻的内容。停止运行不会撤销已写入的改动。
+            这是本次运行的累计改动记录，不代表文件此刻的内容。停止运行不会撤销已写入的改动。
           </p>
           {parts ? (
             <pre className="change-review__lines" aria-label="文本改动">
