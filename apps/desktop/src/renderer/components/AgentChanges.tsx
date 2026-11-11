@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from 'react';
-import { diffLines } from 'diff';
+import { structuredPatch } from 'diff';
 import type { Session } from '../../shared/contracts/session-workspace';
 import { runViews } from '../state/run-view-instance';
+import '../styles/agent-changes.css';
 
 export function AgentChanges({
   session,
@@ -17,69 +18,67 @@ export function AgentChanges({
       : null;
   const current = state.runId !== null;
   const view = current ? state.context : snapshot;
-  const edit = view?.edit;
-  const runId = current ? state.runId : snapshot?.identity.runId;
+  if (!view?.edit) {
+    return <div className="module-content">暂无改动可查看。</div>;
+  }
+
+  const { edit } = view;
   const showsVerifiedContent =
-    edit?.state === 'applied' ||
-    view?.calls.some(
+    edit.state === 'applied' ||
+    view.calls.some(
       (call) => call.tool === 'edit_file' && call.state === 'succeeded',
-    ) === true;
-  const parts = edit
-    ? diffLines(edit.before, edit.after, { timeout: 100, maxEditLength: 2000 })
-    : undefined;
+    );
+  const patch = structuredPatch(
+    edit.path,
+    edit.path,
+    edit.before,
+    edit.after,
+    undefined,
+    undefined,
+    { context: 3, timeout: 100, maxEditLength: 2000 },
+  );
   return (
     <div className="module-content agent-changes">
-      <h3>任务改动</h3>
-      {edit ? (
+      <header className="agent-changes__file">
+        <h3>{edit.path}</h3>
+        <p className="metadata" role="status">
+          本次运行 ·{' '}
+          {edit.state === 'applied'
+            ? '已写入并核对'
+            : edit.state === 'not_applied'
+              ? '未写入 · 尝试的改动'
+              : showsVerifiedContent
+                ? '最新写入待核对 · 显示此前已确认的改动'
+                : '写入待核对 · 尝试的改动'}
+        </p>
+      </header>
+      {patch === undefined ? (
         <>
-          <p>{edit.path}</p>
-          <p className="metadata">运行：{runId}</p>
-          <p role="status">
-            {edit.state === 'applied'
-              ? '已写入并核对'
-              : edit.state === 'not_applied'
-                ? '未写入；下方仅为尝试的改动'
-                : showsVerifiedContent
-                  ? '最新写入尚未确认。下方显示此前已核对的改动。'
-                  : '写入结果尚未确认；下方为尝试的改动'}
-          </p>
-          {edit.code ? (
-            <p className="metadata">
-              {edit.state === 'applied'
-                ? '显示已核对的改动。写入结果代码：'
-                : '结果代码：'}
-              {edit.code}
-            </p>
-          ) : null}
-          <p className="metadata">
-            这是本次运行的累计改动记录，不代表文件此刻的内容。停止运行不会撤销已写入的改动。
-          </p>
-          {parts ? (
-            <pre className="change-review__lines" aria-label="文本改动">
-              {parts.map((part, index) => (
-                <span
-                  key={index}
-                  className={`change-review__line change-review__line--${part.added ? 'added' : part.removed ? 'removed' : 'context'}`}
-                >
-                  {part.added ? '+ ' : part.removed ? '− ' : '  '}
-                  {part.value}
-                </span>
-              ))}
-            </pre>
-          ) : (
-            <>
-              <p>改动较多，请对照前后内容。</p>
-              <h4>修改前</h4>
-              <pre className="change-review__lines">{edit.before}</pre>
-              <h4>
-                {showsVerifiedContent ? '已核对的内容' : '尝试写入的内容'}
-              </h4>
-              <pre className="change-review__lines">{edit.after}</pre>
-            </>
-          )}
+          <h4>修改前</h4>
+          <pre className="change-review__lines">{edit.before}</pre>
+          <h4>{showsVerifiedContent ? '已核对的内容' : '尝试写入的内容'}</h4>
+          <pre className="change-review__lines">{edit.after}</pre>
         </>
+      ) : patch.hunks.length === 0 ? (
+        <p className="metadata">修改前后内容相同。</p>
       ) : (
-        <p>本次运行没有可显示的文件修改记录。</p>
+        <section className="change-review__lines" aria-label="文本改动">
+          {patch.hunks.map((hunk) => (
+            <section key={hunk.oldStart}>
+              <h4 className="change-review__range">
+                原文件第 {Math.max(1, hunk.oldStart)} 行起
+              </h4>
+              {hunk.lines.map((line, index) => (
+                <div
+                  key={index}
+                  className={`change-review__line change-review__line--${line.startsWith('+') ? 'added' : line.startsWith('-') ? 'removed' : 'context'}`}
+                >
+                  {line[0]} {line.slice(1)}
+                </div>
+              ))}
+            </section>
+          ))}
+        </section>
       )}
     </div>
   );

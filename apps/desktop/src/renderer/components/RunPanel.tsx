@@ -158,7 +158,7 @@ export function RunPanel({
       {editMode === 'workspace_write' ? (
         <p className="metadata">
           选择一个文本文件（最多 64 KiB）。Agent
-          可直接修改一次，完成后可查看改动；停止不会撤销已经写入的内容。
+          选定文件后可编辑，完成后可查看改动。
         </p>
       ) : null}
       <MaterialPicker
